@@ -3,6 +3,8 @@ package com.vlt.ecommerce.feature.auth;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.vlt.ecommerce.common.exception.AppException;
+import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.auth.dto.request.LoginRequest;
 import com.vlt.ecommerce.feature.auth.dto.request.RegisterRequest;
 import com.vlt.ecommerce.feature.auth.dto.response.TokenResponse;
@@ -29,7 +31,7 @@ public class AuthService {
 
     public UserResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new AppException(ErrorCode.RESOURCE_EXISTED);
         }
 
         User user = userMapper.toUser(request);
@@ -42,10 +44,10 @@ public class AuthService {
     
     public TokenResponse login(LoginRequest request) {
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("401");
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
         var accessToken = jwtService.generateToken(user);
