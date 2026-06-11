@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: ecommerce-backend
+  datasource:
+    url: jdbc:mysql://localhost:3306/mini_ecommerce?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: user     # Tài khoản bạn đã tạo trong Docker
+    password: 3821     # Mật khẩu bạn đã tạo trong Docker
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update # Tạm thời dùng update để Spring Boot tự tạo bảng
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1  # Base URL cho tất cả API
+
+jwt:
+  secret: your-256-bit-secret-key-change-in-production-your-256-bit-secret-key
+  expiration: 86400000       # 24 giờ (ms)
+  refresh-expiration: 604800000  # 7 ngày (ms)
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
