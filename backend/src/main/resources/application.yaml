@@ -24,7 +24,7 @@ server:
     context-path: /api/v1  # Base URL cho tất cả API
 
 jwt:
-  secret: ;NchAdy?+-)-VHNvLHt}]JSbP{QMe>:sTF&]qb@_p%%
+  secret: WH1q@d,Qfc2NWF#ki#X}$pc4(z2Kte+*]![n/q6}fYWRVcJ{Ku?uqX#_lB_!&/f/^J7-0/u3:1QwUP(wUH;@&q
   expiration: 86400000       # 24 giờ (ms)
   refresh-expiration: 604800000  # 7 ngày (ms)
 
