@@ -7,8 +7,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class CategoryResponse {
+    Long id;
     String name;
     String slug;
+    Long parentId;
     String imageUrl;
     Boolean isActive;
 }
