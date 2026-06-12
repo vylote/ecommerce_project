@@ -29,19 +29,11 @@ public class CategoryService {
             throw new AppException(ErrorCode.RESOURCE_EXISTED);
         }
 
-        Long parentId = request.getParentId();
-        Category parent = null;
-        if (parentId != null) {
-            parent = categoryRepository.findById(parentId)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+        if (request.getParentId() != null && !categoryRepository.existsById(request.getParentId())) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
         }
 
         Category newCategory = categoryMapper.toCategory(request);
-        newCategory.setName(request.getName());
-        newCategory.setSlug(request.getSlug());
-        if (parent != null) newCategory.setParent(parent);
-        newCategory.setImageUrl(request.getImageUrl());
-        newCategory.setIsActive(true);
         
         return categoryMapper.toCategoryResponse(categoryRepository.save(newCategory));
     }
@@ -66,20 +58,16 @@ public class CategoryService {
             throw new AppException(ErrorCode.RESOURCE_EXISTED);
         }
 
-        Category parent = null;
         if (request.getParentId() != null) {
-            parent = categoryRepository.findById(request.getParentId())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
-            
-            if (parent.getId().equals(id)) {
+            if (!categoryRepository.existsById(request.getParentId())) {
+                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            }
+            if (request.getParentId().equals(id)) {
                 throw new AppException(ErrorCode.INVALID_HIERARCHY);
             }
         }
 
-        category.setName(request.getName());
-        category.setSlug(request.getSlug());
-        category.setParent(parent);
-        category.setImageUrl(request.getImageUrl());
+        categoryMapper.updateCategoryFromRequest(request, category);
 
         return categoryMapper.toCategoryResponse(categoryRepository.save(category));
     }

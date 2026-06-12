@@ -1,4 +1,4 @@
-package com.vlt.ecommerce.feature.product;
+package com.vlt.ecommerce.feature.shop;
 
 import java.time.LocalDateTime;
 
@@ -37,8 +37,9 @@ public class Shop {
     String logoUrl;
     @Column(length = 50)
     String address;
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
-    Boolean isActive;
+    Boolean isActive = false;
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
