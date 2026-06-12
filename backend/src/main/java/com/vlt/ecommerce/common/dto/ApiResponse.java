@@ -1,4 +1,4 @@
-package com.vlt.ecommerce.feature.auth.dto.response;
+package com.vlt.ecommerce.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

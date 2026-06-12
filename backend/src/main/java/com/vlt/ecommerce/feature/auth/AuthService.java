@@ -35,7 +35,10 @@ public class AuthService {
         }
 
         User user = userMapper.toUser(request);
+        user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setFullName(request.getFullName());
+        user.setPhone(request.getPhone());
         user.setRole(Role.BUYER);
         user.setIsActive(true);
 

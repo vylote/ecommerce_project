@@ -5,9 +5,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vlt.ecommerce.common.dto.ApiResponse;
 import com.vlt.ecommerce.feature.auth.dto.request.LoginRequest;
 import com.vlt.ecommerce.feature.auth.dto.request.RegisterRequest;
-import com.vlt.ecommerce.feature.auth.dto.response.ApiResponse;
 import com.vlt.ecommerce.feature.auth.dto.response.TokenResponse;
 import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
 

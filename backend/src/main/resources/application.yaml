@@ -2,7 +2,7 @@ spring:
   application:
     name: ecommerce-backend
   datasource:
-    url: jdbc:mysql://localhost:3306/mini_ecommerce?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/ecommerce_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: user     # Tài khoản bạn đã tạo trong Docker
     password: 3821     # Mật khẩu bạn đã tạo trong Docker
     driver-class-name: com.mysql.cj.jdbc.Driver
