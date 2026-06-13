@@ -82,6 +82,6 @@ public class ShopService {
 
         List<Product> products = productRepository.findByShopId(shopId);
         
-        return productMapper.toProductsShopResponse(products);
+        return productMapper.toProductResponseList(products);
     }
 }

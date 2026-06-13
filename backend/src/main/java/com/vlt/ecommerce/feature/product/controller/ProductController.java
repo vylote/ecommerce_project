@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
+import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.feature.product.dto.request.ProductImageRequest;
 import com.vlt.ecommerce.feature.product.dto.request.ProductRequest;
 import com.vlt.ecommerce.feature.product.dto.response.ProductImageResponse;
@@ -53,5 +55,20 @@ public class ProductController {
         return ApiResponse.<ProductResponse>builder()
             .result(productService.getDetailProduct(id))
             .build();
+    }
+
+    @GetMapping
+    public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long shopId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String order) {
+
+        return ApiResponse.<PageResponse<ProductResponse>>builder()
+                .result(productService.getAllProducts(categoryId, shopId, keyword, page, size, sortBy, order))
+                .build();
     }
 }
