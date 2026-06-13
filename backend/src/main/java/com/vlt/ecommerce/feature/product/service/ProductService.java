@@ -8,13 +8,19 @@ import org.springframework.stereotype.Service;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.product.Product;
+import com.vlt.ecommerce.feature.product.ProductImage;
+import com.vlt.ecommerce.feature.product.dto.request.ProductImageRequest;
 import com.vlt.ecommerce.feature.product.dto.request.ProductRequest;
+import com.vlt.ecommerce.feature.product.dto.response.ProductImageResponse;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
+import com.vlt.ecommerce.feature.product.mapper.ProductImageMapper;
 import com.vlt.ecommerce.feature.product.mapper.ProductMapper;
+import com.vlt.ecommerce.feature.product.repository.ProductImageRepository;
 import com.vlt.ecommerce.feature.product.repository.ProductRepository;
 import com.vlt.ecommerce.feature.shop.Shop;
 import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,7 +33,9 @@ import lombok.extern.slf4j.Slf4j;
 public class ProductService {
     ProductRepository productRepository;
     ProductMapper productMapper;
+    ProductImageMapper productImageMapper;
     ShopRepository shopRepository;
+    ProductImageRepository productImageRepository;
 
     public ProductResponse create(ProductRequest request) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -60,4 +68,21 @@ public class ProductService {
     }
 
     //upload anh san pham
+    @Transactional
+    @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#productId)")
+    public ProductImageResponse addProductImage(ProductImageRequest request, Long productId) {
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        ProductImage productImage = productImageMapper.toProductImage(request);
+        productImage.setProduct(product);
+        return productImageMapper.toProductImageResponse(productImageRepository.save(productImage));
+    }
+
+    public ProductResponse getDetailProduct(Long id) {
+        Product product = productRepository.findById(id)
+            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        return productMapper.toProductResponse(product);
+    }
 }

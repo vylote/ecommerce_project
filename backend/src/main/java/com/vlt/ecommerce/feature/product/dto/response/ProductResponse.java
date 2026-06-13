@@ -1,6 +1,7 @@
 package com.vlt.ecommerce.feature.product.dto.response;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import com.vlt.ecommerce.feature.product.ProductStatus;
 
@@ -22,4 +23,5 @@ public class ProductResponse {
     ProductStatus status;
     Long shopId;
     Long categoryId;
+    List<ProductImageResponse> images; 
 }

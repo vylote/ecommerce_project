@@ -19,7 +19,7 @@ public interface CategoryMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "parent", source = "parentId", qualifiedByName = "idToCategory")
     @Mapping(target = "children", ignore = true)
-    @Mapping(target = "isActive", constant = "true")
+    @Mapping(target = "isActive", ignore = true)
     Category toCategory(CategoryRequest request);
 
     List<CategoryResponse> toCategoriesResponse(List<Category> categories);
