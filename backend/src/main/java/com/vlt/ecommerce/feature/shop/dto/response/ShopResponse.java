@@ -1,7 +1,5 @@
 package com.vlt.ecommerce.feature.shop.dto.response;
 
-import com.vlt.ecommerce.feature.user.User;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,5 +11,5 @@ public class ShopResponse {
     String description;
     String logoUrl;
     String address;
-    User seller;
+    Long sellerId;
 }
