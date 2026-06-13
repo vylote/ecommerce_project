@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
+import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
 import com.vlt.ecommerce.feature.product.mapper.ProductMapper;
 import com.vlt.ecommerce.feature.product.repository.ProductRepository;
@@ -34,7 +35,7 @@ public class ShopService {
     ShopMapper shopMapper;
     ProductMapper productMapper;
 
-    @Transactional
+    @Transactional // tối ưu đường truyền, k phải nhằm mục đích lazy loading
     public ShopResponse create(ShopRequest request) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -52,7 +53,7 @@ public class ShopService {
         return shopMapper.toShopResponse(shopRepository.save(newShop));
     }
 
-    @Transactional
+    @Transactional //giữ mạng gọi proxy - note trong model
     public ShopResponse update(ShopRequest request, Long id) {
         Shop shop = shopRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
@@ -60,15 +61,11 @@ public class ShopService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         if (!shop.getSeller().getEmail().equals(email)) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        shop.setName(request.getName());
-        shop.setDescription(request.getDescription());
-        shop.setLogoUrl(request.getLogoUrl());
-        shop.setAddress(request.getAddress());
-
-        return shopMapper.toShopResponse(shopRepository.save(shop));
+        shopMapper.updateShopFromRequest(request, shop);
+        return shopMapper.toShopResponse(shop);
     }
 
     public ShopResponse get(Long id) {
@@ -79,9 +76,12 @@ public class ShopService {
     }
 
     public List<ProductResponse> getProductsShop(Long shopId) {
-        productRepository.findById(shopId)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+        if (!shopRepository.existsById(shopId)) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        List<Product> products = productRepository.findByShopId(shopId);
         
-        return productMapper.toProductsShopResponse(productRepository.findAll());
+        return productMapper.toProductsShopResponse(products);
     }
 }

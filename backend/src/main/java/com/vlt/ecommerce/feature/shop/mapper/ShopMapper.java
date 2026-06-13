@@ -2,6 +2,7 @@ package com.vlt.ecommerce.feature.shop.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import com.vlt.ecommerce.feature.shop.Shop;
 import com.vlt.ecommerce.feature.shop.dto.request.ShopRequest;
@@ -14,7 +15,13 @@ public interface ShopMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "seller", ignore = true)
-    @Mapping(target = "isActive", constant = "true")
+    @Mapping(target = "isActive", ignore = true)
     @Mapping(target = "createdAt", ignore = true) 
     Shop tShop(ShopRequest request);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "seller", ignore = true)
+    @Mapping(target = "isActive", ignore = true)
+    @Mapping(target = "createdAt", ignore = true) 
+    void updateShopFromRequest(ShopRequest request, @MappingTarget Shop shop);
 }
