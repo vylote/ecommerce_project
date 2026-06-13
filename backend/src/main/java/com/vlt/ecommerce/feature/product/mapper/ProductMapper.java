@@ -12,7 +12,7 @@ import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.product.dto.request.ProductRequest;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {ProductImageMapper.class})
 public interface ProductMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "soldCount", ignore = true)
@@ -21,6 +21,7 @@ public interface ProductMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "shop", ignore = true)
     @Mapping(target = "category", source = "categoryId", qualifiedByName = "idToCategory")
+    @Mapping(target = "images", ignore = true)
     Product toProduct(ProductRequest request);
 
     @Mapping(target = "shopId", source = "shop.id")
@@ -34,6 +35,7 @@ public interface ProductMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "shop", ignore = true)
     @Mapping(target = "category", source = "categoryId", qualifiedByName = "idToCategory")
+    @Mapping(target = "images", ignore = true)
     void updateProduct(ProductRequest request, @MappingTarget Product product);
 
     @Named("idToCategory")
@@ -46,5 +48,5 @@ public interface ProductMapper {
         return category;
     }
 
-    List<ProductResponse> toProductsShopResponse(List<Product> products);
+    List<ProductResponse> toProductResponseList(List<Product> products);
 }

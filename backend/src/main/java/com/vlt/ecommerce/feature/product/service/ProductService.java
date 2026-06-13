@@ -1,10 +1,18 @@
 package com.vlt.ecommerce.feature.product.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.product.Product;
@@ -20,7 +28,6 @@ import com.vlt.ecommerce.feature.product.repository.ProductRepository;
 import com.vlt.ecommerce.feature.shop.Shop;
 import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -84,5 +91,31 @@ public class ProductService {
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         return productMapper.toProductResponse(product);
+    }
+
+    //lay danh sach san pham phan trang + filter
+    @Transactional(readOnly = true)
+    public PageResponse<ProductResponse> getAllProducts(
+            Long categoryId, Long shopId, String keyword, int page, int size, String sortBy, String order) {
+
+        Sort sort = order.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        
+        // page - 1: Để Frontend được truyền page=1 cho tự nhiên
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        Page<Product> productPage = productRepository.filterProducts(categoryId, keyword, pageable);
+
+        List<ProductResponse> content = productPage.getContent().stream()
+                .map(productMapper::toProductResponse)
+                .toList();
+
+        return PageResponse.<ProductResponse>builder()
+                .data(content)
+                .currentPage(page)
+                .pageSize(size)
+                .totalElements(productPage.getTotalElements())
+                .totalPages(productPage.getTotalPages())
+                .isLast(productPage.isLast()) // Học từ tài liệu
+                .build();
     }
 }
