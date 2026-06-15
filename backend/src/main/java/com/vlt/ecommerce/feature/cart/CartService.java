@@ -1,10 +1,12 @@
 package com.vlt.ecommerce.feature.cart;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
@@ -28,6 +30,16 @@ public class CartService {
     UserRepository userRepository;
     ProductRepository productRepository;
 
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('BUYER')")
+    public List<CartItemResponse> getCurrentCart() {
+        User user = getCurrentUser();
+
+        List<CartItem> cartItems = cartItemRepository.findByBuyerId(user.getId());
+        return cartMapper.toCartItemsResponse(cartItems);
+    }
+
+    @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public CartItemResponse add(CartItemRequest request) {
         User user = getCurrentUser();
@@ -50,13 +62,33 @@ public class CartService {
         return cartMapper.toCartItemResponse(cartItemRepository.save(cartItem));
     }
 
+    @Transactional
     @PreAuthorize("hasRole('BUYER')")
-    public void remove(Long id) {
+    public CartItemResponse update(CartItemRequest request, Long productId) {
         User user = getCurrentUser();
-        CartItem cartItem = cartItemRepository.findByBuyerIdAndProductId(user.getId(), id)
+        CartItem cartItem = cartItemRepository.findByBuyerIdAndProductId(user.getId(), productId)
+            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        cartMapper.updateQuantityCartItem(request, cartItem);
+        return cartMapper.toCartItemResponse(cartItemRepository.save(cartItem));
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('BUYER')")
+    public void remove(Long productId) {
+        User user = getCurrentUser();
+        CartItem cartItem = cartItemRepository.findByBuyerIdAndProductId(user.getId(), productId)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
             
         cartItemRepository.delete(cartItem);
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('BUYER')")
+    public void removeAllProductsFromCart() {
+        User user = getCurrentUser();
+        // Gọi 1 lệnh duy nhất. Nếu giỏ hàng đang trống, nó xóa 0 dòng (không báo lỗi).
+        cartItemRepository.deleteAllByBuyerId(user.getId());
     }
 
     private User getCurrentUser() {
