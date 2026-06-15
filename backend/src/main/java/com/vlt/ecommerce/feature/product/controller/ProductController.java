@@ -72,3 +72,14 @@ public class ProductController {
                 .build();
     }
 }
+/* ==============================================================================
+     * CHUẨN MỰC THIẾT KẾ RESTFUL API: @RequestParam vs @PathVariable
+     * ==============================================================================
+     * 1. @PathVariable: Dùng để CHỈ ĐÍCH DANH 1 thực thể. Nằm TRƯỚC dấu '?' trên URL.
+     * VD: GET /products/15 (Lấy chi tiết SP số 15). Bắt buộc phải có.
+     * * 2. @RequestParam: Dùng để LỌC (Filter) một DANH SÁCH. Nằm SAU dấu '?' trên URL.
+     * VD: GET /products?keyword=iphone&page=2
+     * - Không bắt buộc (required = false). 
+     * - Nếu User gọi trần trụi (GET /products), Spring sẽ tự động lấy các giá trị 
+     * 'defaultValue' bù vào -> Không bao giờ lo sập API vì thiếu tham số.
+     * ============================================================================== */
