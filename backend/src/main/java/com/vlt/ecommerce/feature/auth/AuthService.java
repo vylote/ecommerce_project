@@ -10,9 +10,9 @@ import com.vlt.ecommerce.feature.auth.dto.request.RegisterRequest;
 import com.vlt.ecommerce.feature.auth.dto.response.TokenResponse;
 import com.vlt.ecommerce.feature.user.Role;
 import com.vlt.ecommerce.feature.user.User;
-import com.vlt.ecommerce.feature.user.UserMapper;
-import com.vlt.ecommerce.feature.user.UserRepository;
 import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
+import com.vlt.ecommerce.feature.user.mapper.UserMapper;
+import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
