@@ -1,9 +1,10 @@
-package com.vlt.ecommerce.feature.user;
+package com.vlt.ecommerce.feature.user.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import com.vlt.ecommerce.feature.auth.dto.request.RegisterRequest;
+import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
 
 @Mapper(componentModel = "spring")

@@ -16,7 +16,7 @@ import com.vlt.ecommerce.feature.shop.dto.response.ShopResponse;
 import com.vlt.ecommerce.feature.shop.mapper.ShopMapper;
 import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 import com.vlt.ecommerce.feature.user.User;
-import com.vlt.ecommerce.feature.user.UserRepository;
+import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
