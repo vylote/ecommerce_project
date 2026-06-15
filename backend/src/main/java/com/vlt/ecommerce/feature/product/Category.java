@@ -34,34 +34,30 @@ public class Category {
     String name;
     @Column(nullable = false, length = 150, unique = true)
     String slug;
-    // quan hệ tự tham chiếu -danh mục cha
+    /* ==============================================================================
+     * VẾ CHỦ ĐỘNG (NGƯỜI CON NHÌN LÊN CHA) - QUYẾT ĐỊNH QUAN HỆ
+     * ==============================================================================
+     * - Đây là nơi GHI dữ liệu: Trực tiếp quản lý cột khóa ngoại 'parent_id' dưới DB.
+     * - Khi tạo Danh mục con, nó chủ động set 'parent_id', từ đó Người Cha tự khắc có con.
+     * - FetchType.LAZY: Bắt buộc phải có để chặn truy vấn N+1 dây chuyền (Con gọi Cha, 
+     * Cha gọi Ông...). Hibernate chỉ nhét 1 Kẻ đóng thế (Proxy) vào đây.
+     */
     @ManyToOne(fetch = FetchType.LAZY) //tránh N+1
     @JoinColumn(name = "parent_id")
-    Category parent; //field
-    //danh sách các danh mục con
-    @OneToMany(mappedBy = "parent") // trỏ đến field k phải cột
+    Category parent; 
+    /* ==============================================================================
+     * VẾ BỊ ĐỘNG (NGƯỜI CHA NHÌN XUỐNG CON) - ÁNH XẠ DỮ LIỆU
+     * ==============================================================================
+     * - DB "phẳng" không lưu được List. Đây chỉ là biến ảo trên RAM để OOP dễ thao tác.
+     * - Không cần ghi LAZY vì @OneToMany mặc định đã là LAZY.
+     * - mappedBy = "parent": Chỉ thị cho Hibernate đi quét bảng categories, tìm những 
+     * đứa nào mà biến 'parent' của nó ĐANG TRỎ VỀ 'id' của chính mình, rồi gom tụi 
+     * nó lại thành cái danh sách List này.
+     */
+    @OneToMany(mappedBy = "parent") 
     List<Category> children; // 
     @Column(name = "image_url", length = 500)
     String imageUrl;
     @Column(name = "is_active", nullable = false)
     Boolean isActive;
 }
-
-// bình thường khi SELECT * FROM categories WHERE id = 2 thì trả về đúng 1 dòng, nhưng JPA/Hibernate tự động query thêm vì nó cần tạo
-// object đầy đủ, 
-// kiểu Category {
-//     id: 2,
-//     name: "Điện thoại",
-//     parent: ??? // ← JPA thấy field này, nó cần điền vào
-// } 
-
-// SELECT * FROM categories WHERE id = 2;
-// SELECT * FROM categories WHERE id = 1;  -- lấy parent để điền vào field
-
-// Với LAZY, JPA tạo proxy object — object giả, chưa có data:
-// Category {
-//     id: 2,
-//     name: "Điện thoại",
-//     parent: Proxy{id=1, data=CHƯA_LOAD}  // placeholder
-// }
-// // Query thêm CHỈ KHI bạn gọi .getParent().getName()

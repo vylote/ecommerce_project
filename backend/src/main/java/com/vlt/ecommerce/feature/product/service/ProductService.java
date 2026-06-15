@@ -103,19 +103,10 @@ public class ProductService {
         // page - 1: Để Frontend được truyền page=1 cho tự nhiên
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Page<Product> productPage = productRepository.filterProducts(categoryId, keyword, pageable);
+        Page<Product> productPage = productRepository.filterProducts(categoryId, shopId, keyword, pageable);
 
-        List<ProductResponse> content = productPage.getContent().stream()
-                .map(productMapper::toProductResponse)
-                .toList();
+        List<ProductResponse> content = productMapper.toProductResponseList(productPage.getContent()); //10 sản phẩm được căt
 
-        return PageResponse.<ProductResponse>builder()
-                .data(content)
-                .currentPage(page)
-                .pageSize(size)
-                .totalElements(productPage.getTotalElements())
-                .totalPages(productPage.getTotalPages())
-                .isLast(productPage.isLast()) // Học từ tài liệu
-                .build();
+        return PageResponse.of(productPage, content);
     }
 }
