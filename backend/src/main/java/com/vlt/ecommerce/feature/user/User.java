@@ -7,6 +7,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.vlt.ecommerce.feature.cart.CartItem;
+import com.vlt.ecommerce.feature.order.Order;
+import com.vlt.ecommerce.feature.shop.Shop;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -46,15 +48,25 @@ public class User {
     @UpdateTimestamp
     LocalDateTime updatedAt;
 
+    @OneToOne(mappedBy = "seller", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Shop shop;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<Address> addresses;
+    List<Address> addresses;
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<CartItem> cartItems;
+    List<CartItem> cartItems;
+
+    @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<Order> orders;
 }
 
 /* ==============================================================================

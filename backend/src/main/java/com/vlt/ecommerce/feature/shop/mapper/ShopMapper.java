@@ -17,11 +17,13 @@ public interface ShopMapper {
     @Mapping(target = "seller", ignore = true)
     @Mapping(target = "isActive", ignore = true)
     @Mapping(target = "createdAt", ignore = true) 
+    @Mapping(target = "products", ignore = true) 
     Shop tShop(ShopRequest request);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "seller", ignore = true)
     @Mapping(target = "isActive", ignore = true)
     @Mapping(target = "createdAt", ignore = true) 
+    @Mapping(target = "products", ignore = true) 
     void updateShopFromRequest(ShopRequest request, @MappingTarget Shop shop);
 }

@@ -60,8 +60,9 @@ public class Category {
     List<Category> children; // 
     @Column(name = "image_url", length = 500)
     String imageUrl;
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
-    Boolean isActive;
+    Boolean isActive = true;
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @ToString.Exclude

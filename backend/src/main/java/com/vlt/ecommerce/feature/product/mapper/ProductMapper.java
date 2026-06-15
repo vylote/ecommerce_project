@@ -22,6 +22,7 @@ public interface ProductMapper {
     @Mapping(target = "shop", ignore = true)
     @Mapping(target = "category", source = "categoryId", qualifiedByName = "idToCategory")
     @Mapping(target = "images", ignore = true)
+    @Mapping(target = "cartItems", ignore = true)
     Product toProduct(ProductRequest request);
 
     @Mapping(target = "shopId", source = "shop.id")
@@ -36,6 +37,7 @@ public interface ProductMapper {
     @Mapping(target = "shop", ignore = true)
     @Mapping(target = "category", source = "categoryId", qualifiedByName = "idToCategory")
     @Mapping(target = "images", ignore = true)
+    @Mapping(target = "cartItems", ignore = true)
     void updateProduct(ProductRequest request, @MappingTarget Product product);
 
     @Named("idToCategory")

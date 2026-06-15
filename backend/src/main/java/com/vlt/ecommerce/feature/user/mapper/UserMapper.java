@@ -15,6 +15,10 @@ public interface UserMapper {
     @Mapping(target = "isActive", ignore = true)
     @Mapping(target = "createdAt", ignore = true) 
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "addresses", ignore = true)
+    @Mapping(target = "shop", ignore = true)
+    @Mapping(target = "cartItems", ignore = true)
+    @Mapping(target = "orders", ignore = true)
     User toUser(RegisterRequest request);
     UserResponse toUserResponse(User user);
 }
