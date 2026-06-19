@@ -3,7 +3,13 @@ package com.vlt.ecommerce.feature.order;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -11,12 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.cart.CartItem;
 import com.vlt.ecommerce.feature.cart.CartItemRepository;
+import com.vlt.ecommerce.feature.order.dto.response.OrderItemResponse;
 import com.vlt.ecommerce.feature.order.dto.response.OrderResponse;
 import com.vlt.ecommerce.feature.product.Product;
+import com.vlt.ecommerce.feature.shop.Shop;
+import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 import com.vlt.ecommerce.feature.user.Address;
 import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.dto.response.AddressResponse;
@@ -35,19 +45,20 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class OrderService {
     OrderRepository orderRepository;
+    OrderItemRepository orderItemRepository;
     CartItemRepository cartItemRepository;
     UserRepository userRepository;
     AddressRepository addressRepository;
-    AddressMapper addressMapper; 
+    ShopRepository shopRepository;
+    AddressMapper addressMapper;
     OrderMapper orderMapper;
+    OrderItemMapper orderItemMapper;
     ObjectMapper objectMapper;
 
     @PreAuthorize("hasRole('BUYER')")
     @Transactional
-    public OrderResponse create(OrderRequest request) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User buyer = userRepository.findByEmail(email)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+    public List<OrderResponse> create(OrderRequest request) {
+        User buyer = getCurrentUser();
 
         List<CartItem> cartItems = cartItemRepository.findByBuyerId(buyer.getId());
         if (cartItems.isEmpty()) {
@@ -55,13 +66,13 @@ public class OrderService {
         }
 
         Address address = addressRepository.findById(request.getAddressId())
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (!address.getUser().getId().equals(buyer.getId())) {
             throw new RuntimeException("Địa chỉ không hợp lệ!");
-        }    
+        }
 
-        //convert string addreson json
+        // convert string addreson json
         String addressSnapshot;
         try {
             AddressResponse addressDto = addressMapper.toAddressResponse(address);
@@ -70,48 +81,151 @@ public class OrderService {
             throw new RuntimeException("Lỗi hệ thống khi xử lý địa chỉ giao hàng!");
         }
 
-        Order newOrder = orderMapper.toOrder(request);
-        newOrder.setBuyer(buyer);
-        newOrder.setAddressSnapshot(addressSnapshot);
-        newOrder.setNote(request.getNote());
-        newOrder.setItems(new ArrayList<>());
-        newOrder.setTotalAmount(BigDecimal.ZERO);
+        Map<Long, List<CartItem>> itemsByShop = cartItems.stream()
+                .collect(Collectors.groupingBy(item -> item.getProduct().getShop().getId()));
 
-        BigDecimal totalAmount = BigDecimal.ZERO;
+        List<Order> createdOrders = new ArrayList<>();
 
-        for (CartItem cartItem :cartItems) {
-            Product product = cartItem.getProduct();
-            int orderQuantity = cartItem.getQuantity();
+        for (Map.Entry<Long, List<CartItem>> entry : itemsByShop.entrySet()) {
+            List<CartItem> shopItems = entry.getValue();
 
-            if (product.getStockQuantity() < orderQuantity) {
-                throw new RuntimeException(String.format(
-                    "Lỗi tồn kho! Sản phẩm ID: %d (Tên: %s). Tồn kho DB đang đọc được: %d, Khách mua: %d", 
-                    product.getId(), product.getName(), product.getStockQuantity(), orderQuantity
-                ));
+            Shop shop = shopRepository.findById(entry.getKey())
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+            Order newOrder = orderMapper.toOrder(request);
+            newOrder.setBuyer(buyer);
+            newOrder.setShop(shop);
+            newOrder.setAddressSnapshot(addressSnapshot);
+            newOrder.setNote(request.getNote());
+            newOrder.setItems(new ArrayList<>());
+            newOrder.setTotalAmount(BigDecimal.ZERO);
+
+            BigDecimal totalAmount = BigDecimal.ZERO;
+
+            for (CartItem shopItem : shopItems) {
+                Product product = shopItem.getProduct();
+                int orderQuantity = shopItem.getQuantity();
+
+                if (product.getStockQuantity() < orderQuantity) {
+                    throw new RuntimeException(String.format(
+                            "Lỗi tồn kho! Sản phẩm ID: %d (Tên: %s). Tồn kho DB đang đọc được: %d, Khách mua: %d",
+                            product.getId(), product.getName(), product.getStockQuantity(), orderQuantity));
+                }
+                product.setStockQuantity(product.getStockQuantity() - orderQuantity);
+                product.setSoldCount(product.getSoldCount() + orderQuantity);
+
+                BigDecimal itemTotalPrice = product.getPrice().multiply(BigDecimal.valueOf(orderQuantity));
+
+                OrderItem orderItem = OrderItem.builder()
+                        .order(newOrder)
+                        .product(product)
+                        .shop(product.getShop())
+                        .productName(product.getName())
+                        .productPrice(product.getPrice())
+                        .quantity(orderQuantity)
+                        .totalPrice(itemTotalPrice)
+                        .build();
+
+                newOrder.getItems().add(orderItem);
+                totalAmount = totalAmount.add(itemTotalPrice);
             }
-            product.setStockQuantity(product.getStockQuantity()-orderQuantity);
-            product.setSoldCount(product.getSoldCount()+orderQuantity);
 
-            BigDecimal itemTotalPrice = product.getPrice().multiply(BigDecimal.valueOf(orderQuantity));
-            
-            OrderItem orderItem = OrderItem.builder()
-                    .order(newOrder)
-                    .product(product)
-                    .shop(product.getShop())
-                    .productName(product.getName())
-                    .productPrice(product.getPrice())
-                    .quantity(orderQuantity)
-                    .totalPrice(itemTotalPrice)
-                    .build();
-
-            newOrder.getItems().add(orderItem);
-            totalAmount = totalAmount.add(itemTotalPrice);
+            newOrder.setTotalAmount(totalAmount);
+            createdOrders.add(orderRepository.save(newOrder));
         }
 
-        newOrder.setTotalAmount(totalAmount);
         cartItemRepository.deleteAllByBuyerId(buyer.getId());
-        return orderMapper.toOrderResponse(orderRepository.save(newOrder));
-    }    
+        return orderMapper.toOrderResponses(createdOrders);
+    }
 
-    
+    @Transactional
+    @PreAuthorize("hasRole('SELLER')")
+    public OrderResponse confirmOrder(Long id) {
+        User seller = getCurrentUser();
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new RuntimeException("Chỉ có thể xác nhận đơn hàng đang ở trạng thái chờ (PENDING)!");
+        }
+
+        Shop shop = shopRepository.findBySellerId(seller.getId());
+        if (shop == null) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        boolean isOwner = order.getItems().stream()
+                .anyMatch(item -> item.getShop().getId().equals(shop.getId()));
+
+        if (!isOwner) {
+            throw new RuntimeException("Bạn không có quyền xác nhận đơn hàng này!");
+        }
+
+        order.setStatus(OrderStatus.CONFIRMED);
+
+        // TODO (Sprint 5)code gui notifi
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('BUYER')")
+    public OrderResponse completeOrder(Long id) {
+        User buyer = getCurrentUser();
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        if (!order.getBuyer().getId().equals(buyer.getId())) {
+            throw new RuntimeException("Bạn không có quyền thao tác trên đơn hàng này!");
+        }
+
+        if (order.getStatus() != OrderStatus.SHIPPING) {
+            throw new RuntimeException("Chỉ có thể xác nhận hàng khi được giao tới đúng điểm");
+        }
+
+        order.setStatus(OrderStatus.COMPLETED);
+        // TODO (Sprint 4): Gọi CommissionService để tính phí hoa hồng và ghi nhận doanh
+        // thu
+        // commissionService.calculateCommission(order);
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @PreAuthorize("hasRole('BUYER')")
+    public PageResponse<OrderResponse> getMyOrders(int page, int size) {
+        User buyer = getCurrentUser();
+
+        // Sắp xếp đơn hàng mới nhất lên đầu
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        // Gọi database (Đã chặn N+1 query bằng EntityGraph)
+        Page<Order> orderPage = orderRepository.findByBuyerId(buyer.getId(), pageable);
+
+        List<OrderResponse> content = orderMapper.toOrderResponses(orderPage.getContent());
+
+        return PageResponse.of(orderPage, content);
+    }
+
+    @PreAuthorize("hasRole('BUYER')")
+    public PageResponse<OrderItemResponse> getSellerOrders(int page, int size) {
+        User seller = getCurrentUser();
+
+        Shop shop = shopRepository.findBySellerId(seller.getId());
+        if (shop == null) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("order.createdAt").descending());
+        Page<OrderItem> orderItemPage = orderItemRepository.findByShopId(shop.getId(), pageable);
+
+        List<OrderItemResponse> content = orderItemMapper.toOrderItemResponses(orderItemPage.getContent());
+
+        return PageResponse.of(orderItemPage, content);
+    }
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+    }
 }

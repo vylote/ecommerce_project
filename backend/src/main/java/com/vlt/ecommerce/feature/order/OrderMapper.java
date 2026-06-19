@@ -1,5 +1,7 @@
 package com.vlt.ecommerce.feature.order;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -25,4 +27,6 @@ public interface OrderMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Order toOrder(OrderRequest request);
+
+    List<OrderResponse> toOrderResponses(List<Order> orders);
 }

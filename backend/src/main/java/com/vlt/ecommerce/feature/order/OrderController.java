@@ -1,5 +1,7 @@
 package com.vlt.ecommerce.feature.order;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,8 +23,8 @@ public class OrderController {
     OrderService orderService;
 
     @PostMapping
-    public ApiResponse<OrderResponse> create(@RequestBody @Valid OrderRequest request) {
-        return ApiResponse.<OrderResponse>builder()
+    public ApiResponse<List<OrderResponse>> create(@RequestBody @Valid OrderRequest request) {
+        return ApiResponse.<List<OrderResponse>>builder()
             .result(orderService.create(request))
             .build();
     }
