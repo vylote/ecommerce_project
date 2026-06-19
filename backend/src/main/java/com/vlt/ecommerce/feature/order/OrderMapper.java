@@ -26,6 +26,7 @@ public interface OrderMapper {
     @Mapping(target = "items", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "shop", ignore = true)
     Order toOrder(OrderRequest request);
 
     List<OrderResponse> toOrderResponses(List<Order> orders);
