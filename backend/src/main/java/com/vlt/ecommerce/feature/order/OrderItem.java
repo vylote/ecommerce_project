@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "order_items")
 @Data 
 @Builder 
 @NoArgsConstructor 

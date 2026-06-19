@@ -1,14 +1,17 @@
 package com.vlt.ecommerce.feature.product.dto.response;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductImageResponse {
-    private Long id;
-    private Long productId;
-    private String url;
-    private Boolean isPrimary;
-    private Integer sortOrder;
+    Long id;
+    Long productId;
+    String url;
+    Boolean isPrimary;
+    Integer sortOrder;
 }
