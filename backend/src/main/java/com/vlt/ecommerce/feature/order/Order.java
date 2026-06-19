@@ -42,7 +42,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     @Column(name = "address_snapshot", nullable = false, columnDefinition = "TEXT")
-    String addressSnapShot;
+    String addressSnapshot;
     @Column(name = "total_amount", nullable = false, precision = 15, scale = 2)
     BigDecimal totalAmount;
     @Enumerated(EnumType.STRING)
