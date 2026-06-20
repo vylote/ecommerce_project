@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.feature.product.controller;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +43,14 @@ public class ProductController {
             .result(productService.update(request, id))
             .build();
     }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> delete(@PathVariable Long id) {
+        productService.delete(id);
+        return ApiResponse.<String>builder()
+            .result("Xoa thanh cong")
+            .build();
+    } 
 
     @PostMapping("/{id}/images")
     public ApiResponse<ProductImageResponse> addImage(@RequestBody @Valid ProductImageRequest request, @PathVariable Long id) {
