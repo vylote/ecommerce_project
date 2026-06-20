@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driverClassName: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop # Cực kỳ quan trọng: Xóa sạch DB sau khi test xong
+    show-sql: true
+
+jwt:
+  secret: WH1q@d,Qfc2NWF#ki#X}$pc4(z2Kte+*]![n/q6}fYWRVcJ{Ku?uqX#_lB_!&/f/^J7-0/u3:1QwUP(wUH;@&q
+  expiration: 86400000 # Nên bổ sung để tránh lỗi nếu JwtService đòi đọc biến này lúc boot

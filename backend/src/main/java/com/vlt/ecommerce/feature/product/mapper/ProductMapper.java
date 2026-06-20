@@ -23,6 +23,7 @@ public interface ProductMapper {
     @Mapping(target = "category", source = "categoryId", qualifiedByName = "idToCategory")
     @Mapping(target = "images", ignore = true)
     @Mapping(target = "cartItems", ignore = true)
+    @Mapping(target = "orderItems", ignore = true)
     Product toProduct(ProductRequest request);
 
     @Mapping(target = "shopId", source = "shop.id")
@@ -38,6 +39,7 @@ public interface ProductMapper {
     @Mapping(target = "category", source = "categoryId", qualifiedByName = "idToCategory")
     @Mapping(target = "images", ignore = true)
     @Mapping(target = "cartItems", ignore = true)
+    @Mapping(target = "orderItems", ignore = true)
     void updateProduct(ProductRequest request, @MappingTarget Product product);
 
     @Named("idToCategory")

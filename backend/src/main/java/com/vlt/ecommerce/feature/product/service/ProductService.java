@@ -44,6 +44,7 @@ public class ProductService {
     ShopRepository shopRepository;
     ProductImageRepository productImageRepository;
 
+    @PreAuthorize("hasRole('SELLER')")
     public ProductResponse create(ProductRequest request) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         Jwt jwt = (Jwt) authentication.getPrincipal();
