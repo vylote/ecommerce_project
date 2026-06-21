@@ -69,7 +69,7 @@ public class OrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (!address.getUser().getId().equals(buyer.getId())) {
-            throw new RuntimeException("Địa chỉ không hợp lệ!");
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
         }
 
         // convert string addreson json
@@ -78,7 +78,7 @@ public class OrderService {
             AddressResponse addressDto = addressMapper.toAddressResponse(address);
             addressSnapshot = objectMapper.writeValueAsString(addressDto);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Lỗi hệ thống khi xử lý địa chỉ giao hàng!");
+            throw new AppException(ErrorCode.SYSTEM_ERROR);
         }
 
         Map<Long, List<CartItem>> itemsByShop = cartItems.stream()
@@ -107,9 +107,7 @@ public class OrderService {
                 int orderQuantity = shopItem.getQuantity();
 
                 if (product.getStockQuantity() < orderQuantity) {
-                    throw new RuntimeException(String.format(
-                            "Lỗi tồn kho! Sản phẩm ID: %d (Tên: %s). Tồn kho DB đang đọc được: %d, Khách mua: %d",
-                            product.getId(), product.getName(), product.getStockQuantity(), orderQuantity));
+                    throw new AppException(ErrorCode.OUT_OF_STOCK);
                 }
                 product.setStockQuantity(product.getStockQuantity() - orderQuantity);
                 product.setSoldCount(product.getSoldCount() + orderQuantity);
@@ -147,7 +145,7 @@ public class OrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (order.getStatus() != OrderStatus.PENDING) {
-            throw new RuntimeException("Chỉ có thể xác nhận đơn hàng đang ở trạng thái chờ (PENDING)!");
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
         Shop shop = shopRepository.findBySellerId(seller.getId());
@@ -159,7 +157,7 @@ public class OrderService {
                 .anyMatch(item -> item.getShop().getId().equals(shop.getId()));
 
         if (!isOwner) {
-            throw new RuntimeException("Bạn không có quyền xác nhận đơn hàng này!");
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         order.setStatus(OrderStatus.CONFIRMED);
@@ -177,11 +175,11 @@ public class OrderService {
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (!order.getBuyer().getId().equals(buyer.getId())) {
-            throw new RuntimeException("Bạn không có quyền thao tác trên đơn hàng này!");
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         if (order.getStatus() != OrderStatus.SHIPPING) {
-            throw new RuntimeException("Chỉ có thể xác nhận hàng khi được giao tới đúng điểm");
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
         order.setStatus(OrderStatus.COMPLETED);
