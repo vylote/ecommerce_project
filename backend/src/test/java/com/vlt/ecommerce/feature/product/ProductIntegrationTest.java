@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
 import java.math.BigDecimal;
 
@@ -28,6 +29,7 @@ import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.vlt.ecommerce.feature.product.dto.request.ProductImageRequest;
 import com.vlt.ecommerce.feature.product.dto.request.ProductRequest;
 import com.vlt.ecommerce.feature.product.repository.CategoryRepository;
 import com.vlt.ecommerce.feature.product.repository.ProductRepository;
@@ -252,6 +254,30 @@ public class ProductIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.result.name").value("Áo thun cũ"))
                 .andExpect(jsonPath("$.result.price").value(100000));
+    }
+
+    @Test
+    void addProductImage_Success_WhenIsOwner() throws Exception {
+        Product product = new Product();
+        product.setName("Áo thun cũ");
+        product.setPrice(new BigDecimal("100000"));
+        product.setStockQuantity(10);
+        product.setCategory(mockCategory);
+        product.setShop(mockShop);
+        product = productRepository.save(product);
+
+        ProductImageRequest imageRequest = new ProductImageRequest();
+        imageRequest.setUrl("anh1.png");
+        
+
+        mockMvc.perform(post("/products/{id}/images", product.getId())
+                .header("Authorization", "Bearer " + validSellerToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(imageRequest)))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.result.url").value("anh1.png"))
+                .andExpect(jsonPath("$.result.productId").value(product.getId()));
     }
 // --- HÀM TIỆN ÍCH DÙNG CHUNG TRONG CLASS ---
     private String generateTestToken(User user) throws Exception {

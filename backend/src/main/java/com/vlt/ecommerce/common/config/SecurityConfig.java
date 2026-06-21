@@ -27,9 +27,20 @@ public class SecurityConfig {
     @Value("${jwt.secret}")
     private String signerKey;
 
-    private final String[] PUBLIC_ENDPOINTS = {
-            "/auth/register", "/auth/login", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/categories", "/categories/*",
-            "/shops", "/shops/*", "/products", "/products/**", "/shops/**", "/addresses", "/addresses/**", "/cart/items/**", "/orders"
+    // 1. Các API POST công khai (Ai cũng gọi được)
+    private final String[] PUBLIC_POST_ENDPOINTS = {
+            "/auth/register", 
+            "/auth/login", 
+            "/auth/refresh"
+    };
+
+    // 2. Các API GET công khai (Xem dữ liệu không cần đăng nhập)
+    private final String[] PUBLIC_GET_ENDPOINTS = {
+            "/categories", "/categories/**",
+            "/shops/**",
+            "/products", "/products/**",
+            // Các API của Swagger UI để xem document
+            "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"
     };
 
     @Bean
@@ -40,10 +51,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(request -> request
-                .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-                .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS).permitAll()
-                .requestMatchers(HttpMethod.PUT, PUBLIC_ENDPOINTS).permitAll()
-                .requestMatchers(HttpMethod.DELETE, PUBLIC_ENDPOINTS).permitAll()
+                .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                 .anyRequest().authenticated());
 
         http.oauth2ResourceServer(oauth2 -> oauth2
