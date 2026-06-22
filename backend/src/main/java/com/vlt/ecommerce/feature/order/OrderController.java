@@ -2,7 +2,9 @@ package com.vlt.ecommerce.feature.order;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +28,13 @@ public class OrderController {
     public ApiResponse<List<OrderResponse>> create(@RequestBody @Valid OrderRequest request) {
         return ApiResponse.<List<OrderResponse>>builder()
             .result(orderService.create(request))
+            .build();
+    }
+
+    @PutMapping("/{id}/complete")
+    public ApiResponse<OrderResponse> completeOrder(@PathVariable Long id) {
+        return ApiResponse.<OrderResponse>builder()
+            .result(orderService.completeOrder(id))
             .build();
     }
 }

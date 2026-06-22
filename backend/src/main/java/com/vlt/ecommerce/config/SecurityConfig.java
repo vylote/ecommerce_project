@@ -1,4 +1,4 @@
-package com.vlt.ecommerce.common.config;
+package com.vlt.ecommerce.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

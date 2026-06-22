@@ -22,6 +22,7 @@ import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.cart.CartItem;
 import com.vlt.ecommerce.feature.cart.CartItemRepository;
+import com.vlt.ecommerce.feature.commission.CommissionService;
 import com.vlt.ecommerce.feature.order.dto.response.OrderItemResponse;
 import com.vlt.ecommerce.feature.order.dto.response.OrderResponse;
 import com.vlt.ecommerce.feature.product.Product;
@@ -44,6 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class OrderService {
+    CommissionService commissionService;
     OrderRepository orderRepository;
     OrderItemRepository orderItemRepository;
     CartItemRepository cartItemRepository;
@@ -185,7 +187,7 @@ public class OrderService {
         order.setStatus(OrderStatus.COMPLETED);
         // TODO (Sprint 4): Gọi CommissionService để tính phí hoa hồng và ghi nhận doanh
         // thu
-        // commissionService.calculateCommission(order);
+        commissionService.calculateCommission(order);
         return orderMapper.toOrderResponse(order);
     }
 
