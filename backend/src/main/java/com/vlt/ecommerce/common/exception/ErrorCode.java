@@ -20,7 +20,9 @@ public enum ErrorCode {
     INVALID_ADDRESS(1015, "Địa chỉ giao hàng không hợp lệ", HttpStatus.BAD_REQUEST),
     SYSTEM_ERROR(1016, "Lỗi hệ thống khi xử lý dữ liệu", HttpStatus.INTERNAL_SERVER_ERROR),
     OUT_OF_STOCK(1017, "Sản phẩm không đủ số lượng trong kho", HttpStatus.BAD_REQUEST),
-    INVALID_ORDER_STATUS(1018, "Trạng thái đơn hàng không hợp lệ cho thao tác này", HttpStatus.BAD_REQUEST);
+    INVALID_ORDER_STATUS(1018, "Trạng thái đơn hàng không hợp lệ cho thao tác này", HttpStatus.BAD_REQUEST),
+
+    COMMISSION_NOT_CONFIGURED(1019, "Hệ thống chưa thiết lập phí hoa hồng!", HttpStatus.INTERNAL_SERVER_ERROR);
 
     int code;
     String message;

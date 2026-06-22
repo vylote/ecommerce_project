@@ -2,6 +2,9 @@ package com.vlt.ecommerce.feature.product;
 
 import java.util.List;
 
+import com.vlt.ecommerce.feature.commission.CommissionConfig;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -67,5 +70,10 @@ public class Category {
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<Product> products;
+    List<Product> products;
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<CommissionConfig> configs;
 }
