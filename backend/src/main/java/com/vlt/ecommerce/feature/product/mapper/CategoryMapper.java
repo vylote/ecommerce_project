@@ -21,6 +21,7 @@ public interface CategoryMapper {
     @Mapping(target = "children", ignore = true)
     @Mapping(target = "isActive", ignore = true)
     @Mapping(target = "products", ignore = true)
+    @Mapping(target = "configs", ignore = true)
     Category toCategory(CategoryRequest request);
 
     List<CategoryResponse> toCategoriesResponse(List<Category> categories);
@@ -30,6 +31,7 @@ public interface CategoryMapper {
     @Mapping(target = "children", ignore = true)
     @Mapping(target = "isActive", ignore = true)
     @Mapping(target = "products", ignore = true)
+    @Mapping(target = "configs", ignore = true)
     void updateCategoryFromRequest(CategoryRequest request, @MappingTarget Category category);
 
     @Named("idToCategory")

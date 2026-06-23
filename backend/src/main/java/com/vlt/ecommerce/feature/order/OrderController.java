@@ -2,9 +2,9 @@ package com.vlt.ecommerce.feature.order;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +31,21 @@ public class OrderController {
             .build();
     }
 
-    @PutMapping("/{id}/complete")
+    @PatchMapping("/{id}/confirm")
+    public ApiResponse<OrderResponse> confirmOrder(@PathVariable Long id) {
+        return ApiResponse.<OrderResponse>builder()
+            .result(orderService.confirmOrder(id))
+            .build();
+    }
+
+    @PatchMapping("/{id}/ship")
+    public ApiResponse<OrderResponse> shipOrder(@PathVariable Long id) {
+        return ApiResponse.<OrderResponse>builder()
+            .result(orderService.shipOrder(id))
+            .build();
+    }
+
+    @PatchMapping("/{id}/complete")
     public ApiResponse<OrderResponse> completeOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
             .result(orderService.completeOrder(id))

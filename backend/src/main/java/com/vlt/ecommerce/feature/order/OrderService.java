@@ -169,6 +169,33 @@ public class OrderService {
     }
 
     @Transactional
+    @PreAuthorize("hasRole('SELLER')")
+    public OrderResponse shipOrder(Long id) {
+        User seller = getCurrentUser();
+
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        if (order.getStatus() != OrderStatus.CONFIRMED) {
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        Shop shop = shopRepository.findBySellerId(seller.getId());
+        if (shop == null) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        boolean isOwner = order.getItems().stream()
+                .anyMatch(item -> item.getShop().getId().equals(shop.getId()));
+
+        if (!isOwner) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        order.setStatus(OrderStatus.SHIPPING);
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public OrderResponse completeOrder(Long id) {
         User buyer = getCurrentUser();
@@ -185,8 +212,7 @@ public class OrderService {
         }
 
         order.setStatus(OrderStatus.COMPLETED);
-        // TODO (Sprint 4): Gọi CommissionService để tính phí hoa hồng và ghi nhận doanh
-        // thu
+        // TODO (Sprint 4): Gọi CommissionService để tính phí hoa hồng và ghi nhận doanh thu
         commissionService.calculateCommission(order);
         return orderMapper.toOrderResponse(order);
     }
@@ -206,7 +232,7 @@ public class OrderService {
         return PageResponse.of(orderPage, content);
     }
 
-    @PreAuthorize("hasRole('BUYER')")
+    @PreAuthorize("hasRole('SELLER')")
     public PageResponse<OrderItemResponse> getSellerOrders(int page, int size) {
         User seller = getCurrentUser();
 
