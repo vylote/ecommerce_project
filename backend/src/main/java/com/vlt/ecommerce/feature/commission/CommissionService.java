@@ -8,20 +8,24 @@ import java.util.Optional;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.commission.dto.request.CommissionConfigRequest;
+import com.vlt.ecommerce.feature.commission.dto.response.AdminStatsResponse;
 import com.vlt.ecommerce.feature.commission.dto.response.CommissionConfigResponse;
+import com.vlt.ecommerce.feature.commission.dto.response.SellerStatsResponse;
 import com.vlt.ecommerce.feature.order.Order;
 import com.vlt.ecommerce.feature.order.OrderItem;
 import com.vlt.ecommerce.feature.order.OrderStatus;
 import com.vlt.ecommerce.feature.product.Category;
 import com.vlt.ecommerce.feature.product.repository.CategoryRepository;
+import com.vlt.ecommerce.feature.shop.Shop;
+import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -34,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CommissionService {
     UserRepository userRepository;
     CategoryRepository categoryRepository;
+    ShopRepository shopRepository;
     CommissionConfigRepository commissionConfigRepository;
     CommissionRecordRepository commissionRecordRepository;
     CommissionConfigMapper commissionConfigMapper;
@@ -113,13 +118,43 @@ public class CommissionService {
         }
     }
 
-    // @PreAuthorize("hasRole('SELLER')")
-    // public void thongKeDoanhThuSeller() {
-    //     User seller = getCurrentUser();
+    @PreAuthorize("hasRole('SELLER')")
+    @Transactional(readOnly = true)
+    public SellerStatsResponse getSellerStats() {
+        User seller = getCurrentUser();
 
-    //     List<CommissionRecord> records = commissionRecordRepository.getCommissionRecordsBySellerId(seller.getId());
-    //     BigDecimal doanhThu = records.stream().collect((record) -> )
-    // }
+        Shop shop = shopRepository.findBySellerId(seller.getId());
+        if (shop == null) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        Long sellerId = seller.getId();
+        BigDecimal totalGrossRevenue = commissionRecordRepository.sumGrossRevenueBySellerId(sellerId);
+        BigDecimal totalCommissionPaid = commissionRecordRepository.sumCommissionPaidBySellerId(sellerId);
+        BigDecimal totalNetRevenue = commissionRecordRepository.sumNetRevenueBySellerId(sellerId);
+        
+        totalGrossRevenue = totalGrossRevenue != null ? totalGrossRevenue : BigDecimal.ZERO;
+        totalCommissionPaid = totalCommissionPaid != null ? totalCommissionPaid : BigDecimal.ZERO;
+        totalNetRevenue = totalNetRevenue != null ? totalNetRevenue : BigDecimal.ZERO;
+
+        return SellerStatsResponse.builder()
+            .totalGrossRevenue(totalGrossRevenue)
+            .totalCommissionPaid(totalCommissionPaid)
+            .totalNetRevenue(totalNetRevenue)
+            .build();
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('ADMIN')")
+    public AdminStatsResponse getAdminStats() {
+        BigDecimal gross = commissionRecordRepository.sumTotalGrossRevenue();
+        BigDecimal commission = commissionRecordRepository.sumTotalCommissionRevenue();
+
+        return AdminStatsResponse.builder()
+            .totalGrossRevenue(gross)
+            .totalCommissionRevenue(commission)
+            .build();
+    }
 
     public User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();

@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
 import com.vlt.ecommerce.feature.commission.dto.request.CommissionConfigRequest;
+import com.vlt.ecommerce.feature.commission.dto.response.AdminStatsResponse;
 import com.vlt.ecommerce.feature.commission.dto.response.CommissionConfigResponse;
+import com.vlt.ecommerce.feature.commission.dto.response.SellerStatsResponse;
 
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -36,5 +38,19 @@ public class CommissionController {
         return ApiResponse.<List<CommissionConfigResponse>>builder()
             .result(commissionService.getConfigs())
             .build();
+    }
+
+    @GetMapping("/stats/seller")
+    public ApiResponse<SellerStatsResponse> getSellerStats() {
+        return ApiResponse.<SellerStatsResponse>builder()
+                .result(commissionService.getSellerStats())
+                .build();
+    }
+
+    @GetMapping("/stats/admin")
+    public ApiResponse<AdminStatsResponse> getAdminStats() {
+        return ApiResponse.<AdminStatsResponse>builder()
+                .result(commissionService.getAdminStats())
+                .build();
     }
 }
