@@ -17,6 +17,7 @@ import com.vlt.ecommerce.feature.product.dto.request.ProductRequest;
 import com.vlt.ecommerce.feature.product.dto.response.ProductImageResponse;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
 import com.vlt.ecommerce.feature.product.service.ProductService;
+import com.vlt.ecommerce.feature.review.ReviewResponse;
 
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -78,6 +79,17 @@ public class ProductController {
 
         return ApiResponse.<PageResponse<ProductResponse>>builder()
                 .result(productService.getAllProducts(categoryId, shopId, keyword, page, size, sortBy, order))
+                .build();
+    }
+
+    @GetMapping("/{id}/reviews")
+    public ApiResponse<PageResponse<ReviewResponse>> getProductReviews(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ApiResponse.<PageResponse<ReviewResponse>>builder()
+                .result(productService.getProductReviews(id, page, size))
                 .build();
     }
 }

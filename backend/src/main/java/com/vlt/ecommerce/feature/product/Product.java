@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.vlt.ecommerce.feature.cart.CartItem;
 import com.vlt.ecommerce.feature.order.OrderItem;
+import com.vlt.ecommerce.feature.review.Review;
 import com.vlt.ecommerce.feature.shop.Shop;
 
 import jakarta.persistence.CascadeType;
@@ -76,10 +77,15 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<CartItem> cartItems;
+    List<CartItem> cartItems;
 
     @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<OrderItem> orderItems;
+    List<OrderItem> orderItems;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<Review> reviews;
 }
