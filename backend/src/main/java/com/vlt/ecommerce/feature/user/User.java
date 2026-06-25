@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.vlt.ecommerce.feature.cart.CartItem;
 import com.vlt.ecommerce.feature.order.Order;
+import com.vlt.ecommerce.feature.review.Review;
 import com.vlt.ecommerce.feature.shop.Shop;
 
 import jakarta.persistence.*;
@@ -42,10 +43,10 @@ public class User {
     @Builder.Default
     @Column(name = "is_active", nullable = false)
     Boolean isActive = true;
-    @Column(name = "create_at", nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
     LocalDateTime createdAt;
-    @Column(name = "update_at", nullable = false)
+    @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     LocalDateTime updatedAt;
 
@@ -64,10 +65,15 @@ public class User {
     @EqualsAndHashCode.Exclude
     List<CartItem> cartItems;
 
-    @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "buyer", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<Order> orders;
+
+    @OneToMany(mappedBy = "buyer", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<Review> reviews;
 }
 
 /* ==============================================================================

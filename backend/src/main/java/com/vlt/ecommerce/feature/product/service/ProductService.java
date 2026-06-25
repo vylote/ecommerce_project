@@ -25,6 +25,10 @@ import com.vlt.ecommerce.feature.product.mapper.ProductImageMapper;
 import com.vlt.ecommerce.feature.product.mapper.ProductMapper;
 import com.vlt.ecommerce.feature.product.repository.ProductImageRepository;
 import com.vlt.ecommerce.feature.product.repository.ProductRepository;
+import com.vlt.ecommerce.feature.review.Review;
+import com.vlt.ecommerce.feature.review.ReviewMapper;
+import com.vlt.ecommerce.feature.review.ReviewRepository;
+import com.vlt.ecommerce.feature.review.ReviewResponse;
 import com.vlt.ecommerce.feature.shop.Shop;
 import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 
@@ -43,6 +47,8 @@ public class ProductService {
     ProductImageMapper productImageMapper;
     ShopRepository shopRepository;
     ProductImageRepository productImageRepository;
+    ReviewRepository reviewRepository;
+    ReviewMapper reviewMapper;
 
     @PreAuthorize("hasRole('SELLER')")
     public ProductResponse create(ProductRequest request) {
@@ -109,5 +115,16 @@ public class ProductService {
         List<ProductResponse> content = productMapper.toProductResponseList(productPage.getContent()); //10 sản phẩm được căt
 
         return PageResponse.of(productPage, content);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<ReviewResponse> getProductReviews(Long productId, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        
+        Page<Review> reviewPage = reviewRepository.findByProductIdWithBuyer(productId, pageable);
+        
+        List<ReviewResponse> content = reviewMapper.toReviewResponses(reviewPage.getContent());
+        
+        return PageResponse.of(reviewPage, content);
     }
 }
