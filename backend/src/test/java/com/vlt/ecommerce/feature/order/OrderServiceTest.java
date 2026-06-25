@@ -34,6 +34,7 @@ import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.cart.CartItem;
 import com.vlt.ecommerce.feature.cart.CartItemRepository;
+import com.vlt.ecommerce.feature.commission.CommissionService;
 import com.vlt.ecommerce.feature.order.dto.response.OrderResponse;
 import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.shop.Shop;
@@ -45,128 +46,145 @@ import com.vlt.ecommerce.feature.user.mapper.AddressMapper;
 import com.vlt.ecommerce.feature.user.repository.AddressRepository;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+
 @ExtendWith(MockitoExtension.class)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderServiceTest {
     @Mock
-    private OrderRepository orderRepository;
+    OrderRepository orderRepository;
     @Mock
-    private OrderItemRepository orderItemRepository;
+    OrderItemRepository orderItemRepository;
     @Mock
-    private CartItemRepository cartItemRepository;
+    CartItemRepository cartItemRepository;
     @Mock
-    private UserRepository userRepository;
+    UserRepository userRepository;
     @Mock
-    private AddressRepository addressRepository;
+    AddressRepository addressRepository;
     @Mock
-    private ShopRepository shopRepository;
+    ShopRepository shopRepository;
     @Mock
-    private AddressMapper addressMapper;
+    AddressMapper addressMapper;
     @Mock
-    private OrderMapper orderMapper;
+    OrderMapper orderMapper;
     @Mock
-    private OrderItemMapper orderItemMapper;
+    OrderItemMapper orderItemMapper;
     @Mock
-    private ObjectMapper objectMapper;
+    ObjectMapper objectMapper;
 
     @InjectMocks
-    private OrderService orderService;
+    OrderService orderService;
+    @Mock
+    CommissionService commissionService;
 
-    private OrderRequest orderRequest;
-    private OrderResponse orderResponse;
-    private Order mockOrder;
-    private OrderItem mockOrderItem;
-    private User mockBuyer;
-    private Shop mockShop;
-    private Product mockProduct;
-    private CartItem mockCartItem;
-    private Address mockAddress;
-    private AddressResponse mockAddressResponse;
+    OrderRequest orderRequest;
+    OrderResponse orderResponse;
+    Order mockOrder;
+    OrderItem mockOrderItem;
+    User mockBuyer;
+    Shop mockShop;
+    Product mockProduct;
+    CartItem mockCartItem;
+    Address mockAddress;
+    AddressResponse mockAddressResponse;
 
     @BeforeEach
     void setUp() {
-        mockBuyer = new User();
-        mockBuyer.setId(1L);
-        mockBuyer.setEmail("buyer@gmail.com");
+        mockBuyer = User.builder()
+                .id(1L)
+                .email("buyer@gmail.com")
+                .build();
 
-        User mockSeller = new User();
-        mockSeller.setId(2L);
-        mockSeller.setEmail("seller@gmail.com");
+        User mockSeller = User.builder()
+                .id(2L)
+                .email("seller@gmail.com")
+                .build();
 
-        mockAddress = new Address();
-        mockAddress.setId(10L);
-        mockAddress.setFullName("Le Thanh Vy");
-        mockAddress.setPhone("0912345678");
-        mockAddress.setProvince("Hà Nội");
-        mockAddress.setDistrict("Đống Đa");
-        mockAddress.setWard("Láng Thượng");
-        mockAddress.setDetail("Trường Đại học Giao thông Vận tải");
-        mockAddress.setIsDefault(true);
-        mockAddress.setUser(mockBuyer);
+        mockAddress = Address.builder()
+                .id(10L)
+                .fullName("Le Thanh Vy")
+                .phone("0912345678")
+                .province("Hà Nội")
+                .district("Đống Đa")
+                .ward("Láng Thượng")
+                .detail("Trường Đại học Giao thông Vận tải")
+                .isDefault(true)
+                .user(mockBuyer)
+                .build();
 
-        mockAddressResponse = new AddressResponse();
-        mockAddressResponse.setUserId(mockBuyer.getId());
-        mockAddressResponse.setFullName(mockAddress.getFullName());
-        mockAddressResponse.setPhone(mockAddress.getPhone());
-        mockAddressResponse.setProvince(mockAddress.getProvince());
-        mockAddressResponse.setDistrict(mockAddress.getDistrict());
-        mockAddressResponse.setWard(mockAddress.getWard());
-        mockAddressResponse.setDetail(mockAddress.getDetail());
-        mockAddressResponse.setIsDefault(mockAddress.getIsDefault());
+        mockAddressResponse = AddressResponse.builder()
+                .userId(mockBuyer.getId())
+                .fullName(mockAddress.getFullName())
+                .phone(mockAddress.getPhone())
+                .province(mockAddress.getProvince())
+                .district(mockAddress.getDistrict())
+                .ward(mockAddress.getWard())
+                .detail(mockAddress.getDetail())
+                .isDefault(mockAddress.getIsDefault())
+                .build();
 
-        mockShop = new Shop();
-        mockShop.setId(100L);
-        mockShop.setName("UTC Tech Shop");
-        mockShop.setDescription("Chuyên thiết bị IT");
-        mockShop.setAddress("Hà Nội");
-        mockShop.setIsActive(true);
-        mockShop.setSeller(mockSeller);
+        mockShop = Shop.builder()
+                .id(100L)
+                .name("UTC Tech Shop")
+                .description("Chuyên thiết bị IT")
+                .address("Hà Nội")
+                .isActive(true)
+                .seller(mockSeller)
+                .build();
 
-        mockProduct = new Product();
-        mockProduct.setId(1000L);
-        mockProduct.setName("Bàn phím cơ");
-        mockProduct.setPrice(new BigDecimal("1500000"));
-        mockProduct.setStockQuantity(20);
-        mockProduct.setShop(mockShop);
+        mockProduct = Product.builder()
+                .id(1000L)
+                .name("Bàn phím cơ")
+                .price(new BigDecimal("1500000"))
+                .stockQuantity(20)
+                .shop(mockShop)
+                .build();
 
-        mockCartItem = new CartItem();
-        mockCartItem.setId(5L);
-        mockCartItem.setQuantity(2);
-        mockCartItem.setBuyer(mockBuyer);
-        mockCartItem.setProduct(mockProduct);
+        mockCartItem = CartItem.builder()
+                .id(5L)
+                .quantity(2)
+                .buyer(mockBuyer)
+                .product(mockProduct)
+                .build();
 
-        orderRequest = new OrderRequest();
-        orderRequest.setAddressId(mockAddress.getId());
-        orderRequest.setNote("Giao giờ hành chính");
+        orderRequest = OrderRequest.builder()
+                .addressId(mockAddress.getId())
+                .note("Giao giờ hành chính")
+                .build();
 
-        mockOrder = new Order();
-        mockOrder.setId(99L);
-        mockOrder.setAddressSnapshot("{\"fullName\":\"Le Thanh Vy\", \"phone\":\"0912345678\", \"detail\":\"Trường Đại học Giao thông Vận tải\"}");
-        mockOrder.setTotalAmount(new BigDecimal("3000000"));
-        mockOrder.setStatus(OrderStatus.PENDING);
-        mockOrder.setNote("Giao giờ hành chính");
-        mockOrder.setBuyer(mockBuyer);
-        mockOrder.setShop(mockShop);
+        mockOrder = Order.builder()
+                .id(99L)
+                .addressSnapshot("{\"fullName\":\"Le Thanh Vy\", \"phone\":\"0912345678\", \"detail\":\"Trường Đại học Giao thông Vận tải\"}")
+                .totalAmount(new BigDecimal("3000000"))
+                .status(OrderStatus.PENDING)
+                .note("Giao giờ hành chính")
+                .buyer(mockBuyer)
+                .shop(mockShop)
+                .build();
 
-        mockOrderItem = new OrderItem();
-        mockOrderItem.setId(999L);
-        mockOrderItem.setProductName(mockProduct.getName());
-        mockOrderItem.setProductPrice(mockProduct.getPrice());
-        mockOrderItem.setQuantity(2);
-        mockOrderItem.setTotalPrice(new BigDecimal("3000000"));
-        mockOrderItem.setOrder(mockOrder);
-        mockOrderItem.setProduct(mockProduct);
-        mockOrderItem.setShop(mockShop);
+        mockOrderItem = OrderItem.builder()
+                .id(999L)
+                .productName(mockProduct.getName())
+                .productPrice(mockProduct.getPrice())
+                .quantity(2)
+                .totalPrice(new BigDecimal("3000000"))
+                .order(mockOrder)
+                .product(mockProduct)
+                .shop(mockShop)
+                .build();
 
         mockOrder.setItems(new ArrayList<>(List.of(mockOrderItem)));
 
-        orderResponse = new OrderResponse();
-        orderResponse.setId(mockOrder.getId());
-        orderResponse.setAddressSnapshot(mockOrder.getAddressSnapshot());
-        orderResponse.setTotalAmount(mockOrder.getTotalAmount());
-        orderResponse.setStatus(mockOrder.getStatus().name());
-        orderResponse.setNote(mockOrder.getNote());
-        orderResponse.setBuyerId(mockBuyer.getId());
-        orderResponse.setItems(new ArrayList<>());
+        orderResponse = OrderResponse.builder()
+                .id(mockOrder.getId())
+                .addressSnapshot(mockOrder.getAddressSnapshot())
+                .totalAmount(mockOrder.getTotalAmount())
+                .status(mockOrder.getStatus().name())
+                .note(mockOrder.getNote())
+                .buyerId(mockBuyer.getId())
+                .items(new ArrayList<>())
+                .build();
 
         Authentication authentication = mock(Authentication.class);
         SecurityContext securityContext = mock(SecurityContext.class);
@@ -302,11 +320,13 @@ public class OrderServiceTest {
         when(userRepository.findByEmail(mockBuyer.getEmail())).thenReturn(Optional.of(mockBuyer));
         when(orderRepository.findById(mockOrder.getId())).thenReturn(Optional.of(mockOrder));
         orderResponse.setStatus(OrderStatus.COMPLETED.name());
+
         when(orderMapper.toOrderResponse(any(Order.class))).thenReturn(orderResponse);
         OrderResponse response = orderService.completeOrder(mockOrder.getId());
         
         assertNotNull(response);
         assertEquals(mockOrder.getId(), response.getId());
         assertEquals(OrderStatus.COMPLETED.name(), response.getStatus());
+        verify(commissionService, times(1)).calculateCommission(mockOrder);
     }
 }

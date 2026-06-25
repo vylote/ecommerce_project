@@ -26,28 +26,32 @@ import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
 import com.vlt.ecommerce.feature.user.mapper.UserMapper;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
+import lombok.AccessLevel;
+import lombok.experimental.FieldDefaults;
+
 @ExtendWith(MockitoExtension.class)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 class AuthServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    UserRepository userRepository;
 
     @Mock
-    private PasswordEncoder passwordEncoder;
+    PasswordEncoder passwordEncoder;
 
     @Mock
-    private JwtService jwtService;
+    JwtService jwtService;
 
     @Mock
-    private UserMapper userMapper;
+    UserMapper userMapper;
 
     @InjectMocks
-    private AuthService authService;
+    AuthService authService;
 
-    private RegisterRequest registerRequest;
-    private LoginRequest loginRequest;
-    private User mockUser;
-    private UserResponse userResponse;
+    RegisterRequest registerRequest;
+    LoginRequest loginRequest;
+    User mockUser;
+    UserResponse userResponse;
 
     @BeforeEach
     void setUp() {
@@ -107,13 +111,13 @@ class AuthServiceTest {
     void login_Success() {
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(mockUser));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-        when(jwtService.generateToken(any(User.class))).thenReturn("mockJwtToken");
+        when(jwtService.generateAccessToken(any(User.class))).thenReturn("mockJwtToken");
 
         TokenResponse response = authService.login(loginRequest);
 
         assertNotNull(response);
         assertEquals("mockJwtToken", response.getAccessToken());
-        verify(jwtService, times(1)).generateToken(any(User.class));
+        verify(jwtService, times(1)).generateAccessToken(any(User.class));
     }
     @Test
     void login_Fail_WrongPassword() {
@@ -122,6 +126,6 @@ class AuthServiceTest {
         
         AppException exception = assertThrows(AppException.class, () -> authService.login(loginRequest));
         assertEquals(ErrorCode.UNAUTHENTICATED, exception.getErrorCode());
-        verify(jwtService, never()).generateToken(any(User.class));
+        verify(jwtService, never()).generateAccessToken(any(User.class));
     }
 }
