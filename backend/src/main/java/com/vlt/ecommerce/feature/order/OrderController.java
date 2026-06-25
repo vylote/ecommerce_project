@@ -2,14 +2,17 @@ package com.vlt.ecommerce.feature.order;
 
 import java.util.List;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
+import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.feature.order.dto.response.OrderResponse;
 
 import jakarta.validation.Valid;
@@ -49,6 +52,40 @@ public class OrderController {
     public ApiResponse<OrderResponse> completeOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
             .result(orderService.completeOrder(id))
+            .build();
+    }
+
+    @GetMapping
+    public ApiResponse<PageResponse<OrderResponse>> getOwnHistoryOrder(
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size) {
+        
+        return ApiResponse.<PageResponse<OrderResponse>>builder()
+            .result(orderService.getOwnHistoryOrder(page, size))
+            .build();
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ApiResponse<OrderResponse> cancelOrder(@PathVariable Long id) {
+        return ApiResponse.<OrderResponse>builder()
+            .result(orderService.cancelOrder(id))
+            .build();
+    }
+
+    @GetMapping("/seller")
+    public ApiResponse<PageResponse<OrderResponse>> getSellerOrders(
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size) {
+
+        return ApiResponse.<PageResponse<OrderResponse>>builder()
+            .result(orderService.getSellerOrders(page, size))
+            .build();
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<OrderResponse> getDetailOrder(@PathVariable Long id) {
+        return ApiResponse.<OrderResponse>builder()
+            .result(orderService.getDetailOrder(id))
             .build();
     }
 }

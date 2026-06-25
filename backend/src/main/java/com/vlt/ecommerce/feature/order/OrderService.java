@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -23,12 +24,15 @@ import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.cart.CartItem;
 import com.vlt.ecommerce.feature.cart.CartItemRepository;
 import com.vlt.ecommerce.feature.commission.CommissionService;
-import com.vlt.ecommerce.feature.order.dto.response.OrderItemResponse;
 import com.vlt.ecommerce.feature.order.dto.response.OrderResponse;
+import com.vlt.ecommerce.feature.payment.Payment;
+import com.vlt.ecommerce.feature.payment.Payment.PaymentMethod;
+import com.vlt.ecommerce.feature.payment.Payment.PaymentStatus;
 import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.shop.Shop;
 import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 import com.vlt.ecommerce.feature.user.Address;
+import com.vlt.ecommerce.feature.user.Role;
 import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.dto.response.AddressResponse;
 import com.vlt.ecommerce.feature.user.mapper.AddressMapper;
@@ -47,14 +51,12 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderService {
     CommissionService commissionService;
     OrderRepository orderRepository;
-    OrderItemRepository orderItemRepository;
     CartItemRepository cartItemRepository;
     UserRepository userRepository;
     AddressRepository addressRepository;
     ShopRepository shopRepository;
     AddressMapper addressMapper;
     OrderMapper orderMapper;
-    OrderItemMapper orderItemMapper;
     ObjectMapper objectMapper;
 
     @PreAuthorize("hasRole('BUYER')")
@@ -218,11 +220,11 @@ public class OrderService {
     }
 
     @PreAuthorize("hasRole('BUYER')")
-    public PageResponse<OrderResponse> getMyOrders(int page, int size) {
+    public PageResponse<OrderResponse> getOwnHistoryOrder(int page, int size) {
         User buyer = getCurrentUser();
 
         // Sắp xếp đơn hàng mới nhất lên đầu
-        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by("createdAt").descending());
 
         // Gọi database (Đã chặn N+1 query bằng EntityGraph)
         Page<Order> orderPage = orderRepository.findByBuyerId(buyer.getId(), pageable);
@@ -232,8 +234,64 @@ public class OrderService {
         return PageResponse.of(orderPage, content);
     }
 
+    @PreAuthorize("hasAnyRole('BUYER', 'SELLER')")
+    public OrderResponse getDetailOrder(Long id) {
+        User user = getCurrentUser();
+
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        if (user.getRole() == Role.BUYER && !order.getBuyer().getId().equals(user.getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        } 
+        
+        if (user.getRole() == Role.SELLER && !order.getShop().getSeller().getId().equals(user.getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    //huy hang
+    @Transactional
+    @PreAuthorize("hasRole('BUYER')")
+    public OrderResponse cancelOrder(Long id) {
+        User buyer = getCurrentUser();
+
+        Order order = orderRepository.findById(id)
+            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        if (!order.getBuyer().getId().equals(buyer.getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (!order.getStatus().equals(OrderStatus.PENDING)) {
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+     
+        order.setStatus(OrderStatus.CANCELLED);
+
+        Payment payment = order.getPayment();
+        if (payment != null && payment.getStatus() == PaymentStatus.PAID) {
+            if (payment.getMethod() == PaymentMethod.MOCK_ONLINE || 
+                payment.getMethod() == PaymentMethod.BANK_TRANSFER) {
+                
+                payment.setStatus(PaymentStatus.REFUNDED); 
+                payment.setTransactionRef("REFUND_MOCK_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase()); // Mã hoàn tiền giả
+            }
+        }
+
+        for (OrderItem item : order.getItems()) {
+            Product product = item.getProduct();
+            product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
+            product.setSoldCount(product.getSoldCount() - item.getQuantity());
+        }
+        // ban di thong bao cho seller sprint5 khi ma order status thay doi
+        return orderMapper.toOrderResponse(order);
+    }
+
     @PreAuthorize("hasRole('SELLER')")
-    public PageResponse<OrderItemResponse> getSellerOrders(int page, int size) {
+    public PageResponse<OrderResponse> getSellerOrders(int page, int size) {
         User seller = getCurrentUser();
 
         Shop shop = shopRepository.findBySellerId(seller.getId());
@@ -241,12 +299,12 @@ public class OrderService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
         }
 
-        Pageable pageable = PageRequest.of(page, size, Sort.by("order.createdAt").descending());
-        Page<OrderItem> orderItemPage = orderItemRepository.findByShopId(shop.getId(), pageable);
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by("order.createdAt").descending());
+        Page<Order> orderPage = orderRepository.findByShopId(shop.getId(), pageable);
 
-        List<OrderItemResponse> content = orderItemMapper.toOrderItemResponses(orderItemPage.getContent());
+        List<OrderResponse> content = orderMapper.toOrderResponses(orderPage.getContent());
 
-        return PageResponse.of(orderItemPage, content);
+        return PageResponse.of(orderPage, content);
     }
 
     private User getCurrentUser() {
