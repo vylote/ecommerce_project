@@ -27,14 +27,12 @@ public class SecurityConfig {
     @Value("${jwt.secret}")
     private String signerKey;
 
-    // 1. Các API POST công khai (Ai cũng gọi được)
     private final String[] PUBLIC_POST_ENDPOINTS = {
             "/auth/register", 
             "/auth/login", 
             "/auth/refresh"
     };
 
-    // 2. Các API GET công khai (Xem dữ liệu không cần đăng nhập)
     private final String[] PUBLIC_GET_ENDPOINTS = {
             "/categories", "/categories/**",
             "/shops/**",

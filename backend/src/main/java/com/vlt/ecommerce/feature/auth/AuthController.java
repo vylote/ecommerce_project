@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.feature.auth;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
 import com.vlt.ecommerce.feature.auth.dto.request.LoginRequest;
+import com.vlt.ecommerce.feature.auth.dto.request.RefreshTokenRequest;
 import com.vlt.ecommerce.feature.auth.dto.request.RegisterRequest;
 import com.vlt.ecommerce.feature.auth.dto.response.TokenResponse;
 import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
@@ -34,6 +36,20 @@ public class AuthController {
     public ApiResponse<TokenResponse> register(@RequestBody @Valid LoginRequest request) {
         return ApiResponse.<TokenResponse>builder()
                 .result(authService.login(request))
+                .build();
+    }
+
+    @PostMapping("/refresh")
+    public ApiResponse<TokenResponse> refreshToken(@RequestBody @Valid RefreshTokenRequest request) {
+        return ApiResponse.<TokenResponse>builder()
+                .result(authService.refreshToken(request))
+                .build();
+    }
+
+    @GetMapping("/me")
+    public ApiResponse<UserResponse> getMyInfo() {
+        return ApiResponse.<UserResponse>builder()
+                .result(authService.getMyInfo())
                 .build();
     }
 }

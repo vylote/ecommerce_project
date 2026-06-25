@@ -1,11 +1,16 @@
 package com.vlt.ecommerce.feature.auth;
 
+import java.text.ParseException;
+
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.auth.dto.request.LoginRequest;
+import com.vlt.ecommerce.feature.auth.dto.request.RefreshTokenRequest;
 import com.vlt.ecommerce.feature.auth.dto.request.RegisterRequest;
 import com.vlt.ecommerce.feature.auth.dto.response.TokenResponse;
 import com.vlt.ecommerce.feature.user.Role;
@@ -53,9 +58,39 @@ public class AuthService {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
-        var accessToken = jwtService.generateToken(user);
+        var accessToken = jwtService.generateAccessToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
         return TokenResponse.builder()
                 .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
+    }
+
+    public TokenResponse refreshToken(RefreshTokenRequest request) {
+        try {
+            SignedJWT signedJWT = jwtService.verifyToken(request.getRefreshToken());
+            String email = signedJWT.getJWTClaimsSet().getSubject();
+
+            var user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+            var accessToken = jwtService.generateAccessToken(user);
+            var newRefreshToken = jwtService.generateRefreshToken(user);
+
+            return TokenResponse.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(newRefreshToken)
+                    .build();
+        } catch (ParseException e) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+    }
+
+    public UserResponse getMyInfo() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        return userMapper.toUserResponse(user);
     }
 }
