@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlt.ecommerce.common.dto.PageResponse;
+import com.vlt.ecommerce.common.event.OrderStatusChangedEvent;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.cart.CartItem;
@@ -58,6 +60,7 @@ public class OrderService {
     AddressMapper addressMapper;
     OrderMapper orderMapper;
     ObjectMapper objectMapper;
+    ApplicationEventPublisher eventPublisher;
 
     @PreAuthorize("hasRole('BUYER')")
     @Transactional
@@ -133,7 +136,9 @@ public class OrderService {
             }
 
             newOrder.setTotalAmount(totalAmount);
-            createdOrders.add(orderRepository.save(newOrder));
+            Order savedOrder = orderRepository.save(newOrder);
+            createdOrders.add(savedOrder);
+            eventPublisher.publishEvent(new OrderStatusChangedEvent(this, savedOrder.getId()));
         }
 
         cartItemRepository.deleteAllByBuyerId(buyer.getId());
@@ -166,7 +171,7 @@ public class OrderService {
 
         order.setStatus(OrderStatus.CONFIRMED);
 
-        // TODO (Sprint 5)code gui notifi
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order.getId()));
         return orderMapper.toOrderResponse(order);
     }
 
@@ -194,6 +199,7 @@ public class OrderService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         order.setStatus(OrderStatus.SHIPPING);
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order.getId()));
         return orderMapper.toOrderResponse(order);
     }
 
@@ -214,8 +220,8 @@ public class OrderService {
         }
 
         order.setStatus(OrderStatus.COMPLETED);
-        // TODO (Sprint 4): Gọi CommissionService để tính phí hoa hồng và ghi nhận doanh thu
         commissionService.calculateCommission(order);
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order.getId()));
         return orderMapper.toOrderResponse(order);
     }
 

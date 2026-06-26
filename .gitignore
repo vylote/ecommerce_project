@@ -1,0 +1,29 @@
+# 1. Bỏ qua thư viện của Node.js (Áp dụng cho cả Frontend React và Notification Service)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# 2. Bỏ qua các file build và thư viện của Spring Boot (Backend)
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.class
+*.jar
+*.war
+
+# 3. Bỏ qua các file môi trường (KHÔNG BAO GIỜ push .env lên Git để tránh lộ secret)
+.env
+.env.local
+
+# 4. Bỏ qua các file cấu hình của IDE (VS Code, IntelliJ, Eclipse)
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# 5. Bỏ qua file rác của Hệ điều hành
+.DS_Store
+Thumbs.db
