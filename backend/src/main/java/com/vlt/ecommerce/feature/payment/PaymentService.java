@@ -71,7 +71,6 @@ public class PaymentService {
         payment.setPaidAt(LocalDateTime.now());
         payment.setTransactionRef("MOCK_TXN_"+UUID.randomUUID().toString().substring(0,8).toUpperCase());
 
-        //TODO Phát loa thông báo cho cả hệ thống biết đơn này đã được trả tiền
         eventPublisher.publishEvent(new PaymentSuccessEvent(payment.getOrder().getId()));
         return paymentMapper.toPaymentResponse(paymentRepository.save(payment));
     }
