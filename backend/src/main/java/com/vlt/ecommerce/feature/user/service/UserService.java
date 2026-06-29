@@ -33,6 +33,7 @@ public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
 
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
     public PageResponse<UserResponse> getAllUsers(
         String email, String fullName, String phone, int page, int size, String sortBy, String order) {
@@ -46,6 +47,7 @@ public class UserService {
         return PageResponse.of(userPage, content);
     }
 
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getDetailUser(Long id) {
         User user = userRepository.findById(id)
@@ -61,7 +63,7 @@ public class UserService {
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         userMapper.updateUserProfile(request, user);
-        return userMapper.toUserResponse(userRepository.save(user));
+        return userMapper.toUserResponse(user);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -76,6 +78,6 @@ public class UserService {
         }
 
         user.setIsActive(!user.getIsActive());
-        return userMapper.toUserResponse(userRepository.save(user));
+        return userMapper.toUserResponse(user);
     } 
 }

@@ -292,7 +292,8 @@ public class OrderService {
             product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
             product.setSoldCount(product.getSoldCount() - item.getQuantity());
         }
-        // ban di thong bao cho seller sprint5 khi ma order status thay doi
+        
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order.getId()));
         return orderMapper.toOrderResponse(order);
     }
 
