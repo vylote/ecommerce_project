@@ -1,7 +1,7 @@
 require ('dotenv').config()
-const express = require('express')
+const express = require('express') //framework dùng để build web server và RESTful API 
 const http = require('http')
-const cors = require('cors')
+const cors = require('cors') // cung cấp middleware xử lí Cross-Origin Resource Sharing
 const { initSocket } = require('../src/services/socket.service')
 const notifyRoutes = require('../src/routes/notify.routes')
 

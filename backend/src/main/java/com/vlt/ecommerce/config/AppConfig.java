@@ -30,6 +30,7 @@ public class AppConfig {
         return new ObjectMapper();
     }
 
+    //resttemplate như kiểu là postman được nhúng trong java, khi gọi api từ fe dùng axios hoặc fetch
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

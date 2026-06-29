@@ -69,10 +69,11 @@ public class PaymentService {
         
         payment.setStatus(Payment.PaymentStatus.PAID);
         payment.setPaidAt(LocalDateTime.now());
-        payment.setTransactionRef("MOCK_TXN_"+UUID.randomUUID().toString().substring(0,8).toUpperCase());
+        payment.setTransactionRef("MOCK_TXN_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
 
         eventPublisher.publishEvent(new PaymentSuccessEvent(payment.getOrder().getId()));
-        return paymentMapper.toPaymentResponse(paymentRepository.save(payment));
+        
+        return paymentMapper.toPaymentResponse(payment);
     }
 
     @PreAuthorize("hasAnyRole('BUYER', 'SELLER')")

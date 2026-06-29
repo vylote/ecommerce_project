@@ -4,7 +4,7 @@ let io
 
 const initSocket = (server) => {
     io = socketIo(server, {
-        cors: { origin: '*'}
+        cors: { origin: '*'} // khi production thì đổi thành domain thực tê của fe-> chống hack
     })
 
     io.on('connection', (socket) => {

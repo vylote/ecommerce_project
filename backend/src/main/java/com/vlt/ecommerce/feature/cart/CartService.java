@@ -70,7 +70,7 @@ public class CartService {
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         cartMapper.updateQuantityCartItem(request, cartItem);
-        return cartMapper.toCartItemResponse(cartItemRepository.save(cartItem));
+        return cartMapper.toCartItemResponse(cartItem);
     }
 
     @Transactional
