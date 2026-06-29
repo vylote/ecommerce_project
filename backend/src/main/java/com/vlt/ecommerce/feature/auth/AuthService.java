@@ -10,7 +10,6 @@ import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.auth.dto.request.LoginRequest;
-import com.vlt.ecommerce.feature.auth.dto.request.RefreshTokenRequest;
 import com.vlt.ecommerce.feature.auth.dto.request.RegisterRequest;
 import com.vlt.ecommerce.feature.auth.dto.response.TokenResponse;
 import com.vlt.ecommerce.feature.user.Role;
@@ -66,9 +65,9 @@ public class AuthService {
                 .build();
     }
 
-    public TokenResponse refreshToken(RefreshTokenRequest request) {
+    public TokenResponse refreshToken(String refreshToken) {
         try {
-            SignedJWT signedJWT = jwtService.verifyToken(request.getRefreshToken());
+            SignedJWT signedJWT = jwtService.verifyToken(refreshToken);
             String email = signedJWT.getJWTClaimsSet().getSubject();
 
             var user = userRepository.findByEmail(email)

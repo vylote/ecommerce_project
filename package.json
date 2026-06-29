@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  },
+  "scripts": {
+    "dev": "concurrently \"cd backend && mvnw spring-boot:run\" \"cd frontend && npm run dev\" \"cd notification && npm run dev\""
+  }
+}
