@@ -4,9 +4,6 @@ import { logout } from "../../store/slice/authSlice";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
   // BẮT BUỘC CÓ DÒNG NÀY ĐỂ TRÌNH DUYỆT GỬI KÈM COOKIE LÊN BACKEND
   withCredentials: true,
 });
