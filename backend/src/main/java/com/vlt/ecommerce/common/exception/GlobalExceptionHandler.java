@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
 
@@ -18,12 +19,23 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = e.getErrorCode();
 
         return ResponseEntity.status(errorCode.getStatusCode()).body(
-            ApiResponse.builder()
-                    .code(errorCode.getCode())
-                    .message(errorCode.getMessage())
-                    .build()   
-        );    
+                ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
     }
+
+    @SuppressWarnings("rawtypes")
+    @ExceptionHandler(value = NoResourceFoundException.class)
+    ResponseEntity<ApiResponse> handlingNotFoundException(NoResourceFoundException e) {
+        // Không cần in log đỏ lòm cho lỗi thiếu ảnh tĩnh nữa
+        return ResponseEntity.status(404).body(
+                ApiResponse.builder()
+                        .code(404)
+                        .message("Không tìm thấy đường dẫn hoặc tài nguyên (404)")
+                        .build());
+    }
+
     @SuppressWarnings("rawtypes")
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException e) {
@@ -31,11 +43,10 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
 
         return ResponseEntity.status(errorCode.getStatusCode()).body(
-            ApiResponse.builder()
-                    .code(errorCode.getCode())
-                    .message(errorCode.getMessage())
-                    .build()   
-        );
+                ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
     }
 
     @SuppressWarnings("rawtypes")
@@ -44,10 +55,9 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 
         return ResponseEntity.status(errorCode.getStatusCode()).body(
-            ApiResponse.builder()
-                    .code(errorCode.getCode())
-                    .message(errorCode.getMessage())
-                    .build()   
-        );
+                ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
     }
 }

@@ -12,4 +12,5 @@ public class ShopResponse {
     String logoUrl;
     String address;
     Long sellerId;
+    Double rating;
 }

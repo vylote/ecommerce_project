@@ -48,6 +48,10 @@ public class Shop {
     @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
 
+    @Builder.Default
+    @Column(name = "rating", nullable = false)
+    Double rating = 0.0;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false, unique = true)
     User seller;

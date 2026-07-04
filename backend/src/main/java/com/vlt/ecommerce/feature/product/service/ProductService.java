@@ -32,6 +32,7 @@ import com.vlt.ecommerce.feature.review.ReviewMapper;
 import com.vlt.ecommerce.feature.review.ReviewRepository;
 import com.vlt.ecommerce.feature.review.ReviewResponse;
 import com.vlt.ecommerce.feature.shop.Shop;
+import com.vlt.ecommerce.feature.shop.ShopService;
 import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 
 import lombok.AccessLevel;
@@ -53,6 +54,7 @@ public class ProductService {
     ReviewMapper reviewMapper;
 
     CloudinaryService cloudinaryService;
+    ShopService shopService;
 
     @PreAuthorize("hasRole('SELLER')")
     public ProductResponse create(ProductRequest request) {
@@ -161,5 +163,6 @@ public class ProductService {
         // Ghi đè dữ liệu phi chuẩn hóa vào Product
         product.setReviewCount(count.intValue());
         product.setAverageRating(average);
+        shopService.updateShopRating(product.getShop().getId());
     }
 }

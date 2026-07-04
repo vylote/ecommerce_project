@@ -6,6 +6,7 @@ import HomePage from '../features/home/HomePage';
 import RegisterPage from '../features/auth/RegisterPage';
 import DailyDiscovery from '../features/product/DailyDiscovery';
 import CategoryPage from '../features/product/CategoryPage';
+import SearchPage from '../features/product/SearchPage';
 
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
@@ -17,6 +18,7 @@ export const AppRoutes = () => {
       <Route path="/register" element={!user ? <RegisterPage /> : <Navigate to="/" />} />
       <Route path="/daily-discovery" element={<DailyDiscovery />} />
       <Route path="/category/:id" element={<CategoryPage />} />
+      <Route path="/search" element={<SearchPage />} />
     </Routes>
   );
 };

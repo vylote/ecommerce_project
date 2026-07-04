@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../shared/utils/api';
@@ -7,6 +8,9 @@ export default function Navbar() {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  
+  // State lưu từ khóa tìm kiếm
+  const [keyword, setKeyword] = useState('');
 
   const handleLogout = async () => {
     try {
@@ -16,6 +20,14 @@ export default function Navbar() {
     } finally {
       dispatch(logout());
       navigate('/login', { replace: true });
+    }
+  };
+
+  // Hàm xử lý tìm kiếm
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (keyword.trim()) {
+      navigate(`/search?keyword=${encodeURIComponent(keyword.trim())}`);
     }
   };
 
@@ -82,18 +94,21 @@ export default function Navbar() {
           </Link>
 
           <div className="form-control flex-1 max-w-xl hidden md:block">
-            <div className="join w-full">
+            {/* Cập nhật phần div thành form để xử lý sự kiện submit */}
+            <form onSubmit={handleSearch} className="join w-full">
               <input
                 type="text"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
                 placeholder="Tìm kiếm sản phẩm, thương hiệu..."
                 className="input join-item w-full bg-white text-base-content border-none focus:outline-none"
               />
-              <button className="btn join-item bg-green-700 hover:bg-green-800 border-none text-white px-6">
+              <button type="submit" className="btn join-item bg-green-700 hover:bg-green-800 border-none text-white px-6">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
                 </svg>
               </button>
-            </div>
+            </form>
           </div>
 
           <div className="flex items-center gap-4 ml-auto">
