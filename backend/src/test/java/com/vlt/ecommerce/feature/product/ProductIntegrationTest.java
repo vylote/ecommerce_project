@@ -40,6 +40,8 @@ import com.vlt.ecommerce.feature.user.mapper.UserMapper;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
 import com.vlt.ecommerce.util.MockDataFactory;
 
+import jakarta.servlet.http.Cookie;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -122,7 +124,7 @@ public class ProductIntegrationTest {
 
         // Act & Assert: Gọi API có đính kèm JWT
         mockMvc.perform(post("/products")
-                .header("Authorization", "Bearer " + validSellerToken) 
+                .cookie(new Cookie("accessToken", validSellerToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 
@@ -146,7 +148,7 @@ public class ProductIntegrationTest {
         request.setCategoryId(mockCategory.getId());
 
         mockMvc.perform(post("/products")
-                .header("Authorization", "Bearer "+buyerToken)
+                .cookie(new Cookie("accessToken", buyerToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isForbidden());
@@ -172,7 +174,7 @@ public class ProductIntegrationTest {
 
         // 2. Act & Assert: Gọi API update
         mockMvc.perform(put("/products/{id}", product.getId()) // Truyền ID vào URL
-                .header("Authorization", "Bearer " + validSellerToken)
+                .cookie(new Cookie("accessToken", validSellerToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
                 
@@ -207,7 +209,7 @@ public class ProductIntegrationTest {
 
         // 2. Act & Assert: Kẻ gian dùng Token của mình để sửa SP của người khác
         mockMvc.perform(put("/products/{id}", productOfMockSeller.getId())
-                .header("Authorization", "Bearer " + badSellerToken)
+                .cookie(new Cookie("accessToken", badSellerToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(maliciousRequest)))
                 
@@ -230,7 +232,7 @@ public class ProductIntegrationTest {
 
         // 2. Act & Assert: Gọi API DELETE có đính kèm JWT
         mockMvc.perform(delete("/products/{id}", product.getId())
-                .header("Authorization", "Bearer " + validSellerToken))
+                .cookie(new Cookie("accessToken", validSellerToken)))
                 // Kỳ vọng API trả về thành công
                 .andExpect(status().isOk());
 
@@ -271,7 +273,7 @@ public class ProductIntegrationTest {
         
 
         mockMvc.perform(post("/products/{id}/images", product.getId())
-                .header("Authorization", "Bearer " + validSellerToken)
+                .cookie(new Cookie("accessToken", validSellerToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(imageRequest)))
                 .andDo(print())

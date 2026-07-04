@@ -17,6 +17,11 @@ spring:
     # serialization: 
     #   write-dates-as-timestamps: false
     default-property-inclusion: non_null
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB       # Dung lượng tối đa của MỘT file
+      max-request-size: 15MB   # Dung lượng tối đa của TOÀN BỘ request (nếu up nhiều file cùng lúc)
 
 server:
   port: 8080
@@ -43,3 +48,8 @@ logging:
     org.springframework.orm.jpa.JpaTransactionManager: DEBUG
     org.springframework.transaction: DEBUG
     org.hibernate.engine.transaction.internal.TransactionImpl: DEBUG
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
