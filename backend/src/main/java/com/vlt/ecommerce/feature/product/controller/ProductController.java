@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.feature.product.controller;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
 import com.vlt.ecommerce.common.dto.PageResponse;
@@ -53,10 +55,14 @@ public class ProductController {
             .build();
     } 
 
-    @PostMapping("/{id}/images")
-    public ApiResponse<ProductImageResponse> addImage(@RequestBody @Valid ProductImageRequest request, @PathVariable Long id) {
+    @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<ProductImageResponse> addImage(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(defaultValue = "false") Boolean isPrimary,
+            @RequestParam(defaultValue = "0") Integer sortOrder) {
         return ApiResponse.<ProductImageResponse>builder()
-            .result(productService.addProductImage(request, id))
+            .result(productService.addProductImage(file, id, isPrimary, sortOrder))
             .build();
     }
 

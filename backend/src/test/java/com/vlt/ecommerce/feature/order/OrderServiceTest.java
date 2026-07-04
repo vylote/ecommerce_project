@@ -28,6 +28,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.context.ApplicationEventPublisher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlt.ecommerce.common.exception.AppException;
@@ -72,6 +73,9 @@ public class OrderServiceTest {
     OrderItemMapper orderItemMapper;
     @Mock
     ObjectMapper objectMapper;
+
+    @Mock
+    ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     OrderService orderService;

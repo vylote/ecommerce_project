@@ -42,9 +42,9 @@ public class SecurityConfig {
     };
 
     private final String[] PUBLIC_GET_ENDPOINTS = {
-            "/categories", "/categories/**",
+            "/categories", "/categories/**", "/images/**",
             "/shops/**",
-            "/products", "/products/**",
+            "/products", "/products/**", 
             // Các API của Swagger UI để xem document
             "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"
     };

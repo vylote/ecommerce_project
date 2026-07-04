@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.feature.product.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
@@ -50,6 +52,8 @@ public class ProductService {
     ReviewRepository reviewRepository;
     ReviewMapper reviewMapper;
 
+    CloudinaryService cloudinaryService;
+
     @PreAuthorize("hasRole('SELLER')")
     public ProductResponse create(ProductRequest request) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -84,13 +88,27 @@ public class ProductService {
     //upload anh san pham
     @Transactional
     @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#productId)")
-    public ProductImageResponse addProductImage(ProductImageRequest request, Long productId) {
+    public ProductImageResponse addProductImage(MultipartFile file, Long productId, Boolean isPrimary, Integer sortOrder) {
         Product product = productRepository.findById(productId)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        ProductImage productImage = productImageMapper.toProductImage(request);
-        productImage.setProduct(product);
-        return productImageMapper.toProductImageResponse(productImageRepository.save(productImage));
+        if (file == null || file.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_DATA);
+        }
+
+        try {
+            String imageUrl = cloudinaryService.uploadFile(file, "ecommerce/products");
+            
+            ProductImage productImage = new ProductImage();
+            productImage.setProduct(product);
+            productImage.setUrl(imageUrl);
+            productImage.setIsPrimary(isPrimary);
+            productImage.setSortOrder(sortOrder);
+            
+            return productImageMapper.toProductImageResponse(productImageRepository.save(productImage));
+        } catch (IOException e) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
     }
 
     public ProductResponse getDetailProduct(Long id) {
