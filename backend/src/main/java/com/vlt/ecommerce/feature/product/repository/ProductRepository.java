@@ -33,6 +33,9 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
         @Param("minRating") Double minRating,
         Pageable pageable
     );
+
+    @Query("SELECT COALESCE(AVG(p.averageRating), 0.0) FROM Product p WHERE p.shop.id = :shopId AND p.status = 'ACTIVE'")
+    Double getAverageRatingByShopId(@Param("shopId") Long shopId);
 }
 /* ==============================================================================
      * NGHỊCH LÝ LAZY CHỐNG N+1 VÀ KỸ THUẬT LỌC ĐỘNG (DYNAMIC FILTER)

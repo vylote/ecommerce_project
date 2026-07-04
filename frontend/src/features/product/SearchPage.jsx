@@ -1,27 +1,24 @@
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import Navbar from '../../shared/components/Navbar';
 import api from '../../shared/utils/api';
 
-export default function CategoryPage() {
-  const { id } = useParams();
-  const navigate = useNavigate();
+export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pageInfo, setPageInfo] = useState({ currentPage: 1, totalPages: 1 });
   
-  const [currentCategory, setCurrentCategory] = useState(null);
-  const [childCategories, setChildCategories] = useState([]);
-  const [showMoreCategories, setShowMoreCategories] = useState(false);
-  const [showMoreBrands, setShowMoreBrands] = useState(false);
+  const [shopResult, setShopResult] = useState(null);
+  const [shopProducts, setShopProducts] = useState([]);
 
   const [minPriceInput, setMinPriceInput] = useState('');
   const [maxPriceInput, setMaxPriceInput] = useState('');
 
+  const keyword = searchParams.get('keyword') || '';
   const page = parseInt(searchParams.get('page') || '1', 10);
-  const sortBy = searchParams.get('sortBy') || 'soldCount';
+  const sortBy = searchParams.get('sortBy') || 'relevance';
   const order = searchParams.get('order') || 'desc';
   const minPrice = searchParams.get('minPrice');
   const maxPrice = searchParams.get('maxPrice');
@@ -29,33 +26,41 @@ export default function CategoryPage() {
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!keyword) return;
       setLoading(true);
       try {
-        const [catRes, childRes] = await Promise.all([
-          api.get(`/categories/${id}`),
-          api.get(`/categories/${id}/childrens`).catch(() => ({ data: { result: [] } }))
-        ]);
-        setCurrentCategory(catRes.data.result);
-        setChildCategories(childRes.data.result);
+        api.get('/shops/search', { params: { keyword, size: 1 } })
+          .then(async (res) => {
+            const shopList = Array.isArray(res.data.result) ? res.data.result : res.data.result?.data;
+            const shopData = shopList?.[0];
+            if (shopData) {
+              setShopResult(shopData);
+              const pRes = await api.get('/products', { 
+                params: { shopId: shopData.id, size: 4, sortBy: 'soldCount', order: 'desc' } 
+              });
+              setShopProducts(pRes.data.result.data || []);
+            } else {
+              setShopResult(null);
+              setShopProducts([]);
+            }
+          }).catch(() => setShopResult(null));
 
-        const params = {
-          categoryId: id,
-          page: page,
-          size: 25,
-          sortBy: sortBy,
-          order: order
+        const params = { 
+          keyword, 
+          page, 
+          size: 25, 
+          sortBy: sortBy === 'relevance' ? 'id' : sortBy, 
+          order 
         };
         if (minPrice) params.minPrice = minPrice;
         if (maxPrice) params.maxPrice = maxPrice;
         if (minRating) params.minRating = minRating;
 
         const prodRes = await api.get('/products', { params });
-        const pageResponse = prodRes.data.result;
-        
-        setProducts(pageResponse.data);
+        setProducts(prodRes.data.result.data);
         setPageInfo({
-          currentPage: pageResponse.currentPage,
-          totalPages: pageResponse.totalPages,
+          currentPage: prodRes.data.result.currentPage,
+          totalPages: prodRes.data.result.totalPages,
         });
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -66,7 +71,7 @@ export default function CategoryPage() {
       }
     };
     fetchData();
-  }, [id, page, sortBy, order, minPrice, maxPrice, minRating]);
+  }, [keyword, page, sortBy, order, minPrice, maxPrice, minRating]);
 
   const updateParams = (newParams) => {
     const current = Object.fromEntries([...searchParams]);
@@ -88,11 +93,7 @@ export default function CategoryPage() {
   };
 
   const applyPriceFilter = () => {
-    updateParams({
-      minPrice: minPriceInput,
-      maxPrice: maxPriceInput,
-      page: 1
-    });
+    updateParams({ minPrice: minPriceInput, maxPrice: maxPriceInput, page: 1 });
   };
 
   const applyRatingFilter = (rating) => {
@@ -100,12 +101,10 @@ export default function CategoryPage() {
   };
 
   const getDisplayImage = (product) => {
-    if (!product.images || product.images.length === 0) return null;
+    if (!product?.images?.length) return null;
     const primaryImg = product.images.find(img => img.isPrimary);
     return primaryImg ? primaryImg.url : product.images[0].url;
   };
-
-  const displayedCategories = showMoreCategories ? childCategories : childCategories.slice(0, 4);
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
@@ -115,48 +114,10 @@ export default function CategoryPage() {
         <aside className="w-[220px] shrink-0 bg-transparent">
           <div className="mb-6">
             <h3 className="font-bold text-sm uppercase mb-3 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-              {currentCategory ? currentCategory.name : 'Danh Mục'}
-            </h3>
-            {childCategories.length > 0 && (
-              <ul className="text-sm space-y-2 pl-6">
-                <li className="font-bold text-primary cursor-pointer mb-2">Tất cả</li>
-                {displayedCategories.map(child => (
-                  <li 
-                    key={child.id}
-                    className="cursor-pointer hover:text-primary transition-colors"
-                    onClick={() => navigate(`/category/${child.id}`)}
-                  >
-                    {child.name}
-                  </li>
-                ))}
-                
-                {childCategories.length > 4 && (
-                  <li 
-                    className="cursor-pointer text-primary font-medium mt-1 flex items-center gap-1"
-                    onClick={() => setShowMoreCategories(!showMoreCategories)}
-                  >
-                    {showMoreCategories ? 'Thu gọn' : 'Thêm...'}
-                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 transition-transform ${showMoreCategories ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                  </li>
-                )}
-              </ul>
-            )}
-          </div>
-
-          <div className="border-t border-base-300 pt-4 mb-6">
-            <h3 className="font-bold text-sm uppercase mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
               Bộ Lọc Tìm Kiếm
             </h3>
             
-            <div className="mb-5">
-              <h4 className="text-sm font-medium mb-2">Thương hiệu</h4>
-              <div className="space-y-2 text-sm text-base-content/50 italic">
-                (Chưa có dữ liệu)
-              </div>
-            </div>
-
             <div className="mb-5">
               <h4 className="text-sm font-medium mb-2">Khoảng Giá</h4>
               <div className="flex items-center gap-2 mb-2">
@@ -210,15 +171,69 @@ export default function CategoryPage() {
         </aside>
 
         <main className="flex-1 min-w-0">
+          <div className="text-base mb-4 text-base-content/80">
+            Kết quả tìm kiếm cho từ khoá '<span className="font-bold text-primary">{keyword}</span>'
+          </div>
+
+          {shopResult && (
+            <div className="bg-base-100 p-4 rounded-sm border border-base-200 mb-5 shadow-[0_1px_1px_0_rgba(0,0,0,0.05)]">
+              <div className="flex items-center justify-between mb-4 border-b border-base-200 pb-3">
+                <div className="flex items-center gap-4">
+                  <div className="avatar">
+                    <div className="w-14 h-14 rounded-full border border-base-300 overflow-hidden bg-base-200">
+                      {shopResult.logoUrl ? (
+                        <img src={shopResult.logoUrl} alt={shopResult.name} className="object-cover w-full h-full" />
+                      ) : (
+                        <span className="flex items-center justify-center w-full h-full text-xl opacity-30">🏪</span>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-base mb-1">{shopResult.name}</h4>
+                    <div className="flex items-center text-xs text-base-content/70 gap-2">
+                      <span className="flex items-center text-warning font-medium">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 mr-1 fill-current" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        {shopResult.rating ? shopResult.rating.toFixed(1) : "0.0"}
+                      </span>
+                      <span className="text-base-300">|</span>
+                      <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm">Gian hàng</span>
+                    </div>
+                  </div>
+                </div>
+                <Link to={`/shop/${shopResult.id}`} className="btn btn-outline btn-sm text-xs font-normal border-base-300 hover:border-primary hover:bg-primary/5 hover:text-primary transition-colors">
+                  Xem thêm Shop <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </Link>
+              </div>
+              
+              <div className="grid grid-cols-4 gap-3">
+                {shopProducts.map((p) => {
+                  const img = getDisplayImage(p);
+                  return (
+                    <Link to={`/product/${p.id}`} key={p.id} className="border border-base-200 rounded-sm hover:border-primary transition-colors block overflow-hidden group">
+                      <div className="aspect-square bg-base-200 w-full relative">
+                          {img ? <img src={img} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" /> : <div className="w-full h-full flex items-center justify-center"><span className="opacity-30">📦</span></div>}
+                      </div>
+                      <div className="p-2">
+                          <div className="text-primary font-medium text-sm">₫{p.price?.toLocaleString('vi-VN')}</div>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="bg-base-200/50 p-3 rounded-sm flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5 text-sm">
               <span className="text-base-content/70 mr-2">Sắp xếp theo</span>
               
               <button 
-                className={`btn btn-sm ${sortBy === 'id' ? 'btn-primary text-white' : 'bg-base-100 border-transparent font-normal'}`}
-                onClick={() => handleSort('id', 'desc')}
+                className={`btn btn-sm ${sortBy === 'relevance' ? 'btn-primary text-white' : 'bg-base-100 border-transparent font-normal'}`}
+                onClick={() => handleSort('relevance', 'desc')}
               >
-                Phổ Biến
+                Liên Quan
               </button>
 
               <button 

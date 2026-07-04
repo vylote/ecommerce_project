@@ -49,6 +49,14 @@ public class CategoryService {
         return categoryMapper.toCategoriesResponse(categoryRepository.findAll());
     }
 
+    public List<CategoryResponse> getParentCategories() {
+        List<Category> parents = categoryRepository.findByParentIsNull();
+        if (parents == null) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
+        return categoryMapper.toCategoriesResponse(parents);
+    }
+
     public CategoryResponse update(CategoryRequest request, Long id) {
         Category category = categoryRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));

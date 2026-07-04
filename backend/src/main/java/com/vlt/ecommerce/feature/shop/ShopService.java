@@ -2,9 +2,15 @@ package com.vlt.ecommerce.feature.shop;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.product.Product;
@@ -18,7 +24,6 @@ import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -83,5 +88,25 @@ public class ShopService {
         List<Product> products = productRepository.findByShopId(shopId);
         
         return productMapper.toProductResponseList(products);
+    }
+
+    @Transactional
+    public void updateShopRating(Long shopId) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        // 1. Lấy điểm trung bình cộng của các sản phẩm thuộc Shop
+        Double avgRating = productRepository.getAverageRatingByShopId(shopId);
+
+        // 2. Ghi đè điểm rating mới vào Shop
+        shop.setRating(avgRating != null ? avgRating : 0.0);
+    }
+
+    @Transactional
+    public PageResponse<ShopResponse> searchShops(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by("rating").descending());
+        Page<Shop> shopPage = shopRepository.searchShopsByKeyword(keyword, pageable);
+        List<ShopResponse> content = shopMapper.toShopResponses(shopPage.getContent());
+        return PageResponse.of(shopPage, content);
     }
 }

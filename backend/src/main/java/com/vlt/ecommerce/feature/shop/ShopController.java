@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
+import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
 import com.vlt.ecommerce.feature.shop.dto.request.ShopRequest;
 import com.vlt.ecommerce.feature.shop.dto.response.ShopResponse;
@@ -52,6 +54,17 @@ public class ShopController {
     public ApiResponse<List<ProductResponse>> getProductsShop(@PathVariable Long shopId) {
         return ApiResponse.<List<ProductResponse>>builder()
             .result(shopService.getProductsShop(shopId))
+            .build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<ShopResponse>> searchShops(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        return ApiResponse.<PageResponse<ShopResponse>>builder()
+            .result(shopService.searchShops(keyword, page, size))
             .build();
     }
 }

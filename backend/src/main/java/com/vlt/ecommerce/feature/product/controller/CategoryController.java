@@ -49,6 +49,13 @@ public class CategoryController {
                 .build();
     }
 
+    @GetMapping("/parents")
+    public ApiResponse<List<CategoryResponse>> getParentCategories() {
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .result(categoryService.getParentCategories())
+                .build();
+    }
+
     @PutMapping("/{id}")
     public ApiResponse<CategoryResponse> update(@RequestBody @Valid CategoryRequest request, @PathVariable Long id) {
         return ApiResponse.<CategoryResponse>builder()

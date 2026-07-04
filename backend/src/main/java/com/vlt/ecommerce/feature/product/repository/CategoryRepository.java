@@ -12,4 +12,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long>{
     List<Category> findByParentIdAndIsActiveTrue(Long parentId);
 
     boolean existsById(Long id);
+    // Lấy tất cả danh mục gốc (không có danh mục cha)
+    List<Category> findByParentIsNull();
 }
