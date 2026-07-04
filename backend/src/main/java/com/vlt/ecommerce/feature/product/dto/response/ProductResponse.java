@@ -23,5 +23,7 @@ public class ProductResponse {
     ProductStatus status;
     Long shopId;
     Long categoryId;
+    Double averageRating;
+    Integer reviewCount;
     List<ProductImageResponse> images; 
 }

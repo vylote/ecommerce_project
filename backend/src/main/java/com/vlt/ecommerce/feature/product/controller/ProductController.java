@@ -1,5 +1,7 @@
 package com.vlt.ecommerce.feature.product.controller;
 
+import java.math.BigDecimal;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
 import com.vlt.ecommerce.common.dto.PageResponse;
-import com.vlt.ecommerce.feature.product.dto.request.ProductImageRequest;
 import com.vlt.ecommerce.feature.product.dto.request.ProductRequest;
 import com.vlt.ecommerce.feature.product.dto.response.ProductImageResponse;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
@@ -78,13 +79,16 @@ public class ProductController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long shopId,
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Double minRating,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "createdAt") String sortBy,
             @RequestParam(defaultValue = "desc") String order) {
 
         return ApiResponse.<PageResponse<ProductResponse>>builder()
-                .result(productService.getAllProducts(categoryId, shopId, keyword, page, size, sortBy, order))
+                .result(productService.getAllProducts(categoryId, shopId, keyword, minPrice, maxPrice, minRating, page, size, sortBy, order))
                 .build();
     }
 

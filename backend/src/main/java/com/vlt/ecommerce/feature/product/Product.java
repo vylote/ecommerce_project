@@ -63,6 +63,14 @@ public class Product {
     @Column(name = "updated_at", nullable = false)
     LocalDateTime updatedAt;
 
+    @Builder.Default
+    @Column(name = "average_rating", nullable = false)
+    private Double averageRating = 0.0;
+
+    @Builder.Default
+    @Column(name = "review_count", nullable = false)
+    private Integer reviewCount = 0;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)
     Shop shop;

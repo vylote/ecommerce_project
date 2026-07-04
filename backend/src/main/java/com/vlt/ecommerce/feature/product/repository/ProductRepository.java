@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.feature.product.repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -19,11 +20,17 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
            "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +
            "(:shopId IS NULL OR p.shop.id = :shopId) AND "+
            "(:keyword IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+           "(:minPrice IS NULL OR p.price >= :minPrice) AND " +
+           "(:maxPrice IS NULL OR p.price <= :maxPrice) AND " +
+           "(:minRating IS NULL OR p.averageRating >= :minRating) AND " +
            "p.status = 'ACTIVE'")
     Page<Product> filterProducts(
         @Param("categoryId") Long categoryId,
         @Param("shopId") Long shopId,
         @Param("keyword") String keyword,
+        @Param("minPrice") BigDecimal minPrice,
+        @Param("maxPrice") BigDecimal maxPrice,
+        @Param("minRating") Double minRating,
         Pageable pageable
     );
 }
