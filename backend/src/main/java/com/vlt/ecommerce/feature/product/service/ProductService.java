@@ -1,6 +1,7 @@
 package com.vlt.ecommerce.feature.product.service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -19,7 +20,6 @@ import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.product.ProductImage;
-import com.vlt.ecommerce.feature.product.dto.request.ProductImageRequest;
 import com.vlt.ecommerce.feature.product.dto.request.ProductRequest;
 import com.vlt.ecommerce.feature.product.dto.response.ProductImageResponse;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
@@ -121,14 +121,14 @@ public class ProductService {
     //lay danh sach san pham phan trang + filter
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> getAllProducts(
-            Long categoryId, Long shopId, String keyword, int page, int size, String sortBy, String order) {
+            Long categoryId, Long shopId, String keyword, BigDecimal minPrice, BigDecimal maxPrice, Double minRating, int page, int size, String sortBy, String order) {
 
         Sort sort = order.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         
         // page - 1: Để Frontend được truyền page=1 cho tự nhiên
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Page<Product> productPage = productRepository.filterProducts(categoryId, shopId, keyword, pageable);
+        Page<Product> productPage = productRepository.filterProducts(categoryId, shopId, keyword, minPrice, maxPrice, minRating, pageable);
 
         List<ProductResponse> content = productMapper.toProductResponseList(productPage.getContent()); //10 sản phẩm được căt
 
@@ -144,5 +144,22 @@ public class ProductService {
         List<ReviewResponse> content = reviewMapper.toReviewResponses(reviewPage.getContent());
         
         return PageResponse.of(reviewPage, content);
+    }
+
+    @Transactional
+    public void updateProductRatingStats(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        // Tính toán thống kê từ các reviews hiện tại
+        Object result = reviewRepository.getRatingStatsByProductId(productId);
+        Object[] stats = (Object[]) result;
+        
+        Long count = (Long) stats[0];       // Phần tử đầu tiên tương ứng với COUNT(r)
+        Double average = (Double) stats[1];
+
+        // Ghi đè dữ liệu phi chuẩn hóa vào Product
+        product.setReviewCount(count.intValue());
+        product.setAverageRating(average);
     }
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import api from "../../../shared/utils/api";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -49,7 +50,7 @@ export default function CategorySection() {
       const { clientWidth } = carouselRef.current;
       const scrollAmount =
         direction === "left" ? -(clientWidth * 0.8) : clientWidth * 0.8;
-      carouselRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      carouselRef.current.scrollBy({ left: scrollAmount });
     }
   };
 
@@ -102,7 +103,8 @@ export default function CategorySection() {
           }}
         >
           {categories.map((category) => (
-            <button
+            <Link
+              to={`/category/${category.id}`}
               key={category.id}
               className="flex flex-col items-center justify-start py-4 px-1 rounded-lg border border-transparent hover:border-base-300 hover:bg-base-200/40 transition-colors cursor-pointer"
             >
@@ -120,7 +122,7 @@ export default function CategorySection() {
               <span className="text-sm text-neutral/80 text-center line-clamp-2 px-2 leading-tight">
                 {category.name}
               </span>
-            </button>
+            </Link>
           ))}
         </div>
 

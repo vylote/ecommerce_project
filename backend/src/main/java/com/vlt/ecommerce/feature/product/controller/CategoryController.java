@@ -63,4 +63,11 @@ public class CategoryController {
                 .result("Đã xóa danh mục")
                 .build();
     }
+
+    @GetMapping("/{id}/childrens")
+    public ApiResponse<List<CategoryResponse>> getChildrenCategories(@PathVariable Long id) {
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .result(categoryService.getChildrenCategories(id))
+                .build();
+    }
 }

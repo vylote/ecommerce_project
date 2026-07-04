@@ -78,4 +78,17 @@ public class CategoryService {
 
         categoryRepository.deleteById(id);
     }
+
+    public List<CategoryResponse> getChildrenCategories(Long parentId) {
+        if (!categoryRepository.existsById(parentId)) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        List<Category> childs = categoryRepository.findByParentIdAndIsActiveTrue(parentId);
+        if (childs.isEmpty()) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        return categoryMapper.toCategoriesResponse(childs);
+    }
 }

@@ -10,6 +10,7 @@ import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.order.Order;
 import com.vlt.ecommerce.feature.order.OrderRepository;
 import com.vlt.ecommerce.feature.order.OrderStatus;
+import com.vlt.ecommerce.feature.product.service.ProductService;
 import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
@@ -27,6 +28,7 @@ public class ReviewService {
     ReviewMapper reviewMapper;
     UserRepository userRepository;
     OrderRepository orderRepository;
+    ProductService productService;
 
     @PreAuthorize("hasRole('BUYER')")
     @Transactional
@@ -62,6 +64,8 @@ public class ReviewService {
 
         Review review = reviewMapper.toReview(request);
         review.setBuyer(buyer);
-        return reviewMapper.toReviewResponse(reviewRepository.save(review));
+        Review savedReview = reviewRepository.save(review);
+        productService.updateProductRatingStats(savedReview.getProduct().getId());
+        return reviewMapper.toReviewResponse(savedReview);
     }
 }
