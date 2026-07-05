@@ -93,8 +93,8 @@ export default function Navbar() {
             ECOMMERCE
           </Link>
 
-          <div className="form-control flex-1 max-w-xl hidden md:block">
-            {/* Cập nhật phần div thành form để xử lý sự kiện submit */}
+          {/* Cột giữa: search + quick-link nằm ngay dưới, cùng căn trái với ô search */}
+          <div className="flex-1 flex flex-col gap-1.5 min-w-0">
             <form onSubmit={handleSearch} className="join w-full">
               <input
                 type="text"
@@ -109,9 +109,20 @@ export default function Navbar() {
                 </svg>
               </button>
             </form>
+
+            {/* Quick links nằm ngay dưới ô search, căn trái theo ô search */}
+            <div className="hidden md:flex items-center gap-4 text-xs text-white/90">
+              <Link to="/category/thoi-trang-nam" className="hover:text-white hover:underline">Thời Trang Nam</Link>
+              <Link to="/category/thoi-trang-nu" className="hover:text-white hover:underline">Thời Trang Nữ</Link>
+              <Link to="/category/dien-thoai" className="hover:text-white hover:underline">Điện Thoại &amp; Phụ Kiện</Link>
+              <Link to="/category/nha-cua" className="hover:text-white hover:underline">Nhà Cửa &amp; Đời Sống</Link>
+              <Link to="/category/lam-dep" className="hover:text-white hover:underline">Sắc Đẹp</Link>
+              <Link to="/category/the-thao" className="hover:text-white hover:underline">Thể Thao &amp; Du Lịch</Link>
+              <Link to="/category/me-be" className="hover:text-white hover:underline">Mẹ &amp; Bé</Link>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4 ml-auto">
+          <div className="flex items-center gap-4 shrink-0">
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="btn btn-ghost btn-circle text-white hover:bg-white/10">
                 <div className="indicator">
@@ -153,17 +164,6 @@ export default function Navbar() {
               </div>
             )}
           </div>
-        </div>
-
-        {/* Category quick links row */}
-        <div className="max-w-[1400px] mx-auto px-4 md:px-12 pb-2 hidden md:flex items-center gap-4 text-xs text-white/90">
-          <Link to="/category/thoi-trang-nam" className="hover:text-white hover:underline">Thời Trang Nam</Link>
-          <Link to="/category/thoi-trang-nu" className="hover:text-white hover:underline">Thời Trang Nữ</Link>
-          <Link to="/category/dien-thoai" className="hover:text-white hover:underline">Điện Thoại &amp; Phụ Kiện</Link>
-          <Link to="/category/nha-cua" className="hover:text-white hover:underline">Nhà Cửa &amp; Đời Sống</Link>
-          <Link to="/category/lam-dep" className="hover:text-white hover:underline">Sắc Đẹp</Link>
-          <Link to="/category/the-thao" className="hover:text-white hover:underline">Thể Thao &amp; Du Lịch</Link>
-          <Link to="/category/me-be" className="hover:text-white hover:underline">Mẹ &amp; Bé</Link>
         </div>
       </div>
     </div>

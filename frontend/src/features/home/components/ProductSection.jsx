@@ -84,7 +84,8 @@ export default function ProductSection() {
           const displayImageUrl = getDisplayImage(product); // Lấy URL ảnh ra đây
           
           return (
-            <div 
+            <Link 
+              to={`/product/${product.id}`}
               key={product.id} 
               className="card bg-base-100 rounded-xl border border-base-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all overflow-hidden group cursor-pointer flex flex-col"
             >
@@ -124,7 +125,7 @@ export default function ProductSection() {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           );
         })}
       </div>

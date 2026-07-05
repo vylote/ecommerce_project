@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../../shared/components/Navbar'; // Đảm bảo đường dẫn import Navbar chính xác
+import { Link } from 'react-router-dom';
+import Navbar from '../../shared/components/Navbar';
 import api from '../../shared/utils/api';
 
 export default function DailyDiscovery() {
@@ -18,7 +19,7 @@ export default function DailyDiscovery() {
         const response = await api.get('/products', {
           params: {
             page: page,
-            size: 48, // 8 hàng x 6 cột = 48 sản phẩm
+            size: 48,
             sortBy: 'createdAt',
             order: 'desc'
           }
@@ -30,7 +31,6 @@ export default function DailyDiscovery() {
           currentPage: pageResponse.currentPage,
           totalPages: pageResponse.totalPages,
         });
-        // Cuộn lên đầu trang mỗi khi chuyển trang mượt mà
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (error) {
         console.error(error);
@@ -40,7 +40,7 @@ export default function DailyDiscovery() {
     };
 
     fetchProducts();
-  }, [page]); // Chạy lại mỗi khi state 'page' thay đổi
+  }, [page]);
 
   const getDisplayImage = (product) => {
     if (!product.images || product.images.length === 0) return null;
@@ -83,7 +83,8 @@ export default function DailyDiscovery() {
                 const displayImageUrl = getDisplayImage(product);
                 
                 return (
-                  <div 
+                  <Link 
+                    to={`/product/${product.id}`}
                     key={product.id} 
                     className="card bg-base-100 rounded-xl border border-base-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all overflow-hidden group cursor-pointer flex flex-col"
                   >
@@ -123,12 +124,11 @@ export default function DailyDiscovery() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
 
-            {/* Pagination UI */}
             {pageInfo.totalPages > 1 && (
               <div className="flex justify-center mt-10">
                 <div className="join border border-base-300 shadow-sm">

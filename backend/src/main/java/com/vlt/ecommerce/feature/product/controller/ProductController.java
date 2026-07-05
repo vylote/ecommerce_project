@@ -95,11 +95,12 @@ public class ProductController {
     @GetMapping("/{id}/reviews")
     public ApiResponse<PageResponse<ReviewResponse>> getProductReviews(
             @PathVariable Long id,
+            @RequestParam(required = false) Integer rating,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         return ApiResponse.<PageResponse<ReviewResponse>>builder()
-                .result(productService.getProductReviews(id, page, size))
+                .result(productService.getProductReviews(id, rating, page, size))
                 .build();
     }
 }

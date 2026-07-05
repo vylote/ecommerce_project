@@ -138,10 +138,10 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ReviewResponse> getProductReviews(Long productId, int page, int size) {
+    public PageResponse<ReviewResponse> getProductReviews(Long productId, Integer rating, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         
-        Page<Review> reviewPage = reviewRepository.findByProductIdWithBuyer(productId, pageable);
+        Page<Review> reviewPage = reviewRepository.findByProductIdWithBuyer(productId, rating, pageable);
         
         List<ReviewResponse> content = reviewMapper.toReviewResponses(reviewPage.getContent());
         
