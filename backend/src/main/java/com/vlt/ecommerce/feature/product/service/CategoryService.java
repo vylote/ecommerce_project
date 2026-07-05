@@ -1,13 +1,16 @@
 package com.vlt.ecommerce.feature.product.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.product.Category;
 import com.vlt.ecommerce.feature.product.dto.request.CategoryRequest;
+import com.vlt.ecommerce.feature.product.dto.response.CategoryDetailResponse;
 import com.vlt.ecommerce.feature.product.dto.response.CategoryResponse;
 import com.vlt.ecommerce.feature.product.mapper.CategoryMapper;
 import com.vlt.ecommerce.feature.product.repository.CategoryRepository;
@@ -38,11 +41,30 @@ public class CategoryService {
         return categoryMapper.toCategoryResponse(categoryRepository.save(newCategory));
     }
 
-    public CategoryResponse get(Long id) {
+    @Transactional
+    public CategoryDetailResponse getCategoryDetailWithBreadcrumbs(Long id) {
         Category category = categoryRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
-        
-        return categoryMapper.toCategoryResponse(category);
+
+        List<Category> parentChain = new ArrayList<>();
+        Category currentParent = category.getParent();
+
+        while (currentParent != null) {
+            // Thêm vào vị trí đầu tiên (chỉ mục 0) để đảm bảo thứ tự từ gốc -> ngọn (ví dụ: Điện tử -> Điện thoại)
+            parentChain.add(0, currentParent); 
+            currentParent = currentParent.getParent();
+        }
+
+        List<CategoryResponse> breadcrumbsDto = categoryMapper.toCategoriesResponse(parentChain);
+
+        return CategoryDetailResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .slug(category.getSlug())
+                .imageUrl(category.getImageUrl())
+                .isActive(category.getIsActive())
+                .breadcrumbs(breadcrumbsDto)
+                .build();
     }
 
     public List<CategoryResponse> getAll() {

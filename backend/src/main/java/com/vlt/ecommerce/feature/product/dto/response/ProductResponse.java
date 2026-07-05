@@ -22,7 +22,7 @@ public class ProductResponse {
     Integer soldCount;
     ProductStatus status;
     Long shopId;
-    Long categoryId;
+    CategoryResponse category;
     Double averageRating;
     Integer reviewCount;
     List<ProductImageResponse> images; 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
 import com.vlt.ecommerce.feature.product.dto.request.CategoryRequest;
+import com.vlt.ecommerce.feature.product.dto.response.CategoryDetailResponse;
 import com.vlt.ecommerce.feature.product.dto.response.CategoryResponse;
 import com.vlt.ecommerce.feature.product.service.CategoryService;
 
@@ -36,9 +37,9 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<CategoryResponse> create(@PathVariable Long id) {
-        return ApiResponse.<CategoryResponse>builder()
-                .result(categoryService.get(id))
+    public ApiResponse<CategoryDetailResponse> getCategoryDetail(@PathVariable Long id) {
+        return ApiResponse.<CategoryDetailResponse>builder()
+                .result(categoryService.getCategoryDetailWithBreadcrumbs(id))
                 .build();
     }
 
