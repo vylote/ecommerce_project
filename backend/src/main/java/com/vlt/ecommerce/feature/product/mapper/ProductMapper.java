@@ -9,8 +9,9 @@ import org.mapstruct.MappingTarget;
 import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.product.dto.request.ProductRequest;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
+import com.vlt.ecommerce.feature.shop.mapper.ShopMapper;
 
-@Mapper(componentModel = "spring", uses = {ProductImageMapper.class, CategoryMapper.class})
+@Mapper(componentModel = "spring", uses = {ProductImageMapper.class, CategoryMapper.class, ShopMapper.class})
 public interface ProductMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "soldCount", ignore = true)
@@ -27,7 +28,6 @@ public interface ProductMapper {
     @Mapping(target = "reviewCount", ignore = true)
     Product toProduct(ProductRequest request);
 
-    @Mapping(target = "shopId", source = "shop.id")
     @Mapping(target = "category", source = "product.category")
     @Mapping(target = "averageRating", source = "product.averageRating")
     @Mapping(target = "reviewCount", source = "product.reviewCount")
