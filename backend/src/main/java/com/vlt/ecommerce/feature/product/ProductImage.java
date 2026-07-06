@@ -34,7 +34,7 @@ public class ProductImage {
     Boolean isPrimary = false;
     @Builder.Default
     @Column(name = "sort_order", nullable = false)
-    private Integer sortOrder = 0;
+    Integer sortOrder = 0;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
