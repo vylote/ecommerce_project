@@ -14,6 +14,9 @@ export default function ProductDetailPage() {
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewTotalPages, setReviewTotalPages] = useState(1);
   const [filterRating, setFilterRating] = useState("all");
+  
+  // STATE MỚI: Lưu số lượng sản phẩm của Shop
+  const [shopProductCount, setShopProductCount] = useState(0);
 
   // STATE & REF CAROUSEL ẢNH
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -30,12 +33,20 @@ export default function ProductDetailPage() {
         ]);
 
         const prodData = productRes.data.result;
-        setProduct(prodData);
+        setProduct(prodData); // Thông tin Shop đã nằm sẵn trong prodData.shop
         setReviews(reviewRes.data.result.data);
         setReviewTotalPages(reviewRes.data.result.totalPages);
-        setCurrentImageIndex(0); // Reset ảnh về vị trí đầu khi load xong
+        setCurrentImageIndex(0); 
 
-        // Hỗ trợ cả trường hợp DTO trả về Object category hoặc chỉ trả Long categoryId
+        // BỔ SUNG: Gọi API lấy danh sách sản phẩm của Shop để đếm số lượng
+        if (prodData.shop?.id) {
+          api.get(`/shops/${prodData.shop.id}/products`)
+            .then(res => {
+              setShopProductCount(res.data.result?.length || 0);
+            })
+            .catch(err => console.error("Lỗi lấy số sản phẩm của shop:", err));
+        }
+
         const catId = prodData.category?.id || prodData.categoryId;
         if (catId) {
           const categoryRes = await api.get(`/categories/${catId}`);
@@ -89,12 +100,8 @@ export default function ProductDetailPage() {
     setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
   };
 
-  // AUTO-PLAY: tự động chuyển ảnh mỗi 3.5s, lặp vòng qua toàn bộ ảnh.
-  // currentImageIndex nằm trong dependency để mỗi lần user thao tác thủ công
-  // (bấm prev/next hoặc hover thumbnail), đồng hồ được reset lại từ đầu,
-  // tránh vừa thao tác xong bị tự nhảy tiếp ngay lập tức.
   useEffect(() => {
-    if (totalImages <= 1) return; // không cần auto-play nếu chỉ có 0-1 ảnh
+    if (totalImages <= 1) return; 
 
     autoPlayRef.current = setInterval(() => {
       setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
@@ -103,7 +110,6 @@ export default function ProductDetailPage() {
     return () => clearInterval(autoPlayRef.current);
   }, [totalImages, currentImageIndex]);
 
-  // Tự động cuộn track ảnh thu nhỏ khi currentImageIndex thay đổi
   useEffect(() => {
     if (thumbRefs.current[currentImageIndex]) {
       thumbRefs.current[currentImageIndex].scrollIntoView({
@@ -137,9 +143,7 @@ export default function ProductDetailPage() {
       <div className="max-w-[1200px] mx-auto mt-5">
         {/* KHỐI 1: KHUNG ẢNH VÀ THÔNG TIN CƠ BẢN */}
         <div className="bg-white p-4 rounded-sm shadow-[0_1px_1px_0_rgba(0,0,0,0.05)] mb-4 flex gap-6">
-          {/* CỘT TRÁI: CAROUSEL ẢNH */}
           <div className="w-[400px] shrink-0">
-            {/* Ảnh Chính Lớn */}
             <div className="w-[400px] h-[400px] bg-base-200 relative overflow-hidden mb-3">
               {totalImages > 0 ? (
                 <>
@@ -151,7 +155,6 @@ export default function ProductDetailPage() {
 
                   {totalImages > 1 && (
                     <>
-                      {/* Dot-indicator vị trí ảnh hiện tại */}
                       <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
                         {sortedImages.map((_, idx) => (
                           <span
@@ -170,45 +173,44 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            {/* Khay Ảnh Thu Nhỏ (Thumbnails) - hiển thị ~5 item, cuộn ngang nếu nhiều hơn */}
             {totalImages > 0 && (
-  <div className="relative w-full">
-    <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 scroll-smooth">
-      {sortedImages.map((img, idx) => (
-        <div
-          key={img.id}
-          ref={el => thumbRefs.current[idx] = el}
-          onMouseEnter={() => setCurrentImageIndex(idx)}
-          onClick={() => setCurrentImageIndex(idx)}
-          className={`w-[73.6px] h-[73.6px] shrink-0 cursor-pointer border-2 transition-all ${currentImageIndex === idx ? 'border-primary opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
-        >
-          <img src={img.url} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
-        </div>
-      ))}
-    </div>
+              <div className="relative w-full">
+                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 scroll-smooth">
+                  {sortedImages.map((img, idx) => (
+                    <div
+                      key={img.id}
+                      ref={el => thumbRefs.current[idx] = el}
+                      onMouseEnter={() => setCurrentImageIndex(idx)}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`w-[73.6px] h-[73.6px] shrink-0 cursor-pointer border-2 transition-all ${currentImageIndex === idx ? 'border-primary opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                    >
+                      <img src={img.url} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
 
-    {totalImages > 1 && (
-      <>
-        <button
-          type="button"
-          onClick={handlePrevImage}
-          aria-label="Ảnh trước"
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-white/80 hover:bg-white text-base-content rounded-full opacity-70 hover:opacity-100 transition-opacity shadow-[0_1px_4px_rgba(0,0,0,0.25)] z-10"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-        </button>
-        <button
-          type="button"
-          onClick={handleNextImage}
-          aria-label="Ảnh tiếp theo"
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-white/80 hover:bg-white text-base-content rounded-full opacity-70 hover:opacity-100 transition-opacity shadow-[0_1px_4px_rgba(0,0,0,0.25)] z-10"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-        </button>
-      </>
-    )}
-  </div>
-)}
+                {totalImages > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handlePrevImage}
+                      aria-label="Ảnh trước"
+                      className="absolute left-0 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-white/80 hover:bg-white text-base-content rounded-full opacity-70 hover:opacity-100 transition-opacity shadow-[0_1px_4px_rgba(0,0,0,0.25)] z-10"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleNextImage}
+                      aria-label="Ảnh tiếp theo"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-white/80 hover:bg-white text-base-content rounded-full opacity-70 hover:opacity-100 transition-opacity shadow-[0_1px_4px_rgba(0,0,0,0.25)] z-10"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex-1 py-2">
@@ -361,7 +363,7 @@ export default function ProductDetailPage() {
                 Tham gia: <span className="text-primary">12 tháng trước</span>
               </div>
               <div>
-                Sản phẩm: <span className="text-primary">94</span>
+                Sản phẩm: <span className="text-primary">{shopProductCount}</span>
               </div>
               <div>
                 Thời gian phản hồi:{" "}

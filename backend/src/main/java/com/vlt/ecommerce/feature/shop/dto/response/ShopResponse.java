@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShopResponse {
+    Long id;
     String name;
     String description;
     String logoUrl;

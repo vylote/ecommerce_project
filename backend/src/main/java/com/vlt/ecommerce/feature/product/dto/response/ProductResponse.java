@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.vlt.ecommerce.feature.product.ProductStatus;
+import com.vlt.ecommerce.feature.shop.dto.response.ShopResponse;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -21,7 +22,7 @@ public class ProductResponse {
     Integer stockQuantity;
     Integer soldCount;
     ProductStatus status;
-    Long shopId;
+    ShopResponse shop;
     CategoryResponse category;
     Double averageRating;
     Integer reviewCount;
