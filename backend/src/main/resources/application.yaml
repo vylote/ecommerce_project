@@ -12,11 +12,14 @@ spring:
     show-sql: true
     properties:
       hibernate.format_sql: true
+      hibernate.jdbc.time_zone: Asia/Ho_Chi_Minh
   jackson:
   # Cấu hình thủ công ở đây dư thừa vì từ springboot3 trở lên tich hợp sẵn JavaTimeModule
     # serialization: 
     #   write-dates-as-timestamps: false
     default-property-inclusion: non_null
+    time-zone: Asia/Ho_Chi_Minh
+    date-format: yyyy-MM-dd HH:mm:ss
   servlet:
     multipart:
       enabled: true
@@ -48,10 +51,17 @@ notification:
   service-url: ${NOTIFICATION_SERVICE_URL:http://localhost:3000}
 
 logging:
+  file:
+    name: logs/ecommerce-app.log
   level:
     org.springframework.orm.jpa.JpaTransactionManager: DEBUG
     org.springframework.transaction: DEBUG
     org.hibernate.engine.transaction.internal.TransactionImpl: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB # Khi file đạt 10MB, nó sẽ tự cắt sang file mới (ví dụ: ecommerce-app-1.log)
+      max-history: 30 #
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}

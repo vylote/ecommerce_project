@@ -2,6 +2,7 @@
 node_modules/
 npm-debug.log
 yarn-error.log
+logs/
 
 # 2. Bỏ qua các file build và thư viện của Spring Boot (Backend)
 target/

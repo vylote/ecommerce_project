@@ -26,13 +26,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column(nullable = false, unique = true, length = 200)
+    @Column(nullable = false, unique = true, length = 100)
     String email;
     @Column(nullable = false)
     String password;
     @Column(name = "full_name", nullable = false, length = 30)
     String fullName;
-    @Column(length = 10)
+    @Column(length = 20) 
     String phone;
     @Column(name = "avatar_url", length = 500)
     String avatarUrl;

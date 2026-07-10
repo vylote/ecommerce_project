@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,7 @@ import com.vlt.ecommerce.feature.payment.Payment;
 import com.vlt.ecommerce.feature.payment.Payment.PaymentMethod;
 import com.vlt.ecommerce.feature.payment.Payment.PaymentStatus;
 import com.vlt.ecommerce.feature.product.Product;
+import com.vlt.ecommerce.feature.product.repository.ProductRepository;
 import com.vlt.ecommerce.feature.shop.Shop;
 import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 import com.vlt.ecommerce.feature.user.Address;
@@ -57,6 +59,7 @@ public class OrderService {
     UserRepository userRepository;
     AddressRepository addressRepository;
     ShopRepository shopRepository;
+    ProductRepository productRepository;
     AddressMapper addressMapper;
     OrderMapper orderMapper;
     ObjectMapper objectMapper;
@@ -113,11 +116,20 @@ public class OrderService {
                 Product product = shopItem.getProduct();
                 int orderQuantity = shopItem.getQuantity();
 
-                if (product.getStockQuantity() < orderQuantity) {
+                // if (product.getStockQuantity() < orderQuantity) {
+                //     throw new AppException(ErrorCode.OUT_OF_STOCK);
+                // }
+                // product.setStockQuantity(product.getStockQuantity() - orderQuantity);
+                // product.setSoldCount(product.getSoldCount() + orderQuantity);
+
+                // 1. XÓA BỎ kiểm tra in-memory cũ.
+                // 2. Chạy lệnh Atomic Update dưới DB và lấy ra số dòng cập nhật thành công
+                int updatedRows = productRepository.decrementStockAndIncrementSold(product.getId(), orderQuantity);
+
+                // 3. Nếu trả về 0 -> Không có dòng nào thỏa mãn điều kiện stock_quantity >= qty -> BÁO LỖI HẾT HÀNG
+                if (updatedRows == 0) {
                     throw new AppException(ErrorCode.OUT_OF_STOCK);
                 }
-                product.setStockQuantity(product.getStockQuantity() - orderQuantity);
-                product.setSoldCount(product.getSoldCount() + orderQuantity);
 
                 BigDecimal itemTotalPrice = product.getPrice().multiply(BigDecimal.valueOf(orderQuantity));
 
@@ -208,8 +220,11 @@ public class OrderService {
     public OrderResponse completeOrder(Long id) {
         User buyer = getCurrentUser();
 
-        Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+        // Order order = orderRepository.findById(id)
+        //         .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        Order order = orderRepository.findByIdForUpdate(id)
+            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (!order.getBuyer().getId().equals(buyer.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -287,10 +302,14 @@ public class OrderService {
             }
         }
 
+        // for (OrderItem item : order.getItems()) {
+        //     Product product = item.getProduct();
+        //     product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
+        //     product.setSoldCount(product.getSoldCount() - item.getQuantity());
+        // }
+
         for (OrderItem item : order.getItems()) {
-            Product product = item.getProduct();
-            product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
-            product.setSoldCount(product.getSoldCount() - item.getQuantity());
+            productRepository.restoreStockAndDecrementSold(item.getProduct().getId(), item.getQuantity());
         }
         
         eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order.getId()));

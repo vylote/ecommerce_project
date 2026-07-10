@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -76,4 +77,8 @@ public class Category {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<CommissionConfig> configs;
+
+    @Version
+    @Column(name = "version")
+    Long version;
 }
