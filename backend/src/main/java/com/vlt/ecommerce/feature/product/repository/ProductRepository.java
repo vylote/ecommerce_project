@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -36,6 +37,24 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
 
     @Query("SELECT COALESCE(AVG(p.averageRating), 0.0) FROM Product p WHERE p.shop.id = :shopId AND p.status = 'ACTIVE'")
     Double getAverageRatingByShopId(@Param("shopId") Long shopId);
+
+    @Modifying
+    @Query("""
+        UPDATE Product p 
+        SET p.stockQuantity = p.stockQuantity - :qty, 
+            p.soldCount = p.soldCount + :qty 
+        WHERE p.id = :productId AND p.stockQuantity >= :qty
+        """)
+    int decrementStockAndIncrementSold(@Param("productId") Long productId, @Param("qty") Integer qty);
+
+    @Modifying
+    @Query("""
+        UPDATE Product p 
+        SET p.stockQuantity = p.stockQuantity + :qty, 
+            p.soldCount = p.soldCount - :qty 
+        WHERE p.id = :productId
+        """)
+    void restoreStockAndDecrementSold(@Param("productId") Long productId, @Param("qty") Integer qty);
 }
 /* ==============================================================================
      * NGHỊCH LÝ LAZY CHỐNG N+1 VÀ KỸ THUẬT LỌC ĐỘNG (DYNAMIC FILTER)
