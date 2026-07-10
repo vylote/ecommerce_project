@@ -2,7 +2,7 @@ spring:
   application:
     name: ecommerce-backend
   datasource:
-    url: jdbc:mysql://localhost:3306/ecommerce_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://localhost:3306/ecommerce_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
     username: user     # Tài khoản bạn đã tạo trong Docker
     password: 3821     # Mật khẩu bạn đã tạo trong Docker
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -22,6 +22,10 @@ spring:
       enabled: true
       max-file-size: 5MB       # Dung lượng tối đa của MỘT file
       max-request-size: 15MB   # Dung lượng tối đa của TOÀN BỘ request (nếu up nhiều file cùng lúc)
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 server:
   port: 8080

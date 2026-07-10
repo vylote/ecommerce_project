@@ -32,7 +32,7 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String signerKey;
     
-    public String generateAccessToken(User user) {
+    public String generateAccessToken(User user, String sessionId) {
         try {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
@@ -44,6 +44,7 @@ public class JwtService {
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", "ROLE_"+user.getRole().name())
                 .claim("userId", user.getId())
+                .claim("sessionId", sessionId)
                 .build();
                 
             Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -55,7 +56,16 @@ public class JwtService {
         }
     }
 
-    public String generateRefreshToken(User user) {
+    public String extractSessionId(String token) {
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            return signedJWT.getJWTClaimsSet().getStringClaim("sessionId");
+        } catch (ParseException e) {
+            return null; // Báo lỗi hoặc trả về null nếu token sai định dạng
+        }
+    }
+
+    public String generateRefreshToken(User user, String sessionId) {
         try {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
@@ -65,6 +75,7 @@ public class JwtService {
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(7, ChronoUnit.DAYS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
+                .claim("sessionId", sessionId)
                 .build();
 
             Payload payload = new Payload(jwtClaimsSet.toJSONObject());

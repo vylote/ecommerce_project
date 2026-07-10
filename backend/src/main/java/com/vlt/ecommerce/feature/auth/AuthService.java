@@ -1,6 +1,8 @@
 package com.vlt.ecommerce.feature.auth;
 
 import java.text.ParseException;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,11 +11,13 @@ import org.springframework.stereotype.Service;
 import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
+import com.vlt.ecommerce.common.utils.DeviceUtils;
 import com.vlt.ecommerce.feature.auth.dto.request.LoginRequest;
 import com.vlt.ecommerce.feature.auth.dto.request.RegisterRequest;
 import com.vlt.ecommerce.feature.auth.dto.response.TokenResponse;
 import com.vlt.ecommerce.feature.user.Role;
 import com.vlt.ecommerce.feature.user.User;
+import com.vlt.ecommerce.feature.user.UserSession;
 import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
 import com.vlt.ecommerce.feature.user.mapper.UserMapper;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
@@ -32,6 +36,7 @@ public class AuthService {
     PasswordEncoder passwordEncoder;
     JwtService jwtService;
     UserMapper userMapper;
+    SessionRepository sessionRepository;
 
     public UserResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -49,7 +54,7 @@ public class AuthService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
     
-    public TokenResponse login(LoginRequest request) {
+    public TokenResponse login(LoginRequest request, String userAgent) {
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
@@ -57,8 +62,19 @@ public class AuthService {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
-        var accessToken = jwtService.generateAccessToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
+        String sessionId = UUID.randomUUID().toString();
+        String deviceInfo = DeviceUtils.parseDeviceInfo(userAgent);
+        // LƯU SESSION VÀO DATABASE
+        UserSession userSession = UserSession.builder()
+                .id(sessionId)
+                .user(user)
+                .deviceInfo(deviceInfo) // Sau này có thể lấy từ User-Agent của request
+                .expires_at(LocalDateTime.now().plusHours(24)) // Đồng bộ với 24h của Token
+                .build();
+        sessionRepository.save(userSession);
+
+        var accessToken = jwtService.generateAccessToken(user, sessionId);
+        var refreshToken = jwtService.generateRefreshToken(user, sessionId);
         return TokenResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -69,12 +85,16 @@ public class AuthService {
         try {
             SignedJWT signedJWT = jwtService.verifyToken(refreshToken);
             String email = signedJWT.getJWTClaimsSet().getSubject();
+            String sessionId = signedJWT.getJWTClaimsSet().getStringClaim("sessionId");
+
+            if (!sessionRepository.existsById(sessionId))
+                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
 
             var user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
-            var accessToken = jwtService.generateAccessToken(user);
-            var newRefreshToken = jwtService.generateRefreshToken(user);
+            var accessToken = jwtService.generateAccessToken(user, sessionId);
+            var newRefreshToken = jwtService.generateRefreshToken(user, sessionId);
 
             return TokenResponse.builder()
                     .accessToken(accessToken)

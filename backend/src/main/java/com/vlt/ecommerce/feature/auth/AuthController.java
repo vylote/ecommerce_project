@@ -7,7 +7,9 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
@@ -29,6 +31,7 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 public class AuthController {
     AuthService authService;
+    SessionService sessionService;
 
     @PostMapping("/register")
     public ApiResponse<UserResponse> register(@RequestBody @Valid RegisterRequest request) {
@@ -38,8 +41,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<String>> login(@RequestBody @Valid LoginRequest request) {
-        TokenResponse tokenResponse = authService.login(request);
+    public ResponseEntity<ApiResponse<String>> login(
+                @RequestBody @Valid LoginRequest request,
+                @RequestHeader(value = "User-Agent", required = false) String userAgent) {
+        TokenResponse tokenResponse = authService.login(request, userAgent);
 
         // Nặn Cookie cho Access Token
         ResponseCookie jwtCookie = ResponseCookie.from("accessToken", tokenResponse.getAccessToken())
@@ -133,6 +138,13 @@ public class AuthController {
     public ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
                 .result(authService.getMyInfo())
+                .build();
+    }
+    @PostMapping("/sessions/revoke")
+    public ApiResponse<String> revokeSession(@RequestParam String ssid) {
+        sessionService.revokeSession(ssid);
+        return ApiResponse.<String>builder()
+                .result("thu hoi thanh cong")
                 .build();
     }
 }

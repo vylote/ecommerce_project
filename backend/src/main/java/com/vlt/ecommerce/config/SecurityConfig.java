@@ -1,44 +1,42 @@
 package com.vlt.ecommerce.config;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import jakarta.servlet.http.Cookie;
-
 import java.util.List;
-
-import javax.crypto.spec.SecretKeySpec;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Value("${jwt.secret}")
-    private String signerKey;
+    // @Value("${jwt.secret}")
+    // private String signerKey;
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     private final String[] PUBLIC_POST_ENDPOINTS = {
             "/auth/register",
             "/auth/login",
             "/auth/refresh",
-            "/auth/logout"
+            "/auth/logout",
+            "/auth/sessions/revoke"
     };
 
     private final String[] PUBLIC_GET_ENDPOINTS = {
@@ -54,45 +52,49 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder(10);
     }
 
-    @Bean
-    public BearerTokenResolver bearerTokenResolver() {
-        return request -> {
-            if (request.getCookies() != null) {
-                String targetCookie = "accessToken"; // Mặc định tìm accessToken
+    // @Bean
+    // public BearerTokenResolver bearerTokenResolver() {
+    //     return request -> {
+    //         if (request.getCookies() != null) {
+    //             String targetCookie = "accessToken"; // Mặc định tìm accessToken
 
-                // Nếu là request refresh, ta cần tìm refreshToken
-                if (request.getRequestURI().contains("/auth/refresh")) {
-                    targetCookie = "refreshToken";
-                }
+    //             // Nếu là request refresh, ta cần tìm refreshToken
+    //             if (request.getRequestURI().contains("/auth/refresh")) {
+    //                 targetCookie = "refreshToken";
+    //             }
 
-                for (Cookie cookie : request.getCookies()) {
-                    if (targetCookie.equals(cookie.getName())) {
-                        return cookie.getValue();
-                    }
-                }
-            }
-            return null;
-        };
-    }
+    //             for (Cookie cookie : request.getCookies()) {
+    //                 if (targetCookie.equals(cookie.getName())) {
+    //                     return cookie.getValue();
+    //                 }
+    //             }
+    //         }
+    //         return null;
+    //     };
+    // }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // [QUAN TRỌNG] Thêm dòng này để kích hoạt cấu hình CORS bên dưới
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
+        http.csrf(csrf -> csrf.disable());
+
+        // 3. Đảm bảo Spring Security hoàn toàn Stateless (Không tự tạo JSESSIONID)
+        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
         http.authorizeHttpRequests(request -> request
                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                 .anyRequest().authenticated());
 
-        http.oauth2ResourceServer(oauth2 -> oauth2
-                .bearerTokenResolver(bearerTokenResolver()) // Đăng ký bộ giải mã cookie
-                .jwt(jwtConfigurer -> jwtConfigurer
-                        .decoder(jwtDecoder())
-                        .jwtAuthenticationConverter(jwtAuthenticationConverter())));
+        // http.oauth2ResourceServer(oauth2 -> oauth2
+        //         .bearerTokenResolver(bearerTokenResolver()) // Đăng ký bộ giải mã cookie
+        //         .jwt(jwtConfigurer -> jwtConfigurer
+        //                 .decoder(jwtDecoder())
+        //                 .jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
-        http.csrf(csrf -> csrf.disable());
-
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -117,22 +119,22 @@ public class SecurityConfig {
         return source;
     }
 
-    @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
+    // @Bean
+    // public JwtAuthenticationConverter jwtAuthenticationConverter() {
+    //     JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+    //     jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
 
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
+    //     JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+    //     jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
 
-        return jwtAuthenticationConverter;
-    }
+    //     return jwtAuthenticationConverter;
+    // }
 
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
-        return NimbusJwtDecoder.withSecretKey(secretKeySpec)
-                .macAlgorithm(MacAlgorithm.HS512)
-                .build();
-    }
+    // @Bean
+    // public JwtDecoder jwtDecoder() {
+    //     SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
+    //     return NimbusJwtDecoder.withSecretKey(secretKeySpec)
+    //             .macAlgorithm(MacAlgorithm.HS512)
+    //             .build();
+    // }
 }
