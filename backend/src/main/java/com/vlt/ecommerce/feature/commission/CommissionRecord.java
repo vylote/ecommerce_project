@@ -61,7 +61,7 @@ public class CommissionRecord {
     Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_item_id", nullable = false)
+    @JoinColumn(name = "order_item_id", nullable = false, unique = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     OrderItem orderItem;

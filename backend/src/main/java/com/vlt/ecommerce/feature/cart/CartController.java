@@ -40,9 +40,9 @@ public class CartController {
     }
 
     @PutMapping("/items/{productId}")
-    public ApiResponse<CartItemResponse> update(@RequestBody @Valid CartItemRequest request, Long id) {
+    public ApiResponse<CartItemResponse> update(@RequestBody @Valid CartItemRequest request, @PathVariable Long productId) {
         return ApiResponse.<CartItemResponse>builder()
-            .result(cartService.update(request, id))
+            .result(cartService.update(request, productId))
             .build();
     }
 

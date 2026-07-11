@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -107,6 +106,10 @@ public class OrderService {
             newOrder.setShop(shop);
             newOrder.setAddressSnapshot(addressSnapshot);
             newOrder.setNote(request.getNote());
+            //Gắn khóa chống trùng lặp (Kết hợp UUID của FE và ID của Shop)
+            if (request.getIdempotencyKey() != null) {
+                newOrder.setIdempotencyKey(request.getIdempotencyKey() + "-shop" + shop.getId());
+            }
             newOrder.setItems(new ArrayList<>());
             newOrder.setTotalAmount(BigDecimal.ZERO);
 

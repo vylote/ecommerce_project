@@ -1,10 +1,14 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux"; // THÊM IMPORT NÀY
+import toast from "react-hot-toast"; // THÊM IMPORT NÀY
 import Navbar from "../../shared/components/Navbar";
 import api from "../../shared/utils/api";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth); // Lấy thông tin user
 
   const [product, setProduct] = useState(null);
   const [breadcrumbs, setBreadcrumbs] = useState([]);
@@ -14,9 +18,10 @@ export default function ProductDetailPage() {
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewTotalPages, setReviewTotalPages] = useState(1);
   const [filterRating, setFilterRating] = useState("all");
-  
-  // STATE MỚI: Lưu số lượng sản phẩm của Shop
   const [shopProductCount, setShopProductCount] = useState(0);
+
+  // STATE MỚI: Quản lý số lượng muốn mua
+  const [quantity, setQuantity] = useState(1);
 
   // STATE & REF CAROUSEL ẢNH
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -36,9 +41,9 @@ export default function ProductDetailPage() {
         setProduct(prodData); // Thông tin Shop đã nằm sẵn trong prodData.shop
         setReviews(reviewRes.data.result.data);
         setReviewTotalPages(reviewRes.data.result.totalPages);
-        setCurrentImageIndex(0); 
+        setCurrentImageIndex(0);
 
-        // BỔ SUNG: Gọi API lấy danh sách sản phẩm của Shop để đếm số lượng
+        // Gọi API lấy danh sách sản phẩm của Shop để đếm số lượng
         if (prodData.shop?.id) {
           api.get(`/shops/${prodData.shop.id}/products`)
             .then(res => {
@@ -84,6 +89,40 @@ export default function ProductDetailPage() {
     loadReviews(1, rating);
   };
 
+  // --- LOGIC THÊM VÀO GIỎ HÀNG ---
+  const handleAddToCart = async () => {
+    if (!user) {
+      toast.error("Vui lòng đăng nhập để mua hàng!");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      await api.post("/cart/items", {
+        productId: product.id,
+        quantity: quantity,
+      });
+
+      toast.success("Đã thêm vào giỏ hàng");
+
+      // Bắn pháo hiệu (Event) để Navbar biết đường tải lại số lượng
+      window.dispatchEvent(new Event("cart_updated"));
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Lỗi khi thêm vào giỏ hàng");
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!user) {
+      toast.error("Vui lòng đăng nhập để mua hàng!");
+      navigate("/login");
+      return;
+    }
+    // Logic mua ngay: Gọi add to cart rồi chuyển trang sang Cart
+    await handleAddToCart();
+    navigate("/cart");
+  };
+
   // LOGIC ĐIỀU KHIỂN CAROUSEL
   const sortedImages = product?.images
     ? [...product.images].sort(
@@ -101,7 +140,7 @@ export default function ProductDetailPage() {
   };
 
   useEffect(() => {
-    if (totalImages <= 1) return; 
+    if (totalImages <= 1) return;
 
     autoPlayRef.current = setInterval(() => {
       setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
@@ -260,13 +299,40 @@ export default function ProductDetailPage() {
                 Xử lý đơn hàng bởi Shopee
               </span>
             </div>
+
+            {/* BỘ CHỌN SỐ LƯỢNG */}
             <div className="flex items-center gap-4 text-sm text-base-content/70 mb-8">
-              <span className="w-24">Kho hàng</span>
-              <span className="text-base-content">{product.stockQuantity}</span>
+              <span className="w-24">Số lượng</span>
+              <div className="flex items-center border border-base-300 rounded-sm">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="px-4 py-1.5 hover:bg-base-200 border-r border-base-300 transition-colors"
+                >
+                  -
+                </button>
+                <input
+                  type="text"
+                  value={quantity}
+                  readOnly
+                  className="w-14 text-center outline-none text-base-content font-medium bg-transparent"
+                />
+                <button
+                  onClick={() =>
+                    setQuantity((q) => Math.min(product.stockQuantity, q + 1))
+                  }
+                  className="px-4 py-1.5 hover:bg-base-200 border-l border-base-300 transition-colors"
+                >
+                  +
+                </button>
+              </div>
+              <span>{product.stockQuantity} sản phẩm có sẵn</span>
             </div>
 
             <div className="flex gap-4">
-              <button className="btn btn-outline border-primary text-primary hover:bg-primary/5 hover:border-primary hover:text-primary w-52 bg-primary/10 rounded-sm font-normal">
+              <button
+                onClick={handleAddToCart}
+                className="btn btn-outline border-primary text-primary hover:bg-primary/5 hover:border-primary hover:text-primary w-52 bg-primary/10 rounded-sm font-normal"
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5 mr-1"
@@ -283,7 +349,10 @@ export default function ProductDetailPage() {
                 </svg>
                 Thêm Vào Giỏ Hàng
               </button>
-              <button className="btn btn-primary text-white w-32 rounded-sm font-normal">
+              <button
+                onClick={handleBuyNow}
+                className="btn btn-primary text-white w-32 rounded-sm font-normal"
+              >
                 Mua Ngay
               </button>
             </div>
