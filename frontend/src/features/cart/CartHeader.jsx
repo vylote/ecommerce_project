@@ -1,46 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../shared/utils/api';
 import { logout } from '../../store/slice/authSlice';
 
-export default function Navbar() {
+export default function CartHeader() {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // State lưu từ khóa tìm kiếm
   const [keyword, setKeyword] = useState('');
-
-  // STATE MỚI: Lưu số lượng giỏ hàng
-  const [cartCount, setCartCount] = useState(0);
-
-  // HÀM LẤY SỐ LƯỢNG GIỎ HÀNG TỪ BACKEND
-  const fetchCartCount = async () => {
-    if (!user) {
-      setCartCount(0);
-      return;
-    }
-    try {
-      const res = await api.get('/cart');
-      // Đếm số lượng sản phẩm khác nhau trong giỏ
-      setCartCount(res.data.result?.length || 0);
-    } catch (error) {
-      console.error("Lỗi lấy số lượng giỏ hàng:", error);
-    }
-  };
-
-  // EFFECT CHẠY KHI COMPONENT MOUNT HOẶC USER THAY ĐỔI
-  useEffect(() => {
-    fetchCartCount();
-
-    // Lắng nghe sự kiện 'cart_updated' được bắn ra từ trang Chi tiết sản phẩm
-    const handleCartUpdate = () => fetchCartCount();
-    window.addEventListener('cart_updated', handleCartUpdate);
-
-    // Dọn dẹp sự kiện khi Navbar bị unmount
-    return () => window.removeEventListener('cart_updated', handleCartUpdate);
-  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -53,7 +22,6 @@ export default function Navbar() {
     }
   };
 
-  // Hàm xử lý tìm kiếm
   const handleSearch = (e) => {
     e.preventDefault();
     if (keyword.trim()) {
@@ -63,7 +31,7 @@ export default function Navbar() {
 
   return (
     <div className="sticky top-0 z-50 w-full">
-      {/* Top mini bar */}
+      {/* Top mini bar - giữ nguyên như Navbar chính */}
       <div className="bg-green-800 text-white text-xs">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 md:px-12 py-1.5">
           <div className="flex items-center gap-3">
@@ -116,59 +84,33 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Main navbar */}
+      {/* Main bar - rút gọn cho trang Giỏ hàng: chỉ Logo | "Giỏ hàng" + thanh tìm kiếm */}
       <div className="bg-gradient-to-r from-green-600 to-green-500 shadow-sm">
         <div className="max-w-[1400px] mx-auto flex items-center gap-6 px-4 md:px-12 py-3">
-          <Link to="/" className="text-2xl font-black text-white tracking-wider shrink-0">
-            ECOMMERCE
+          <Link to="/" className="flex items-center gap-3 shrink-0">
+            <span className="text-2xl font-black text-white tracking-wider">
+              ECOMMERCE
+            </span>
+            <span className="w-px h-6 bg-white/40" />
+            <span className="text-white text-base font-medium">Giỏ hàng</span>
           </Link>
 
-          {/* Cột giữa: search + quick-link nằm ngay dưới, cùng căn trái với ô search */}
-          <div className="flex-1 flex flex-col gap-1.5 min-w-0">
-            <form onSubmit={handleSearch} className="join w-full">
-              <input
-                type="text"
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                placeholder="Tìm kiếm sản phẩm, thương hiệu..."
-                className="input join-item w-full bg-white text-base-content border-none focus:outline-none"
-              />
-              <button type="submit" className="btn join-item bg-green-700 hover:bg-green-800 border-none text-white px-6">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
-                </svg>
-              </button>
-            </form>
-
-            {/* Quick links nằm ngay dưới ô search, căn trái theo ô search */}
-            <div className="hidden md:flex items-center gap-4 text-xs text-white/90">
-              <Link to="/category/thoi-trang-nam" className="hover:text-white hover:underline">Thời Trang Nam</Link>
-              <Link to="/category/thoi-trang-nu" className="hover:text-white hover:underline">Thời Trang Nữ</Link>
-              <Link to="/category/dien-thoai" className="hover:text-white hover:underline">Điện Thoại &amp; Phụ Kiện</Link>
-              <Link to="/category/nha-cua" className="hover:text-white hover:underline">Nhà Cửa &amp; Đời Sống</Link>
-              <Link to="/category/lam-dep" className="hover:text-white hover:underline">Sắc Đẹp</Link>
-              <Link to="/category/the-thao" className="hover:text-white hover:underline">Thể Thao &amp; Du Lịch</Link>
-              <Link to="/category/me-be" className="hover:text-white hover:underline">Mẹ &amp; Bé</Link>
-            </div>
-          </div>
+          <form onSubmit={handleSearch} className="join flex-1 min-w-0">
+            <input
+              type="text"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              placeholder="Tìm kiếm sản phẩm, thương hiệu..."
+              className="input join-item w-full bg-white text-base-content border-none focus:outline-none"
+            />
+            <button type="submit" className="btn join-item bg-green-700 hover:bg-green-800 border-none text-white px-6">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+              </svg>
+            </button>
+          </form>
 
           <div className="flex items-center gap-4 shrink-0">
-            {/* GIỎ HÀNG: bọc bởi Link, hiển thị cartCount */}
-            <div className="dropdown dropdown-end">
-              <Link to="/cart" role="button" className="btn btn-ghost btn-circle text-white hover:bg-white/10">
-                <div className="indicator">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  {cartCount > 0 && (
-                    <span className="badge badge-sm bg-white text-green-700 border-none indicator-item font-bold">
-                      {cartCount > 99 ? '99+' : cartCount}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            </div>
-
             {user ? (
               <div className="dropdown dropdown-end">
                 <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">

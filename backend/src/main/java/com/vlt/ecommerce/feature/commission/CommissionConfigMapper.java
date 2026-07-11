@@ -17,11 +17,13 @@ public interface CommissionConfigMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "createdBy", ignore = true)
+    @Mapping(target = "version", ignore = true)
     CommissionConfig toCommissionConfig(CommissionConfigRequest request);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", source = "categoryId", qualifiedByName = "idToCategory")
     @Mapping(target = "createdBy", source = "userId", qualifiedByName = "idToUser")
+    @Mapping(target = "version", ignore = true)
     void updateCommissionConfig(CommissionConfigRequest request, @MappingTarget CommissionConfig config);
 
     @Named("idToCategory")

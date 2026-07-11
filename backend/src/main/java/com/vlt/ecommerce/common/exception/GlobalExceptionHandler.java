@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.common.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -75,6 +76,19 @@ public class GlobalExceptionHandler {
                 ApiResponse.builder()
                         .code(errorCode.getCode())
                         .message(errorMessage) // Ghi đè message mặc định bằng message cụ thể của field
+                        .build());
+    }
+
+    @SuppressWarnings("rawtypes")
+    @ExceptionHandler(value = DataIntegrityViolationException.class)
+    ResponseEntity<ApiResponse> handlingDataIntegrityViolationException(DataIntegrityViolationException e) {
+        log.warn("Lỗi trùng lặp dữ liệu (Nghi ngờ Double Submit): {}", e.getMessage());
+        
+        // Bạn có thể tạo thêm ErrorCode.TRANSACTION_PROCESSING, hoặc trả về cấu trúc tĩnh như sau:
+        return ResponseEntity.status(409).body(
+                ApiResponse.builder()
+                        .code(409)
+                        .message("Giao dịch đang được xử lý, vui lòng không nhấn nút thanh toán nhiều lần!")
                         .build());
     }
 }

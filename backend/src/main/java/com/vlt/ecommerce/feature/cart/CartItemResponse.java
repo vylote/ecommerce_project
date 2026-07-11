@@ -15,6 +15,9 @@ public class CartItemResponse {
     Long id;
     Long productId;
     String productName;
+    String imageUrl;       // Thêm ảnh sản phẩm
+    Long shopId;           // Thêm ID để Frontend gộp nhóm
+    String shopName;
     BigDecimal productPrice;
     Integer quantity;
     BigDecimal totalPrice; // Tổng tiền = quantity * price

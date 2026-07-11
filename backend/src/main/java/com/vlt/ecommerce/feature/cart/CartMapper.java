@@ -21,6 +21,9 @@ public interface CartMapper {
     @Mapping(target = "productName", source = "product.name")
     @Mapping(target = "productPrice", source = "product.price")
     @Mapping(target = "totalPrice", expression = "java(cartItem.getProduct().getPrice().multiply(java.math.BigDecimal.valueOf(cartItem.getQuantity())))")
+    @Mapping(source = "product.shop.id", target = "shopId")       // Móc shopId từ product
+    @Mapping(source = "product.shop.name", target = "shopName")
+    @Mapping(expression = "java(cartItem.getProduct().getImages().isEmpty() ? null : cartItem.getProduct().getImages().get(0).getUrl())", target = "imageUrl")
     CartItemResponse toCartItemResponse(CartItem cartItem);
 
     @Mapping(target = "id", ignore = true)

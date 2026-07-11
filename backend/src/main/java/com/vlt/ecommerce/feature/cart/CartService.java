@@ -1,7 +1,6 @@
 package com.vlt.ecommerce.feature.cart;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
