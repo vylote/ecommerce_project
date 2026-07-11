@@ -16,6 +16,8 @@ public interface OrderMapper {
     @Mapping(target = "buyerId", source = "buyer.id")
     @Mapping(target = "items", source = "items")
     @Mapping(target = "createdAt", source = "createdAt")
+    @Mapping(target = "shopName", source = "shop.name")
+    @Mapping(target = "shopId", source = "shop.id")
     OrderResponse toOrderResponse(Order order);
 
     @Mapping(target = "id", ignore = true)

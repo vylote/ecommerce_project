@@ -15,7 +15,7 @@ import jakarta.persistence.LockModeType;
 public interface OrderRepository extends JpaRepository<Order, Long>{
     // Dành cho BUYER: Kéo luôn danh sách items để tránh N+1 Query
     @EntityGraph(attributePaths = {"items"})
-    Page<Order> findByBuyerId(Long buyerId, Pageable pageable);
+    Page<Order> findByBuyerIdAndStatus(Long buyerId, OrderStatus status, Pageable pageable);
 
     @EntityGraph(attributePaths = {"items"})
     Page<Order> findByShopId(Long shopId, Pageable pageable);

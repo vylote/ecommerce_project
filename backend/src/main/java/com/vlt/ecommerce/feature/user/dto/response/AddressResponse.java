@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class AddressResponse {
+    Long id;
     Long userId; // Trả về để Frontend biết của ai
     String fullName;
     String phone;

@@ -69,9 +69,9 @@ public class OrderService {
     public List<OrderResponse> create(OrderRequest request) {
         User buyer = getCurrentUser();
 
-        List<CartItem> cartItems = cartItemRepository.findByBuyerId(buyer.getId());
-        if (cartItems.isEmpty()) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        List<CartItem> cartItems = cartItemRepository.findAllByIdInAndBuyerId(request.getCartItemIds(), buyer.getId());
+        if (cartItems.isEmpty() || cartItems.size() != request.getCartItemIds().size()) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND); 
         }
 
         Address address = addressRepository.findById(request.getAddressId())
@@ -119,22 +119,22 @@ public class OrderService {
                 Product product = shopItem.getProduct();
                 int orderQuantity = shopItem.getQuantity();
 
-                // if (product.getStockQuantity() < orderQuantity) {
-                //     throw new AppException(ErrorCode.OUT_OF_STOCK);
-                // }
-                // product.setStockQuantity(product.getStockQuantity() - orderQuantity);
-                // product.setSoldCount(product.getSoldCount() + orderQuantity);
-
-                // 1. XÓA BỎ kiểm tra in-memory cũ.
-                // 2. Chạy lệnh Atomic Update dưới DB và lấy ra số dòng cập nhật thành công
                 int updatedRows = productRepository.decrementStockAndIncrementSold(product.getId(), orderQuantity);
 
-                // 3. Nếu trả về 0 -> Không có dòng nào thỏa mãn điều kiện stock_quantity >= qty -> BÁO LỖI HẾT HÀNG
                 if (updatedRows == 0) {
                     throw new AppException(ErrorCode.OUT_OF_STOCK);
                 }
 
                 BigDecimal itemTotalPrice = product.getPrice().multiply(BigDecimal.valueOf(orderQuantity));
+
+                String primaryImage = null;
+                if (product.getImages() != null && !product.getImages().isEmpty()) {
+                    primaryImage = product.getImages().stream()
+                        .filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))
+                        .map(img -> img.getUrl())
+                        .findFirst()
+                        .orElse(product.getImages().get(0).getUrl());
+                }
 
                 OrderItem orderItem = OrderItem.builder()
                         .order(newOrder)
@@ -144,6 +144,7 @@ public class OrderService {
                         .productPrice(product.getPrice())
                         .quantity(orderQuantity)
                         .totalPrice(itemTotalPrice)
+                        .productImageUrl(primaryImage)
                         .build();
 
                 newOrder.getItems().add(orderItem);
@@ -156,7 +157,7 @@ public class OrderService {
             eventPublisher.publishEvent(new OrderStatusChangedEvent(this, savedOrder.getId()));
         }
 
-        cartItemRepository.deleteAllByBuyerId(buyer.getId());
+        cartItemRepository.deleteAll(cartItems); 
         return orderMapper.toOrderResponses(createdOrders);
     }
 
@@ -244,14 +245,14 @@ public class OrderService {
     }
 
     @PreAuthorize("hasRole('BUYER')")
-    public PageResponse<OrderResponse> getOwnHistoryOrder(int page, int size) {
+    public PageResponse<OrderResponse> getOwnHistoryOrder(int page, int size, OrderStatus status) {
         User buyer = getCurrentUser();
 
         // Sắp xếp đơn hàng mới nhất lên đầu
         Pageable pageable = PageRequest.of(page-1, size, Sort.by("createdAt").descending());
 
         // Gọi database (Đã chặn N+1 query bằng EntityGraph)
-        Page<Order> orderPage = orderRepository.findByBuyerId(buyer.getId(), pageable);
+        Page<Order> orderPage = orderRepository.findByBuyerIdAndStatus(buyer.getId(), status, pageable);
 
         List<OrderResponse> content = orderMapper.toOrderResponses(orderPage.getContent());
 
@@ -304,12 +305,6 @@ public class OrderService {
                 payment.setTransactionRef("REFUND_MOCK_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase()); // Mã hoàn tiền giả
             }
         }
-
-        // for (OrderItem item : order.getItems()) {
-        //     Product product = item.getProduct();
-        //     product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
-        //     product.setSoldCount(product.getSoldCount() - item.getQuantity());
-        // }
 
         for (OrderItem item : order.getItems()) {
             productRepository.restoreStockAndDecrementSold(item.getProduct().getId(), item.getQuantity());

@@ -1,6 +1,9 @@
 package com.vlt.ecommerce.feature.user;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -25,6 +28,13 @@ import lombok.experimental.FieldDefaults;
 public class AddressController {
     AddressService addressService;
     
+    @GetMapping
+    public ApiResponse<List<AddressResponse>> getMyAddresses() {
+        return ApiResponse.<List<AddressResponse>>builder()
+            .result(addressService.getMyAddresses())
+            .build();
+    }
+
     @PostMapping
     public ApiResponse<AddressResponse> create(@RequestBody @Valid AddressRequest request) {
         return ApiResponse.<AddressResponse>builder()

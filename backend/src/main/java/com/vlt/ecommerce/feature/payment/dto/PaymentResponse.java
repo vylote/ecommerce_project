@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class PaymentResponse {
+    Long id;
     PaymentMethod method;
     PaymentStatus status;
     BigDecimal amount;
