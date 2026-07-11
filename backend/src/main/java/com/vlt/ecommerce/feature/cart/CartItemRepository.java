@@ -25,4 +25,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long>{
     void upsertCartItem(@Param("buyerId") Long buyerId, 
                         @Param("productId") Long productId, 
                         @Param("qty") Integer qty);
+    // Lấy chính xác các item được chọn và đảm bảo tính sở hữu của Buyer
+    List<CartItem> findAllByIdInAndBuyerId(List<Long> ids, Long buyerId);
 }

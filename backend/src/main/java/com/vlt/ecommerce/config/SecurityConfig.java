@@ -88,12 +88,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                 .anyRequest().authenticated());
 
-        // http.oauth2ResourceServer(oauth2 -> oauth2
-        //         .bearerTokenResolver(bearerTokenResolver()) // Đăng ký bộ giải mã cookie
-        //         .jwt(jwtConfigurer -> jwtConfigurer
-        //                 .decoder(jwtDecoder())
-        //                 .jwtAuthenticationConverter(jwtAuthenticationConverter())));
-
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -106,7 +100,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
 
         // 2. Cho phép các phương thức cần thiết
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
         // 3. Cho phép tất cả headers (bao gồm Content-Type, Authorization...)
         configuration.setAllowedHeaders(List.of("*"));

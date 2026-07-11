@@ -18,4 +18,5 @@ public class OrderItemResponse {
     BigDecimal totalPrice;
     Long productId;
     Long shopId;
+    String productImageUrl; 
 }

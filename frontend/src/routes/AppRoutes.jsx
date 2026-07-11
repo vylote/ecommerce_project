@@ -8,6 +8,8 @@ import CategoryPage from '../features/product/CategoryPage';
 import SearchPage from '../features/product/SearchPage';
 import ProductDetailPage from '../features/product/ProductDetailPage';
 import CartPage from '../features/cart/CartPage';
+import CheckoutPage from '../features/order/CheckoutPage'; 
+import OrdersPage from '../features/order/OrderPage';
 
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
@@ -22,6 +24,8 @@ export const AppRoutes = () => {
       <Route path="/search" element={<SearchPage />} />
       <Route path="/product/:id" element={<ProductDetailPage />} />
       <Route path="/cart" element={user ? <CartPage /> : <Navigate to="/login" />} />
+      <Route path="/checkout" element={user ? <CheckoutPage /> : <Navigate to="/login" />} />
+      <Route path="/orders" element={user ? <OrdersPage /> : <Navigate to="/login" />} />
     </Routes>
   );
 };

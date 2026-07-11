@@ -53,4 +53,7 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)
     Shop shop;
+
+    @Column(name = "product_image_url", length = 500)
+    String productImageUrl;
 }

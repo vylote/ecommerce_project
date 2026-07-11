@@ -58,10 +58,11 @@ public class OrderController {
     @GetMapping
     public ApiResponse<PageResponse<OrderResponse>> getOwnHistoryOrder(
         @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "PENDING") OrderStatus status) {
         
         return ApiResponse.<PageResponse<OrderResponse>>builder()
-            .result(orderService.getOwnHistoryOrder(page, size))
+            .result(orderService.getOwnHistoryOrder(page, size, status))
             .build();
     }
 

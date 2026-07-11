@@ -103,8 +103,11 @@ const CartPage = () => {
       toast.error("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
       return;
     }
-    // Chuyển hướng sang trang thanh toán, truyền theo danh sách ID sản phẩm đã chọn
-    navigate('/checkout', { state: { selectedItems } });
+    // [FIX TẠI ĐÂY]: Lọc ra toàn bộ thông tin (tên, giá, ảnh...) của các item được tích chọn
+    const fullSelectedItems = cartItems.filter(item => selectedItems.includes(item.productId));
+
+    // Chuyển hướng sang trang thanh toán và ném cục data này sang
+    navigate('/checkout', { state: { selectedItems: fullSelectedItems } });
   };
 
   if (loading) {

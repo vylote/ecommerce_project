@@ -18,6 +18,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderResponse {
     Long id;
+    Long shopId;
+    String shopName;
     String addressSnapshot;
     BigDecimal totalAmount;
     String status;
