@@ -1,7 +1,6 @@
 package com.vlt.ecommerce.common.security;
 
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 import com.vlt.ecommerce.feature.user.Address;
@@ -19,8 +18,7 @@ public class AddressSecurity {
 
     public Boolean isOwner(Long addressId) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Long currentUserId = ((Number) jwt.getClaim("userId")).longValue();
+        Long currentUserId = (Long) authentication.getDetails();
 
         Address address = addressRepository.findById(addressId).orElse(null);
 

@@ -62,6 +62,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String ssid = signedJWT.getJWTClaimsSet().getStringClaim("sessionId");
                 String email = signedJWT.getJWTClaimsSet().getSubject();
                 String scope = signedJWT.getJWTClaimsSet().getStringClaim("scope"); // VD: "ROLE_BUYER"
+                Long userId = signedJWT.getJWTClaimsSet().getLongClaim("userId");
 
                 // KIỂM TRA LỆNH TRUY NÃ TỪ REDIS
                 if (blacklistService.isSsidBlacklisted(ssid)) {
@@ -74,6 +75,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         email, null, Collections.singletonList(authority));
                 
+                authentication.setDetails(userId);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
             } catch (Exception e) {

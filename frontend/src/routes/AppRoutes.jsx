@@ -16,6 +16,10 @@ import AddressPage from '../features/profile/AddressPage';
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
 
+  if (user) {
+    window.currentUser = user; 
+  }
+
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />

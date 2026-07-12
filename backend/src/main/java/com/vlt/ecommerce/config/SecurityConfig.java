@@ -22,9 +22,6 @@ import java.util.List;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // @Value("${jwt.secret}")
-    // private String signerKey;
-
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
@@ -51,27 +48,6 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
-
-    // @Bean
-    // public BearerTokenResolver bearerTokenResolver() {
-    //     return request -> {
-    //         if (request.getCookies() != null) {
-    //             String targetCookie = "accessToken"; // Mặc định tìm accessToken
-
-    //             // Nếu là request refresh, ta cần tìm refreshToken
-    //             if (request.getRequestURI().contains("/auth/refresh")) {
-    //                 targetCookie = "refreshToken";
-    //             }
-
-    //             for (Cookie cookie : request.getCookies()) {
-    //                 if (targetCookie.equals(cookie.getName())) {
-    //                     return cookie.getValue();
-    //                 }
-    //             }
-    //         }
-    //         return null;
-    //     };
-    // }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -112,23 +88,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
-    // @Bean
-    // public JwtAuthenticationConverter jwtAuthenticationConverter() {
-    //     JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-    //     jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
-
-    //     JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-    //     jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
-
-    //     return jwtAuthenticationConverter;
-    // }
-
-    // @Bean
-    // public JwtDecoder jwtDecoder() {
-    //     SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
-    //     return NimbusJwtDecoder.withSecretKey(secretKeySpec)
-    //             .macAlgorithm(MacAlgorithm.HS512)
-    //             .build();
-    // }
 }
