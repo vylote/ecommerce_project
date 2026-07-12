@@ -66,11 +66,19 @@ public class UserService {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
+            String avatarUrl = user.getAvatarUrl();
+            String oldPublicId = null;
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            oldPublicId = cloudinaryService.extractPublicIdFromUrl(avatarUrl);
+        }
+
+        userMapper.updateUserProfile(request, user);
         try {
-            userMapper.updateUserProfile(request, user);
             if (file != null && !file.isEmpty()) {
-                String avatarUrl = cloudinaryService.uploadFile(file, "ecommerce/users");
-                user.setAvatarUrl(avatarUrl);
+                String secureUrl = cloudinaryService.uploadFile(file, "ecommerce/users");
+                
+                cloudinaryService.deleteFile(oldPublicId);
+                user.setAvatarUrl(secureUrl);
             }
         } catch (IOException e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
