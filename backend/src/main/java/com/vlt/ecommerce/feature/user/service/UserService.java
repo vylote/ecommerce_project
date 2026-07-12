@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.feature.user.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -10,10 +11,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
+import com.vlt.ecommerce.feature.product.service.CloudinaryService;
 import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.dto.request.UpdateProfileRequest;
 import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
@@ -32,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
+    CloudinaryService cloudinaryService;
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
@@ -57,12 +61,21 @@ public class UserService {
     }
 
     @Transactional 
-    public UserResponse updateMyProfile(UpdateProfileRequest request) {
+    public UserResponse updateMyProfile(UpdateProfileRequest request, MultipartFile file) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        userMapper.updateUserProfile(request, user);
+        try {
+            userMapper.updateUserProfile(request, user);
+            if (file != null && !file.isEmpty()) {
+                String avatarUrl = cloudinaryService.uploadFile(file, "ecommerce/users");
+                user.setAvatarUrl(avatarUrl);
+            }
+        } catch (IOException e) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+
         return userMapper.toUserResponse(user);
     }
 

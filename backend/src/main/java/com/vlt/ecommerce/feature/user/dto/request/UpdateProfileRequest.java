@@ -9,5 +9,4 @@ import lombok.experimental.FieldDefaults;
 public class UpdateProfileRequest {  
     String fullName;
     String phone;
-    String avatarUrl;
 }
