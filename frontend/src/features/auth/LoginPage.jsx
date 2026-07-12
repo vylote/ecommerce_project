@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
+import { Eye, EyeOff } from 'lucide-react'; // Import icon con mắt
 import api from '../../shared/utils/api';
 import { loginSuccess } from '../../store/slice/authSlice';
 import AuthLayout from '../../shared/components/AuthLayout';
@@ -10,6 +11,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  
+  // State quản lý việc ẩn/hiện mật khẩu
+  const [showPassword, setShowPassword] = useState(false);
+  
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -17,8 +22,15 @@ export default function LoginPage() {
     e.preventDefault();
     setErrorMsg('');
     try {
-      const response = await api.post('/auth/login', { email, password });
-      dispatch(loginSuccess({ user: response.data.result }));
+      // 1. Gọi API Login để lấy Token/Cookie
+      await api.post('/auth/login', { email, password });
+      
+      // 2. Gọi API lấy thông tin Profile ngay lập tức để đút vào Redux
+      const userRes = await api.get('/auth/me');
+      
+      // 3. Dispatch dữ liệu thật vào Redux, lúc này Navbar sẽ re-render và có ảnh ngay
+      dispatch(loginSuccess({ user: userRes.data.result }));
+      
       navigate('/', { replace: true });
     } catch (err) {
       setErrorMsg('Tài khoản hoặc mật khẩu không chính xác!');
@@ -71,15 +83,31 @@ export default function LoginPage() {
                 Quên mật khẩu?
               </Link>
             </div>
-            <input
-              type="password"
-              placeholder="Tối thiểu 6 ký tự"
-              className="input input-bordered w-full bg-base-200 border-2 border-base-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20 placeholder:text-base-content/40 transition-colors"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={6}
-            />
+            
+            {/* VÙNG CHỨA INPUT MẬT KHẨU VÀ ICON CON MẮT */}
+            <div className="relative">
+              <input
+                // Đổi type qua lại giữa text và password
+                type={showPassword ? "text" : "password"} 
+                placeholder="Tối thiểu 6 ký tự"
+                // Thêm pr-10 để chữ không bị tràn vào icon con mắt
+                className="input input-bordered w-full bg-base-200 border-2 border-base-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20 placeholder:text-base-content/40 transition-colors pr-10"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+              
+              {/* Nút bấm con mắt */}
+              <button
+                type="button"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content transition-colors focus:outline-none"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex="-1" // Không focus vào nút này khi ấn Tab
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           <div className="form-control pt-2">

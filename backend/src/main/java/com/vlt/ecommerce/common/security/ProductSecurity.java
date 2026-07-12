@@ -1,7 +1,6 @@
 package com.vlt.ecommerce.common.security;
 
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 import com.vlt.ecommerce.feature.product.Product;
@@ -19,8 +18,7 @@ public class ProductSecurity {
 
     public Boolean isOwner(Long productId) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Long currentUserId = ((Number) jwt.getClaim("userId")).longValue();
+        Long currentUserId = (Long) authentication.getDetails();
 
         Product product = productRepository.findById(productId).orElse(null);
 
