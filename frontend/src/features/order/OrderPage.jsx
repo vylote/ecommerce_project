@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 import Navbar from '../../shared/components/Navbar';
+import ConfirmDialog from '../../shared/components/ConfirmDialog';
 import { Store } from 'lucide-react'; // Thêm icon cho đẹp
 
 const TABS = [
@@ -34,6 +35,9 @@ export default function OrdersPage() {
   const [activeTab, setActiveTab] = useState('ALL');
   const [processingId, setProcessingId] = useState(null);
 
+  // State cho dialog xác nhận (thay cho window.confirm)
+  const [confirmState, setConfirmState] = useState(null);
+
   useEffect(() => {
     fetchOrders(page);
   }, [page]);
@@ -55,8 +59,7 @@ export default function OrdersPage() {
     ? orders
     : orders.filter(order => order.status === activeTab);
 
-  const handleCancel = async (orderId) => {
-    if (!window.confirm('Bạn chắc chắn muốn hủy đơn hàng này?')) return;
+  const cancelOrderRequest = async (orderId) => {
     try {
       setProcessingId(orderId);
       await api.patch(`/orders/${orderId}/cancel`);
@@ -69,8 +72,7 @@ export default function OrdersPage() {
     }
   };
 
-  const handleComplete = async (orderId) => {
-    if (!window.confirm('Xác nhận đã nhận được hàng?')) return;
+  const completeOrderRequest = async (orderId) => {
     try {
       setProcessingId(orderId);
       await api.patch(`/orders/${orderId}/complete`);
@@ -81,6 +83,28 @@ export default function OrdersPage() {
     } finally {
       setProcessingId(null);
     }
+  };
+
+  const handleCancel = (orderId) => {
+    setConfirmState({
+      title: 'Hủy đơn hàng',
+      message: 'Bạn chắc chắn muốn hủy đơn hàng này? Hành động này không thể hoàn tác.',
+      confirmText: 'Hủy đơn hàng',
+      cancelText: 'Không',
+      variant: 'danger',
+      onConfirm: () => cancelOrderRequest(orderId),
+    });
+  };
+
+  const handleComplete = (orderId) => {
+    setConfirmState({
+      title: 'Xác nhận đã nhận hàng',
+      message: 'Bạn xác nhận đã nhận được hàng cho đơn này chứ?',
+      confirmText: 'Đã nhận hàng',
+      cancelText: 'Chưa',
+      variant: 'primary',
+      onConfirm: () => completeOrderRequest(orderId),
+    });
   };
 
   return (
@@ -138,9 +162,8 @@ export default function OrdersPage() {
           ) : (
             <div className="space-y-3">
               {filteredOrders.map(order => {
-                // SỬA LỖI 1: Lấy shopName thẳng từ OrderResponse
                 const shopLabel = order.shopName || `Đơn #${order.id}`;
-                
+
                 return (
                   <div key={order.id} className="bg-white rounded-sm shadow-sm">
                     {/* Header đơn */}
@@ -153,7 +176,7 @@ export default function OrdersPage() {
                         </button>
                       </div>
                       <span className={`text-sm font-medium uppercase ${
-                        order.status === 'COMPLETED' ? 'text-green-600' : 
+                        order.status === 'COMPLETED' ? 'text-green-600' :
                         order.status === 'CANCELLED' ? 'text-gray-500' : 'text-[#ee4d2d]'
                       }`}>
                         {STATUS_LABEL[order.status] || order.status}
@@ -165,7 +188,6 @@ export default function OrdersPage() {
                       {order.items?.map((item) => (
                         <div key={item.id} className="flex items-center gap-4 px-6 py-3 hover:bg-gray-50 transition-colors">
                           <div className="w-20 h-20 border shrink-0 bg-gray-100 flex items-center justify-center overflow-hidden">
-                            {/* SỬA LỖI 2: Dùng productImageUrl thay vì imageUrl */}
                             {item.productImageUrl ? (
                               <img src={item.productImageUrl} alt={item.productName} className="w-full h-full object-cover" />
                             ) : (
@@ -191,7 +213,7 @@ export default function OrdersPage() {
                           ₫{order.totalAmount?.toLocaleString('vi-VN')}
                         </span>
                       </div>
-                      
+
                       <div className="flex gap-3">
                         {order.status === 'PENDING' && (
                           <button
@@ -260,6 +282,8 @@ export default function OrdersPage() {
           )}
         </div>
       </div>
+
+      <ConfirmDialog state={confirmState} onClose={() => setConfirmState(null)} />
     </div>
   );
 }
