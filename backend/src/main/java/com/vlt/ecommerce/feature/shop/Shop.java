@@ -1,10 +1,13 @@
 package com.vlt.ecommerce.feature.shop;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.vlt.ecommerce.feature.product.Category;
 import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.user.User;
 
@@ -16,6 +19,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -39,7 +44,7 @@ public class Shop {
     String description;
     @Column(name = "logo_url", length = 500)
     String logoUrl;
-    @Column(length = 50)
+    @Column(name = "address", columnDefinition = "TEXT")
     String address;
     @Builder.Default
     @Column(name = "is_active", nullable = false)
@@ -60,6 +65,15 @@ public class Shop {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<Product> products;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "shop_categories",
+        joinColumns = @JoinColumn(name = "shop_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    @Builder.Default
+    Set<Category> categories = new HashSet<>();
 }
 
 /* ==============================================================================

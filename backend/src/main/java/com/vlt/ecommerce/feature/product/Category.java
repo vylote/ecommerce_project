@@ -1,8 +1,11 @@
 package com.vlt.ecommerce.feature.product;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.vlt.ecommerce.feature.commission.CommissionConfig;
+import com.vlt.ecommerce.feature.shop.Shop;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -12,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -81,4 +85,8 @@ public class Category {
     @Version
     @Column(name = "version")
     Long version;
+
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
+    @Builder.Default
+    Set<Shop> shops = new HashSet<>();
 }
