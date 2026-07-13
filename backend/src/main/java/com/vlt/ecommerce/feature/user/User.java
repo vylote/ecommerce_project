@@ -1,7 +1,9 @@
 package com.vlt.ecommerce.feature.user;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -37,10 +39,6 @@ public class User {
     @Column(name = "avatar_url", length = 500)
     String avatarUrl;
     @Builder.Default
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    Role role = Role.BUYER;
-    @Builder.Default
     @Column(name = "is_active", nullable = false)
     Boolean isActive = true;
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -49,6 +47,15 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
     LocalDateTime updatedAt;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    @Builder.Default
+    Set<Role> roles = new HashSet<>();
 
     @OneToOne(mappedBy = "seller", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude

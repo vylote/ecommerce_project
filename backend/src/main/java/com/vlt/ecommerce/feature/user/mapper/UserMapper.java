@@ -11,11 +11,11 @@ import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.dto.request.UpdateProfileRequest;
 import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {RoleMapper.class})
 public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "avatarUrl", ignore = true)
-    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     @Mapping(target = "isActive", ignore = true)
     @Mapping(target = "createdAt", ignore = true) 
     @Mapping(target = "updatedAt", ignore = true)
@@ -32,7 +32,7 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "password", ignore = true)
-    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "roles", ignore = true)
     @Mapping(target = "isActive", ignore = true)
     @Mapping(target = "createdAt", ignore = true) 
     @Mapping(target = "updatedAt", ignore = true)

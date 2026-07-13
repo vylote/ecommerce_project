@@ -40,14 +40,23 @@ export default function OrdersPage() {
 
   useEffect(() => {
     fetchOrders(page);
-  }, [page]);
+  }, [page, activeTab]);
+
+  const handleTabChange = (tabValue) => {
+    setActiveTab(tabValue);
+    setPage(1); // Luôn luôn quay về trang 1 khi đổi bộ lọc
+  };
 
   const fetchOrders = async (pageToLoad) => {
     try {
       setLoading(true);
-      const res = await api.get("/orders", {
-        params: { page: pageToLoad, size: 10 },
-      });
+
+      const params = { page, size: 10 };
+      if (activeTab !== "ALL") {
+        params.status = activeTab; // Chỉ gửi status khi nó KHÔNG phải ALL
+      }
+
+      const res = await api.get("/orders", { params });
       setOrders(res.data.result.data || []);
       setTotalPages(res.data.result.totalPages || 1);
     } catch (error) {
@@ -56,11 +65,6 @@ export default function OrdersPage() {
       setLoading(false);
     }
   };
-
-  const filteredOrders =
-    activeTab === "ALL"
-      ? orders
-      : orders.filter((order) => order.status === activeTab);
 
   const cancelOrderRequest = async (orderId) => {
     try {
@@ -190,7 +194,7 @@ export default function OrdersPage() {
             <div className="text-center py-20 text-gray-500 bg-white rounded-sm shadow-sm">
               Đang tải đơn hàng...
             </div>
-          ) : filteredOrders.length === 0 ? (
+          ) : orders.length === 0 ? (
             <div className="text-center py-24 bg-white rounded-sm shadow-sm text-gray-500 flex flex-col items-center justify-center">
               <div className="text-6xl opacity-30 mb-4">🛒</div>
               Chưa có đơn hàng nào
@@ -201,7 +205,7 @@ export default function OrdersPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {filteredOrders.map((order) => {
+              {orders.map((order) => {
                 const shopLabel = order.shopName || `Đơn #${order.id}`;
 
                 return (

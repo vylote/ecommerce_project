@@ -12,6 +12,7 @@ import CheckoutPage from '../features/order/CheckoutPage';
 import OrdersPage from '../features/order/OrderPage';
 import ProfilePage from '../features/profile/ProfilePage';
 import AddressPage from '../features/profile/AddressPage';
+import SellerOnboarding from '../features/seller/SellerOnboarding';
 
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
@@ -34,6 +35,7 @@ export const AppRoutes = () => {
       <Route path="/orders" element={user ? <OrdersPage /> : <Navigate to="/login" />} />
       <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
       <Route path="/profile/addresses" element={user ? <AddressPage /> : <Navigate to="/login" />} />
+      <Route path="/seller/onboarding" element={user ? <SellerOnboarding /> : <Navigate to="/login" />} />
     </Routes>
   );
 };

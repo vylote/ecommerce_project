@@ -2,6 +2,8 @@ package com.vlt.ecommerce.feature.auth;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +22,7 @@ import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.UserSession;
 import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
 import com.vlt.ecommerce.feature.user.mapper.UserMapper;
+import com.vlt.ecommerce.feature.user.repository.RoleRepository;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
 import lombok.AccessLevel;
@@ -37,18 +40,22 @@ public class AuthService {
     JwtService jwtService;
     UserMapper userMapper;
     SessionRepository sessionRepository;
+    RoleRepository roleRepository;
 
     public UserResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.RESOURCE_EXISTED);
         }
 
+        Role buyerRole = roleRepository.findByName("ROLE_BUYER")
+            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
         User user = userMapper.toUser(request);
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
-        user.setRole(Role.BUYER);
+        user.setRoles(new HashSet<>(Collections.singletonList(buyerRole)));
         user.setIsActive(true);
 
         return userMapper.toUserResponse(userRepository.save(user));

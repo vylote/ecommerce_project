@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +23,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
+import com.vlt.ecommerce.feature.user.Permission;
+import com.vlt.ecommerce.feature.user.Role;
 import com.vlt.ecommerce.feature.user.User;
 
 import lombok.AccessLevel;
@@ -36,13 +40,26 @@ public class JwtService {
         try {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
+            Set<String> roles = new HashSet<>();
+            Set<String> permissions = new HashSet<>();
+
+            if (user.getRoles() != null) {
+                for (Role role : user.getRoles()) {
+                    roles.add(role.getName()); 
+                    for (Permission perm : role.getPermissions()) {
+                        permissions.add(perm.getName()); 
+                    }
+                }
+            }
+
             JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getEmail())
                 .issuer("mini-ecommerce")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(24, ChronoUnit.HOURS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("scope", "ROLE_"+user.getRole().name())
+                .claim("roles", roles)                 // Mảng ["ROLE_BUYER", "ROLE_SELLER"]
+                .claim("permissions", permissions)
                 .claim("userId", user.getId())
                 .claim("sessionId", sessionId)
                 .build();
