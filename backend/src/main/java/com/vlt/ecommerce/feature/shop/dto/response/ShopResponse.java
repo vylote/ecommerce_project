@@ -1,5 +1,9 @@
 package com.vlt.ecommerce.feature.shop.dto.response;
 
+import java.util.Set;
+
+import com.vlt.ecommerce.feature.product.dto.response.CategoryResponse;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,4 +18,5 @@ public class ShopResponse {
     String address;
     Long sellerId;
     Double rating;
+    Set<CategoryResponse> categories;
 }

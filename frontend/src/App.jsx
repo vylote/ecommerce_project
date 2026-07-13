@@ -20,21 +20,28 @@ function App() {
       try {
         console.log("[APP-2] Chuẩn bị gọi api.get(/auth/me)...");
         const response = await api.get("/auth/me");
-        
-        console.log("[APP-3] Gọi /me THÀNH CÔNG, chuẩn bị dispatch user...", response.data);
+
+        console.log(
+          "[APP-3] Gọi /me THÀNH CÔNG, chuẩn bị dispatch user...",
+          response.data,
+        );
         dispatch(loginSuccess({ user: response.data.result }));
         console.log("[APP-4] Dispatch user xong.");
-
       } catch (error) {
         console.error("[APP-5] Nhảy vào CATCH của App.jsx. Lý do:", error);
-        dispatch(logout()); 
+        if (error.response?.status === 401) {
+          dispatch(logout());
+        } else {
+          toast.error("Không thể kết nối đến máy chủ, vui lòng thử lại sau!");
+        }
         console.log("[APP-6] Đã chạy xong dispatch logout trong catch.");
-
       } finally {
         console.log("[APP-7] Nhảy vào FINALLY. Chuẩn bị tắt Loading...");
         setLoading(false);
         dispatch(setInitialized());
-        console.log("[APP-8] Đã tắt loading xong. Trạng thái App sẽ re-render!");
+        console.log(
+          "[APP-8] Đã tắt loading xong. Trạng thái App sẽ re-render!",
+        );
       }
     };
 
@@ -44,7 +51,7 @@ function App() {
   // 2. KÍCH HOẠT SOCKET.IO (Chỉ kết nối khi đã có thông tin user)
   const currentUserId = user?.id;
   // Lưu ý: Không cần truyền token vào hook nữa vì API tự dùng Cookie
-  const { notifications, unreadCount } = useNotification(currentUserId); 
+  const { notifications, unreadCount } = useNotification(currentUserId);
 
   // 3. HIỂN THỊ MÀN HÌNH CHỜ TRONG LÚC GỌI API /auth/me
   if (loading || !isInitialized) {

@@ -1,6 +1,8 @@
 package com.vlt.ecommerce.feature.shop;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,15 +15,19 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
+import com.vlt.ecommerce.feature.product.Category;
 import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
 import com.vlt.ecommerce.feature.product.mapper.ProductMapper;
+import com.vlt.ecommerce.feature.product.repository.CategoryRepository;
 import com.vlt.ecommerce.feature.product.repository.ProductRepository;
 import com.vlt.ecommerce.feature.shop.dto.request.ShopRequest;
 import com.vlt.ecommerce.feature.shop.dto.response.ShopResponse;
 import com.vlt.ecommerce.feature.shop.mapper.ShopMapper;
 import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
+import com.vlt.ecommerce.feature.user.Role;
 import com.vlt.ecommerce.feature.user.User;
+import com.vlt.ecommerce.feature.user.repository.RoleRepository;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
 import lombok.AccessLevel;
@@ -37,6 +43,8 @@ public class ShopService {
     ShopRepository shopRepository;
     UserRepository userRepository;
     ProductRepository productRepository;
+    RoleRepository roleRepository;
+    CategoryRepository categoryRepository;
     ShopMapper shopMapper;
     ProductMapper productMapper;
 
@@ -45,23 +53,33 @@ public class ShopService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        User seller =  userRepository.findByEmail(email)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+        User seller = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        if (shopRepository.existsBySellerId(seller.getId())) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+        boolean isAlreadySeller = seller.getRoles().stream()
+                .anyMatch(r -> r.getName().equals("ROLE_SELLER"));
+
+        if (isAlreadySeller) {
+            throw new AppException(ErrorCode.RESOURCE_EXISTED); // Hoặc tạo lỗi riêng: SHOP_ALREADY_EXISTS
         }
+
+        Role sellerRole = roleRepository.findByName("ROLE_SELLER")
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+        seller.getRoles().add(sellerRole);
+
+        Set<Category> categories = new HashSet<>(categoryRepository.findAllById(request.getCategoryIds()));
 
         Shop newShop = shopMapper.tShop(request);
         newShop.setSeller(seller);
+        newShop.setCategories(categories);
 
         return shopMapper.toShopResponse(shopRepository.save(newShop));
     }
 
-    @Transactional //giữ mạng gọi proxy - note trong model
+    @Transactional // giữ mạng gọi proxy - note trong model
     public ShopResponse update(ShopRequest request, Long id) {
         Shop shop = shopRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -75,7 +93,7 @@ public class ShopService {
 
     public ShopResponse get(Long id) {
         Shop shop = shopRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         return shopMapper.toShopResponse(shop);
     }
@@ -86,7 +104,7 @@ public class ShopService {
         }
 
         List<Product> products = productRepository.findByShopId(shopId);
-        
+
         return productMapper.toProductResponseList(products);
     }
 
@@ -104,7 +122,7 @@ public class ShopService {
 
     @Transactional
     public PageResponse<ShopResponse> searchShops(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page-1, size, Sort.by("rating").descending());
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("rating").descending());
         Page<Shop> shopPage = shopRepository.searchShopsByKeyword(keyword, pageable);
         List<ShopResponse> content = shopMapper.toShopResponses(shopPage.getContent());
         return PageResponse.of(shopPage, content);
