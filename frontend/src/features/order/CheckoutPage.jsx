@@ -2,9 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../shared/utils/api";
-// Thay đổi Navbar tương ứng với component của bạn, ở đây giả sử dùng Navbar chung
 import Navbar from "../../shared/components/Navbar";
-import { MapPin, Ticket, Coins, CreditCard, CheckCircle2 } from "lucide-react";
+import {
+  MapPin,
+  Ticket,
+  Coins,
+  CreditCard,
+  CheckCircle2,
+  Plus,
+  X,
+} from "lucide-react";
 
 const PAYMENT_METHODS = [
   { value: "COD", label: "Thanh toán khi nhận hàng" },
@@ -19,31 +26,43 @@ const formatAddress = (addr) => {
     .join(", ");
 };
 
+const INITIAL_ADDRESS_STATE = {
+  fullName: "",
+  phone: "",
+  province: "",
+  district: "",
+  ward: "",
+  detail: "",
+  isDefault: true, // Khi tạo mới ở Checkout, thường gán luôn làm mặc định
+};
+
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Dữ liệu lấy từ CartPage truyền sang qua state
   const selectedCartItems = location.state?.selectedItems || [];
 
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [addressLoading, setAddressLoading] = useState(true);
+
+  // States quản lý việc chọn/thêm địa chỉ
   const [showAddressPicker, setShowAddressPicker] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newAddress, setNewAddress] = useState(INITIAL_ADDRESS_STATE);
+  const [addingAddress, setAddingAddress] = useState(false);
 
   const [note, setNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("COD");
   const [submitting, setSubmitting] = useState(false);
   const [useCoins, setUseCoins] = useState(false);
 
-  // Sinh Idempotency Key 1 lần duy nhất cho mỗi phiên mở trang
   const [idempotencyKey] = useState(() =>
     typeof crypto !== "undefined" && crypto.randomUUID
       ? crypto.randomUUID()
       : `txn-${Date.now()}`,
   );
 
-  // 1. Kiểm tra nếu vào trang mà chưa chọn hàng
   useEffect(() => {
     if (!selectedCartItems || selectedCartItems.length === 0) {
       toast.error("Vui lòng chọn sản phẩm từ giỏ hàng trước khi thanh toán!");
@@ -51,28 +70,59 @@ export default function CheckoutPage() {
     }
   }, [selectedCartItems, navigate]);
 
-  // 2. Fetch danh sách địa chỉ của User
-  useEffect(() => {
-    const fetchAddresses = async () => {
-      try {
-        setAddressLoading(true);
-        const res = await api.get("/addresses");
-        const list = res.data.result || [];
-        setAddresses(list);
+  const fetchAddresses = async () => {
+    try {
+      setAddressLoading(true);
+      const res = await api.get("/addresses");
+      const list = res.data.result || [];
+      setAddresses(list);
 
-        // Mặc định chọn địa chỉ isDefault = true, nếu không có thì lấy cái đầu tiên
+      // Nếu chưa chọn địa chỉ nào, tự động pick cái mặc định hoặc cái đầu tiên
+      if (!selectedAddressId) {
         const defaultAddr = list.find((a) => a.isDefault) || list[0];
         if (defaultAddr) setSelectedAddressId(defaultAddr.id);
-      } catch (error) {
-        toast.error("Không thể tải danh sách địa chỉ!");
-      } finally {
-        setAddressLoading(false);
       }
-    };
+    } catch (error) {
+      toast.error("Không thể tải danh sách địa chỉ!");
+    } finally {
+      setAddressLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchAddresses();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 3. Logic Gộp nhóm theo Shop (Giống màn Cart)
+  // HÀM XỬ LÝ THÊM ĐỊA CHỈ MỚI TẠI CHỖ
+  const handleAddNewAddress = async (e) => {
+    e.preventDefault();
+    setAddingAddress(true);
+    try {
+      const res = await api.post("/addresses", newAddress);
+      toast.success("Thêm địa chỉ thành công!");
+      setShowAddModal(false);
+      setNewAddress(INITIAL_ADDRESS_STATE);
+
+      // Tải lại danh sách
+      const listRes = await api.get("/addresses");
+      const list = listRes.data.result || [];
+      setAddresses(list);
+
+      // Chọn luôn địa chỉ vừa tạo
+      if (res.data.result?.id) {
+        setSelectedAddressId(res.data.result.id);
+        setShowAddressPicker(false); // Ẩn luôn list chọn nếu đang mở
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message || "Không thể thêm địa chỉ mới",
+      );
+    } finally {
+      setAddingAddress(false);
+    }
+  };
+
   const groupedByShop = selectedCartItems.reduce((acc, item) => {
     const shopId = item.shopId;
     if (!acc[shopId]) {
@@ -86,66 +136,52 @@ export default function CheckoutPage() {
     return acc;
   }, {});
 
-  // 4. Các biến tính toán tiền tệ
   const totalItemsAmount = selectedCartItems.reduce(
     (sum, item) => sum + item.totalPrice,
     0,
   );
-
-  // Phí vận chuyển giả định (Mock): 16.500đ / Shop
   const shippingFeePerShop = 16500;
   const totalShippingFee =
     Object.keys(groupedByShop).length * shippingFeePerShop;
-
-  // Xu giả định
   const coinDiscount = useCoins ? 200 : 0;
-
   const grandTotal = totalItemsAmount + totalShippingFee - coinDiscount;
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
 
-  // 5. Logic Đặt hàng cốt lõi
   const handlePlaceOrder = async () => {
     if (!selectedAddressId) {
-      toast.error("Vui lòng chọn địa chỉ nhận hàng!");
+      toast.error("Vui lòng chọn hoặc thêm địa chỉ nhận hàng!");
       return;
     }
 
     setSubmitting(true);
     try {
-      // BƯỚC 1: TẠO ĐƠN HÀNG (OrderService sẽ tách làm nhiều đơn dựa theo shopId)
       const orderRes = await api.post("/orders", {
         addressId: selectedAddressId,
         note: note.trim() || null,
         idempotencyKey: idempotencyKey,
-        cartItemIds: selectedCartItems.map(item => item.id),
+        cartItemIds: selectedCartItems.map((item) => item.id),
       });
 
       const createdOrders = orderRes.data.result || [];
       if (createdOrders.length === 0)
         throw new Error("Không có đơn hàng nào được tạo.");
 
-      // BƯỚC 2: TẠO LIÊN KẾT THANH TOÁN (Payment) CHO TỪNG ĐƠN
-      // Ví dụ: Có 2 đơn hàng, ta sẽ tạo 2 payment tương ứng.
       const paymentResults = await Promise.allSettled(
         createdOrders.map((order) =>
           api.post(`/payments/orders/${order.id}`, { method: paymentMethod }),
         ),
       );
 
-      // BƯỚC 3: NẾU THANH TOÁN MOCK_ONLINE, TỰ ĐỘNG XÁC NHẬN LUÔN
       if (paymentMethod === "MOCK_ONLINE") {
         const confirmResults = await Promise.allSettled(
           paymentResults
             .filter((r) => r.status === "fulfilled")
             .map((r) => {
               const paymentId = r.value?.data?.result?.id;
-              if (paymentId) {
-                return api.post(`/payments/${paymentId}/confirm`);
-              }
+              if (paymentId) return api.post(`/payments/${paymentId}/confirm`);
               return Promise.resolve();
             }),
         );
-
         if (confirmResults.some((r) => r.status === "rejected")) {
           toast.error(
             "Một số giao dịch thanh toán online bị lỗi, vui lòng kiểm tra lại đơn hàng.",
@@ -153,14 +189,10 @@ export default function CheckoutPage() {
         }
       }
 
-      // Xoá giỏ hàng thành công -> Bắn event update Navbar số lượng
       window.dispatchEvent(new Event("cart_updated"));
       toast.success("Đặt hàng thành công!");
-
-      // Chuyển hướng sang trang lịch sử đơn mua
       navigate("/orders", { replace: true });
     } catch (error) {
-      // 409 Conflict: Bắt dính lỗi Idempotency Double Submit!
       if (error.response?.status === 409) {
         toast.error(
           "Giao dịch đang được xử lý, vui lòng không nhấn đặt hàng nhiều lần!",
@@ -175,7 +207,6 @@ export default function CheckoutPage() {
     }
   };
 
-  // Tránh render mớ hỗn độn nếu chưa có data giỏ hàng bị ép redirect
   if (selectedCartItems.length === 0) return null;
 
   return (
@@ -191,6 +222,20 @@ export default function CheckoutPage() {
 
           {addressLoading ? (
             <div className="text-gray-500">Đang tải địa chỉ...</div>
+          ) : addresses.length === 0 ? (
+            // TRƯỜNG HỢP CHƯA CÓ ĐỊA CHỈ NÀO TỪ TRƯỚC
+            <div className="flex flex-col items-start gap-3">
+              <div className="text-gray-600">
+                Bạn chưa thiết lập địa chỉ nhận hàng nào. Vui lòng thêm địa chỉ
+                để tiếp tục!
+              </div>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="bg-[#ee4d2d] text-white px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#d73211] flex items-center gap-1"
+              >
+                <Plus size={16} /> Thêm địa chỉ mới
+              </button>
+            </div>
           ) : selectedAddress ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
@@ -214,14 +259,10 @@ export default function CheckoutPage() {
                 Thay Đổi
               </button>
             </div>
-          ) : (
-            <div className="text-gray-500">
-              Bạn chưa thiết lập địa chỉ nhận hàng.
-            </div>
-          )}
+          ) : null}
 
           {/* Modal/Dropdown chọn địa chỉ */}
-          {showAddressPicker && (
+          {showAddressPicker && addresses.length > 0 && (
             <div className="mt-4 p-4 border border-gray-200 rounded bg-gray-50 space-y-3">
               {addresses.map((addr) => (
                 <label
@@ -248,19 +289,25 @@ export default function CheckoutPage() {
                   </div>
                 </label>
               ))}
-              <div className="pt-2">
+              <div className="pt-3 flex gap-3">
                 <button
                   onClick={() => setShowAddressPicker(false)}
-                  className="bg-white border text-gray-700 px-4 py-1.5 text-sm rounded shadow-sm hover:bg-gray-100"
+                  className="bg-white border text-gray-700 px-6 py-1.5 text-sm rounded shadow-sm hover:bg-gray-100 font-medium"
                 >
                   Xong
+                </button>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="text-[#ee4d2d] border border-[#ee4d2d] bg-white px-4 py-1.5 text-sm rounded hover:bg-orange-50 font-medium flex items-center gap-1"
+                >
+                  <Plus size={16} /> Thêm địa chỉ mới
                 </button>
               </div>
             </div>
           )}
         </div>
 
-        {/* SECTION 2: DANH SÁCH SẢN PHẨM (Group by Shop) */}
+        {/* SECTION 2: DANH SÁCH SẢN PHẨM */}
         <div className="bg-white rounded-sm shadow-sm">
           <div className="grid grid-cols-12 px-6 py-4 border-b text-gray-500 text-sm font-medium">
             <div className="col-span-6 text-gray-800 text-lg">Sản phẩm</div>
@@ -314,7 +361,6 @@ export default function CheckoutPage() {
                 </div>
               ))}
 
-              {/* Lời nhắn & Vận chuyển của từng Shop */}
               <div className="grid grid-cols-12 px-6 py-4 items-center bg-[#fafdff] border-b border-dashed">
                 <div className="col-span-6 flex items-center gap-4">
                   <span className="text-sm">Lời nhắn:</span>
@@ -347,7 +393,7 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        {/* SECTION 3: VOUCHER & XU */}
+        {/* SECTION 3 & 4: VOUCHER, COIN & THANH TOÁN (Giữ nguyên như của bạn) */}
         <div className="bg-white rounded-sm shadow-sm space-y-4 py-2">
           <div className="px-6 py-4 flex items-center justify-between border-b">
             <div className="flex items-center gap-2 text-lg text-gray-800">
@@ -376,7 +422,6 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* SECTION 4: PHƯƠNG THỨC THANH TOÁN */}
         <div className="bg-white rounded-sm shadow-sm">
           <div className="px-6 py-6 border-b flex items-start gap-8">
             <div className="text-lg font-medium text-gray-800 w-48 shrink-0">
@@ -444,6 +489,115 @@ export default function CheckoutPage() {
           </div>
         </div>
       </div>
+
+      {/* ========================================== */}
+      {/* POPUP MODAL THÊM ĐỊA CHỈ NGAY TẠI CHECKOUT */}
+      {/* ========================================== */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-sm w-[500px] shadow-lg overflow-hidden">
+            <div className="px-6 py-4 border-b flex justify-between items-center">
+              <h2 className="text-lg font-medium text-gray-800">
+                Thêm địa chỉ mới
+              </h2>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddNewAddress}>
+              <div className="p-6 space-y-4">
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    placeholder="Họ và tên"
+                    required
+                    value={newAddress.fullName}
+                    onChange={(e) =>
+                      setNewAddress({ ...newAddress, fullName: e.target.value })
+                    }
+                    className="w-1/2 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Số điện thoại"
+                    required
+                    value={newAddress.phone}
+                    onChange={(e) =>
+                      setNewAddress({ ...newAddress, phone: e.target.value })
+                    }
+                    className="w-1/2 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
+                  />
+                </div>
+
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    placeholder="Tỉnh/Thành phố"
+                    required
+                    value={newAddress.province}
+                    onChange={(e) =>
+                      setNewAddress({ ...newAddress, province: e.target.value })
+                    }
+                    className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Quận/Huyện"
+                    required
+                    value={newAddress.district}
+                    onChange={(e) =>
+                      setNewAddress({ ...newAddress, district: e.target.value })
+                    }
+                    className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Phường/Xã"
+                    required
+                    value={newAddress.ward}
+                    onChange={(e) =>
+                      setNewAddress({ ...newAddress, ward: e.target.value })
+                    }
+                    className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
+                  />
+                </div>
+
+                <input
+                  type="text"
+                  placeholder="Địa chỉ cụ thể (Số nhà, Tên đường...)"
+                  required
+                  value={newAddress.detail}
+                  onChange={(e) =>
+                    setNewAddress({ ...newAddress, detail: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
+                />
+              </div>
+
+              <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-6 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-100 transition-colors"
+                >
+                  Trở lại
+                </button>
+                <button
+                  type="submit"
+                  disabled={addingAddress}
+                  className="px-6 py-2 text-sm text-white bg-[#ee4d2d] rounded-sm hover:bg-[#d73211] transition-colors disabled:opacity-70"
+                >
+                  {addingAddress ? "Đang lưu..." : "Hoàn thành"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

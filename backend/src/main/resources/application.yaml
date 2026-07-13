@@ -8,7 +8,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update # Tạm thời dùng update để Spring Boot tự tạo bảng
+      ddl-auto: validate # Tạm thời dùng update để Spring Boot tự tạo bảng (sau đó tăt bằng validate chạy script)
     show-sql: true
     properties:
       hibernate.format_sql: true

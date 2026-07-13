@@ -67,7 +67,14 @@ export default function Navbar() {
       <div className="bg-green-800 text-white text-xs">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 md:px-12 py-1.5">
           <div className="flex items-center gap-3">
-            <Link to="/seller" className="hover:opacity-80">
+            <Link
+              to={
+                user?.role === "SELLER"
+                  ? "/seller/dashboard"
+                  : "/seller/onboarding"
+              }
+              className="hover:opacity-80"
+            >
               Kênh Người Bán
             </Link>
             <span className="w-px h-3 bg-white/30" />

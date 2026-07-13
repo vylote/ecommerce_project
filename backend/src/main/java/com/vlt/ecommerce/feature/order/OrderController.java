@@ -59,7 +59,7 @@ public class OrderController {
     public ApiResponse<PageResponse<OrderResponse>> getOwnHistoryOrder(
         @RequestParam(defaultValue = "1") int page,
         @RequestParam(defaultValue = "10") int size,
-        @RequestParam(defaultValue = "PENDING") OrderStatus status) {
+        @RequestParam(required = false) OrderStatus status) {
         
         return ApiResponse.<PageResponse<OrderResponse>>builder()
             .result(orderService.getOwnHistoryOrder(page, size, status))

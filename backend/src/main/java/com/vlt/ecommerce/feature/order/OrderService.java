@@ -35,7 +35,6 @@ import com.vlt.ecommerce.feature.product.repository.ProductRepository;
 import com.vlt.ecommerce.feature.shop.Shop;
 import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 import com.vlt.ecommerce.feature.user.Address;
-import com.vlt.ecommerce.feature.user.Role;
 import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.dto.response.AddressResponse;
 import com.vlt.ecommerce.feature.user.mapper.AddressMapper;
@@ -224,9 +223,6 @@ public class OrderService {
     public OrderResponse completeOrder(Long id) {
         User buyer = getCurrentUser();
 
-        // Order order = orderRepository.findById(id)
-        //         .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
-
         Order order = orderRepository.findByIdForUpdate(id)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
@@ -251,8 +247,12 @@ public class OrderService {
         // Sắp xếp đơn hàng mới nhất lên đầu
         Pageable pageable = PageRequest.of(page-1, size, Sort.by("createdAt").descending());
 
-        // Gọi database (Đã chặn N+1 query bằng EntityGraph)
-        Page<Order> orderPage = orderRepository.findByBuyerIdAndStatus(buyer.getId(), status, pageable);
+        Page<Order> orderPage;
+        if (status == null) {
+            orderPage = orderRepository.findByBuyerId(buyer.getId(), pageable);
+        } else {
+            orderPage = orderRepository.findByBuyerIdAndStatus(buyer.getId(), status, pageable);
+        }
 
         List<OrderResponse> content = orderMapper.toOrderResponses(orderPage.getContent());
 
@@ -266,11 +266,14 @@ public class OrderService {
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        if (user.getRole() == Role.BUYER && !order.getBuyer().getId().equals(user.getId())) {
+        boolean isBuyer = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_BUYER"));
+        boolean isSeller = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_SELLER"));
+
+        if (isBuyer && !order.getBuyer().getId().equals(user.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
-        } 
+        }
         
-        if (user.getRole() == Role.SELLER && !order.getShop().getSeller().getId().equals(user.getId())) {
+        if (isSeller && !order.getShop().getSeller().getId().equals(user.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 

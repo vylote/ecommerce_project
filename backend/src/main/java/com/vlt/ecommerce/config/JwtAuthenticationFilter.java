@@ -1,7 +1,9 @@
 package com.vlt.ecommerce.config;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -61,8 +63,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Lấy thông tin từ Payload
                 String ssid = signedJWT.getJWTClaimsSet().getStringClaim("sessionId");
                 String email = signedJWT.getJWTClaimsSet().getSubject();
-                String scope = signedJWT.getJWTClaimsSet().getStringClaim("scope"); // VD: "ROLE_BUYER"
                 Long userId = signedJWT.getJWTClaimsSet().getLongClaim("userId");
+
+                List<String> roles = signedJWT.getJWTClaimsSet().getStringListClaim("roles");
+                List<String> permissions = signedJWT.getJWTClaimsSet().getStringListClaim("permissions");
 
                 // KIỂM TRA LỆNH TRUY NÃ TỪ REDIS
                 if (blacklistService.isSsidBlacklisted(ssid)) {
@@ -71,9 +75,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
 
                 // Nếu mọi thứ an toàn, cấp "thẻ hành nghề" cho User đi qua
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority(scope);
+                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+                if (roles != null) {
+                    authorities.addAll(roles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList()));
+                }
+
+                // Đổ mảng Permissions vào (Spring Security dùng các chuỗi này cho hàm hasAuthority())
+                if (permissions != null) {
+                    authorities.addAll(permissions.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList()));
+                }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        email, null, Collections.singletonList(authority));
+                        email, null, authorities);
                 
                 authentication.setDetails(userId);
                 SecurityContextHolder.getContext().setAuthentication(authentication);

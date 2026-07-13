@@ -76,8 +76,8 @@ public class UserService {
         try {
             if (file != null && !file.isEmpty()) {
                 String secureUrl = cloudinaryService.uploadFile(file, "ecommerce/users");
-                
-                cloudinaryService.deleteFile(oldPublicId);
+                if (oldPublicId != null)
+                    cloudinaryService.deleteFile(oldPublicId);
                 user.setAvatarUrl(secureUrl);
             }
         } catch (IOException e) {
