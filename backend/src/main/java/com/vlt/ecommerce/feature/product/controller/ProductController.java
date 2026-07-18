@@ -103,6 +103,24 @@ public class ProductController {
                 .result(productService.getProductReviews(id, rating, page, size))
                 .build();
     }
+
+    @GetMapping("/seller")
+    public ApiResponse<PageResponse<ProductResponse>> getMyProducts(
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) Double minRating,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String order) {
+
+        return ApiResponse.<PageResponse<ProductResponse>>builder()
+                .result(productService.getMyProducts(categoryId, keyword, minPrice, maxPrice, minRating, status, page, size, sortBy, order))
+                .build();
+    }
 }
 /* ==============================================================================
      * CHUẨN MỰC THIẾT KẾ RESTFUL API: @RequestParam vs @PathVariable

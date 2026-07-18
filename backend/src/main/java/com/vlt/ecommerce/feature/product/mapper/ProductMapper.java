@@ -19,7 +19,7 @@ public interface ProductMapper {
     @Mapping(target = "createdAt", ignore = true) 
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "shop", ignore = true)
-    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "category", ignore = true) 
     @Mapping(target = "images", ignore = true)
     @Mapping(target = "cartItems", ignore = true)
     @Mapping(target = "orderItems", ignore = true)

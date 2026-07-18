@@ -24,7 +24,10 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
            "(:minPrice IS NULL OR p.price >= :minPrice) AND " +
            "(:maxPrice IS NULL OR p.price <= :maxPrice) AND " +
            "(:minRating IS NULL OR p.averageRating >= :minRating) AND " +
-           "p.status = 'ACTIVE'")
+           "((:statusFilter = 'ALL' AND p.status != 'DELETED') OR " +
+           " (:statusFilter = 'ACTIVE' AND p.status = 'ACTIVE') OR " +
+           " (:statusFilter = 'INACTIVE' AND p.status = 'INACTIVE') OR " +
+           " (:statusFilter = 'OUT_OF_STOCK' AND p.stockQuantity = 0 AND p.status != 'DELETED'))")
     Page<Product> filterProducts(
         @Param("categoryId") Long categoryId,
         @Param("shopId") Long shopId,
@@ -32,6 +35,7 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
         @Param("minPrice") BigDecimal minPrice,
         @Param("maxPrice") BigDecimal maxPrice,
         @Param("minRating") Double minRating,
+        @Param("statusFilter") String statusFilter,
         Pageable pageable
     );
 
