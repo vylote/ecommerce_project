@@ -73,6 +73,8 @@ public class Shop {
         inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     @Builder.Default
+    @ToString.Exclude          // <--- THÊM DÒNG NÀY
+    @EqualsAndHashCode.Exclude // <--- THÊM DÒNG NÀY
     Set<Category> categories = new HashSet<>();
 }
 

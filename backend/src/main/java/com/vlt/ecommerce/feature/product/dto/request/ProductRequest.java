@@ -2,6 +2,8 @@ package com.vlt.ecommerce.feature.product.dto.request;
 
 import java.math.BigDecimal;
 
+import com.vlt.ecommerce.feature.product.ProductStatus;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,4 +25,5 @@ public class ProductRequest {
     Integer stockQuantity;
     @NotNull(message = "Danh mục không được để trống")
     Long categoryId;
+    ProductStatus status;
 }

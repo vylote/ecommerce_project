@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
+import com.vlt.ecommerce.feature.product.Category;
 import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.product.ProductImage;
 import com.vlt.ecommerce.feature.product.dto.request.ProductRequest;
@@ -25,6 +25,7 @@ import com.vlt.ecommerce.feature.product.dto.response.ProductImageResponse;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
 import com.vlt.ecommerce.feature.product.mapper.ProductImageMapper;
 import com.vlt.ecommerce.feature.product.mapper.ProductMapper;
+import com.vlt.ecommerce.feature.product.repository.CategoryRepository;
 import com.vlt.ecommerce.feature.product.repository.ProductImageRepository;
 import com.vlt.ecommerce.feature.product.repository.ProductRepository;
 import com.vlt.ecommerce.feature.review.Review;
@@ -52,6 +53,7 @@ public class ProductService {
     ProductImageRepository productImageRepository;
     ReviewRepository reviewRepository;
     ReviewMapper reviewMapper;
+    CategoryRepository categoryRepository;
 
     CloudinaryService cloudinaryService;
     ShopService shopService;
@@ -59,14 +61,23 @@ public class ProductService {
     @PreAuthorize("hasRole('SELLER')")
     public ProductResponse create(ProductRequest request) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Long sellerId = ((Number) jwt.getClaim("userId")).longValue();
+        Long sellerId = (Long) authentication.getDetails();
 
         Shop shop = shopRepository.findBySellerId(sellerId);
         if (shop == null) 
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
         Product newProduct = productMapper.toProduct(request);
         newProduct.setShop(shop);
+        newProduct.setCategory(category);
+
+        if (request.getStatus() != null) {
+            newProduct.setStatus(request.getStatus());
+        }
+
         return productMapper.toProductResponse(productRepository.save(newProduct));
     }
 
@@ -130,7 +141,8 @@ public class ProductService {
         // page - 1: Để Frontend được truyền page=1 cho tự nhiên
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        Page<Product> productPage = productRepository.filterProducts(categoryId, shopId, keyword, minPrice, maxPrice, minRating, pageable);
+        Page<Product> productPage = productRepository.filterProducts(
+            categoryId, shopId, keyword, minPrice, maxPrice, minRating, "ACTIVE", pageable);
 
         List<ProductResponse> content = productMapper.toProductResponseList(productPage.getContent()); //10 sản phẩm được căt
 
@@ -164,5 +176,36 @@ public class ProductService {
         product.setReviewCount(count.intValue());
         product.setAverageRating(average);
         shopService.updateShopRating(product.getShop().getId());
+    }
+
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('SELLER')")
+    public PageResponse<ProductResponse> getMyProducts(
+            Long categoryId, String keyword, BigDecimal minPrice, BigDecimal maxPrice, Double minRating, 
+            String statusFilter,
+            int page, int size, String sortBy, String order) {
+
+        // 1. Lấy sellerId từ Token (như cách bạn làm ở hàm create)
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long sellerId = (Long) authentication.getDetails();
+
+        // 2. Tìm Shop của Seller này
+        Shop shop = shopRepository.findBySellerId(sellerId);
+        if (shop == null) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
+
+        // 3. Gọi hàm filter có sẵn, nhưng ÉP CỨNG shopId
+        Sort sort = order.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+
+        String finalStatus = (statusFilter == null || statusFilter.isBlank()) ? "ALL" : statusFilter;
+
+        Page<Product> productPage = productRepository.filterProducts(
+            categoryId, shop.getId(), keyword, minPrice, maxPrice, minRating, finalStatus, pageable);
+
+        List<ProductResponse> content = productMapper.toProductResponseList(productPage.getContent());
+
+        return PageResponse.of(productPage, content);
     }
 }

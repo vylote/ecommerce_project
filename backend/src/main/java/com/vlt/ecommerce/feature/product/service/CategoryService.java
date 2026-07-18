@@ -37,6 +37,7 @@ public class CategoryService {
         }
 
         Category newCategory = categoryMapper.toCategory(request);
+        newCategory.setParent(newCategory);
         
         return categoryMapper.toCategoryResponse(categoryRepository.save(newCategory));
     }

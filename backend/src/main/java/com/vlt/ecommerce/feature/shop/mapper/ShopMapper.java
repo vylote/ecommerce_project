@@ -33,6 +33,7 @@ public interface ShopMapper {
     @Mapping(target = "createdAt", ignore = true) 
     @Mapping(target = "products", ignore = true) 
     @Mapping(target = "rating", ignore = true) 
+    @Mapping(target = "categories", ignore = true) 
     void updateShopFromRequest(ShopRequest request, @MappingTarget Shop shop);
 
     List<ShopResponse> toShopResponses(List<Shop> shops);

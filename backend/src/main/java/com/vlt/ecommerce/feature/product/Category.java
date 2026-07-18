@@ -88,5 +88,7 @@ public class Category {
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude          // <--- THÊM DÒNG NÀY
+    @EqualsAndHashCode.Exclude // <--- THÊM DÒNG NÀY
     Set<Shop> shops = new HashSet<>();
 }
