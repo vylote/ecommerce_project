@@ -31,24 +31,4 @@ public class AppConfig {
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
-
-    // @Bean
-    // ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
-    //     return args -> {
-    //         if (userRepository.findByEmail("admin@gmail.com").isEmpty()) {
-    //             Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-    //                 .orElseGet(() -> roleRepository.save(Role.builder().name("ROLE_ADMIN").build()));
-
-    //             User admin = User.builder()
-    //                 .email("admin@gmail.com")
-    //                 .password(passwordEncoder.encode("admin"))
-    //                 .fullName("super administrator")
-    //                 .role(Role.ADMIN)
-    //                 .build();
-
-    //             userRepository.save(admin);
-    //             log.warn("admin has been created");
-    //         }
-    //     };
-    // }
 }

@@ -21,6 +21,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>{
 
     @EntityGraph(attributePaths = {"items"})
     Page<Order> findByShopId(Long shopId, Pageable pageable);
+    @EntityGraph(attributePaths = {"items"})
+    Page<Order> findByShopIdAndStatus(Long shopId, OrderStatus status, Pageable pageable);
 
     @Query("SELECT o FROM Order o JOIN FETCH o.shop s JOIN FETCH s.seller WHERE o.id = :id")
     Optional<Order> findByIdWithShopAndSeller(@Param("id") Long id);

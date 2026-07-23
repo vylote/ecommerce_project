@@ -318,7 +318,7 @@ public class OrderService {
     }
 
     @PreAuthorize("hasRole('SELLER')")
-    public PageResponse<OrderResponse> getSellerOrders(int page, int size) {
+    public PageResponse<OrderResponse> getSellerOrders(int page, int size, OrderStatus status) {
         User seller = getCurrentUser();
 
         Shop shop = shopRepository.findBySellerId(seller.getId());
@@ -326,8 +326,13 @@ public class OrderService {
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
         }
 
-        Pageable pageable = PageRequest.of(page-1, size, Sort.by("order.createdAt").descending());
-        Page<Order> orderPage = orderRepository.findByShopId(shop.getId(), pageable);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        Page<Order> orderPage;
+        if (status == null) {
+            orderPage = orderRepository.findByShopId(shop.getId(), pageable);
+        } else {
+            orderPage = orderRepository.findByShopIdAndStatus(shop.getId(), status, pageable);
+        }
 
         List<OrderResponse> content = orderMapper.toOrderResponses(orderPage.getContent());
 
