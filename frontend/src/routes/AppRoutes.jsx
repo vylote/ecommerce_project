@@ -17,6 +17,7 @@ import SellerLayout from '../features/seller/SellerLayout';
 import SellerDashboard from '../features/seller/SellerDashboard';
 import AddProduct from '../features/seller/AddProduct';
 import SellerProductPage from '../features/seller/SellerProductPage';
+import SellerOrderPage from '../features/seller/SellerOrderPage';
 
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
@@ -61,6 +62,7 @@ export const AppRoutes = () => {
         <Route path="dashboard" element={<SellerDashboard />} />
         <Route path="products" element={<SellerProductPage />} />
         <Route path="product/add" element={<AddProduct />} />
+        <Route path="orders" element={<SellerOrderPage />} />
       </Route>
     </Routes>
   );

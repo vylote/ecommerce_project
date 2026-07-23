@@ -76,10 +76,11 @@ public class OrderController {
     @GetMapping("/seller")
     public ApiResponse<PageResponse<OrderResponse>> getSellerOrders(
         @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "10") int size) {
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(required = false) OrderStatus status) {
 
         return ApiResponse.<PageResponse<OrderResponse>>builder()
-            .result(orderService.getSellerOrders(page, size))
+            .result(orderService.getSellerOrders(page, size, status))
             .build();
     }
 
