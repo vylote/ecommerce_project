@@ -45,8 +45,6 @@ public class NotificationService {
             .build();
 
         Notification savedNotification = notificationRepository.save(notification);
-        
-        // --- TỪ DÒNG NÀY TRỞ ĐI, DỮ LIỆU ĐÃ NẰM AN TOÀN 100% TRONG MYSQL ---
 
         try {
             log.info("=> Bắt đầu gọi API sang Node.js...");

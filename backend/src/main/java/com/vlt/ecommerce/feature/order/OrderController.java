@@ -1,6 +1,7 @@
 package com.vlt.ecommerce.feature.order;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
 import com.vlt.ecommerce.common.dto.PageResponse;
+import com.vlt.ecommerce.feature.order.dto.request.OrderRequest;
 import com.vlt.ecommerce.feature.order.dto.response.OrderResponse;
 
 import jakarta.validation.Valid;
@@ -88,6 +90,13 @@ public class OrderController {
     public ApiResponse<OrderResponse> getDetailOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
             .result(orderService.getDetailOrder(id))
+            .build();
+    }
+
+    @GetMapping("/seller/dashboard/stats")
+    public ApiResponse<Map<OrderStatus, Long>> getSellerDashboardStats() {
+        return ApiResponse.<Map<OrderStatus, Long>>builder()
+            .result(orderService.getDashboardStats())
             .build();
     }
 }

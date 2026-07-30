@@ -60,7 +60,6 @@ public class Order {
     // [BỔ SUNG CỘT NÀY] Khóa lũy đẳng chống Double Checkout
     @Column(name = "idempotency_key", unique = true, length = 100)
     String idempotencyKey;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
     LocalDateTime createdAt;

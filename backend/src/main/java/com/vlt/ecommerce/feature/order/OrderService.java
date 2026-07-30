@@ -2,6 +2,7 @@ package com.vlt.ecommerce.feature.order;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -26,7 +27,11 @@ import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.cart.CartItem;
 import com.vlt.ecommerce.feature.cart.CartItemRepository;
 import com.vlt.ecommerce.feature.commission.CommissionService;
+import com.vlt.ecommerce.feature.order.dto.request.OrderRequest;
 import com.vlt.ecommerce.feature.order.dto.response.OrderResponse;
+import com.vlt.ecommerce.feature.order.dto.response.OrderStatusStat;
+import com.vlt.ecommerce.feature.order.mapper.OrderMapper;
+import com.vlt.ecommerce.feature.order.repository.OrderRepository;
 import com.vlt.ecommerce.feature.payment.Payment;
 import com.vlt.ecommerce.feature.payment.Payment.PaymentMethod;
 import com.vlt.ecommerce.feature.payment.Payment.PaymentStatus;
@@ -337,6 +342,24 @@ public class OrderService {
         List<OrderResponse> content = orderMapper.toOrderResponses(orderPage.getContent());
 
         return PageResponse.of(orderPage, content);
+    }
+
+    @PreAuthorize("hasRole('SELLER')")
+    public Map<OrderStatus, Long> getDashboardStats() {
+        User seller = getCurrentUser();
+        Shop shop = shopRepository.findBySellerId(seller.getId());
+        if (shop == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+
+        List<OrderStatusStat> stats = orderRepository.countOrdersByStatusForShop(shop.getId());
+        // Chuyển List thành Map để Frontend dễ hiển thị (VD: { "PENDING": 12, "SHIPPING": 5 })
+        Map<OrderStatus, Long> result = new EnumMap<>(OrderStatus.class);
+        for (OrderStatus status : OrderStatus.values()) {
+            result.put(status, 0L);
+        }
+        for (OrderStatusStat stat : stats) {
+            result.put(stat.getStatus(), stat.getCount());
+        }
+        return result;
     }
 
     private User getCurrentUser() {

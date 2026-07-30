@@ -1,4 +1,4 @@
-package com.vlt.ecommerce.feature.order;
+package com.vlt.ecommerce.feature.order.dto.request;
 
 import java.util.List;
 

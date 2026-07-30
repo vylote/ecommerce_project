@@ -1,10 +1,11 @@
-package com.vlt.ecommerce.feature.order;
+package com.vlt.ecommerce.feature.order.mapper;
 
 import java.util.List;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
+import com.vlt.ecommerce.feature.order.OrderItem;
 import com.vlt.ecommerce.feature.order.dto.response.OrderItemResponse;
 
 @Mapper(componentModel = "spring")

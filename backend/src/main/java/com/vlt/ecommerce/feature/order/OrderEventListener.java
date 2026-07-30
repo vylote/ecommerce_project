@@ -10,6 +10,7 @@ import com.vlt.ecommerce.common.event.PaymentSuccessEvent;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.notification.NotificationService;
+import com.vlt.ecommerce.feature.order.repository.OrderRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

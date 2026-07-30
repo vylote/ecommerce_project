@@ -18,9 +18,9 @@ export const useNotification = (userId) => {
           `/notifications?page=${page}&size=${size}`,
         );
 
-        // Cấu trúc của bạn là: response.data (ApiResponse)
+        // response.data (ApiResponse)
         // -> .result (PageResponse)
-        // -> .data (List các Notification)
+        // -> .result.data (List các Notification)
         const pageResult = response.data.result;
 
         if (pageResult && pageResult.data) {
@@ -42,7 +42,7 @@ export const useNotification = (userId) => {
   useEffect(() => {
     if (!userId) return;
 
-    const socket = io(NOTIFICATION_SOCKET_URL);
+    const socket = io(NOTIFICATION_SOCKET_URL); // đây chính là mệnh lệnh kết nối->mở pipeline websocket
 
     socket.on("connect", () => {
       socket.emit("join", userId);

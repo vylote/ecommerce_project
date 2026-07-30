@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.security.Security;
 import java.util.List;
 
 @Configuration
@@ -64,6 +65,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                 .anyRequest().authenticated());
 
+        /* chèn JwtAuthenticationFilter vào đúng vị trí trong chuỗi filter của Spring Security, ngay trước filter 
+        UsernamePasswordAuthenticationFilter (filter xử lý login form truyền thống, dự án bạn không dùng tới nhưng Spring Security luôn
+        có sẵn). */
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
