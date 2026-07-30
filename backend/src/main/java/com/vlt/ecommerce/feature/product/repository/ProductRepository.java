@@ -42,6 +42,8 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
     @Query("SELECT COALESCE(AVG(p.averageRating), 0.0) FROM Product p WHERE p.shop.id = :shopId AND p.status = 'ACTIVE'")
     Double getAverageRatingByShopId(@Param("shopId") Long shopId);
 
+    //atomic update
+    // khi mysql thực thi update, nó áp dụng cơ chế row level lock
     @Modifying
     @Query("""
         UPDATE Product p 
@@ -81,3 +83,13 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
      * - Tự động chèn thêm LIMIT và OFFSET vào cuối lệnh SQL.
      * - Tự động bắn thêm 1 câu truy vấn SELECT COUNT(*) để lấy biến totalElements.
      * ============================================================================== */
+
+//@Modifying cần chạy trong 1 transaction — Spring Data JPA bắt buộc các query @Modifying phải chạy trong ngữ cảnh @Transactional, nếu không sẽ throw lỗi lúc runtime (InvalidDataAccessApiUsageException)
+
+/* Race Condition (Trạng thái tương tranh): Hiện tượng lỗi khi nhiều luồng cùng truy cập và sửa đổi một dữ liệu dùng chung, khiến kết quả cuối cùng phụ thuộc vào thứ tự các luồng được xử lý, dẫn đến kết quả không xác định (non-deterministic) hoặc sai lệch
+
+Atomic Operation: Thao tác nguyên tử, tức là một cụm lệnh thực thi trọn vẹn từ đầu đến cuối mà không thể bị xen ngang hay chia nhỏ.
+
+Row-level Locking: Cơ chế khóa cấp dòng của InnoDB (MySQL) khi thực thi lệnh UPDATE/DELETE, giúp chống ghi đè dữ liệu.
+
+Read-Modify-Write Anti-pattern: Lỗi thiết kế khi kéo dữ liệu lên tầng Application (Java) để sửa rồi lưu lại thay vì dùng Native SQL Update. */

@@ -1,5 +1,6 @@
-package com.vlt.ecommerce.feature.order;
+package com.vlt.ecommerce.feature.order.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -9,6 +10,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.vlt.ecommerce.feature.order.Order;
+import com.vlt.ecommerce.feature.order.OrderStatus;
+import com.vlt.ecommerce.feature.order.dto.response.OrderStatusStat;
 
 import jakarta.persistence.LockModeType;
 
@@ -33,4 +38,10 @@ public interface OrderRepository extends JpaRepository<Order, Long>{
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT o FROM Order o WHERE o.id = :id")
     Optional<Order> findByIdForUpdate(@Param("id") Long id);
+
+    // KỸ THUẬT GOM NHÓM (GROUP BY) TỐI ƯU DASHBOARD
+    @Query("SELECT o.status AS status, COUNT(o.id) AS count " +
+           "FROM Order o WHERE o.shop.id = :shopId " +
+           "GROUP BY o.status")
+    List<OrderStatusStat> countOrdersByStatusForShop(@Param("shopId") Long shopId);
 }

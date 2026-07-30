@@ -13,7 +13,7 @@ import com.vlt.ecommerce.common.event.PaymentSuccessEvent;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.order.Order;
-import com.vlt.ecommerce.feature.order.OrderRepository;
+import com.vlt.ecommerce.feature.order.repository.OrderRepository;
 import com.vlt.ecommerce.feature.payment.dto.PaymentRequest;
 import com.vlt.ecommerce.feature.payment.dto.PaymentResponse;
 import com.vlt.ecommerce.feature.user.User;

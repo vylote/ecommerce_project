@@ -26,7 +26,7 @@ const emitNotification = (userId, payload) => {
     if (io) {
         // Chỉ gửi tin nhắn vào đúng room có tên là userId
         io.to(userId.toString()).emit('new_notification', payload);
-        console.log(`[🚀] Đã đẩy thông báo tới User ${userId}`);
+        console.log(`Đã đẩy thông báo tới User ${userId}`);
     }
 };
 
