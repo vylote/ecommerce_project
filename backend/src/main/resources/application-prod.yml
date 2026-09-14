@@ -1,0 +1,9 @@
+notification:
+  service-url: ${NOTIFICATION_SERVICE_URL}
+
+# Trên server thường cấu hình tắt show-sql hoặc ddl-auto: validate
+spring:
+  jpa:
+    show-sql: false
+    hibernate:
+      ddl-auto: validate

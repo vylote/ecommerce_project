@@ -16,7 +16,7 @@ initSocket(server)
 
 app.use('/notify', notifyRoutes)
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3000
 server.listen(PORT, () => {
     console.log(`Notification service is running on port ${PORT}`)
 })

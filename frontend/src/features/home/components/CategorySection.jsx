@@ -12,13 +12,29 @@ export default function CategorySection() {
   const carouselRef = useRef(null);
   const rafRef = useRef(null);
 
+  const checkScrollability = () => {
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      if (carouselRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+        setCanScrollLeft(scrollLeft > 2);
+        setCanScrollRight(
+          Math.ceil(scrollLeft + clientWidth) < scrollWidth - 2,
+        );
+      }
+    });
+  };
+
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         // Gọi thẳng vào API dành riêng cho Parent Categories
         const response = await api.get("/categories/parents");
-        setCategories(response.data.result);
         
+
+        setCategories(response.data?.result || []);
+
         setTimeout(checkScrollability, 150);
       } catch (error) {
         console.error(error);
@@ -28,18 +44,6 @@ export default function CategorySection() {
     };
     fetchCategories();
   }, []);
-
-  const checkScrollability = () => {
-    if (rafRef.current) return;
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = null;
-      if (carouselRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
-        setCanScrollLeft(scrollLeft > 2);
-        setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 2);
-      }
-    });
-  };
 
   useEffect(() => {
     return () => {
@@ -134,8 +138,19 @@ export default function CategorySection() {
             onClick={() => scroll("left")}
             className="absolute top-1/2 -translate-y-1/2 -left-4 w-8 h-8 flex items-center justify-center rounded-full bg-base-100 shadow-[0_1px_12px_0_rgba(0,0,0,0.12)] border border-base-200 transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
         )}
@@ -147,8 +162,19 @@ export default function CategorySection() {
             onClick={() => scroll("right")}
             className="absolute top-1/2 -translate-y-1/2 -right-4 w-8 h-8 flex items-center justify-center rounded-full bg-base-100 shadow-[0_1px_12px_0_rgba(0,0,0,0.12)] border border-base-200 transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2.5}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </button>
         )}

@@ -1,10 +1,12 @@
 spring:
   application:
     name: ecommerce-backend
+  profiles:
+    active: dev
   datasource:
-    url: jdbc:mysql://localhost:3306/ecommerce_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
-    username: user     # Tài khoản bạn đã tạo trong Docker
-    password: 3821     # Mật khẩu bạn đã tạo trong Docker
+    url: jdbc:mysql://localhost:3307/ecommerce_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
+    username: user
+    password: "3821"
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -28,7 +30,7 @@ spring:
   data:
     redis:
       host: localhost
-      port: 6379
+      port: 6380
 
 server:
   port: 8080

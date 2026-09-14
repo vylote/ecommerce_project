@@ -1,11 +1,26 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const savedUser = localStorage.getItem('user');
+const getInitialUser = () => {
+  const savedUser = localStorage.getItem('user');
+  
+  // Bỏ qua nếu không có dữ liệu hoặc dữ liệu là chuỗi 'undefined'
+  if (!savedUser || savedUser === 'undefined') {
+    return null;
+  }
+
+  try {
+    return JSON.parse(savedUser);
+  } catch (error) {
+    // Xóa ngay dữ liệu rác nếu parse lỗi
+    localStorage.removeItem('user'); 
+    return null;
+  }
+};
 
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: savedUser ? JSON.parse(savedUser) : null,
+    user: getInitialUser(),
     isInitialized: false,
   },
   reducers: {
