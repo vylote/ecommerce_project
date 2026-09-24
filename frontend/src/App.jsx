@@ -32,7 +32,7 @@ function App() {
         if (error.response?.status === 401) {
           dispatch(logout());
         } else {
-          toast.error("Không thể kết nối đến máy chủ, vui lòng thử lại sau!");
+          Toaster.error("Không thể kết nối đến máy chủ, vui lòng thử lại sau!");
         }
         console.log("[APP-6] Đã chạy xong dispatch logout trong catch.");
       } finally {

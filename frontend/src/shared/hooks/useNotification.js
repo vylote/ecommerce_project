@@ -12,10 +12,10 @@ export const useNotification = (userId) => {
   useEffect(() => {
     if (!userId) return;
 
-    const fetchHistory = async () => {
+    const fetchHistory = async (page = 1) => {
       try {
         const response = await api.get(
-          `/notifications?page=${page}&size=${size}`,
+          `/notifications?page=${page}`,
         );
 
         // response.data (ApiResponse)
