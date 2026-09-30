@@ -60,6 +60,7 @@ logging:
     org.springframework.transaction: DEBUG
     org.hibernate.engine.transaction.internal.TransactionImpl: DEBUG
     org.hibernate.orm.jdbc.bind: TRACE
+    org.springframework.security: DEBUG
   logback:
     rollingpolicy:
       max-file-size: 10MB # Khi file đạt 10MB, nó sẽ tự cắt sang file mới (ví dụ: ecommerce-app-1.log)

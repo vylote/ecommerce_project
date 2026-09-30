@@ -3,44 +3,43 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../../shared/utils/api";
 import { logout } from "../../store/slice/authSlice";
+import UserAvatar from "./UserAvatar";
 
 export default function Navbar() {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // State lưu từ khóa tìm kiếm
   const [keyword, setKeyword] = useState("");
 
-  // STATE MỚI: Lưu số lượng giỏ hàng
   const [cartCount, setCartCount] = useState(0);
 
-  // HÀM LẤY SỐ LƯỢNG GIỎ HÀNG TỪ BACKEND
-  const fetchCartCount = async () => {
-    if (!user) {
-      setCartCount(0);
-      return;
-    }
-    try {
-      const res = await api.get("/cart");
-      // Đếm số lượng sản phẩm khác nhau trong giỏ
-      setCartCount(res.data.result?.length || 0);
-    } catch (error) {
-      console.error("Lỗi lấy số lượng giỏ hàng:", error);
-    }
-  };
-
-  // EFFECT CHẠY KHI COMPONENT MOUNT HOẶC USER THAY ĐỔI
   useEffect(() => {
+    if (!user) return; // không set state đồng bộ
+
+    let ignore = false;
+
+    const fetchCartCount = async () => {
+      try {
+        const res = await api.get("/cart");
+        if (!ignore) setCartCount(res.data.result?.length || 0); // sau await nên hợp lệ
+      } catch (error) {
+        console.error("Lỗi lấy số lượng giỏ hàng:", error);
+      }
+    };
+
     fetchCartCount();
 
-    // Lắng nghe sự kiện 'cart_updated' được bắn ra từ trang Chi tiết sản phẩm
-    const handleCartUpdate = () => fetchCartCount();
-    window.addEventListener("cart_updated", handleCartUpdate);
+    // Lắng nghe sự kiện 'cart_updated' từ trang Chi tiết sản phẩm
+    window.addEventListener("cart_updated", fetchCartCount);
 
-    // Dọn dẹp sự kiện khi Navbar bị unmount
-    return () => window.removeEventListener("cart_updated", handleCartUpdate);
+    return () => {
+      ignore = true;
+      window.removeEventListener("cart_updated", fetchCartCount);
+    };
   }, [user]);
+
+  const displayCartCount = user ? cartCount : 0;
 
   const handleLogout = async () => {
     try {
@@ -148,9 +147,7 @@ export default function Navbar() {
               <>
                 <span className="w-px h-3 bg-white/30" />
                 <span className="flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-bold">
-                    {user.fullName?.charAt(0).toUpperCase()}
-                  </span>
+                  <UserAvatar user={user} className="w-4 h-4" />
                   {user.fullName}
                 </span>
               </>
@@ -270,9 +267,9 @@ export default function Navbar() {
                       d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
                     />
                   </svg>
-                  {cartCount > 0 && (
+                  {displayCartCount > 0 && (
                     <span className="badge badge-sm bg-white text-green-700 border-none indicator-item font-bold">
-                      {cartCount > 99 ? "99+" : cartCount}
+                      {displayCartCount > 99 ? "99+" : displayCartCount}
                     </span>
                   )}
                 </div>

@@ -15,20 +15,26 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.vlt.ecommerce.common.exception.CustomAccessDeniedHandler;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    JwtAuthenticationFilter jwtAuthenticationFilter;
+    JwtAuthenticationEntryPoint authenticationEntryPoint;
+    CustomAccessDeniedHandler accessDeniedHandler;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
-
-    private final String[] PUBLIC_POST_ENDPOINTS = {
+    private String[] PUBLIC_POST_ENDPOINTS = {
             "/auth/register",
             "/auth/login",
             "/auth/refresh",
@@ -36,11 +42,10 @@ public class SecurityConfig {
             "/auth/sessions/revoke"
     };
 
-    private final String[] PUBLIC_GET_ENDPOINTS = {
+    private String[] PUBLIC_GET_ENDPOINTS = {
             "/categories", "/categories/**", "/images/**",
             "/shops/**", "/users/**",
-            "/products", "/products/**", 
-            // Các API của Swagger UI để xem document
+            "/products", "/products/**",
             "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"
     };
 
@@ -51,12 +56,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // [QUAN TRỌNG] Thêm dòng này để kích hoạt cấu hình CORS bên dưới
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         http.csrf(csrf -> csrf.disable());
 
-        // 3. Đảm bảo Spring Security hoàn toàn Stateless (Không tự tạo JSESSIONID)
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.authorizeHttpRequests(request -> request
@@ -64,9 +67,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                 .anyRequest().authenticated());
 
-        /* chèn JwtAuthenticationFilter vào đúng vị trí trong chuỗi filter của Spring Security, ngay trước filter 
-        UsernamePasswordAuthenticationFilter (filter xử lý login form truyền thống, dự án bạn không dùng tới nhưng Spring Security luôn
-        có sẵn). */
+        http.exceptionHandling(ex -> ex
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(accessDeniedHandler));
+
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
@@ -75,16 +79,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 1. Chỉ định chính xác Frontend URL
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
 
-        // 2. Cho phép các phương thức cần thiết
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
-        // 3. Cho phép tất cả headers (bao gồm Content-Type, Authorization...)
         configuration.setAllowedHeaders(List.of("*"));
 
-        // 4. Bắt buộc phải có để truyền được Cookie/Credentials
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

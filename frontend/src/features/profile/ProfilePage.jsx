@@ -1,43 +1,45 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import api from "../../shared/utils/api";
 import Navbar from "../../shared/components/Navbar";
 import ProfileSidebar from "./ProfileSidebar";
-// Nếu bạn có action để update user trong Redux, hãy import nó vào. Ví dụ: import { setUser } from '../../store/slice/authSlice';
+import { updateUser } from "../../store/slice/authSlice";
+import UserAvatar from "../../shared/components/UserAvatar";
 
 export default function ProfilePage() {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
 
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [fullName, setFullName] = useState(user?.fullName || "");
+  const [phone, setPhone] = useState(user?.phone || "");
   const [avatarFile, setAvatarFile] = useState(null);
-  const [avatarPreview, setAvatarPreview] = useState("");
+  const [localPreview, setLocalPreview] = useState(""); // chỉ cho ảnh blob mới chọn
   const [saving, setSaving] = useState(false);
 
+
+  // Dọn blob URL khi đổi ảnh hoặc unmount (effect này đồng bộ với hệ thống ngoài nên hợp lệ)
   useEffect(() => {
-    if (user) {
-      setFullName(user.fullName || "");
-      setPhone(user.phone || "");
-      setAvatarPreview(
-        user.avatarUrl ||
-          `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || "U")}&background=random`,
-      );
-    }
-  }, [user]);
+    return () => {
+      if (localPreview) URL.revokeObjectURL(localPreview);
+    };
+  }, [localPreview]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      if (file.size > 1024 * 1024) {
-        toast.error("Dung lượng file tối đa là 1MB");
-        return;
-      }
-      setAvatarFile(file);
-      setAvatarPreview(URL.createObjectURL(file));
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      toast.error("Chỉ hỗ trợ định dạng .JPEG, .PNG");
+      return;
     }
+    if (file.size > 1024 * 1024) {
+      toast.error("Dung lượng file tối đa là 1MB");
+      return;
+    }
+    setAvatarFile(file);
+    setLocalPreview(URL.createObjectURL(file));
   };
 
   const handleSave = async (e) => {
@@ -45,26 +47,22 @@ export default function ProfilePage() {
     setSaving(true);
     try {
       const formData = new FormData();
+      formData.append(
+        "request",
+        new Blob([JSON.stringify({ fullName, phone })], {
+          type: "application/json",
+        }),
+      );
+      if (avatarFile) formData.append("file", avatarFile);
 
-      // Đóng gói JSON request thành Blob để Spring Boot đọc được qua @RequestPart
-      const requestBlob = new Blob([JSON.stringify({ fullName, phone })], {
-        type: "application/json",
-      });
-      formData.append("request", requestBlob);
+      const res = await api.put("/users/profile", formData);
 
-      if (avatarFile) {
-        formData.append("file", avatarFile);
-      }
-
-      const res = await api.put("/users/profile", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const updated = res.data?.result ?? res.data;
+      dispatch(updateUser(updated));
+      setAvatarFile(null);
+      setLocalPreview(""); // quay về dùng avatarUrl từ Redux (URL Cloudinary mới)
 
       toast.success("Cập nhật hồ sơ thành công");
-
-      // FIXME: Bạn nên dispatch action cập nhật User vào Redux ở đây để Header và Sidebar ăn theo dữ liệu mới
-      // dispatch(setUser(res.data.result));
-      // Hoặc đơn giản là tải lại trang (không mượt bằng update state): window.location.reload();
     } catch (error) {
       toast.error(error.response?.data?.message || "Cập nhật thất bại");
     } finally {
@@ -138,18 +136,12 @@ export default function ProfilePage() {
 
             {/* Upload Avatar */}
             <div className="w-64 shrink-0 flex flex-col items-center justify-start pt-4">
-              {/* FIX ẢNH TRÒN: rounded-full */}
-              <div className="w-24 h-24 rounded-full overflow-hidden border border-gray-200 mb-5 bg-gray-100 flex items-center justify-center">
-                {avatarPreview ? (
-                  <img
-                    src={avatarPreview}
-                    alt="Avatar Preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  /* Hiển thị một khung xám loading trong tíc tắc chờ useEffect chạy */
-                  <div className="w-full h-full bg-gray-200 animate-pulse"></div>
-                )}
+              <div className="w-24 h-24 rounded-full overflow-hidden border border-gray-200 mb-5 bg-gray-100">
+                <UserAvatar
+                  user={user}
+                  src={localPreview}
+                  className="w-full h-full"
+                />
               </div>
 
               <input
