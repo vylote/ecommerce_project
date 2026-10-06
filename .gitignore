@@ -13,18 +13,10 @@ target/
 *.jar
 *.war
 
-# 3. Bỏ qua các file môi trường (KHÔNG BAO GIỜ push .env lên Git để tránh lộ secret)
 .env
-.env.local
 
-# 4. Bỏ qua các file cấu hình của IDE (VS Code, IntelliJ, Eclipse)
 .idea/
-.vscode/
 *.iml
 .classpath
 .project
 .settings/
-
-# 5. Bỏ qua file rác của Hệ điều hành
-.DS_Store
-Thumbs.db

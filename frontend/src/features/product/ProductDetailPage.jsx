@@ -94,7 +94,7 @@ export default function ProductDetailPage() {
     if (!user) {
       toast.error("Vui lòng đăng nhập để mua hàng!");
       navigate("/login");
-      return;
+      return false;
     }
 
     try {
@@ -107,8 +107,10 @@ export default function ProductDetailPage() {
 
       // Bắn pháo hiệu (Event) để Navbar biết đường tải lại số lượng
       window.dispatchEvent(new Event("cart_updated"));
+      return true;
     } catch (error) {
       toast.error(error.response?.data?.message || "Lỗi khi thêm vào giỏ hàng");
+      return false;
     }
   };
 
@@ -119,8 +121,10 @@ export default function ProductDetailPage() {
       return;
     }
     // Logic mua ngay: Gọi add to cart rồi chuyển trang sang Cart
-    await handleAddToCart();
-    navigate("/cart");
+    const success = await handleAddToCart();
+    if (success) {
+      navigate("/cart");
+    }
   };
 
   // LOGIC ĐIỀU KHIỂN CAROUSEL

@@ -66,9 +66,17 @@ export default function Navbar() {
       <div className="bg-green-800 text-white text-xs">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between px-4 md:px-12 py-1.5">
           <div className="flex items-center gap-3">
+            {user?.roles?.some(r => r.name === 'ROLE_ADMIN') && (
+              <>
+                <Link to="/admin" className="hover:opacity-80 font-bold text-yellow-300">
+                  Trang Admin
+                </Link>
+                <span className="w-px h-3 bg-white/30" />
+              </>
+            )}
             <Link
               to={
-                user?.role === "SELLER"
+                user?.roles?.some(r => r.name === 'ROLE_SELLER')
                   ? "/seller/dashboard"
                   : "/seller/onboarding"
               }

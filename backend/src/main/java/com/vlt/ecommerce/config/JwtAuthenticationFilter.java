@@ -15,6 +15,8 @@ import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.common.security.TokenBlacklistService;
 import com.vlt.ecommerce.feature.auth.JwtService;
+import com.vlt.ecommerce.feature.user.User;
+import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -31,6 +33,7 @@ import lombok.experimental.FieldDefaults;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     JwtService jwtService;
     TokenBlacklistService blacklistService;
+    UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -57,7 +60,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 3. Nếu có Token, tiến hành mổ xẻ và xác thực
         if (token != null) {
             try {
-                // Sử dụng hàm verifyToken của bạn (nếu lỗi, nó sẽ throw AppException và nhảy xuống catch)
+                // Sử dụng hàm verifyToken của bạn (nếu lỗi, nó sẽ throw AppException và nhảy
+                // xuống catch)
                 SignedJWT signedJWT = jwtService.verifyToken(token);
 
                 // Lấy thông tin từ Payload
@@ -74,6 +78,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
+                // KIỂM TRA USER CÓ BỊ KHÓA KHÔNG
+                User user = userRepository.findById(userId).orElse(null);
+                if (user == null || Boolean.FALSE.equals(user.getIsActive())) {
+                    sendErrorResponse(response, ErrorCode.USER_LOCKED, ErrorCode.USER_LOCKED.getMessage());
+                    return;
+                }
+
                 // Nếu mọi thứ an toàn, cấp "thẻ hành nghề" cho User đi qua
                 List<SimpleGrantedAuthority> authorities = new ArrayList<>();
                 if (roles != null) {
@@ -82,7 +93,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .collect(Collectors.toList()));
                 }
 
-                // Đổ mảng Permissions vào (Spring Security dùng các chuỗi này cho hàm hasAuthority())
+                // Đổ mảng Permissions vào (Spring Security dùng các chuỗi này cho hàm
+                // hasAuthority())
                 if (permissions != null) {
                     authorities.addAll(permissions.stream()
                             .map(SimpleGrantedAuthority::new)
@@ -90,7 +102,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         email, null, authorities);
-                
+
                 authentication.setDetails(userId);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -103,15 +115,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode, String customMessage) throws IOException {
+    private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode, String customMessage)
+            throws IOException {
         response.setStatus(errorCode.getStatusCode().value());
         response.setContentType("application/json;charset=UTF-8");
         // Giả lập cấu trúc ApiResponse của bạn
         String jsonResponse = String.format(
-            "{\"code\": %d, \"message\": \"%s\"}", 
-            errorCode.getCode(), 
-            customMessage
-        );
+                "{\"code\": %d, \"message\": \"%s\"}",
+                errorCode.getCode(),
+                customMessage);
         response.getWriter().write(jsonResponse);
     }
 }

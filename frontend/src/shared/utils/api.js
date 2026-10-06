@@ -32,6 +32,12 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    if (error.response?.data?.code === 1025) {
+      localStorage.setItem('account_locked_alert', 'true');
+      store.dispatch(logout());
+      return Promise.reject(error);
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       console.log("[API-2] Lỗi 401, kiểm tra xem có đang Refresh không...");
       

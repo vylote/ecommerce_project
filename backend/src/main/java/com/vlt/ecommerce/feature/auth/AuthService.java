@@ -69,6 +69,10 @@ public class AuthService {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
+        if (Boolean.FALSE.equals(user.getIsActive())) {
+            throw new AppException(ErrorCode.USER_LOCKED);
+        }
+
         String sessionId = UUID.randomUUID().toString();
         String deviceInfo = DeviceUtils.parseDeviceInfo(userAgent);
         // LƯU SESSION VÀO DATABASE

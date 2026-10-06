@@ -19,6 +19,11 @@ import AddProduct from '../features/seller/AddProduct';
 import SellerProductPage from '../features/seller/SellerProductPage';
 import SellerOrderPage from '../features/seller/SellerOrderPage';
 
+import AdminLayout from '../features/admin/AdminLayout';
+import AdminDashboard from '../features/admin/AdminDashboard';
+import UserManagementPage from '../features/admin/UserManagementPage';
+import CommissionPage from '../features/admin/CommissionPage';
+
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
 
@@ -63,6 +68,21 @@ export const AppRoutes = () => {
         <Route path="products" element={<SellerProductPage />} />
         <Route path="product/add" element={<AddProduct />} />
         <Route path="orders" element={<SellerOrderPage />} />
+      </Route>
+
+      {/* ADMIN ROUTES */}
+      <Route 
+        path="/admin" 
+        element={
+          !user ? <Navigate to="/login" /> :
+          user.roles?.some(r => r.name === 'ROLE_ADMIN') ? <AdminLayout /> : 
+          <Navigate to="/" />
+        }
+      >
+        <Route index element={<Navigate to="dashboard" />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="users" element={<UserManagementPage />} />
+        <Route path="commissions" element={<CommissionPage />} />
       </Route>
     </Routes>
   );

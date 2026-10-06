@@ -27,7 +27,8 @@ public enum ErrorCode {
     PAYMENT_ALREADY_PROCESSED(1019, "Giao dịch này đã được thanh toán rồi", HttpStatus.BAD_REQUEST),
     CANNOT_BUY_OWN_PRODUCT(1022, "Chủ shop không thể tự mua hoặc đánh giá sản phẩm của chính mình!", HttpStatus.BAD_REQUEST),
     TRANSACTION_PROCESSING(1024, "Hệ thống đang xử lý, vui lòng không thao tác quá nhanh!", HttpStatus.CONFLICT),
-    INVALID_DATA(1021, "Dữ liệu không hợp lệ hoặc file tải lên trống", HttpStatus.BAD_REQUEST);
+    INVALID_DATA(1021, "Dữ liệu không hợp lệ hoặc file tải lên trống", HttpStatus.BAD_REQUEST),
+    USER_LOCKED(1025, "Tài khoản của bạn đã bị khóa!", HttpStatus.FORBIDDEN);
 
     int code;
     String message;

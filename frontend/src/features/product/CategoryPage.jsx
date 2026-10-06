@@ -35,8 +35,26 @@ export default function CategoryPage() {
           api.get(`/categories/${id}`),
           api.get(`/categories/${id}/childrens`).catch(() => ({ data: { result: [] } }))
         ]);
-        setCurrentCategory(catRes.data.result);
-        setChildCategories(childRes.data.result);
+        let categoryInfo = catRes.data.result;
+        let childrenInfo = childRes.data.result;
+
+        if (childrenInfo.length === 0 && categoryInfo.parentId) {
+          try {
+            const [parentCatRes, parentChildRes] = await Promise.all([
+              api.get(`/categories/${categoryInfo.parentId}`),
+              api.get(`/categories/${categoryInfo.parentId}/childrens`)
+            ]);
+            setCurrentCategory(parentCatRes.data.result);
+            setChildCategories(parentChildRes.data.result);
+          } catch (e) {
+            console.error(e);
+            setCurrentCategory(categoryInfo);
+            setChildCategories(childrenInfo);
+          }
+        } else {
+          setCurrentCategory(categoryInfo);
+          setChildCategories(childrenInfo);
+        }
 
         const params = {
           categoryId: id,
@@ -116,15 +134,48 @@ export default function CategoryPage() {
           <div className="mb-6">
             <h3 className="font-bold text-sm uppercase mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
-              {currentCategory ? currentCategory.name : 'Danh Mục'}
+              Danh Mục
             </h3>
+            
+            {currentCategory?.breadcrumbs?.length > 0 && (
+              <div className="text-sm mb-2">
+                {currentCategory.breadcrumbs.map((crumb, idx) => (
+                  <div 
+                    key={crumb.id} 
+                    className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors font-medium text-base-content/70 mb-2"
+                    style={{ paddingLeft: `${idx * 12}px` }}
+                    onClick={() => navigate(`/category/${crumb.id}`)}
+                  >
+                    {idx > 0 && <span className="text-xs text-base-300">↳</span>}
+                    {crumb.name}
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {currentCategory && (
+              <div 
+                className={`text-sm flex items-center gap-1.5 cursor-pointer transition-colors mb-2 ${Number(id) === currentCategory.id ? 'font-bold text-primary' : 'hover:text-primary font-medium text-base-content/80'}`}
+                style={{ paddingLeft: `${(currentCategory.breadcrumbs?.length || 0) * 12}px` }}
+                onClick={() => navigate(`/category/${currentCategory.id}`)}
+              >
+                {currentCategory.breadcrumbs?.length > 0 && <span className="text-xs text-base-300">↳</span>}
+                {currentCategory.name}
+              </div>
+            )}
+
             {childCategories.length > 0 && (
-              <ul className="text-sm space-y-2 pl-6">
-                <li className="font-bold text-primary cursor-pointer mb-2">Tất cả</li>
+              <ul className="text-sm space-y-2" style={{ paddingLeft: `${((currentCategory?.breadcrumbs?.length || 0) + 1) * 12 + 4}px` }}>
+                <li 
+                  className={`cursor-pointer transition-colors ${Number(id) === currentCategory?.id ? 'font-bold text-primary' : 'hover:text-primary'}`}
+                  onClick={() => currentCategory && navigate(`/category/${currentCategory.id}`)}
+                >
+                  Tất cả
+                </li>
                 {displayedCategories.map(child => (
                   <li 
                     key={child.id}
-                    className="cursor-pointer hover:text-primary transition-colors"
+                    className={`cursor-pointer transition-colors ${Number(id) === child.id ? 'font-bold text-primary' : 'hover:text-primary'}`}
                     onClick={() => navigate(`/category/${child.id}`)}
                   >
                     {child.name}

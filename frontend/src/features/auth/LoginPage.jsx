@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react'; // Import icon con mắt
@@ -18,6 +18,15 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const [showLockedModal, setShowLockedModal] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem('account_locked_alert') === 'true') {
+      setShowLockedModal(true);
+      localStorage.removeItem('account_locked_alert');
+    }
+  }, []);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
@@ -29,11 +38,20 @@ export default function LoginPage() {
       const userRes = await api.get('/auth/me');
       
       // 3. Dispatch dữ liệu thật vào Redux, lúc này Navbar sẽ re-render và có ảnh ngay
-      dispatch(loginSuccess({ user: userRes.data.result }));
+      const userData = userRes.data.result;
+      dispatch(loginSuccess({ user: userData }));
       
-      navigate('/', { replace: true });
+      if (userData.roles?.some(r => r.name === 'ROLE_ADMIN')) {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     } catch (err) {
-      setErrorMsg('Tài khoản hoặc mật khẩu không chính xác!');
+      if (err.response?.data?.code === 1025) {
+        setErrorMsg('Tài khoản của bạn đã bị khóa!');
+      } else {
+        setErrorMsg('Tài khoản hoặc mật khẩu không chính xác!');
+      }
     }
   };
 
@@ -132,6 +150,28 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
+
+      {showLockedModal && (
+        <div className="modal modal-open bg-black/50 backdrop-blur-sm">
+          <div className="modal-box text-center p-6 bg-white animate-fade-in-up shadow-2xl rounded-2xl">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50">
+              <span className="text-red-500 text-3xl font-bold">!</span>
+            </div>
+            <h3 className="font-bold text-2xl text-gray-800 mb-2">Tài khoản bị khóa</h3>
+            <p className="py-4 text-gray-600">
+              Tài khoản của bạn đã bị khóa do vi phạm chính sách của chúng tôi. Bạn đã bị buộc đăng xuất khỏi hệ thống.
+            </p>
+            <div className="modal-action justify-center mt-6">
+              <button 
+                className="btn btn-error text-white w-full max-w-[200px] shadow-lg shadow-red-200" 
+                onClick={() => setShowLockedModal(false)}
+              >
+                ĐÃ HIỂU
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AuthLayout>
   );
 }
