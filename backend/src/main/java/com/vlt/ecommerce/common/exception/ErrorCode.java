@@ -23,7 +23,10 @@ public enum ErrorCode {
     INVALID_ORDER_STATUS(1018, "Trạng thái đơn hàng không hợp lệ cho thao tác này", HttpStatus.BAD_REQUEST),
 
     COMMISSION_NOT_CONFIGURED(1019, "Hệ thống chưa thiết lập phí hoa hồng!", HttpStatus.INTERNAL_SERVER_ERROR),
+    REVIEW_ALREADY_EXISTED(1023, "Bạn đã đánh giá sản phẩm trong đơn hàng này rồi!", HttpStatus.CONFLICT),
     PAYMENT_ALREADY_PROCESSED(1019, "Giao dịch này đã được thanh toán rồi", HttpStatus.BAD_REQUEST),
+    CANNOT_BUY_OWN_PRODUCT(1022, "Chủ shop không thể tự mua hoặc đánh giá sản phẩm của chính mình!", HttpStatus.BAD_REQUEST),
+    TRANSACTION_PROCESSING(1024, "Hệ thống đang xử lý, vui lòng không thao tác quá nhanh!", HttpStatus.CONFLICT),
     INVALID_DATA(1021, "Dữ liệu không hợp lệ hoặc file tải lên trống", HttpStatus.BAD_REQUEST);
 
     int code;

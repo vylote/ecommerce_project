@@ -84,16 +84,10 @@ public class CommissionService {
 
         for (OrderItem item : order.getItems()) {
             Long categoryId = item.getProduct().getCategory().getId();
-            // 3. LOGIC TÌM KIẾM TỶ LỆ PHÍ (Tư duy Fallback)
-            // Ưu tiên tìm cấu hình riêng của Danh mục đang có hiệu lực
+            
             CommissionConfig config = commissionConfigRepository
                     .findActiveConfigByCategory(categoryId, today)
-                    .orElseGet(() -> 
-                            // Nếu không có, Fallback về cấu hình Global (category_id = NULL)
-                            commissionConfigRepository
-                                .findActiveGlobalConfig(today)
-                                .orElseThrow(() -> new AppException(ErrorCode.COMMISSION_NOT_CONFIGURED))
-                    );
+                    .orElseThrow(() -> new AppException(ErrorCode.COMMISSION_NOT_CONFIGURED));
 
             BigDecimal commissionRate = config.getRate();
             BigDecimal itemRevenue = item.getTotalPrice();

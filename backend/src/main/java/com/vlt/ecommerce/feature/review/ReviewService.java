@@ -10,6 +10,7 @@ import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.order.Order;
 import com.vlt.ecommerce.feature.order.OrderStatus;
 import com.vlt.ecommerce.feature.order.repository.OrderRepository;
+import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.product.service.ProductService;
 import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
@@ -24,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class ReviewService {
-    ReviewRepository  reviewRepository;
+    ReviewRepository reviewRepository;
     ReviewMapper reviewMapper;
     UserRepository userRepository;
     OrderRepository orderRepository;
@@ -35,10 +36,14 @@ public class ReviewService {
     public ReviewResponse createReview(CreateReviewRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User buyer = userRepository.findByEmail(email)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         Order order = orderRepository.findById(request.getOrderId())
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        if (order.getShop().getSeller().getId().equals(buyer.getId())) {
+            throw new AppException(ErrorCode.CANNOT_BUY_OWN_PRODUCT);
+        }
 
         if (!order.getBuyer().getId().equals(buyer.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -57,13 +62,23 @@ public class ReviewService {
 
         boolean alreadyReviewed = reviewRepository.existsByBuyerIdAndOrderIdAndProductId(
                 buyer.getId(), order.getId(), request.getProductId());
-        
+
         if (alreadyReviewed) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED); 
+            throw new AppException(ErrorCode.REVIEW_ALREADY_EXISTED);
         }
 
         Review review = reviewMapper.toReview(request);
         review.setBuyer(buyer);
+        review.setOrder(order);
+        
+        // Lấy managed Product từ OrderItems
+        Product product = order.getItems().stream()
+            .map(com.vlt.ecommerce.feature.order.OrderItem::getProduct)
+            .filter(p -> p.getId().equals(request.getProductId()))
+            .findFirst()
+            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+        review.setProduct(product);
+
         Review savedReview = reviewRepository.save(review);
         productService.updateProductRatingStats(savedReview.getProduct().getId());
         return reviewMapper.toReviewResponse(savedReview);

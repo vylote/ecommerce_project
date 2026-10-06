@@ -44,23 +44,16 @@ public class CartService {
         User user = getCurrentUser();
 
         Product product = productRepository.findById(request.getProductId())
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));    
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        // Optional<CartItem> existingItem = cartItemRepository.findByBuyerIdAndProductId(user.getId(), product.getId());    
+        if (product.getShop().getSeller().getId().equals(user.getId())) {
+            throw new AppException(ErrorCode.CANNOT_BUY_OWN_PRODUCT);
+        }
 
-        // CartItem cartItem;
-        // if (existingItem.isPresent()) {
-        //     cartItem = existingItem.get();
-        //     cartItem.setQuantity(cartItem.getQuantity()+request.getQuantity());
-        // } else {
-        //     cartItem = cartMapper.toCartItem(request);
-        //     cartItem.setBuyer(user);
-        //     cartItem.setProduct(product);
-        // }
         cartItemRepository.upsertCartItem(user.getId(), request.getProductId(), request.getQuantity());
-        // 2. Query ngược lại để lấy dữ liệu mới nhất (đã được cộng dồn) lên
+
         CartItem updatedCartItem = cartItemRepository.findByBuyerIdAndProductId(user.getId(), product.getId())
-            .orElseThrow(() -> new AppException(ErrorCode.SYSTEM_ERROR));
+                .orElseThrow(() -> new AppException(ErrorCode.SYSTEM_ERROR));
 
         return cartMapper.toCartItemResponse(cartItemRepository.save(updatedCartItem));
     }
@@ -70,7 +63,7 @@ public class CartService {
     public CartItemResponse update(CartItemRequest request, Long productId) {
         User user = getCurrentUser();
         CartItem cartItem = cartItemRepository.findByBuyerIdAndProductId(user.getId(), productId)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         cartMapper.updateQuantityCartItem(request, cartItem);
         return cartMapper.toCartItemResponse(cartItem);
@@ -81,8 +74,8 @@ public class CartService {
     public void remove(Long productId) {
         User user = getCurrentUser();
         CartItem cartItem = cartItemRepository.findByBuyerIdAndProductId(user.getId(), productId)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
-            
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
         cartItemRepository.delete(cartItem);
     }
 

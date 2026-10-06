@@ -27,4 +27,5 @@ public class OrderResponse {
     Long buyerId;
     List<OrderItemResponse> items;
     LocalDateTime createdAt;
+    Boolean reviewed;
 }

@@ -1,19 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { 
-  Package, ShoppingBag, Megaphone, MessageSquare, 
-  DollarSign, BarChart2, Store, LogOut, Home 
+import {
+  Package, ShoppingBag, Megaphone, MessageSquare,
+  DollarSign, BarChart2, Store, LogOut, Home
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
-import { logout } from '../../store/slice/authSlice'; 
+import { logout } from '../../store/slice/authSlice';
 
 export default function SellerLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   // Lấy thông tin user từ Redux để hiển thị Avatar thật
   const { user } = useSelector((state) => state.auth);
 
@@ -36,11 +36,11 @@ export default function SellerLayout() {
   const handleLogout = async () => {
     try {
       // Gọi API xóa session/cookie dưới Backend (Nếu bạn có API này)
-      await api.post('/auth/logout').catch(() => {}); 
-      
+      await api.post('/auth/logout').catch(() => { });
+
       // Xóa state trong Redux
       dispatch(logout());
-      
+
       toast.success('Đã đăng xuất thành công');
       navigate('/login');
     } catch (error) {
@@ -51,7 +51,7 @@ export default function SellerLayout() {
   const MENU_ITEMS = [
     { path: '/seller/orders', icon: <Package size={18} />, label: 'Quản lý đơn hàng' },
     { path: '/seller/products', icon: <ShoppingBag size={18} />, label: 'Quản lý sản phẩm' },
-    { path: '/seller/product/add', icon: <Store size={18} />, label: 'Thêm sản phẩm' }, 
+    { path: '/seller/product/add', icon: <Store size={18} />, label: 'Thêm sản phẩm' },
     { path: '/seller/marketing', icon: <Megaphone size={18} />, label: 'Kênh Marketing' },
     { path: '/seller/chat', icon: <MessageSquare size={18} />, label: 'Chăm sóc khách hàng' },
     { path: '/seller/finance', icon: <DollarSign size={18} />, label: 'Tài chính' },
@@ -67,22 +67,22 @@ export default function SellerLayout() {
             <Store className="text-[#ee4d2d]" size={28} />
             <h1 className="text-xl font-bold text-[#ee4d2d]">Kênh Người Bán</h1>
           </div>
-          
+
           <div className="flex items-center gap-6 text-sm">
             <Link to="/" className="text-gray-500 hover:text-[#ee4d2d] hidden md:block transition-colors">
               Trang chủ Shopee
             </Link>
-            
+
             {/* ================= KHU VỰC AVATAR DROPDOWN ================= */}
             <div className="relative" ref={dropdownRef}>
-              <button 
+              <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 className="flex items-center gap-2 focus:outline-none hover:opacity-80 transition-opacity"
               >
                 <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden border border-gray-300">
-                  <img 
-                    src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || 'Seller')}&background=random`} 
-                    alt="Avatar" 
+                  <img
+                    src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || 'Seller')}&background=random`}
+                    alt="Avatar"
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -95,17 +95,17 @@ export default function SellerLayout() {
               {/* MENU DROPDOWN (Chỉ hiện khi isDropdownOpen = true) */}
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-md shadow-[0_4px_12px_rgba(0,0,0,0.1)] py-2 z-50 animate-fade-in origin-top-right">
-                  <Link 
-                    to="/" 
+                  <Link
+                    to="/"
                     onClick={() => setIsDropdownOpen(false)}
                     className="flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-[#ee4d2d] transition-colors"
                   >
                     <Home size={16} /> Trang người mua
                   </Link>
-                  
+
                   <div className="h-px bg-gray-100 my-1"></div> {/* Đường gạch ngang phân cách */}
 
-                  <button 
+                  <button
                     onClick={handleLogout}
                     className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-[#ee4d2d] transition-colors"
                   >
@@ -122,7 +122,7 @@ export default function SellerLayout() {
 
       {/* ================= BODY ================= */}
       <div className="w-full flex gap-5 py-5 px-6 flex-1 items-start">
-        
+
         {/* SIDEBAR DÙNG CHUNG CHỨA MENU */}
         <aside className="w-[240px] shrink-0 bg-white border border-gray-200 rounded-xl p-4 shadow-sm sticky top-20 flex flex-col gap-4">
           <nav>
@@ -134,13 +134,12 @@ export default function SellerLayout() {
               </li>
               {MENU_ITEMS.map((item, idx) => (
                 <li key={idx}>
-                  <Link 
-                    to={item.path} 
-                    className={`flex items-center gap-3 p-2.5 rounded-lg text-sm transition-colors ${
-                      location.pathname.startsWith(item.path) 
-                        ? 'bg-[#fff3f1] text-[#ee4d2d] font-bold border border-orange-100' 
+                  <Link
+                    to={item.path}
+                    className={`flex items-center gap-3 p-2.5 rounded-lg text-sm transition-colors ${location.pathname.startsWith(item.path)
+                        ? 'bg-[#fff3f1] text-[#ee4d2d] font-bold border border-orange-100'
                         : 'hover:bg-gray-50 text-gray-700 font-medium'
-                    }`}
+                      }`}
                   >
                     {item.icon} {item.label}
                   </Link>
@@ -165,7 +164,7 @@ export default function SellerLayout() {
         </aside>
 
         <main className="flex-1 min-w-0">
-          <Outlet /> 
+          <Outlet />
         </main>
       </div>
     </div>

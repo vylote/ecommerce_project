@@ -2,8 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../shared/utils/api";
 
-const API_URL = import.meta.env.VITE_API_URL;
-
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1";
 export default function CategorySection() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +30,7 @@ export default function CategorySection() {
       try {
         // Gọi thẳng vào API dành riêng cho Parent Categories
         const response = await api.get("/categories/parents");
-        
+
 
         setCategories(response.data?.result || []);
 
@@ -62,10 +61,15 @@ export default function CategorySection() {
 
   const buildImageUrl = (category) => {
     if (!category.imageUrl) return null;
+
+    if (category.imageUrl.startsWith("http://") || category.imageUrl.startsWith("https://")) {
+      return category.imageUrl;
+    }
+
     const fileName = category.imageUrl.startsWith("/")
       ? category.imageUrl.substring(1)
       : category.imageUrl;
-    return `${API_URL}/images/categories/${fileName}`;
+    return `${BASE_URL}/images/categories/${fileName}`;
   };
 
   if (loading) {

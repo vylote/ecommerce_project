@@ -42,5 +42,5 @@ public interface UserMapper {
     @Mapping(target = "orders", ignore = true)
     @Mapping(target = "reviews", ignore = true)
     @Mapping(target = "avatarUrl", ignore = true)
-    void updateUserProfile(UpdateProfileRequest request, @MappingTarget User usre);
+    void updateUserProfile(UpdateProfileRequest request, @MappingTarget User user);
 }

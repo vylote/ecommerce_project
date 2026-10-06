@@ -116,9 +116,6 @@ public class CategoryService {
         }
 
         List<Category> childs = categoryRepository.findByParentIdAndIsActiveTrue(parentId);
-        if (childs.isEmpty()) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
-        }
 
         return categoryMapper.toCategoriesResponse(childs);
     }

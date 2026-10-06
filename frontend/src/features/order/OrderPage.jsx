@@ -6,6 +6,7 @@ import api from "../../shared/utils/api";
 import Navbar from "../../shared/components/Navbar";
 import ConfirmDialog from "../../shared/components/ConfirmDialog";
 import { Store } from "lucide-react"; // Thêm icon cho đẹp
+import ReviewModal from "./ReviewModal";
 
 const TABS = [
   { value: "ALL", label: "Tất cả" },
@@ -37,6 +38,9 @@ export default function OrdersPage() {
 
   // State cho dialog xác nhận (thay cho window.confirm)
   const [confirmState, setConfirmState] = useState(null);
+
+  // State cho Đánh giá sản phẩm
+  const [reviewOrder, setReviewOrder] = useState(null);
 
   useEffect(() => {
     fetchOrders(page);
@@ -235,14 +239,12 @@ export default function OrdersPage() {
                     </div>
 
                     {/* Danh sách sản phẩm trong đơn */}
-                    <div
-                      className="divide-y divide-gray-100 cursor-pointer"
-                      onClick={() => navigate(`/orders/${order.id}`)}
-                    >
+                    <div className="divide-y divide-gray-100">
                       {order.items?.map((item) => (
                         <div
                           key={item.id}
-                          className="flex items-center gap-4 px-6 py-3 hover:bg-gray-50 transition-colors"
+                          onClick={() => navigate(`/product/${item.productId}`)}
+                          className="flex items-center gap-4 px-6 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                           <div className="w-20 h-20 border shrink-0 bg-gray-100 flex items-center justify-center overflow-hidden">
                             {item.productImageUrl ? (
@@ -301,8 +303,16 @@ export default function OrdersPage() {
                           </button>
                         )}
                         {order.status === "COMPLETED" && (
-                          <button className="w-40 py-2 text-sm text-[#ee4d2d] bg-white border border-[#ee4d2d] rounded-sm hover:bg-orange-50 transition-colors">
-                            Đánh Giá
+                          <button 
+                            onClick={() => !order.reviewed && setReviewOrder(order)}
+                            disabled={order.reviewed}
+                            className={`w-40 py-2 text-sm rounded-sm transition-colors ${
+                              order.reviewed 
+                                ? "text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed" 
+                                : "text-[#ee4d2d] bg-white border border-[#ee4d2d] hover:bg-orange-50"
+                            }`}
+                          >
+                            {order.reviewed ? "Đã Đánh Giá" : "Đánh Giá"}
                           </button>
                         )}
                         {order.status === "CANCELLED" && (
@@ -355,6 +365,13 @@ export default function OrdersPage() {
       <ConfirmDialog
         state={confirmState}
         onClose={() => setConfirmState(null)}
+      />
+
+      <ReviewModal 
+        isOpen={!!reviewOrder}
+        onClose={() => setReviewOrder(null)}
+        order={reviewOrder}
+        onSuccess={() => fetchOrders(page)}
       />
     </div>
   );

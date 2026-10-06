@@ -46,6 +46,8 @@ import com.vlt.ecommerce.feature.user.mapper.AddressMapper;
 import com.vlt.ecommerce.feature.user.repository.AddressRepository;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
+import com.vlt.ecommerce.feature.review.ReviewRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -58,6 +60,7 @@ import lombok.extern.slf4j.Slf4j;
 public class OrderService {
     CommissionService commissionService;
     OrderRepository orderRepository;
+    ReviewRepository reviewRepository;
     CartItemRepository cartItemRepository;
     UserRepository userRepository;
     AddressRepository addressRepository;
@@ -260,6 +263,9 @@ public class OrderService {
         }
 
         List<OrderResponse> content = orderMapper.toOrderResponses(orderPage.getContent());
+        
+        // Kiểm tra xem đơn hàng đã được đánh giá chưa
+        content.forEach(res -> res.setReviewed(reviewRepository.existsByOrderId(res.getId())));
 
         return PageResponse.of(orderPage, content);
     }
