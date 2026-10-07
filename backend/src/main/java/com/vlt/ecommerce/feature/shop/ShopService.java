@@ -109,7 +109,7 @@ public class ShopService {
         shopMapper.updateShopFromRequest(request, shop);
 
         if (request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
-            Set<Category> categories = new java.util.HashSet<>(categoryRepository.findAllById(request.getCategoryIds()));
+            Set<Category> categories = new HashSet<>(categoryRepository.findAllById(request.getCategoryIds()));
             shop.setCategories(categories);
         }
 
