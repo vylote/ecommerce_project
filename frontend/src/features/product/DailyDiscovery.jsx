@@ -20,7 +20,7 @@ export default function DailyDiscovery() {
           params: {
             page: page,
             size: 48,
-            sortBy: 'createdAt',
+            sortBy: 'random',
             order: 'desc'
           }
         });

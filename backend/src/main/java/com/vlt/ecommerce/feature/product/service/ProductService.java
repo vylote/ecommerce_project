@@ -2,6 +2,7 @@ package com.vlt.ecommerce.feature.product.service;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -64,11 +65,11 @@ public class ProductService {
         Long sellerId = (Long) authentication.getDetails();
 
         Shop shop = shopRepository.findBySellerId(sellerId);
-        if (shop == null) 
+        if (shop == null)
             throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
 
         Category category = categoryRepository.findById(request.getCategoryId())
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         Product newProduct = productMapper.toProduct(request);
         newProduct.setShop(shop);
@@ -84,26 +85,27 @@ public class ProductService {
     @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#id)")
     public ProductResponse update(ProductRequest request, Long id) {
         Product product = productRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         productMapper.updateProduct(request, product);
-        return productMapper.toProductResponse(productRepository.save(product));         
+        return productMapper.toProductResponse(productRepository.save(product));
     }
 
     @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#id)")
     public void delete(Long id) {
         productRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         productRepository.deleteById(id);
     }
 
-    //upload anh san pham
+    // upload anh san pham
     @Transactional
     @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#productId)")
-    public ProductImageResponse addProductImage(MultipartFile file, Long productId, Boolean isPrimary, Integer sortOrder) {
+    public ProductImageResponse addProductImage(MultipartFile file, Long productId, Boolean isPrimary,
+            Integer sortOrder) {
         Product product = productRepository.findById(productId)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (file == null || file.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_DATA);
@@ -111,13 +113,13 @@ public class ProductService {
 
         try {
             String imageUrl = cloudinaryService.uploadFile(file, "ecommerce/products");
-            
+
             ProductImage productImage = new ProductImage();
             productImage.setProduct(product);
             productImage.setUrl(imageUrl);
             productImage.setIsPrimary(isPrimary);
             productImage.setSortOrder(sortOrder);
-            
+
             return productImageMapper.toProductImageResponse(productImageRepository.save(productImage));
         } catch (IOException e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
@@ -126,25 +128,32 @@ public class ProductService {
 
     public ProductResponse getDetailProduct(Long id) {
         Product product = productRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         return productMapper.toProductResponse(product);
     }
 
-    //lay danh sach san pham phan trang + filter
+    // lay danh sach san pham phan trang + filter
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> getAllProducts(
-            Long categoryId, Long shopId, String keyword, BigDecimal minPrice, BigDecimal maxPrice, Double minRating, int page, int size, String sortBy, String order) {
+            Long categoryId, Long shopId, String keyword, BigDecimal minPrice, BigDecimal maxPrice, Double minRating,
+            int page, int size, String sortBy, String order) {
 
-        Sort sort = order.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        
-        // page - 1: Để Frontend được truyền page=1 cho tự nhiên
+        Sort sort = Sort.unsorted();
+        if (!sortBy.equalsIgnoreCase("random")) {
+            sort = order.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        }
+
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
         Page<Product> productPage = productRepository.filterProducts(
-            categoryId, shopId, keyword, minPrice, maxPrice, minRating, "ACTIVE", pageable);
+                categoryId, shopId, keyword, minPrice, maxPrice, minRating, "ACTIVE", pageable);
 
-        List<ProductResponse> content = productMapper.toProductResponseList(productPage.getContent()); //10 sản phẩm được căt
+        List<ProductResponse> content = productMapper.toProductResponseList(productPage.getContent());
+
+        if (sortBy.equalsIgnoreCase("random")) {
+            Collections.shuffle(content);
+        }
 
         return PageResponse.of(productPage, content);
     }
@@ -152,11 +161,11 @@ public class ProductService {
     @Transactional(readOnly = true)
     public PageResponse<ReviewResponse> getProductReviews(Long productId, Integer rating, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
-        
+
         Page<Review> reviewPage = reviewRepository.findByProductIdWithBuyer(productId, rating, pageable);
-        
+
         List<ReviewResponse> content = reviewMapper.toReviewResponses(reviewPage.getContent());
-        
+
         return PageResponse.of(reviewPage, content);
     }
 
@@ -168,8 +177,8 @@ public class ProductService {
         // Tính toán thống kê từ các reviews hiện tại
         Object result = reviewRepository.getRatingStatsByProductId(productId);
         Object[] stats = (Object[]) result;
-        
-        Long count = (Long) stats[0];       // Phần tử đầu tiên tương ứng với COUNT(r)
+
+        Long count = (Long) stats[0]; // Phần tử đầu tiên tương ứng với COUNT(r)
         Double average = (Double) stats[1];
 
         // Ghi đè dữ liệu phi chuẩn hóa vào Product
@@ -181,7 +190,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('SELLER')")
     public PageResponse<ProductResponse> getMyProducts(
-            Long categoryId, String keyword, BigDecimal minPrice, BigDecimal maxPrice, Double minRating, 
+            Long categoryId, String keyword, BigDecimal minPrice, BigDecimal maxPrice, Double minRating,
             String statusFilter,
             int page, int size, String sortBy, String order) {
 
@@ -202,7 +211,7 @@ public class ProductService {
         String finalStatus = (statusFilter == null || statusFilter.isBlank()) ? "ALL" : statusFilter;
 
         Page<Product> productPage = productRepository.filterProducts(
-            categoryId, shop.getId(), keyword, minPrice, maxPrice, minRating, finalStatus, pageable);
+                categoryId, shop.getId(), keyword, minPrice, maxPrice, minRating, finalStatus, pageable);
 
         List<ProductResponse> content = productMapper.toProductResponseList(productPage.getContent());
 

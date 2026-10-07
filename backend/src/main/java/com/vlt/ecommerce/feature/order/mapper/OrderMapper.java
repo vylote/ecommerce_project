@@ -20,6 +20,7 @@ public interface OrderMapper {
     @Mapping(target = "createdAt", source = "createdAt")
     @Mapping(target = "shopName", source = "shop.name")
     @Mapping(target = "shopId", source = "shop.id")
+    @Mapping(target = "reviewed", ignore = true)
     OrderResponse toOrderResponse(Order order);
 
     @Mapping(target = "id", ignore = true)
@@ -33,6 +34,7 @@ public interface OrderMapper {
     @Mapping(target = "shop", ignore = true)
     @Mapping(target = "commissionRecords", ignore = true)
     @Mapping(target = "payment", ignore = true)
+    @Mapping(target = "idempotencyKey", ignore = true)
     Order toOrder(OrderRequest request);
 
     List<OrderResponse> toOrderResponses(List<Order> orders);

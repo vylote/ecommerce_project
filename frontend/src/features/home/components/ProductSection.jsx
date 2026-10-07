@@ -17,7 +17,7 @@ export default function ProductSection() {
           params: {
             page: 1,
             size: 12,
-            sortBy: "createdAt",
+            sortBy: "random",
             order: "desc",
           },
         });

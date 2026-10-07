@@ -3,7 +3,8 @@ package com.vlt.ecommerce.common.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import java.util.concurrent.TimeUnit;
+
+import java.time.Duration;
 
 @Service
 @RequiredArgsConstructor
@@ -18,8 +19,7 @@ public class TokenBlacklistService {
             redisTemplate.opsForValue().set(
                 BLACKLIST_PREFIX + ssid, 
                 "revoked", 
-                remainingTtlMillis, 
-                TimeUnit.MILLISECONDS
+                Duration.ofMillis(remainingTtlMillis)
             );
         }
     }

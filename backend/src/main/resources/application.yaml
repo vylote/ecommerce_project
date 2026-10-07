@@ -10,15 +10,12 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update # Tạm thời dùng update để Spring Boot tự tạo bảng (sau đó tăt bằng validate chạy script)
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate.format_sql: true
       hibernate.jdbc.time_zone: Asia/Ho_Chi_Minh
   jackson:
-  # Cấu hình thủ công ở đây dư thừa vì từ springboot3 trở lên tich hợp sẵn JavaTimeModule
-    # serialization: 
-    #   write-dates-as-timestamps: false
     default-property-inclusion: non_null
     time-zone: Asia/Ho_Chi_Minh
     date-format: yyyy-MM-dd HH:mm:ss
@@ -35,12 +32,12 @@ spring:
 server:
   port: 8080
   servlet:
-    context-path: /api/v1  # Base URL cho tất cả API
+    context-path: /api/v1
 
 jwt:
   secret: WH1q@d,Qfc2NWF#ki#X}$pc4(z2Kte+*]![n/q6}fYWRVcJ{Ku?uqX#_lB_!&/f/^J7-0/u3:1QwUP(wUH;@&q
-  expiration: 86400000       # 24 giờ (ms)
-  refresh-expiration: 604800000  # 7 ngày (ms)
+  expiration: 86400000
+  refresh-expiration: 604800000
 
 springdoc:
   api-docs:
