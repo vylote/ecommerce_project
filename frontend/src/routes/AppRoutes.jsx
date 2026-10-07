@@ -17,6 +17,7 @@ import SellerLayout from '../features/seller/SellerLayout';
 import SellerDashboard from '../features/seller/SellerDashboard';
 import AddProduct from '../features/seller/AddProduct';
 import SellerProductPage from '../features/seller/SellerProductPage';
+import SellerProfilePage from '../features/seller/SellerProfilePage';
 import SellerOrderPage from '../features/seller/SellerOrderPage';
 
 import AdminLayout from '../features/admin/AdminLayout';
@@ -65,6 +66,7 @@ export const AppRoutes = () => {
       >
         <Route index element={<Navigate to="dashboard" />} />
         <Route path="dashboard" element={<SellerDashboard />} />
+        <Route path="profile" element={<SellerProfilePage />} />
         <Route path="products" element={<SellerProductPage />} />
         <Route path="product/add" element={<AddProduct />} />
         <Route path="orders" element={<SellerOrderPage />} />

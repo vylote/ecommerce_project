@@ -11,6 +11,10 @@ export default function UserManagementPage() {
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Modal xác nhận khóa/mở khóa
+  const [confirmUser, setConfirmUser] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -36,22 +40,41 @@ export default function UserManagementPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, searchQuery]);
 
+  // Đóng modal bằng phím Esc
+  useEffect(() => {
+    if (!confirmUser) return;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape' && !actionLoading) setConfirmUser(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [confirmUser, actionLoading]);
+
   const handleSearch = (e) => {
     e.preventDefault();
     setSearchQuery(searchInput);
     setPage(1);
   };
 
-  const handleToggleStatus = async (user) => {
-    const action = user.isActive ? 'Khóa' : 'Mở khóa';
-    if (!window.confirm(`Bạn có chắc chắn muốn ${action} tài khoản ${user.email}?`)) return;
+  const closeConfirm = () => {
+    if (actionLoading) return;
+    setConfirmUser(null);
+  };
 
+  const handleConfirmToggle = async () => {
+    if (!confirmUser) return;
+    const action = confirmUser.isActive ? 'Khóa' : 'Mở khóa';
+
+    setActionLoading(true);
     try {
-      await api.patch(`/users/${user.id}/status`);
+      await api.patch(`/users/${confirmUser.id}/status`);
       toast.success(`${action} tài khoản thành công!`);
+      setConfirmUser(null);
       fetchUsers();
     } catch (error) {
       toast.error(`Lỗi khi ${action.toLowerCase()} tài khoản`);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -62,11 +85,11 @@ export default function UserManagementPage() {
           <ShieldAlert className="text-blue-500" />
           Quản lý người dùng
         </h2>
-        
+
         <form onSubmit={handleSearch} className="relative w-full md:w-[300px]">
-          <input 
-            type="text" 
-            placeholder="Tìm kiếm theo email..." 
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo email..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             className="input input-bordered input-sm w-full pl-9 focus:border-blue-500"
@@ -87,7 +110,7 @@ export default function UserManagementPage() {
               <th className="px-5 py-4 text-center">Thao tác</th>
             </tr>
           </thead>
-          
+
           <tbody className="divide-y divide-gray-100">
             {loading ? (
               <tr><td colSpan="6" className="text-center py-10"><span className="loading loading-spinner text-blue-500"></span></td></tr>
@@ -101,7 +124,7 @@ export default function UserManagementPage() {
                     <div className="flex items-center gap-3">
                       <div className="avatar">
                         <div className="w-10 rounded-full border border-gray-200">
-                           <img src={u.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.fullName || 'User')}`} alt="Avatar" />
+                          <img src={u.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.fullName || 'User')}`} alt="Avatar" />
                         </div>
                       </div>
                       <div>
@@ -128,8 +151,8 @@ export default function UserManagementPage() {
                     )}
                   </td>
                   <td className="px-5 py-4 text-center">
-                    <button 
-                      onClick={() => handleToggleStatus(u)}
+                    <button
+                      onClick={() => setConfirmUser(u)}
                       className={`btn btn-sm btn-ghost ${u.isActive ? 'text-red-500 hover:bg-red-50' : 'text-green-500 hover:bg-green-50'}`}
                       title={u.isActive ? 'Khóa tài khoản' : 'Mở khóa'}
                     >
@@ -149,6 +172,40 @@ export default function UserManagementPage() {
             <button disabled={page === 1} onClick={() => setPage(page - 1)} className="join-item btn btn-sm bg-white border-gray-300">«</button>
             <button className="join-item btn btn-sm bg-blue-500 text-white border-blue-500 hover:bg-blue-600">{page}</button>
             <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="join-item btn btn-sm bg-white border-gray-300">»</button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal xác nhận khóa / mở khóa */}
+      {confirmUser && (
+        <div className="modal modal-open" onClick={closeConfirm}>
+          <div className="modal-box max-w-sm" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-bold text-lg text-gray-800">
+              {confirmUser.isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+            </h3>
+            <p className="py-4 text-sm text-gray-600">
+              Bạn có chắc chắn muốn {confirmUser.isActive ? 'khóa' : 'mở khóa'} tài khoản{' '}
+              <span className="font-semibold text-gray-800">{confirmUser.email}</span>?
+            </p>
+            <div className="modal-action">
+              <button
+                className="btn btn-sm btn-ghost"
+                onClick={closeConfirm}
+                disabled={actionLoading}
+              >
+                Hủy
+              </button>
+              <button
+                className={`btn btn-sm text-white border-0 ${
+                  confirmUser.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+                }`}
+                onClick={handleConfirmToggle}
+                disabled={actionLoading}
+              >
+                {actionLoading && <span className="loading loading-spinner loading-xs"></span>}
+                {confirmUser.isActive ? 'Khóa' : 'Mở khóa'}
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
@@ -21,6 +22,7 @@ import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
 import com.vlt.ecommerce.feature.product.mapper.ProductMapper;
 import com.vlt.ecommerce.feature.product.repository.CategoryRepository;
 import com.vlt.ecommerce.feature.product.repository.ProductRepository;
+import com.vlt.ecommerce.feature.product.service.CloudinaryService;
 import com.vlt.ecommerce.feature.shop.dto.request.ShopRequest;
 import com.vlt.ecommerce.feature.shop.dto.response.ShopResponse;
 import com.vlt.ecommerce.feature.shop.mapper.ShopMapper;
@@ -48,8 +50,10 @@ public class ShopService {
     ShopMapper shopMapper;
     ProductMapper productMapper;
 
+    CloudinaryService cloudinaryService;
+
     @Transactional // tối ưu đường truyền, k phải nhằm mục đích lazy loading
-    public ShopResponse create(ShopRequest request) {
+    public ShopResponse create(ShopRequest request, MultipartFile file) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
@@ -73,11 +77,20 @@ public class ShopService {
         newShop.setSeller(seller);
         newShop.setCategories(categories);
 
+        try {
+            if (file != null && !file.isEmpty()) {
+                String secureUrl = cloudinaryService.uploadFile(file, "ecommerce/shops");
+                newShop.setLogoUrl(secureUrl);
+            }
+        } catch (java.io.IOException e) {
+            log.error("Error uploading shop logo", e);
+        }
+
         return shopMapper.toShopResponse(shopRepository.save(newShop));
     }
 
     @Transactional // giữ mạng gọi proxy - note trong model
-    public ShopResponse update(ShopRequest request, Long id) {
+    public ShopResponse update(ShopRequest request, Long id, MultipartFile file) {
         Shop shop = shopRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
@@ -87,13 +100,52 @@ public class ShopService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
+        String oldLogoUrl = shop.getLogoUrl();
+        String oldPublicId = null;
+        if (oldLogoUrl != null && !oldLogoUrl.isEmpty()) {
+            oldPublicId = cloudinaryService.extractPublicIdFromUrl(oldLogoUrl);
+        }
+
         shopMapper.updateShopFromRequest(request, shop);
+
+        if (request.getCategoryIds() != null && !request.getCategoryIds().isEmpty()) {
+            Set<Category> categories = new java.util.HashSet<>(categoryRepository.findAllById(request.getCategoryIds()));
+            shop.setCategories(categories);
+        }
+
+        try {
+            if (file != null && !file.isEmpty()) {
+                String secureUrl = cloudinaryService.uploadFile(file, "ecommerce/shops");
+                if (oldPublicId != null) {
+                    cloudinaryService.deleteFile(oldPublicId);
+                }
+                shop.setLogoUrl(secureUrl);
+            }
+        } catch (java.io.IOException e) {
+            log.error("Error uploading shop logo", e);
+        }
+
         return shopMapper.toShopResponse(shop);
     }
 
     public ShopResponse get(Long id) {
         Shop shop = shopRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        return shopMapper.toShopResponse(shop);
+    }
+
+    public ShopResponse getMyShop() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        User seller = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        Shop shop = shopRepository.findBySellerId(seller.getId());
+        if (shop == null) {
+            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        }
 
         return shopMapper.toShopResponse(shop);
     }

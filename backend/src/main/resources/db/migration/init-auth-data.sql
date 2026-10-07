@@ -46,7 +46,7 @@ WHERE r.name = 'ROLE_ADMIN';
 INSERT INTO users (email, password, full_name, is_active, created_at, updated_at) 
 VALUES (
     'admin@gmail.com', 
-    '$2a$10$3st8wmNGFdm9JBXFJnOkc.gPjet4qQwALDzSN6nO98vzINBrb2o2S', 
+    '$2y$10$pVPLFD9yPeaXWuhg6aKoxOXmfN7Jpxo/3fp0m2rKfH/865uE.ilAq', 
     'Super Administrator', 
     true, 
     NOW(), 

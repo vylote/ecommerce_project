@@ -89,7 +89,7 @@ public class AuthController {
                 .secure(false)
                 .path("/")
                 .maxAge(24 * 60 * 60)
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
         ResponseCookie newRefreshCookie = ResponseCookie.from("refreshToken", tokenResponse.getRefreshToken())
@@ -97,7 +97,7 @@ public class AuthController {
                 .secure(false)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60)
-                .sameSite("Strict")
+                .sameSite("Lax")
                 .build();
 
         return ResponseEntity.ok()

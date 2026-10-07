@@ -49,13 +49,14 @@ export default function SellerLayout() {
   };
 
   const MENU_ITEMS = [
-    { path: '/seller/orders', icon: <Package size={18} />, label: 'Quản lý đơn hàng' },
-    { path: '/seller/products', icon: <ShoppingBag size={18} />, label: 'Quản lý sản phẩm' },
-    { path: '/seller/product/add', icon: <Store size={18} />, label: 'Thêm sản phẩm' },
-    { path: '/seller/marketing', icon: <Megaphone size={18} />, label: 'Kênh Marketing' },
-    { path: '/seller/chat', icon: <MessageSquare size={18} />, label: 'Chăm sóc khách hàng' },
-    { path: '/seller/finance', icon: <DollarSign size={18} />, label: 'Tài chính' },
-    { path: '/seller/data', icon: <BarChart2 size={18} />, label: 'Dữ liệu' },
+    { path: '/seller/profile', icon: <Store size={18} />, label: 'Hồ sơ Shop', isImplemented: true },
+    { path: '/seller/orders', icon: <Package size={18} />, label: 'Quản lý đơn hàng', isImplemented: true },
+    { path: '/seller/products', icon: <ShoppingBag size={18} />, label: 'Quản lý sản phẩm', isImplemented: true },
+    { path: '/seller/product/add', icon: <Store size={18} />, label: 'Thêm sản phẩm', isImplemented: true },
+    { path: '/seller/marketing', icon: <Megaphone size={18} />, label: 'Kênh Marketing', isImplemented: false },
+    { path: '/seller/chat', icon: <MessageSquare size={18} />, label: 'Chăm sóc khách hàng', isImplemented: false },
+    { path: '/seller/finance', icon: <DollarSign size={18} />, label: 'Tài chính', isImplemented: false },
+    { path: '/seller/data', icon: <BarChart2 size={18} />, label: 'Dữ liệu', isImplemented: false },
   ];
 
   return (
@@ -134,15 +135,24 @@ export default function SellerLayout() {
               </li>
               {MENU_ITEMS.map((item, idx) => (
                 <li key={idx}>
-                  <Link
-                    to={item.path}
-                    className={`flex items-center gap-3 p-2.5 rounded-lg text-sm transition-colors ${location.pathname.startsWith(item.path)
-                        ? 'bg-[#fff3f1] text-[#ee4d2d] font-bold border border-orange-100'
-                        : 'hover:bg-gray-50 text-gray-700 font-medium'
-                      }`}
-                  >
-                    {item.icon} {item.label}
-                  </Link>
+                  {item.isImplemented ? (
+                    <Link
+                      to={item.path}
+                      className={`flex items-center gap-3 p-2.5 rounded-lg text-sm transition-colors ${location.pathname.startsWith(item.path)
+                          ? 'bg-[#fff3f1] text-[#ee4d2d] font-bold border border-orange-100'
+                          : 'hover:bg-gray-50 text-gray-700 font-medium'
+                        }`}
+                    >
+                      {item.icon} {item.label}
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => toast('Tính năng đang phát triển. Vui lòng quay lại sau!', { icon: '🚧' })}
+                      className="w-full flex items-center gap-3 p-2.5 rounded-lg text-sm transition-colors hover:bg-gray-50 text-gray-400 font-medium opacity-80 cursor-not-allowed text-left"
+                    >
+                      {item.icon} {item.label}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

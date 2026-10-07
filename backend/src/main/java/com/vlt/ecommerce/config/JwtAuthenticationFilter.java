@@ -26,7 +26,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -38,15 +40,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // 1. Bỏ qua các endpoint không cần bảo mật (như login, register, refresh)
-        // Nếu không bỏ qua, lúc User chưa có token mà gọi Login sẽ bị chặn oan
         String path = request.getRequestURI();
         if (path.startsWith("/auth/login") || path.startsWith("/auth/register") || path.startsWith("/auth/refresh")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2. Lấy Access Token từ Cookie
         String token = null;
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
@@ -57,14 +56,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 3. Nếu có Token, tiến hành mổ xẻ và xác thực
         if (token != null) {
             try {
-                // Sử dụng hàm verifyToken của bạn (nếu lỗi, nó sẽ throw AppException và nhảy
-                // xuống catch)
                 SignedJWT signedJWT = jwtService.verifyToken(token);
 
-                // Lấy thông tin từ Payload
                 String ssid = signedJWT.getJWTClaimsSet().getStringClaim("sessionId");
                 String email = signedJWT.getJWTClaimsSet().getSubject();
                 Long userId = signedJWT.getJWTClaimsSet().getLongClaim("userId");
@@ -72,20 +67,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 List<String> roles = signedJWT.getJWTClaimsSet().getStringListClaim("roles");
                 List<String> permissions = signedJWT.getJWTClaimsSet().getStringListClaim("permissions");
 
-                // KIỂM TRA LỆNH TRUY NÃ TỪ REDIS
                 if (blacklistService.isSsidBlacklisted(ssid)) {
+                    log.warn("Chặn truy cập: Phiên đăng nhập {} đã bị thu hồi", ssid);
                     sendErrorResponse(response, ErrorCode.UNAUTHENTICATED, "Phiên đăng nhập đã bị thu hồi từ xa.");
                     return;
                 }
 
-                // KIỂM TRA USER CÓ BỊ KHÓA KHÔNG
                 User user = userRepository.findById(userId).orElse(null);
                 if (user == null || Boolean.FALSE.equals(user.getIsActive())) {
+                    log.warn("Chặn truy cập: User bị khóa hoặc không tồn tại. UserId: {}", userId);
                     sendErrorResponse(response, ErrorCode.USER_LOCKED, ErrorCode.USER_LOCKED.getMessage());
                     return;
                 }
 
-                // Nếu mọi thứ an toàn, cấp "thẻ hành nghề" cho User đi qua
                 List<SimpleGrantedAuthority> authorities = new ArrayList<>();
                 if (roles != null) {
                     authorities.addAll(roles.stream()
@@ -93,8 +87,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             .collect(Collectors.toList()));
                 }
 
-                // Đổ mảng Permissions vào (Spring Security dùng các chuỗi này cho hàm
-                // hasAuthority())
                 if (permissions != null) {
                     authorities.addAll(permissions.stream()
                             .map(SimpleGrantedAuthority::new)
@@ -107,11 +99,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
             } catch (Exception e) {
-                // Bắt mọi lỗi từ token (hết hạn, sai chữ ký, v.v.)
+                log.error("Token JWT không hợp lệ hoặc đã hết hạn cho request {}: {}", path, e.getMessage());
                 sendErrorResponse(response, ErrorCode.UNAUTHENTICATED, ErrorCode.UNAUTHENTICATED.getMessage());
                 return;
             }
+        } else {
+            log.debug("Không tìm thấy accessToken cookie trong request: {}", path);
         }
+        
         filterChain.doFilter(request, response);
     }
 
@@ -119,7 +114,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws IOException {
         response.setStatus(errorCode.getStatusCode().value());
         response.setContentType("application/json;charset=UTF-8");
-        // Giả lập cấu trúc ApiResponse của bạn
         String jsonResponse = String.format(
                 "{\"code\": %d, \"message\": \"%s\"}",
                 errorCode.getCode(),

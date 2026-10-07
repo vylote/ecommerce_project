@@ -23,8 +23,10 @@ export default function SellerOnboarding() {
     shopName: '',
     phone: '',
     email: '',
-    categoryIds: [], // N-N: shop có thể thuộc nhiều ngành hàng
-    address: null, // AddressResponse object khi user chọn/thêm địa chỉ
+    categoryIds: [],
+    address: null,
+    file: null,
+    previewUrl: null,
   });
 
   const [shippingData, setShippingData] = useState({
@@ -62,6 +64,21 @@ export default function SellerOnboarding() {
         ? prev.categoryIds.filter(id => id !== categoryId)
         : [...prev.categoryIds, categoryId],
     }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('Kích thước ảnh tối đa là 2MB');
+        return;
+      }
+      setShopData(prev => ({
+        ...prev,
+        file,
+        previewUrl: URL.createObjectURL(file)
+      }));
+    }
   };
 
   // --- STATE CHO MODAL ĐỊA CHỈ ---
@@ -141,21 +158,28 @@ export default function SellerOnboarding() {
         .filter(Boolean)
         .join(', ');
 
-      // 1. Tạo shop - Shop-Category là N-N nên gửi mảng categoryIds
-      // Đã xác nhận khớp ShopRequest.categoryIds (Set<Long>) thật ở backend.
-      await api.post('/shops', {
+      const formData = new FormData();
+      formData.append('request', new Blob([JSON.stringify({
         name: shopData.shopName,
         description: "Cửa hàng của " + shopData.shopName,
         address: fullAddress,
-        logoUrl: null,
         categoryIds: shopData.categoryIds,
-      });
+      })], { type: 'application/json' }));
+
+      if (shopData.file) {
+        formData.append('file', shopData.file);
+      }
+
+      await api.post('/shops', formData);
 
       // 2. Refresh token để nhận quyền Seller mới
-      const userRes = await api.post('/auth/refresh');
+      await api.post('/auth/refresh');
 
-      // 3. Cập nhật lại Redux store với thông tin User có ROLE_SELLER
-      dispatch(loginSuccess({ user: userRes.data.result }));
+      // 3. Gọi lại API /me để lấy chính xác thông tin User đã được cấp thêm Role Seller
+      const meRes = await api.get('/auth/me');
+
+      // 4. Cập nhật lại Redux store
+      dispatch(loginSuccess({ user: meRes.data.result }));
 
       toast.success('Đăng ký Shop thành công!');
       navigate('/seller/dashboard');
@@ -213,6 +237,29 @@ export default function SellerOnboarding() {
           {currentStep === 1 && (
             <div className="space-y-6 animate-fade-in">
               <h2 className="text-xl font-semibold border-b pb-4">Thông tin cơ bản</h2>
+
+              <div className="flex flex-col items-center mt-4 mb-2">
+                <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50 overflow-hidden group hover:border-[#ee4d2d] transition-colors cursor-pointer">
+                  {shopData.previewUrl ? (
+                    <img src={shopData.previewUrl} alt="Logo preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="text-center">
+                      <Store className="mx-auto text-gray-400 mb-1" size={24} />
+                      <span className="text-[10px] text-gray-500">Tải ảnh lên</span>
+                    </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-white text-xs font-medium">Sửa ảnh</span>
+                  </div>
+                  <input
+                    type="file"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    accept="image/jpeg, image/png, image/jpg"
+                    onChange={handleFileChange}
+                  />
+                </div>
+                <div className="text-xs text-gray-400 mt-2">Dung lượng file tối đa 2MB. Định dạng: JPEG, PNG</div>
+              </div>
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="form-control">
