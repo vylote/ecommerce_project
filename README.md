@@ -347,3 +347,57 @@ CommissionRecord "*" -up-> "1" User : Seller
 CommissionConfig "*" -down-> "1" Category
 CommissionConfig "*" -up-> "1" User : CreatedBy
 @enduml
+
+
+SODOPHANRA
+
+@startwbs
+<style>
+wbsDiagram {
+  node {
+    BackgroundColor white
+    LineColor black
+    FontName Arial
+    Padding 10
+    Margin 15
+    RoundCorner 0
+    MaximumWidth 160
+    HorizontalAlignment center
+  }
+  arrow {
+    LineColor black
+  }
+}
+</style>
+
+* \n**Hệ thống Thương mại điện tử**
+** 1 Quản lý tài khoản và xác thực
+*** 1.1 Đăng ký, đăng nhập, đăng xuất
+*** 1.2 Cấp mới mã xác thực và thu hồi phiên
+*** 1.3 Cập nhật hồ sơ người dùng
+*** 1.4 Khóa và mở khóa tài khoản
+*** 1.5 Quản lý sổ địa chỉ giao hàng
+** 2 Quản lý cửa hàng
+*** 2.1 Đăng ký và cập nhật cửa hàng
+*** 2.2 Tra cứu thông tin và sản phẩm
+*** 2.3 Tìm kiếm cửa hàng
+*** 2.4 Bảng thống kê dành cho người bán
+** 3 Quản lý sản phẩm và danh mục
+*** 3.1 Quản lý cây phân cấp danh mục
+*** 3.2 Thêm, sửa, xóa sản phẩm
+*** 3.3 Quản lý hình ảnh sản phẩm
+*** 3.4 Quản lý đánh giá sản phẩm
+** 4 Quản lý giỏ hàng và đơn hàng
+*** 4.1 Thêm, sửa, xóa sản phẩm trong giỏ
+*** 4.2 Tiến hành đặt hàng
+*** 4.3 Cập nhật tiến độ đơn hàng
+*** 4.4 Theo dõi lịch sử đơn mua và bán
+** 5 Quản lý thanh toán và hoa hồng
+*** 5.1 Khởi tạo và xác nhận thanh toán
+*** 5.2 Thiết lập tỷ lệ hoa hồng
+*** 5.3 Báo cáo thống kê doanh thu hoa hồng
+** 6 Hệ thống thông báo
+*** 6.1 Truy xuất danh sách thông báo
+*** 6.2 Thống kê số lượng chưa đọc
+*** 6.3 Đánh dấu trạng thái đã đọc
+@endwbs
