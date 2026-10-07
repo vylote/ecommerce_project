@@ -11,9 +11,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.util.StringUtils;
-
-import com.nimbusds.jwt.SignedJWT;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
 import com.vlt.ecommerce.common.exception.AppException;
@@ -36,125 +33,126 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class AuthController {
-    AuthService authService;
-    SessionService sessionService;
+        AuthService authService;
+        SessionService sessionService;
 
-    @PostMapping("/register")
-    public ApiResponse<UserResponse> register(@RequestBody @Valid RegisterRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                .result(authService.register(request))
-                .build();
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponse<String>> login(
-                @RequestBody @Valid LoginRequest request,
-                @RequestHeader(value = "User-Agent", required = false) String userAgent) {
-        TokenResponse tokenResponse = authService.login(request, userAgent);
-
-        // Nặn Cookie cho Access Token
-        ResponseCookie jwtCookie = ResponseCookie.from("accessToken", tokenResponse.getAccessToken())
-                .httpOnly(true)
-                .secure(false) // Đổi thành true khi deploy lên server thật (có HTTPS)
-                .path("/")
-                .maxAge(24 * 60 * 60) // 1 ngày
-                .sameSite("Lax")
-                .build();
-
-        // Nặn Cookie cho Refresh Token
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenResponse.getRefreshToken())
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(7 * 24 * 60 * 60) // 7 ngày
-                .sameSite("Lax")
-                .build();
-
-        // Ép Cookie vào Header và trả về kết quả
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
-                .body(ApiResponse.<String>builder()
-                        .result("Đăng nhập thành công")
-                        .build());
-    }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<String>> refreshToken(
-            // Tự động thò tay vào Cookie của Browser lấy ra refreshToken
-            @CookieValue(name = "refreshToken", required = false) String currentRefreshToken) {
-
-        if (currentRefreshToken == null || currentRefreshToken.isEmpty()) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        @PostMapping("/register")
+        public ApiResponse<UserResponse> register(@RequestBody @Valid RegisterRequest request) {
+                return ApiResponse.<UserResponse>builder()
+                                .result(authService.register(request))
+                                .build();
         }
 
-        TokenResponse tokenResponse = authService.refreshToken(currentRefreshToken);
+        @PostMapping("/login")
+        public ResponseEntity<ApiResponse<String>> login(
+                        @RequestBody @Valid LoginRequest request,
+                        @RequestHeader(value = "User-Agent", required = false) String userAgent) {
+                TokenResponse tokenResponse = authService.login(request, userAgent);
 
-        ResponseCookie jwtCookie = ResponseCookie.from("accessToken", tokenResponse.getAccessToken())
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(24 * 60 * 60)
-                .sameSite("Lax")
-                .build();
+                // Nặn Cookie cho Access Token
+                ResponseCookie jwtCookie = ResponseCookie.from("accessToken", tokenResponse.getAccessToken())
+                                .httpOnly(true)
+                                .secure(false) // Đổi thành true khi deploy lên server thật (có HTTPS)
+                                .path("/")
+                                .maxAge(24 * 60 * 60) // 1 ngày
+                                .sameSite("Lax")
+                                .build();
 
-        ResponseCookie newRefreshCookie = ResponseCookie.from("refreshToken", tokenResponse.getRefreshToken())
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(7 * 24 * 60 * 60)
-                .sameSite("Lax")
-                .build();
+                // Nặn Cookie cho Refresh Token
+                ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", tokenResponse.getRefreshToken())
+                                .httpOnly(true)
+                                .secure(false)
+                                .path("/")
+                                .maxAge(7 * 24 * 60 * 60) // 7 ngày
+                                .sameSite("Lax")
+                                .build();
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
-                .body(ApiResponse.<String>builder()
-                        .result("Làm mới phiên thành công")
-                        .build());
-    }
+                // Ép Cookie vào Header và trả về kết quả
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .body(ApiResponse.<String>builder()
+                                                .result("Đăng nhập thành công")
+                                                .build());
+        }
 
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<String>> logout(
-            @CookieValue(name = "accessToken", required = false) String accessToken) {
-            
-        authService.logout(accessToken);
+        @PostMapping("/refresh")
+        public ResponseEntity<ApiResponse<String>> refreshToken(
+                        // Tự động thò tay vào Cookie của Browser lấy ra refreshToken
+                        @CookieValue(name = "refreshToken", required = false) String currentRefreshToken) {
 
-        ResponseCookie cleanJwtCookie = ResponseCookie.from("accessToken", "")
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(0)
-                .sameSite("Lax")
-                .build();
+                if (currentRefreshToken == null || currentRefreshToken.isEmpty()) {
+                        throw new AppException(ErrorCode.UNAUTHENTICATED);
+                }
 
-        ResponseCookie cleanRefreshCookie = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(0)
-                .sameSite("Lax")
-                .build();
+                TokenResponse tokenResponse = authService.refreshToken(currentRefreshToken);
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cleanJwtCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
-                .body(ApiResponse.<String>builder()
-                        .result("Đăng xuất thành công")
-                        .build());
-    }
+                ResponseCookie jwtCookie = ResponseCookie.from("accessToken", tokenResponse.getAccessToken())
+                                .httpOnly(true)
+                                .secure(false)
+                                .path("/")
+                                .maxAge(24 * 60 * 60)
+                                .sameSite("Lax")
+                                .build();
 
-    @GetMapping("/me")
-    public ApiResponse<UserResponse> getMyInfo() {
-        return ApiResponse.<UserResponse>builder()
-                .result(authService.getMyInfo())
-                .build();
-    }
-    @PostMapping("/sessions/revoke")
-    public ApiResponse<String> revokeSession(@RequestParam String ssid) {
-        sessionService.revokeSession(ssid);
-        return ApiResponse.<String>builder()
-                .result("thu hoi thanh cong")
-                .build();
-    }
+                ResponseCookie newRefreshCookie = ResponseCookie.from("refreshToken", tokenResponse.getRefreshToken())
+                                .httpOnly(true)
+                                .secure(false)
+                                .path("/")
+                                .maxAge(7 * 24 * 60 * 60)
+                                .sameSite("Lax")
+                                .build();
+
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
+                                .body(ApiResponse.<String>builder()
+                                                .result("Làm mới phiên thành công")
+                                                .build());
+        }
+
+        @PostMapping("/logout")
+        public ResponseEntity<ApiResponse<String>> logout(
+                        @CookieValue(name = "accessToken", required = false) String accessToken) {
+
+                authService.logout(accessToken);
+
+                ResponseCookie cleanJwtCookie = ResponseCookie.from("accessToken", "")
+                                .httpOnly(true)
+                                .secure(false)
+                                .path("/")
+                                .maxAge(0)
+                                .sameSite("Lax")
+                                .build();
+
+                ResponseCookie cleanRefreshCookie = ResponseCookie.from("refreshToken", "")
+                                .httpOnly(true)
+                                .secure(false)
+                                .path("/")
+                                .maxAge(0)
+                                .sameSite("Lax")
+                                .build();
+
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, cleanJwtCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
+                                .body(ApiResponse.<String>builder()
+                                                .result("Đăng xuất thành công")
+                                                .build());
+        }
+
+        @GetMapping("/me")
+        public ApiResponse<UserResponse> getMyInfo() {
+                return ApiResponse.<UserResponse>builder()
+                                .result(authService.getMyInfo())
+                                .build();
+        }
+
+        @PostMapping("/sessions/revoke")
+        public ApiResponse<String> revokeSession(@RequestParam String ssid) {
+                sessionService.revokeSession(ssid);
+                return ApiResponse.<String>builder()
+                                .result("thu hoi thanh cong")
+                                .build();
+        }
 }
