@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.common.exception.AppException;
@@ -41,6 +42,7 @@ public class AuthService {
     UserMapper userMapper;
     SessionRepository sessionRepository;
     RoleRepository roleRepository;
+    SessionService sessionService;
 
     public UserResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -75,12 +77,12 @@ public class AuthService {
 
         String sessionId = UUID.randomUUID().toString();
         String deviceInfo = DeviceUtils.parseDeviceInfo(userAgent);
-        // LƯU SESSION VÀO DATABASE
+        
         UserSession userSession = UserSession.builder()
                 .id(sessionId)
                 .user(user)
-                .deviceInfo(deviceInfo) // Sau này có thể lấy từ User-Agent của request
-                .expires_at(LocalDateTime.now().plusHours(24)) // Đồng bộ với 24h của Token
+                .deviceInfo(deviceInfo)
+                .expires_at(LocalDateTime.now().plusHours(24))
                 .build();
         sessionRepository.save(userSession);
 
@@ -122,5 +124,20 @@ public class AuthService {
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         return userMapper.toUserResponse(user);
+    }
+
+    public void logout(String accessToken) {
+        if (StringUtils.hasText(accessToken)) {
+            try {
+                SignedJWT signedJWT = SignedJWT.parse(accessToken);
+                String ssid = signedJWT.getJWTClaimsSet().getStringClaim("sessionId");
+                
+                if (ssid != null) {
+                    sessionService.revokeSession(ssid);
+                }
+            } catch (Exception e) {
+                log.warn("Lỗi parse token khi đăng xuất (có thể token đã hỏng hoặc bị can thiệp): {}", e.getMessage());
+            }
+        }
     }
 }

@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.StringUtils;
+
+import com.nimbusds.jwt.SignedJWT;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
 import com.vlt.ecommerce.common.exception.AppException;
@@ -25,6 +28,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -109,7 +115,11 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<String>> logout() {
+    public ResponseEntity<ApiResponse<String>> logout(
+            @CookieValue(name = "accessToken", required = false) String accessToken) {
+            
+        authService.logout(accessToken);
+
         ResponseCookie cleanJwtCookie = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)
                 .secure(false)
