@@ -102,6 +102,40 @@ wbsDiagram {
 @endwbs
 ```
 
+### Chi tiết phân rã chức năng:
+**1. Quản lý tài khoản và xác thực**
+- Đăng ký, đăng nhập bằng email, mã hóa mật khẩu an toàn.
+- Quản lý JWT token và thu hồi phiên làm việc (blacklist) bảo vệ tài khoản.
+- Cập nhật hồ sơ (đổi tên, ảnh đại diện) và quản lý sổ địa chỉ giao hàng (chọn địa chỉ mặc định).
+*Quy tắc:* Mật khẩu được mã hóa Bcrypt. Khi người dùng đăng xuất, token sẽ bị đẩy vào Blacklist Redis.
+
+**2. Quản lý cửa hàng**
+- Cho phép người dùng đăng ký mở shop kinh doanh (trở thành Seller).
+- Tìm kiếm và tra cứu thông tin shop.
+- Dashboard thống kê tổng quan doanh thu, số lượng đơn hàng cho người bán.
+*Quy tắc:* Tên cửa hàng phải duy nhất. Khi tài khoản bị khóa, cửa hàng cũng tạm ngưng.
+
+**3. Quản lý sản phẩm và danh mục**
+- Quản lý danh mục sản phẩm phân cấp (đệ quy đa tầng).
+- Thêm, sửa, xóa sản phẩm, tải ảnh lên hệ thống lưu trữ Cloudinary.
+- Theo dõi và phản hồi đánh giá của khách hàng.
+*Quy tắc:* Khi xóa sản phẩm sẽ xóa luôn ảnh đính kèm. Trừ tồn kho an toàn bằng Optimistic/Pessimistic lock.
+
+**4. Quản lý giỏ hàng và đơn hàng**
+- Thêm sản phẩm vào giỏ, điều chỉnh số lượng.
+- Xác nhận đặt hàng, chọn địa chỉ giao nhận (snapshot địa chỉ để tránh thay đổi sau khi đặt).
+- Cập nhật tiến độ: Chờ xác nhận, Đang giao, Đã giao, Hủy.
+*Quy tắc:* Áp dụng Idempotency Key để ngăn chặn tình trạng khách hàng bấm đúp tạo ra nhiều đơn trùng lặp do mạng chậm.
+
+**5. Quản lý thanh toán và hoa hồng**
+- Hỗ trợ thanh toán COD hoặc qua cổng thanh toán điện tử (VNPay, Momo).
+- Tự động trích phần trăm hoa hồng phí sàn cho mỗi mặt hàng thành công theo cấu hình định sẵn.
+*Quy tắc:* Phí hoa hồng = (Giá sản phẩm * Tỷ lệ quy định của ngành hàng).
+
+**6. Hệ thống thông báo**
+- Bắn thông báo Realtime qua WebSocket/Socket.io khi đơn hàng đổi trạng thái.
+- Đánh dấu đã đọc/chưa đọc.
+
 ---
 
 ## IV. Đặc tả chi tiết các lớp và phương thức (UML Class Diagram)
@@ -455,6 +489,91 @@ CommissionConfig "*" -down-> "1" Category
 CommissionConfig "*" -up-> "1" User : CreatedBy
 @enduml
 ```
+
+### Đặc tả chi tiết các lớp và phương thức
+
+**1. Lớp User**
+* **Mô tả:** Đại diện cho thực thể người dùng, quản trị định danh, phân quyền.
+* **Thuộc tính:**
+  * `- String email`: Địa chỉ hộp thư (duy nhất).
+  * `- String password`: Chuỗi băm mật khẩu.
+  * `- String fullName`: Tên hiển thị giao diện.
+  * `- Set<Role> roles`: Tập hợp các vai trò mà tài khoản nắm giữ.
+  * `- Shop shop`: Cửa hàng mà tài khoản này đang sở hữu.
+* **Phương thức:**
+  * `+ register(RegisterRequest req): User`: Xử lý tạo mới tài khoản.
+  * `+ login(LoginRequest req): TokenResponse`: Kiểm tra mật khẩu, sinh JWT token.
+  * `+ updateProfile(MultipartFile file): void`: Đổi ảnh đại diện, xóa ảnh cũ trên Cloudinary.
+
+**2. Lớp Role & Permission**
+* **Mô tả:** Cấu trúc phân quyền linh hoạt theo vai trò và quyền hạn chi tiết (RBAC).
+* **Thuộc tính:**
+  * `- String name`: Tên role (vd: ROLE_SELLER) hoặc tên quyền (vd: CREATE_PRODUCT).
+  * `- Set<Permission> permissions`: Danh sách các quyền tương ứng với Role.
+
+**3. Lớp UserSession**
+* **Mô tả:** Đối tượng quản lý phiên đăng nhập hợp lệ của người dùng.
+* **Thuộc tính:**
+  * `- String id`: Chuỗi định danh session/token.
+  * `- LocalDateTime expires_at`: Thời gian hết hạn của phiên.
+* **Phương thức:**
+  * `+ revokeSession(String sessionId): void`: Hủy hiệu lực của token.
+
+**4. Lớp Shop**
+* **Mô tả:** Thực thể đại diện cho cửa hàng của người bán.
+* **Thuộc tính:**
+  * `- String name`: Tên cửa hàng.
+  * `- User seller`: Tham chiếu đến người dùng sở hữu.
+  * `- List<Product> products`: Tập hợp các sản phẩm đang bán.
+* **Phương thức:**
+  * `+ createShop(ShopRequest req): Shop`: Đăng ký cửa hàng mới.
+  * `+ getShopDetails(Long id): ShopResponse`: Lấy thông tin chi tiết shop.
+
+**5. Lớp Category**
+* **Mô tả:** Danh mục phân loại sản phẩm.
+* **Thuộc tính:**
+  * `- Category parent`: Tham chiếu tới danh mục cha (cấu trúc đệ quy).
+  * `- List<Category> children`: Danh sách danh mục con.
+* **Phương thức:**
+  * `+ getChildrens(Long id): List<Category>`: Truy xuất cây danh mục.
+
+**6. Lớp Product & ProductImage**
+* **Mô tả:** Thực thể lưu trữ thông tin về một mặt hàng và hình ảnh của nó.
+* **Thuộc tính:**
+  * `- BigDecimal price`: Giá bán.
+  * `- Integer stockQuantity`: Số lượng tồn kho hiện tại.
+  * `- Shop shop`: Sản phẩm thuộc về cửa hàng nào.
+  * `- List<ProductImage> images`: Các hình ảnh đính kèm.
+* **Phương thức:**
+  * `+ createProduct(ProductRequest req): void`: Tạo mặt hàng mới.
+  * `+ uploadImages(Long id, MultipartFile[] files): void`: Lưu trữ ảnh đa phương tiện.
+
+**7. Lớp Order & OrderItem**
+* **Mô tả:** Quản lý quy trình đặt hàng và chi tiết từng sản phẩm được chốt.
+* **Thuộc tính:**
+  * `- String idempotencyKey`: Chuỗi UUID chống trùng lặp dữ liệu submit.
+  * `- String addressSnapshot`: Thông tin giao hàng chốt cố định tại thời điểm mua.
+  * `- OrderStatus status`: Trạng thái xử lý.
+  * `- List<OrderItem> items`: Chi tiết số lượng và giá từng món hàng.
+* **Phương thức:**
+  * `+ createOrder(OrderRequest req): Order`: Xử lý tạo đơn hàng, trừ kho, tính tiền.
+  * `+ completeOrder(Long id): void`: Đánh dấu thành công và kích hoạt tính hoa hồng.
+
+**8. Lớp Review**
+* **Mô tả:** Phản hồi đánh giá 5 sao.
+* **Thuộc tính:**
+  * `- int rating`: Điểm chất lượng (1-5).
+  * `- Product product`: Sản phẩm được đánh giá.
+
+**9. Lớp CommissionConfig & CommissionRecord**
+* **Mô tả:** Quản lý tỷ lệ chiết khấu sàn và lưu trữ vết tiền hoa hồng thu được.
+* **Thuộc tính:**
+  * `- BigDecimal rate`: Tỉ lệ hoa hồng phần trăm.
+  * `- BigDecimal commissionAmount`: Số tiền trích lại cho sàn.
+  * `- BigDecimal netRevenue`: Số tiền thực nhận của Shop.
+* **Phương thức:**
+  * `+ getSellerStats(): SellerStatsResponse`: Tính tổng doanh thu theo Shop.
+  * `+ getAdminStats(): AdminStatsResponse`: Tính tổng tiền hoa hồng sàn thu được.
 
 ---
 
