@@ -11,6 +11,8 @@ public class CategoryResponse {
     String name;
     String slug;
     Long parentId;
+    String parentName;
     String imageUrl;
     Boolean isActive;
+    Integer productCount;
 }

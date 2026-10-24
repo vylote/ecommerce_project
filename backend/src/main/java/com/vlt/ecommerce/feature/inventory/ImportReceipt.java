@@ -54,8 +54,8 @@ public class ImportReceipt {
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
-    // Quan hệ 1-1 với Sản phẩm: mỗi phiếu nhập kho cho 1 sản phẩm
-    @OneToOne(fetch = FetchType.LAZY)
+    // Quan hệ N-1 với Sản phẩm: mỗi phiếu nhập kho cho 1 sản phẩm
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     Product product;
 

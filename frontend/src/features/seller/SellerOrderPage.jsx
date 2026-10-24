@@ -117,7 +117,7 @@ export default function SellerOrderPage() {
               placeholder="Nhập Mã đơn hàng..." 
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="input input-bordered input-sm w-full pl-9 focus:border-[#ee4d2d]"
+              className="input input-bordered input-sm w-full pl-9 focus:border-green-600"
             />
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           </form>
@@ -133,8 +133,8 @@ export default function SellerOrderPage() {
               onClick={() => updateParams({ status: tab.id, page: 1 })}
               className={`px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                 currentStatus === tab.id 
-                  ? 'border-[#ee4d2d] text-[#ee4d2d]' 
-                  : 'border-transparent text-gray-600 hover:text-[#ee4d2d]'
+                  ? 'border-green-600 text-green-700 font-bold' 
+                  : 'border-transparent text-gray-600 hover:text-green-600'
               }`}
             >
               {tab.label}
@@ -168,7 +168,7 @@ export default function SellerOrderPage() {
                 </tr>
               ) : (
                 orders.map((order) => (
-                  <tr key={order.id} className="hover:bg-orange-50/30 transition-colors">
+                  <tr key={order.id} className="hover:bg-green-50/40 transition-colors">
                     <td className="px-5 py-4 align-top font-medium text-gray-800">
                       #{order.id}
                       <div className="text-[11px] text-gray-400 font-normal mt-1">
@@ -198,7 +198,7 @@ export default function SellerOrderPage() {
                       </div>
                     </td>
                     <td className="px-5 py-4 align-top text-right">
-                      <div className="font-bold text-[#ee4d2d] text-base">
+                      <div className="font-bold text-green-600 text-base">
                         ₫{order.totalAmount?.toLocaleString('vi-VN')}
                       </div>
                       <div className="text-[11px] text-gray-500 mt-1">Đã tính phí ship</div>
@@ -212,7 +212,7 @@ export default function SellerOrderPage() {
                         {order.status === 'PENDING' && (
                           <button 
                             onClick={() => handleAction(order.id, 'Xác nhận', 'confirm')}
-                            className="btn btn-sm w-full bg-[#ee4d2d] hover:bg-[#d73211] text-white border-none font-normal"
+                            className="btn btn-sm w-full bg-green-600 hover:bg-green-700 text-white border-none font-normal"
                           >
                             <CheckCircle size={14} className="mr-1" /> Chuẩn bị hàng
                           </button>
@@ -246,7 +246,7 @@ export default function SellerOrderPage() {
             <div className="join gap-1">
               <button disabled={page === 1} onClick={() => updateParams({ page: page - 1 })} className="join-item btn btn-sm bg-white border-gray-300 text-gray-600 hover:bg-gray-50">«</button>
               {Array.from({ length: pageInfo.totalPages }).map((_, idx) => (
-                <button key={idx + 1} onClick={() => updateParams({ page: idx + 1 })} className={`join-item btn btn-sm border-gray-300 w-8 h-8 rounded-sm font-medium text-sm ${page === idx + 1 ? 'bg-[#ee4d2d] text-white border-[#ee4d2d] hover:bg-[#d73211]' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
+                <button key={idx + 1} onClick={() => updateParams({ page: idx + 1 })} className={`join-item btn btn-sm border-gray-300 w-8 h-8 rounded-sm font-medium text-sm ${page === idx + 1 ? 'bg-green-600 text-white border-green-600 hover:bg-green-700' : 'bg-white text-gray-600 hover:bg-gray-50'}`}>
                   {idx + 1}
                 </button>
               ))}

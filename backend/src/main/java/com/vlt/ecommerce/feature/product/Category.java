@@ -76,4 +76,10 @@ public class Category {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     Set<Shop> shops = new HashSet<>();
+
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
+    @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    Set<SpecificationType> specificationTypes = new HashSet<>();
 }

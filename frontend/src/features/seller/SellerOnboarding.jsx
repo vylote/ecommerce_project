@@ -196,7 +196,7 @@ export default function SellerOnboarding() {
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-[1000px] mx-auto px-6 py-4 flex items-center gap-3">
-          <Store className="text-[#ee4d2d]" size={28} />
+          <Store className="text-green-600" size={28} />
           <h1 className="text-xl font-bold text-gray-800 tracking-wide">Đăng ký trở thành Người bán</h1>
         </div>
       </div>
@@ -207,7 +207,7 @@ export default function SellerOnboarding() {
           <div className="flex justify-between items-center max-w-2xl mx-auto relative">
             <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 z-0"></div>
             <div
-              className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-[#ee4d2d] z-0 transition-all duration-300"
+              className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-green-600 z-0 transition-all duration-300"
               style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
             ></div>
 
@@ -217,8 +217,8 @@ export default function SellerOnboarding() {
               return (
                 <div key={step.id} className="relative z-10 flex flex-col items-center">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 shadow-sm ${
-                    isActive ? 'bg-[#ee4d2d] text-white' : 'bg-gray-200 text-gray-500'
-                  } ${isCurrent ? 'ring-4 ring-orange-100' : ''}`}>
+                    isActive ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500'
+                  } ${isCurrent ? 'ring-4 ring-green-100' : ''}`}>
                     {isActive && !isCurrent ? <CheckCircle2 size={20} /> : step.id}
                   </div>
                   <span className={`mt-2 text-sm font-medium absolute -bottom-6 w-32 text-center ${isActive ? 'text-gray-800' : 'text-gray-400'}`}>
@@ -239,7 +239,7 @@ export default function SellerOnboarding() {
               <h2 className="text-xl font-semibold border-b pb-4">Thông tin cơ bản</h2>
 
               <div className="flex flex-col items-center mt-4 mb-2">
-                <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50 overflow-hidden group hover:border-[#ee4d2d] transition-colors cursor-pointer">
+                <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50 overflow-hidden group hover:border-green-600 transition-colors cursor-pointer">
                   {shopData.previewUrl ? (
                     <img src={shopData.previewUrl} alt="Logo preview" className="w-full h-full object-cover" />
                   ) : (
@@ -265,21 +265,21 @@ export default function SellerOnboarding() {
                 <div className="form-control">
                   <label className="label font-medium text-gray-700">Tên shop *</label>
                   <input
-                    type="text" className="input input-bordered focus:border-[#ee4d2d]" placeholder="Nhập tên shop"
+                    type="text" className="input input-bordered focus:border-green-600" placeholder="Nhập tên shop"
                     value={shopData.shopName} onChange={e => setShopData({...shopData, shopName: e.target.value})}
                   />
                 </div>
                 <div className="form-control">
                   <label className="label font-medium text-gray-700">Số điện thoại *</label>
                   <input
-                    type="text" className="input input-bordered focus:border-[#ee4d2d]" placeholder="09xxxxxxx"
+                    type="text" className="input input-bordered focus:border-green-600" placeholder="09xxxxxxx"
                     value={shopData.phone} onChange={e => setShopData({...shopData, phone: e.target.value})}
                   />
                 </div>
                 <div className="form-control col-span-2">
                   <label className="label font-medium text-gray-700">Email *</label>
                   <input
-                    type="email" className="input input-bordered focus:border-[#ee4d2d] w-full" placeholder="email@domain.com"
+                    type="email" className="input input-bordered focus:border-green-600 w-full" placeholder="email@domain.com"
                     value={shopData.email} onChange={e => setShopData({...shopData, email: e.target.value})}
                   />
                 </div>
@@ -301,8 +301,8 @@ export default function SellerOnboarding() {
                           onClick={() => toggleCategory(cat.id)}
                           className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
                             selected
-                              ? 'bg-[#ee4d2d] border-[#ee4d2d] text-white'
-                              : 'bg-white border-gray-300 text-gray-700 hover:border-[#ee4d2d] hover:text-[#ee4d2d]'
+                              ? 'bg-green-600 border-green-600 text-white'
+                              : 'bg-white border-gray-300 text-gray-700 hover:border-green-600 hover:text-green-600'
                           }`}
                         >
                           {cat.name}{selected ? ' ✓' : ''}
@@ -318,7 +318,7 @@ export default function SellerOnboarding() {
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="font-semibold text-gray-800">Địa chỉ lấy hàng *</h3>
                   {!shopData.address && (
-                    <button onClick={openAddressModal} className="btn btn-sm btn-outline text-[#ee4d2d] hover:bg-[#ee4d2d] hover:text-white hover:border-[#ee4d2d]">
+                    <button onClick={openAddressModal} className="btn btn-sm btn-outline text-green-600 hover:bg-green-600 hover:text-white hover:border-green-600">
                       + Thêm địa chỉ
                     </button>
                   )}
@@ -355,7 +355,7 @@ export default function SellerOnboarding() {
 
               <div className="border border-gray-200 rounded-md overflow-hidden">
                 <div className="bg-gray-50 px-4 py-3 border-b font-medium text-gray-800 flex items-center gap-2">
-                  <Truck size={18} className="text-[#ee4d2d]"/> Đơn Hỏa Tốc
+                  <Truck size={18} className="text-green-600"/> Đơn Hỏa Tốc
                 </div>
                 <div className="p-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
                   <div>
@@ -368,7 +368,7 @@ export default function SellerOnboarding() {
 
               <div className="border border-gray-200 rounded-md overflow-hidden">
                 <div className="bg-gray-50 px-4 py-3 border-b font-medium text-gray-800 flex items-center gap-2">
-                  <Truck size={18} className="text-[#ee4d2d]"/> Đơn Thường
+                  <Truck size={18} className="text-green-600"/> Đơn Thường
                 </div>
                 <div className="divide-y">
                   <div className="p-4 flex justify-between items-center bg-white hover:bg-gray-50 transition-colors">
@@ -432,11 +432,11 @@ export default function SellerOnboarding() {
           ) : <div></div>}
 
           {currentStep < 3 ? (
-            <button onClick={nextStep} className="btn border-none bg-[#ee4d2d] hover:bg-[#d73211] text-white px-10">
+            <button onClick={nextStep} className="btn border-none bg-green-600 hover:bg-green-700 text-white px-10">
               Tiếp theo
             </button>
           ) : (
-            <button onClick={handleRegisterShop} disabled={isSubmitting} className="btn border-none bg-[#ee4d2d] hover:bg-[#d73211] text-white px-10">
+            <button onClick={handleRegisterShop} disabled={isSubmitting} className="btn border-none bg-green-600 hover:bg-green-700 text-white px-10">
               {isSubmitting ? <span className="loading loading-spinner"></span> : 'Xác nhận & Đăng ký'}
             </button>
           )}
@@ -452,13 +452,13 @@ export default function SellerOnboarding() {
               <div className="flex gap-2 text-sm">
                 <button
                   onClick={() => setAddressMode('pick')}
-                  className={`px-3 py-1 rounded ${addressMode === 'pick' ? 'bg-[#ee4d2d] text-white' : 'bg-gray-100 text-gray-600'}`}
+                  className={`px-3 py-1 rounded ${addressMode === 'pick' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}
                 >
                   Đã lưu
                 </button>
                 <button
                   onClick={() => setAddressMode('create')}
-                  className={`px-3 py-1 rounded ${addressMode === 'create' ? 'bg-[#ee4d2d] text-white' : 'bg-gray-100 text-gray-600'}`}
+                  className={`px-3 py-1 rounded ${addressMode === 'create' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}
                 >
                   Thêm mới
                 </button>
@@ -482,12 +482,12 @@ export default function SellerOnboarding() {
                       <button
                         key={addr.id}
                         onClick={() => handlePickAddress(addr)}
-                        className="w-full text-left p-3 border rounded-md hover:border-[#ee4d2d] hover:bg-orange-50 transition-colors"
+                        className="w-full text-left p-3 border rounded-md hover:border-green-600 hover:bg-green-50 transition-colors"
                       >
                         <div className="font-medium text-sm">
                           {addr.fullName} <span className="text-gray-500 font-normal">| {addr.phone}</span>
                           {addr.isDefault && (
-                            <span className="ml-2 text-xs border border-[#ee4d2d] text-[#ee4d2d] px-1.5 py-0.5 rounded">Mặc định</span>
+                            <span className="ml-2 text-xs border border-green-600 text-green-600 px-1.5 py-0.5 rounded">Mặc định</span>
                           )}
                         </div>
                         <div className="text-gray-600 text-sm mt-1">
@@ -542,7 +542,7 @@ export default function SellerOnboarding() {
                 <button
                   onClick={handleSaveNewAddress}
                   disabled={savingAddress}
-                  className="btn border-none bg-[#ee4d2d] hover:bg-[#d73211] text-white disabled:opacity-50"
+                  className="btn border-none bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
                 >
                   {savingAddress ? 'Đang lưu...' : 'Lưu địa chỉ'}
                 </button>

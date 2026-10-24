@@ -1,5 +1,7 @@
 package com.vlt.ecommerce.feature.product.dto.request;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
@@ -21,4 +23,8 @@ public class SpecificationTypeRequest {
 
     @Size(max = 255, message = "Mô tả tối đa 255 ký tự")
     String description;
+
+    Boolean isVariant;
+
+    List<Long> categoryIds;
 }

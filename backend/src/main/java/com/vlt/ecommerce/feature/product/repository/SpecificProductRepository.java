@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.vlt.ecommerce.feature.product.SpecificProduct;
@@ -17,21 +20,21 @@ public interface SpecificProductRepository extends JpaRepository<SpecificProduct
     boolean existsBySku(String sku);
     boolean existsBySkuAndIdNot(String sku, Long id);
 
-    @org.springframework.data.jpa.repository.Modifying
-    @org.springframework.data.jpa.repository.Query("""
+    @Modifying
+    @Query("""
         UPDATE SpecificProduct sp 
         SET sp.stockQuantity = sp.stockQuantity - :qty 
         WHERE sp.id = :variantId AND sp.stockQuantity >= :qty
         """)
-    int decrementStock(@org.springframework.data.repository.query.Param("variantId") Long variantId, 
-                       @org.springframework.data.repository.query.Param("qty") Integer qty);
+    int decrementStock(@Param("variantId") Long variantId, 
+                       @Param("qty") Integer qty);
 
-    @org.springframework.data.jpa.repository.Modifying
-    @org.springframework.data.jpa.repository.Query("""
+    @Modifying
+    @Query("""
         UPDATE SpecificProduct sp 
         SET sp.stockQuantity = sp.stockQuantity + :qty 
         WHERE sp.id = :variantId
         """)
-    int incrementStock(@org.springframework.data.repository.query.Param("variantId") Long variantId, 
-                       @org.springframework.data.repository.query.Param("qty") Integer qty);
+    int incrementStock(@Param("variantId") Long variantId, 
+                       @Param("qty") Integer qty);
 }

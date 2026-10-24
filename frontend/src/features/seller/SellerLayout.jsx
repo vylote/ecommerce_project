@@ -62,25 +62,32 @@ export default function SellerLayout() {
   return (
     <div className="min-h-screen bg-[#f5f7fa] text-gray-800 font-sans flex flex-col">
       {/* ================= HEADER SELLER ================= */}
-      <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+      <header className="bg-gradient-to-r from-green-600 to-green-500 shadow-sm sticky top-0 z-50 text-white">
         <div className="w-full px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Store className="text-[#ee4d2d]" size={28} />
-            <h1 className="text-xl font-bold text-[#ee4d2d]">Kênh Người Bán</h1>
+            <Link to="/" className="text-2xl font-black text-white tracking-wider">
+              ECOMMERCE
+            </Link>
+            <span className="w-px h-6 bg-white/40" />
+            <div className="flex items-center gap-2">
+              <Store className="text-white" size={22} />
+              <h1 className="text-lg font-bold text-white">Kênh Người Bán</h1>
+            </div>
           </div>
 
           <div className="flex items-center gap-6 text-sm">
-            <Link to="/" className="text-gray-500 hover:text-[#ee4d2d] hidden md:block transition-colors">
-              Trang chủ Shopee
+            <Link to="/" className="text-white/85 hover:text-white hidden md:flex items-center gap-1.5 transition-colors font-medium">
+              <Home size={16} />
+              Trang người mua
             </Link>
 
             {/* ================= KHU VỰC AVATAR DROPDOWN ================= */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2 focus:outline-none hover:opacity-80 transition-opacity"
+                className="flex items-center gap-2.5 focus:outline-none hover:opacity-90 transition-opacity"
               >
-                <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden border border-gray-300">
+                <div className="w-8 h-8 bg-white/20 rounded-full overflow-hidden border border-white/40">
                   <img
                     src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || 'Seller')}&background=random`}
                     alt="Avatar"
@@ -88,27 +95,27 @@ export default function SellerLayout() {
                   />
                 </div>
                 {/* Hiện tên Shop/Seller nếu màn hình đủ rộng */}
-                <span className="font-medium text-gray-700 hidden md:block">
+                <span className="font-medium text-white hidden md:block">
                   {user?.fullName || 'Seller'}
                 </span>
               </button>
 
               {/* MENU DROPDOWN (Chỉ hiện khi isDropdownOpen = true) */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-3 w-48 bg-white border border-gray-100 rounded-md shadow-[0_4px_12px_rgba(0,0,0,0.1)] py-2 z-50 animate-fade-in origin-top-right">
+                <div className="absolute right-0 mt-3 w-48 bg-white text-gray-800 border border-gray-100 rounded-md shadow-[0_4px_12px_rgba(0,0,0,0.1)] py-2 z-50 animate-fade-in origin-top-right">
                   <Link
                     to="/"
                     onClick={() => setIsDropdownOpen(false)}
-                    className="flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-[#ee4d2d] transition-colors"
+                    className="flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:bg-green-50 hover:text-green-700 transition-colors"
                   >
                     <Home size={16} /> Trang người mua
                   </Link>
 
-                  <div className="h-px bg-gray-100 my-1"></div> {/* Đường gạch ngang phân cách */}
+                  <div className="h-px bg-gray-100 my-1"></div>
 
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-[#ee4d2d] transition-colors"
+                    className="w-full text-left flex items-center gap-2 px-4 py-2.5 text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
                   >
                     <LogOut size={16} /> Đăng xuất
                   </button>
@@ -129,7 +136,7 @@ export default function SellerLayout() {
           <nav>
             <ul className="flex flex-col gap-2">
               <li>
-                <Link to="/seller/dashboard" className={`flex items-center gap-3 p-2.5 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/seller/dashboard' ? 'bg-[#fff3f1] text-[#ee4d2d] border border-orange-100' : 'hover:bg-gray-50 text-gray-700'}`}>
+                <Link to="/seller/dashboard" className={`flex items-center gap-3 p-2.5 rounded-lg text-sm font-medium transition-colors ${location.pathname === '/seller/dashboard' ? 'bg-green-50 text-green-700 font-bold border border-green-200' : 'hover:bg-green-50/60 hover:text-green-700 text-gray-700'}`}>
                   <BarChart2 size={18} /> Tổng quan
                 </Link>
               </li>
@@ -139,8 +146,8 @@ export default function SellerLayout() {
                     <Link
                       to={item.path}
                       className={`flex items-center gap-3 p-2.5 rounded-lg text-sm transition-colors ${location.pathname.startsWith(item.path)
-                          ? 'bg-[#fff3f1] text-[#ee4d2d] font-bold border border-orange-100'
-                          : 'hover:bg-gray-50 text-gray-700 font-medium'
+                          ? 'bg-green-50 text-green-700 font-bold border border-green-200'
+                          : 'hover:bg-green-50/60 hover:text-green-700 text-gray-700 font-medium'
                         }`}
                     >
                       {item.icon} {item.label}
@@ -159,14 +166,14 @@ export default function SellerLayout() {
           </nav>
 
           <div className="mt-2 border border-gray-100 p-3 rounded-lg bg-gray-50">
-            <div className="font-bold text-sm mb-2">Danh sách cần làm</div>
+            <div className="font-bold text-sm mb-2 text-gray-800">Danh sách cần làm</div>
             <div className="flex gap-2 flex-wrap">
               <div className="bg-white border border-gray-200 p-2 rounded-lg flex-1 min-w-[45%]">
-                <div className="font-bold text-[#ee4d2d] text-lg">85</div>
+                <div className="font-bold text-green-600 text-lg">85</div>
                 <div className="text-xs text-gray-500">Chờ lấy hàng</div>
               </div>
               <div className="bg-white border border-gray-200 p-2 rounded-lg flex-1 min-w-[45%]">
-                <div className="font-bold text-lg">12</div>
+                <div className="font-bold text-lg text-gray-800">12</div>
                 <div className="text-xs text-gray-500">Đơn mới</div>
               </div>
             </div>

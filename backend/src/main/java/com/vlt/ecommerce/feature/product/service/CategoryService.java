@@ -37,7 +37,13 @@ public class CategoryService {
         }
 
         Category newCategory = categoryMapper.toCategory(request);
-        newCategory.setParent(newCategory);
+        if (request.getParentId() != null) {
+            Category parent = categoryRepository.findById(request.getParentId())
+                    .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            newCategory.setParent(parent);
+        } else {
+            newCategory.setParent(null);
+        }
         
         return categoryMapper.toCategoryResponse(categoryRepository.save(newCategory));
     }

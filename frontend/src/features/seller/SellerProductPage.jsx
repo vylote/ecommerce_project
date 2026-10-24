@@ -116,11 +116,11 @@ export default function SellerProductPage() {
               placeholder="Tìm tên sản phẩm..." 
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="input input-bordered input-sm w-full pl-9 focus:border-[#ee4d2d]"
+              className="input input-bordered input-sm w-full pl-9 focus:border-green-600"
             />
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           </form>
-          <Link to="/seller/product/add" className="btn btn-sm bg-[#ee4d2d] hover:bg-[#d73211] text-white border-none flex items-center gap-1">
+          <Link to="/seller/product/add" className="btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none flex items-center gap-1">
             <Plus size={16} /> Thêm mới
           </Link>
         </div>
@@ -136,8 +136,8 @@ export default function SellerProductPage() {
               onClick={() => updateParams({ status: tab.id, page: 1 })} // Bấm tab -> Chuyển status -> Reset trang 1
               className={`px-6 py-3 border-b-2 font-medium text-sm whitespace-nowrap transition-colors ${
                 currentStatus === tab.id 
-                  ? 'border-[#ee4d2d] text-[#ee4d2d]' 
-                  : 'border-transparent text-gray-600 hover:text-[#ee4d2d]'
+                  ? 'border-green-600 text-green-700 font-bold' 
+                  : 'border-transparent text-gray-600 hover:text-green-600'
               }`}
             >
               {tab.label}
@@ -150,13 +150,13 @@ export default function SellerProductPage() {
             <thead className="bg-gray-50 text-gray-700 font-medium">
               <tr>
                 <th className="px-5 py-4">Tên sản phẩm</th>
-                <th className="px-5 py-4 cursor-pointer hover:text-[#ee4d2d]" onClick={() => handleSort('price')}>
+                <th className="px-5 py-4 cursor-pointer hover:text-green-600" onClick={() => handleSort('price')}>
                   Giá {sortBy === 'price' && (order === 'desc' ? '↓' : '↑')}
                 </th>
-                <th className="px-5 py-4 cursor-pointer hover:text-[#ee4d2d]" onClick={() => handleSort('stockQuantity')}>
+                <th className="px-5 py-4 cursor-pointer hover:text-green-600" onClick={() => handleSort('stockQuantity')}>
                   Kho hàng {sortBy === 'stockQuantity' && (order === 'desc' ? '↓' : '↑')}
                 </th>
-                <th className="px-5 py-4 cursor-pointer hover:text-[#ee4d2d]" onClick={() => handleSort('soldCount')}>
+                <th className="px-5 py-4 cursor-pointer hover:text-green-600" onClick={() => handleSort('soldCount')}>
                   Đã bán {sortBy === 'soldCount' && (order === 'desc' ? '↓' : '↑')}
                 </th>
                 <th className="px-5 py-4 text-center">Thao tác</th>
@@ -194,7 +194,7 @@ export default function SellerProductPage() {
                           )}
                         </div>
                         <div className="flex flex-col">
-                          <Link to={`/product/${product.id}`} className="font-medium text-gray-800 hover:text-[#ee4d2d] line-clamp-2">
+                          <Link to={`/product/${product.id}`} className="font-medium text-gray-800 hover:text-green-600 line-clamp-2">
                             {product.name}
                           </Link>
                           {/* --- BỔ SUNG: HUY HIỆU HIỂN THỊ CỜ TRẠNG THÁI (UX) --- */}
@@ -260,7 +260,7 @@ export default function SellerProductPage() {
                     onClick={() => handlePageChange(pageNum)}
                     className={`join-item btn btn-sm border-gray-300 w-8 h-8 rounded-sm font-medium text-sm ${
                       page === pageNum 
-                        ? 'bg-[#ee4d2d] text-white border-[#ee4d2d] hover:bg-[#d73211]' 
+                        ? 'bg-green-600 text-white border-green-600 hover:bg-green-700' 
                         : 'bg-white text-gray-600 hover:bg-gray-50'
                     }`}
                   >

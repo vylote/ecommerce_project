@@ -14,6 +14,8 @@ import com.vlt.ecommerce.feature.product.dto.response.CategoryResponse;
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
     @Mapping(source = "parent.id", target = "parentId")
+    @Mapping(source = "parent.name", target = "parentName")
+    @Mapping(target = "productCount", expression = "java(category.getProducts() != null ? category.getProducts().size() : 0)")
     CategoryResponse toCategoryResponse(Category category);
 
     @Mapping(target = "id", ignore = true)

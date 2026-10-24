@@ -11,4 +11,5 @@ import com.vlt.ecommerce.feature.product.Specification;
 public interface SpecificationRepository extends JpaRepository<Specification, Long> {
     List<Specification> findBySpecificationTypeId(Long typeId);
     boolean existsByNameIgnoreCaseAndSpecificationTypeId(String name, Long typeId);
+    boolean existsByNameIgnoreCaseAndSpecificationTypeIdAndIdNot(String name, Long typeId, Long id);
 }

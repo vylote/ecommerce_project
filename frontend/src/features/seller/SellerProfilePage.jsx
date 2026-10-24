@@ -116,7 +116,7 @@ export default function SellerProfilePage() {
   if (loadingShop) {
     return (
       <div className="flex h-[400px] items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-[#ee4d2d]" />
+        <Loader2 className="w-8 h-8 animate-spin text-green-600" />
       </div>
     );
   }
@@ -137,7 +137,7 @@ export default function SellerProfilePage() {
             <label className="text-sm font-medium text-gray-500 text-right">Tên Shop</label>
             <input
               type="text"
-              className="input input-bordered focus:border-[#ee4d2d] h-10 w-full"
+              className="input input-bordered focus:border-green-600 h-10 w-full"
               value={shopData.shopName}
               onChange={e => setShopData({...shopData, shopName: e.target.value})}
             />
@@ -146,7 +146,7 @@ export default function SellerProfilePage() {
           <div className="grid grid-cols-[120px_1fr] items-start gap-4">
             <label className="text-sm font-medium text-gray-500 text-right mt-3">Mô tả Shop</label>
             <textarea
-              className="textarea textarea-bordered focus:border-[#ee4d2d] w-full"
+              className="textarea textarea-bordered focus:border-green-600 w-full"
               rows={3}
               value={shopData.description}
               onChange={e => setShopData({...shopData, description: e.target.value})}
@@ -168,8 +168,8 @@ export default function SellerProfilePage() {
                       onClick={() => toggleCategory(cat.id)}
                       className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
                         selected
-                          ? 'bg-[#ee4d2d] border-[#ee4d2d] text-white'
-                          : 'bg-white border-gray-300 text-gray-700 hover:border-[#ee4d2d] hover:text-[#ee4d2d]'
+                          ? 'bg-green-600 border-green-600 text-white'
+                          : 'bg-white border-gray-300 text-gray-700 hover:border-green-600 hover:text-green-600'
                       }`}
                     >
                       {cat.name}{selected ? ' ✓' : ''}
@@ -183,7 +183,7 @@ export default function SellerProfilePage() {
           <div className="grid grid-cols-[120px_1fr] items-start gap-4">
             <label className="text-sm font-medium text-gray-500 text-right mt-3">Địa chỉ</label>
             <textarea
-              className="textarea textarea-bordered focus:border-[#ee4d2d] w-full"
+              className="textarea textarea-bordered focus:border-green-600 w-full"
               rows={2}
               value={shopData.addressText}
               onChange={e => setShopData({...shopData, addressText: e.target.value})}
@@ -195,7 +195,7 @@ export default function SellerProfilePage() {
             <button
               onClick={handleUpdateShop}
               disabled={isSubmitting}
-              className="btn border-none bg-[#ee4d2d] hover:bg-[#d73211] text-white px-8 h-10 min-h-10 w-fit"
+              className="btn border-none bg-green-600 hover:bg-green-700 text-white px-8 h-10 min-h-10 w-fit"
             >
               {isSubmitting ? <span className="loading loading-spinner loading-sm"></span> : 'Lưu Thay Đổi'}
             </button>
@@ -204,7 +204,7 @@ export default function SellerProfilePage() {
 
         {/* Right Side: Avatar */}
         <div className="w-full md:w-[300px] flex flex-col items-center justify-start border-l border-gray-100 pl-0 md:pl-8">
-          <div className="relative w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50 overflow-hidden group hover:border-[#ee4d2d] transition-colors cursor-pointer mb-4">
+          <div className="relative w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50 overflow-hidden group hover:border-green-600 transition-colors cursor-pointer mb-4">
             {shopData.previewUrl ? (
               <img src={shopData.previewUrl} alt="Logo preview" className="w-full h-full object-cover" />
             ) : (

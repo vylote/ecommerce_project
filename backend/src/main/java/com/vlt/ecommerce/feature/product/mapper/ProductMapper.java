@@ -29,7 +29,7 @@ public interface ProductMapper {
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "productSpecifications", ignore = true)
     @Mapping(target = "specificProducts", ignore = true)
-    @Mapping(target = "importReceipt", ignore = true)
+    @Mapping(target = "importReceipts", ignore = true)
     Product toProduct(ProductRequest request);
 
     @Mapping(target = "category", source = "product.category")
@@ -53,7 +53,7 @@ public interface ProductMapper {
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "productSpecifications", ignore = true)
     @Mapping(target = "specificProducts", ignore = true)
-    @Mapping(target = "importReceipt", ignore = true)
+    @Mapping(target = "importReceipts", ignore = true)
     void updateProduct(ProductRequest request, @MappingTarget Product product);
 
     List<ProductResponse> toProductResponseList(List<Product> products);

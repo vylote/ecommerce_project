@@ -1,8 +1,8 @@
 {
 	"info": {
 		"_postman_id": "a987d6e5-4c3b-2a10-9876-543210abcdef",
-		"name": "VLT E-Commerce - Nhóm 1: Đặc Tả & Biến Thể SKU",
-		"description": "Bộ test API Postman cho Nhóm 1: SpecificationType, Specification, ProductSpecification, SpecificProduct (SKU).\n\nTài khoản test:\n- Seller: seller_tech@gmail.com / Password123@\n- Admin: admin@gmail.com / Password123@",
+		"name": "VLT E-Commerce - Đặc Tả, Biến Thể SKU & Quản Lý Nhập Kho (Inventory)",
+		"description": "Bộ test API Postman cho Nhóm 1: SpecificationType, Specification, ProductSpecification, SpecificProduct (SKU) và Nhóm 2: Quản lý nhập kho (ImportReceipt, ImportReceiptDetail).\n\nTài khoản test:\n- Seller: seller_tech@gmail.com / Password123@\n- Buyer: test2@gmail.com / Password123@\n- Admin: admin@gmail.com / Password123@",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -807,6 +807,212 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "6. Quản lý Nhập kho (Goods Import / Inventory)",
+			"item": [
+				{
+					"name": "6.1 Tạo phiếu nhập kho COMPLETED (Tăng tồn kho ngay)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.result && jsonData.result.id) {",
+									"    pm.collectionVariables.set(\"receiptId\", jsonData.result.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": {{productId}},\n  \"note\": \"Nhập lô hàng chính hãng đợt 1 từ Apple Authorised Reseller\",\n  \"status\": \"COMPLETED\",\n  \"details\": [\n    {\n      \"specificProductId\": {{variantId}},\n      \"quantity\": 50,\n      \"importPrice\": 24500000.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/import-receipts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"import-receipts"
+							]
+						},
+						"description": "Seller tạo phiếu nhập kho với status COMPLETED. Hệ thống sẽ tự động cộng 50 sản phẩm vào stockQuantity của biến thể SKU và đồng bộ tồn kho tổng của Product cha."
+					},
+					"response": []
+				},
+				{
+					"name": "6.2 Tạo phiếu nhập kho PENDING (Chờ hàng về kho)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.result && jsonData.result.id) {",
+									"    pm.collectionVariables.set(\"receiptId\", jsonData.result.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": {{productId}},\n  \"note\": \"Phiếu dự kiến nhập đợt 2 (hàng đang trên đường vận chuyển)\",\n  \"status\": \"PENDING\",\n  \"details\": [\n    {\n      \"specificProductId\": {{variantId}},\n      \"quantity\": 30,\n      \"importPrice\": 24000000.00\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/import-receipts",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"import-receipts"
+							]
+						},
+						"description": "Tạo phiếu nhập kho ở trạng thái PENDING. Ở trạng thái này, tồn kho của biến thể SKU CHƯA bị thay đổi."
+					},
+					"response": []
+				},
+				{
+					"name": "6.3 Duyệt hoàn thành phiếu nhập kho PENDING (Tăng kho)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/import-receipts/{{receiptId}}/complete",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"import-receipts",
+								"{{receiptId}}",
+								"complete"
+							]
+						},
+						"description": "Duyệt phiếu nhập kho PENDING thành COMPLETED khi hàng đã vào kho thực tế. Hệ thống sẽ cộng tồn kho cho từng biến thể và sản phẩm cha."
+					},
+					"response": []
+				},
+				{
+					"name": "6.4 Hủy phiếu nhập kho PENDING",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/import-receipts/{{receiptId}}/cancel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"import-receipts",
+								"{{receiptId}}",
+								"cancel"
+							]
+						},
+						"description": "Hủy phiếu nhập kho đang ở trạng thái PENDING (phiếu COMPLETED không được phép hủy để tránh sai lệch kho)."
+					},
+					"response": []
+				},
+				{
+					"name": "6.5 Xem chi tiết 1 Phiếu nhập kho theo ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/import-receipts/{{receiptId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"import-receipts",
+								"{{receiptId}}"
+							]
+						},
+						"description": "Xem chi tiết phiếu nhập kho bao gồm danh sách chi tiết các biến thể SKU, giá vốn nhập, số lượng và tổng giá trị tiền hàng."
+					},
+					"response": []
+				},
+				{
+					"name": "6.6 Xem danh sách phiếu nhập kho của Shop (Phân trang)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/import-receipts?page=1&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"import-receipts"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Seller xem toàn bộ lịch sử các phiếu nhập kho của Shop mình."
+					},
+					"response": []
+				},
+				{
+					"name": "6.7 Lọc phiếu nhập kho theo Sản phẩm",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/import-receipts?productId={{productId}}&page=1&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"import-receipts"
+							],
+							"query": [
+								{
+									"key": "productId",
+									"value": "{{productId}}"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Lọc danh sách các phiếu nhập kho riêng cho sản phẩm productId."
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"variable": [
@@ -848,6 +1054,11 @@
 		{
 			"key": "orderId",
 			"value": "4",
+			"type": "string"
+		},
+		{
+			"key": "receiptId",
+			"value": "1",
 			"type": "string"
 		}
 	]

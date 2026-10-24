@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Users, DollarSign, BarChart2, Shield, LogOut, Home, Settings
+  Users, DollarSign, BarChart2, Shield, LogOut, Home, Settings, Layers, FolderTree, KeyRound
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
@@ -41,8 +41,11 @@ export default function AdminLayout() {
 
   const MENU_ITEMS = [
     { path: '/admin/dashboard', icon: <BarChart2 size={18} />, label: 'Thống kê tổng quan' },
+    { path: '/admin/categories', icon: <FolderTree size={18} />, label: 'Quản lý danh mục' },
+    { path: '/admin/roles', icon: <KeyRound size={18} />, label: 'Quản lý phân quyền' },
     { path: '/admin/users', icon: <Users size={18} />, label: 'Quản lý người dùng' },
     { path: '/admin/commissions', icon: <DollarSign size={18} />, label: 'Quản lý hoa hồng sàn' },
+    { path: '/admin/specifications', icon: <Layers size={18} />, label: 'Quản lý đặc tả & biến thể' },
     { path: '/admin/settings', icon: <Settings size={18} />, label: 'Cài đặt hệ thống' },
   ];
 

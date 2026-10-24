@@ -19,6 +19,9 @@ public class SpecificationTypeResponse {
     Long id;
     String name;
     String description;
+    Boolean isVariant;
     LocalDateTime createdAt;
     List<SpecificationResponse> specifications;
+    List<Long> categoryIds;
+    List<String> categoryNames;
 }

@@ -1,0 +1,2485 @@
+[\
+&#x20; {\
+&#x20;   "name": "Màu sắc",\
+&#x20;   "description": "Màu sắc chủ đạo của sản phẩm, dùng chung toàn sàn và hỗ trợ lọc sản phẩm theo màu.",\
+&#x20;   "applicableCategories": [],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Đen", "description": "Black" },\
+&#x20;     { "name": "Trắng", "description": "White" },\
+&#x20;     { "name": "Xám", "description": "Grey" },\
+&#x20;     { "name": "Bạc", "description": "Silver" },\
+&#x20;     { "name": "Vàng", "description": "Yellow" },\
+&#x20;     { "name": "Vàng đồng", "description": "Bronze Gold" },\
+&#x20;     { "name": "Vàng ánh kim", "description": "Metallic Gold" },\
+&#x20;     { "name": "Đỏ", "description": "Red" },\
+&#x20;     { "name": "Đỏ đô", "description": "Burgundy" },\
+&#x20;     { "name": "Hồng", "description": "Pink" },\
+&#x20;     { "name": "Hồng pastel", "description": "Pastel Pink" },\
+&#x20;     { "name": "Cam", "description": "Orange" },\
+&#x20;     { "name": "Vàng kem", "description": "Cream Yellow" },\
+&#x20;     { "name": "Xanh dương", "description": "Blue" },\
+&#x20;     { "name": "Xanh navy", "description": "Navy Blue" },\
+&#x20;     { "name": "Xanh da trời", "description": "Sky Blue" },\
+&#x20;     { "name": "Xanh ngọc", "description": "Turquoise" },\
+&#x20;     { "name": "Xanh lá", "description": "Green" },\
+&#x20;     { "name": "Xanh rêu", "description": "Olive Green" },\
+&#x20;     { "name": "Xanh bạc hà", "description": "Mint Green" },\
+&#x20;     { "name": "Tím", "description": "Purple" },\
+&#x20;     { "name": "Tím lavender", "description": "Lavender" },\
+&#x20;     { "name": "Nâu", "description": "Brown" },\
+&#x20;     { "name": "Nâu đất", "description": "Earth Brown" },\
+&#x20;     { "name": "Be", "description": "Beige" },\
+&#x20;     { "name": "Kem", "description": "Cream" },\
+&#x20;     { "name": "Trong suốt", "description": "Transparent" },\
+&#x20;     { "name": "Nhiều màu", "description": "Multicolor" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Họa tiết",\
+&#x20;   "description": "Kiểu họa tiết trang trí trên bề mặt sản phẩm.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Clothes",\
+&#x20;     "Women Clothes",\
+&#x20;     "Kid Fashion",\
+&#x20;     "Men Shoes",\
+&#x20;     "Women Shoes",\
+&#x20;     "Men Bags",\
+&#x20;     "Women Bags",\
+&#x20;     "Fashion Accessories",\
+&#x20;     "Watches",\
+&#x20;     "Home Living",\
+&#x20;     "Home Appliances",\
+&#x20;     "Sport & Outdoor",\
+&#x20;     "Automotive",\
+&#x20;     "Toys",\
+&#x20;     "Pets",\
+&#x20;     "Books & Stationery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Trơn", "description": "Solid Color" },\
+&#x20;     { "name": "Sọc ngang", "description": "Horizontal Stripes" },\
+&#x20;     { "name": "Sọc dọc", "description": "Vertical Stripes" },\
+&#x20;     { "name": "Kẻ caro", "description": "Checkered" },\
+&#x20;     { "name": "Chấm bi", "description": "Polka Dots" },\
+&#x20;     { "name": "Hoa lá", "description": "Floral" },\
+&#x20;     { "name": "Hình học", "description": "Geometric" },\
+&#x20;     { "name": "Da động vật", "description": "Animal Print" },\
+&#x20;     { "name": "Ngụy trang", "description": "Camouflage" },\
+&#x20;     { "name": "Loang màu", "description": "Tie-Dye" },\
+&#x20;     { "name": "Chuyển sắc", "description": "Gradient" },\
+&#x20;     { "name": "Trừu tượng", "description": "Abstract" },\
+&#x20;     { "name": "Phong cảnh", "description": "Landscape" },\
+&#x20;     { "name": "Hoạt hình", "description": "Cartoon" },\
+&#x20;     { "name": "Nhân vật", "description": "Character Print" },\
+&#x20;     { "name": "Logo", "description": "Logo Print" },\
+&#x20;     { "name": "Chữ", "description": "Typography" },\
+&#x20;     { "name": "Thêu", "description": "Embroidered" },\
+&#x20;     { "name": "Đính đá", "description": "Rhinestone Embellishment" },\
+&#x20;     { "name": "Ren", "description": "Lace" },\
+&#x20;     { "name": "Vân gỗ", "description": "Wood Grain" },\
+&#x20;     { "name": "Vân đá", "description": "Stone Pattern" },\
+&#x20;     { "name": "Vân kim loại", "description": "Metallic Pattern" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Chất liệu",\
+&#x20;   "description": "Vật liệu chính cấu thành sản phẩm, hỗ trợ tìm kiếm và so sánh chất liệu.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Clothes",\
+&#x20;     "Women Clothes",\
+&#x20;     "Kid Fashion",\
+&#x20;     "Men Shoes",\
+&#x20;     "Women Shoes",\
+&#x20;     "Men Bags",\
+&#x20;     "Women Bags",\
+&#x20;     "Fashion Accessories",\
+&#x20;     "Watches",\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics",\
+&#x20;     "Cameras",\
+&#x20;     "Home Appliances",\
+&#x20;     "Beauty",\
+&#x20;     "Health",\
+&#x20;     "Home Living",\
+&#x20;     "Home Care",\
+&#x20;     "Tools & Home Improvement",\
+&#x20;     "Sport & Outdoor",\
+&#x20;     "Automotive",\
+&#x20;     "Moms, Kids & Babies",\
+&#x20;     "Toys",\
+&#x20;     "Pets",\
+&#x20;     "Books & Stationery",\
+&#x20;     "Grocery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Cotton", "description": "Cotton tự nhiên" },\
+&#x20;     { "name": "Polyester", "description": "Sợi polyester tổng hợp" },\
+&#x20;     { "name": "Nylon", "description": "Sợi nylon" },\
+&#x20;     { "name": "Spandex", "description": "Sợi co giãn spandex" },\
+&#x20;     { "name": "Linen", "description": "Vải lanh" },\
+&#x20;     { "name": "Lụa", "description": "Silk" },\
+&#x20;     { "name": "Len", "description": "Wool" },\
+&#x20;     { "name": "Cashmere", "description": "Len cashmere" },\
+&#x20;     { "name": "Denim", "description": "Vải denim" },\
+&#x20;     { "name": "Canvas", "description": "Vải canvas" },\
+&#x20;     { "name": "Da thật", "description": "Genuine Leather" },\
+&#x20;     { "name": "Da tổng hợp PU", "description": "PU Leather" },\
+&#x20;     { "name": "Da microfiber", "description": "Microfiber Leather" },\
+&#x20;     { "name": "Cao su", "description": "Rubber" },\
+&#x20;     { "name": "Silicone", "description": "Silicone" },\
+&#x20;     { "name": "Nhựa ABS", "description": "ABS Plastic" },\
+&#x20;     { "name": "Nhựa PC", "description": "Polycarbonate" },\
+&#x20;     { "name": "Nhựa PP", "description": "Polypropylene" },\
+&#x20;     { "name": "Nhựa PVC", "description": "Polyvinyl Chloride" },\
+&#x20;     { "name": "Acrylic", "description": "Acrylic" },\
+&#x20;     { "name": "Thủy tinh", "description": "Glass" },\
+&#x20;     { "name": "Gốm sứ", "description": "Ceramic" },\
+&#x20;     { "name": "Gỗ tự nhiên", "description": "Natural Wood" },\
+&#x20;     { "name": "Gỗ công nghiệp", "description": "Engineered Wood" },\
+&#x20;     { "name": "Tre", "description": "Bamboo" },\
+&#x20;     { "name": "Giấy", "description": "Paper" },\
+&#x20;     { "name": "Inox", "description": "Stainless Steel" },\
+&#x20;     { "name": "Nhôm", "description": "Aluminum" },\
+&#x20;     { "name": "Thép", "description": "Steel" },\
+&#x20;     { "name": "Đồng", "description": "Copper" },\
+&#x20;     { "name": "Titan", "description": "Titanium" },\
+&#x20;     { "name": "Kẽm", "description": "Zinc" },\
+&#x20;     { "name": "Sợi carbon", "description": "Carbon Fiber" },\
+&#x20;     { "name": "EVA", "description": "Ethylene Vinyl Acetate" },\
+&#x20;     { "name": "TPU", "description": "Thermoplastic Polyurethane" },\
+&#x20;     { "name": "Xốp", "description": "Foam" },\
+&#x20;     { "name": "Nỉ", "description": "Felt" },\
+&#x20;     { "name": "Nhung", "description": "Velvet" },\
+&#x20;     { "name": "Vải dệt kim", "description": "Knitted Fabric" },\
+&#x20;     { "name": "Sợi thủy tinh", "description": "Fiberglass" },\
+&#x20;     { "name": "Đá tự nhiên", "description": "Natural Stone" },\
+&#x20;     { "name": "Pha lê", "description": "Crystal" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Xuất xứ",\
+&#x20;   "description": "Quốc gia hoặc vùng lãnh thổ sản xuất sản phẩm.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Clothes",\
+&#x20;     "Women Clothes",\
+&#x20;     "Kid Fashion",\
+&#x20;     "Men Shoes",\
+&#x20;     "Women Shoes",\
+&#x20;     "Men Bags",\
+&#x20;     "Women Bags",\
+&#x20;     "Fashion Accessories",\
+&#x20;     "Watches",\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics",\
+&#x20;     "Cameras",\
+&#x20;     "Home Appliances",\
+&#x20;     "Beauty",\
+&#x20;     "Health",\
+&#x20;     "Home Living",\
+&#x20;     "Home Care",\
+&#x20;     "Tools & Home Improvement",\
+&#x20;     "Sport & Outdoor",\
+&#x20;     "Automotive",\
+&#x20;     "Moms, Kids & Babies",\
+&#x20;     "Toys",\
+&#x20;     "Pets",\
+&#x20;     "Books & Stationery",\
+&#x20;     "Grocery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Việt Nam", "description": "Vietnam" },\
+&#x20;     { "name": "Trung Quốc", "description": "China" },\
+&#x20;     { "name": "Hàn Quốc", "description": "South Korea" },\
+&#x20;     { "name": "Nhật Bản", "description": "Japan" },\
+&#x20;     { "name": "Thái Lan", "description": "Thailand" },\
+&#x20;     { "name": "Đài Loan", "description": "Taiwan" },\
+&#x20;     { "name": "Hoa Kỳ", "description": "United States" },\
+&#x20;     { "name": "Đức", "description": "Germany" },\
+&#x20;     { "name": "Pháp", "description": "France" },\
+&#x20;     { "name": "Ý", "description": "Italy" },\
+&#x20;     { "name": "Anh", "description": "United Kingdom" },\
+&#x20;     { "name": "Thụy Sĩ", "description": "Switzerland" },\
+&#x20;     { "name": "Thụy Điển", "description": "Sweden" },\
+&#x20;     { "name": "Ấn Độ", "description": "India" },\
+&#x20;     { "name": "Indonesia", "description": "Indonesia" },\
+&#x20;     { "name": "Malaysia", "description": "Malaysia" },\
+&#x20;     { "name": "Singapore", "description": "Singapore" },\
+&#x20;     { "name": "Philippines", "description": "Philippines" },\
+&#x20;     { "name": "Úc", "description": "Australia" },\
+&#x20;     { "name": "New Zealand", "description": "New Zealand" },\
+&#x20;     { "name": "Canada", "description": "Canada" },\
+&#x20;     { "name": "Tây Ban Nha", "description": "Spain" },\
+&#x20;     { "name": "Hà Lan", "description": "Netherlands" },\
+&#x20;     { "name": "Ba Lan", "description": "Poland" },\
+&#x20;     { "name": "Brazil", "description": "Brazil" },\
+&#x20;     { "name": "Khác", "description": "Other Countries" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Tình trạng sản phẩm",\
+&#x20;   "description": "Tình trạng sử dụng hoặc tình trạng hoàn thiện của hàng hóa.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Clothes",\
+&#x20;     "Women Clothes",\
+&#x20;     "Kid Fashion",\
+&#x20;     "Men Shoes",\
+&#x20;     "Women Shoes",\
+&#x20;     "Men Bags",\
+&#x20;     "Women Bags",\
+&#x20;     "Fashion Accessories",\
+&#x20;     "Watches",\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics",\
+&#x20;     "Cameras",\
+&#x20;     "Home Appliances",\
+&#x20;     "Beauty",\
+&#x20;     "Health",\
+&#x20;     "Home Living",\
+&#x20;     "Home Care",\
+&#x20;     "Tools & Home Improvement",\
+&#x20;     "Sport & Outdoor",\
+&#x20;     "Automotive",\
+&#x20;     "Moms, Kids & Babies",\
+&#x20;     "Toys",\
+&#x20;     "Pets",\
+&#x20;     "Books & Stationery",\
+&#x20;     "Grocery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Mới 100%", "description": "Brand New" },\
+&#x20;     { "name": "Hàng đã qua sử dụng", "description": "Used" },\
+&#x20;     { "name": "Hàng tân trang", "description": "Refurbished" },\
+&#x20;     { "name": "Hàng trưng bày", "description": "Display Unit" },\
+&#x20;     { "name": "Hàng đổi trả", "description": "Returned Item" },\
+&#x20;     { "name": "Hàng đã mở hộp", "description": "Open Box" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Đối tượng sử dụng",\
+&#x20;   "description": "Nhóm người dùng hoặc đối tượng được thiết kế để sử dụng sản phẩm.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Clothes",\
+&#x20;     "Women Clothes",\
+&#x20;     "Kid Fashion",\
+&#x20;     "Men Shoes",\
+&#x20;     "Women Shoes",\
+&#x20;     "Men Bags",\
+&#x20;     "Women Bags",\
+&#x20;     "Fashion Accessories",\
+&#x20;     "Watches",\
+&#x20;     "Beauty",\
+&#x20;     "Health",\
+&#x20;     "Sport & Outdoor",\
+&#x20;     "Automotive",\
+&#x20;     "Moms, Kids & Babies",\
+&#x20;     "Toys",\
+&#x20;     "Pets",\
+&#x20;     "Books & Stationery",\
+&#x20;     "Grocery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Nam", "description": "Men" },\
+&#x20;     { "name": "Nữ", "description": "Women" },\
+&#x20;     { "name": "Unisex", "description": "Dùng cho cả nam và nữ" },\
+&#x20;     { "name": "Trẻ sơ sinh", "description": "Newborn" },\
+&#x20;     { "name": "Em bé", "description": "Baby" },\
+&#x20;     { "name": "Trẻ em", "description": "Children" },\
+&#x20;     { "name": "Thiếu niên", "description": "Teenagers" },\
+&#x20;     { "name": "Người trưởng thành", "description": "Adults" },\
+&#x20;     { "name": "Người cao tuổi", "description": "Seniors" },\
+&#x20;     { "name": "Phụ nữ mang thai", "description": "Pregnant Women" },\
+&#x20;     { "name": "Mẹ sau sinh", "description": "Postpartum Mothers" },\
+&#x20;     { "name": "Người chơi thể thao", "description": "Sports Enthusiasts" },\
+&#x20;     { "name": "Mọi đối tượng", "description": "All Users" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kích cỡ quần áo",\
+&#x20;   "description": "Kích cỡ quần áo người lớn theo hệ thống ký hiệu thông dụng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Clothes",\
+&#x20;     "Women Clothes",\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "XXS", "description": "Extra Extra Small" },\
+&#x20;     { "name": "XS", "description": "Extra Small" },\
+&#x20;     { "name": "S", "description": "Small" },\
+&#x20;     { "name": "M", "description": "Medium" },\
+&#x20;     { "name": "L", "description": "Large" },\
+&#x20;     { "name": "XL", "description": "Extra Large" },\
+&#x20;     { "name": "2XL", "description": "Double Extra Large" },\
+&#x20;     { "name": "3XL", "description": "Triple Extra Large" },\
+&#x20;     { "name": "4XL", "description": "Four Extra Large" },\
+&#x20;     { "name": "5XL", "description": "Five Extra Large" },\
+&#x20;     { "name": "6XL", "description": "Six Extra Large" },\
+&#x20;     { "name": "Freesize", "description": "Kích cỡ tự do theo thiết kế của nhà sản xuất" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kích cỡ quần áo trẻ em",\
+&#x20;   "description": "Kích cỡ quần áo trẻ em theo độ tuổi tham khảo.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Kid Fashion",\
+&#x20;     "Moms, Kids & Babies"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Sơ sinh", "description": "Newborn, 0 tháng" },\
+&#x20;     { "name": "0–3 tháng", "description": "0–3 Months" },\
+&#x20;     { "name": "3–6 tháng", "description": "3–6 Months" },\
+&#x20;     { "name": "6–9 tháng", "description": "6–9 Months" },\
+&#x20;     { "name": "9–12 tháng", "description": "9–12 Months" },\
+&#x20;     { "name": "12–18 tháng", "description": "12–18 Months" },\
+&#x20;     { "name": "18–24 tháng", "description": "18–24 Months" },\
+&#x20;     { "name": "2–3 tuổi", "description": "2–3 Years" },\
+&#x20;     { "name": "3–4 tuổi", "description": "3–4 Years" },\
+&#x20;     { "name": "4–5 tuổi", "description": "4–5 Years" },\
+&#x20;     { "name": "5–6 tuổi", "description": "5–6 Years" },\
+&#x20;     { "name": "6–7 tuổi", "description": "6–7 Years" },\
+&#x20;     { "name": "7–8 tuổi", "description": "7–8 Years" },\
+&#x20;     { "name": "8–9 tuổi", "description": "8–9 Years" },\
+&#x20;     { "name": "9–10 tuổi", "description": "9–10 Years" },\
+&#x20;     { "name": "10–11 tuổi", "description": "10–11 Years" },\
+&#x20;     { "name": "11–12 tuổi", "description": "11–12 Years" },\
+&#x20;     { "name": "12–13 tuổi", "description": "12–13 Years" },\
+&#x20;     { "name": "13–14 tuổi", "description": "13–14 Years" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Phom quần áo",\
+&#x20;   "description": "Kiểu phom và độ ôm của trang phục.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Clothes",\
+&#x20;     "Women Clothes",\
+&#x20;     "Kid Fashion",\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Slim Fit", "description": "Phom ôm gọn" },\
+&#x20;     { "name": "Regular Fit", "description": "Phom tiêu chuẩn" },\
+&#x20;     { "name": "Classic Fit", "description": "Phom cổ điển" },\
+&#x20;     { "name": "Relaxed Fit", "description": "Phom rộng thoải mái" },\
+&#x20;     { "name": "Loose Fit", "description": "Phom rộng" },\
+&#x20;     { "name": "Oversized", "description": "Phom rộng ngoại cỡ" },\
+&#x20;     { "name": "Skinny Fit", "description": "Phom ôm sát" },\
+&#x20;     { "name": "Straight Fit", "description": "Phom ống thẳng" },\
+&#x20;     { "name": "Wide Leg", "description": "Phom ống rộng" },\
+&#x20;     { "name": "Bootcut", "description": "Phom hơi loe từ đầu gối" },\
+&#x20;     { "name": "Compression Fit", "description": "Phom nén ôm sát cơ thể" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kiểu tay áo",\
+&#x20;   "description": "Kiểu thiết kế và độ dài tay áo.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Clothes",\
+&#x20;     "Women Clothes",\
+&#x20;     "Kid Fashion"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Không tay", "description": "Sleeveless" },\
+&#x20;     { "name": "Tay ngắn", "description": "Short Sleeve" },\
+&#x20;     { "name": "Tay lỡ", "description": "Three-Quarter Sleeve" },\
+&#x20;     { "name": "Tay dài", "description": "Long Sleeve" },\
+&#x20;     { "name": "Tay raglan", "description": "Raglan Sleeve" },\
+&#x20;     { "name": "Tay phồng", "description": "Puff Sleeve" },\
+&#x20;     { "name": "Tay loe", "description": "Bell Sleeve" },\
+&#x20;     { "name": "Tay cánh tiên", "description": "Flutter Sleeve" },\
+&#x20;     { "name": "Tay bồng", "description": "Balloon Sleeve" },\
+&#x20;     { "name": "Tay bo", "description": "Ribbed Cuff Sleeve" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kiểu cổ áo",\
+&#x20;   "description": "Kiểu dáng phần cổ của trang phục.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Clothes",\
+&#x20;     "Women Clothes",\
+&#x20;     "Kid Fashion"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Cổ tròn", "description": "Crew Neck" },\
+&#x20;     { "name": "Cổ chữ V", "description": "V-Neck" },\
+&#x20;     { "name": "Cổ tim", "description": "Sweetheart Neckline" },\
+&#x20;     { "name": "Cổ vuông", "description": "Square Neck" },\
+&#x20;     { "name": "Cổ sơ mi", "description": "Shirt Collar" },\
+&#x20;     { "name": "Cổ bẻ polo", "description": "Polo Collar" },\
+&#x20;     { "name": "Cổ lọ", "description": "Turtleneck" },\
+&#x20;     { "name": "Cổ thuyền", "description": "Boat Neck" },\
+&#x20;     { "name": "Cổ yếm", "description": "Halter Neck" },\
+&#x20;     { "name": "Cổ trễ vai", "description": "Off-Shoulder" },\
+&#x20;     { "name": "Cổ vuông thấp", "description": "Scoop Neck" },\
+&#x20;     { "name": "Cổ tàu", "description": "Mandarin Collar" },\
+&#x20;     { "name": "Cổ đức", "description": "Point Collar" },\
+&#x20;     { "name": "Có mũ", "description": "Hooded" },\
+&#x20;     { "name": "Không cổ", "description": "Collarless" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Chiều dài trang phục",\
+&#x20;   "description": "Phân loại chiều dài phổ biến của áo, váy và quần.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Clothes",\
+&#x20;     "Women Clothes",\
+&#x20;     "Kid Fashion"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Crop", "description": "Chiều dài ngắn trên eo" },\
+&#x20;     { "name": "Ngang eo", "description": "Waist Length" },\
+&#x20;     { "name": "Ngang hông", "description": "Hip Length" },\
+&#x20;     { "name": "Ngang đùi", "description": "Thigh Length" },\
+&#x20;     { "name": "Trên gối", "description": "Above Knee" },\
+&#x20;     { "name": "Ngang gối", "description": "Knee Length" },\
+&#x20;     { "name": "Qua gối", "description": "Below Knee" },\
+&#x20;     { "name": "Midi", "description": "Chiều dài ngang giữa bắp chân" },\
+&#x20;     { "name": "Maxi", "description": "Chiều dài gần mắt cá chân" },\
+&#x20;     { "name": "Full Length", "description": "Chiều dài đầy đủ" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kích cỡ giày người lớn",\
+&#x20;   "description": "Kích cỡ giày theo hệ thống EU; cần đối chiếu bảng quy đổi của nhà sản xuất.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Shoes",\
+&#x20;     "Women Shoes"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "EU 34", "description": "Cỡ EU 34" },\
+&#x20;     { "name": "EU 35", "description": "Cỡ EU 35" },\
+&#x20;     { "name": "EU 36", "description": "Cỡ EU 36" },\
+&#x20;     { "name": "EU 37", "description": "Cỡ EU 37" },\
+&#x20;     { "name": "EU 38", "description": "Cỡ EU 38" },\
+&#x20;     { "name": "EU 39", "description": "Cỡ EU 39" },\
+&#x20;     { "name": "EU 40", "description": "Cỡ EU 40" },\
+&#x20;     { "name": "EU 41", "description": "Cỡ EU 41" },\
+&#x20;     { "name": "EU 42", "description": "Cỡ EU 42" },\
+&#x20;     { "name": "EU 43", "description": "Cỡ EU 43" },\
+&#x20;     { "name": "EU 44", "description": "Cỡ EU 44" },\
+&#x20;     { "name": "EU 45", "description": "Cỡ EU 45" },\
+&#x20;     { "name": "EU 46", "description": "Cỡ EU 46" },\
+&#x20;     { "name": "EU 47", "description": "Cỡ EU 47" },\
+&#x20;     { "name": "EU 48", "description": "Cỡ EU 48" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kích cỡ giày trẻ em",\
+&#x20;   "description": "Kích cỡ giày trẻ em theo hệ thống EU.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Kid Fashion",\
+&#x20;     "Moms, Kids & Babies"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "EU 16", "description": "Cỡ EU 16" },\
+&#x20;     { "name": "EU 17", "description": "Cỡ EU 17" },\
+&#x20;     { "name": "EU 18", "description": "Cỡ EU 18" },\
+&#x20;     { "name": "EU 19", "description": "Cỡ EU 19" },\
+&#x20;     { "name": "EU 20", "description": "Cỡ EU 20" },\
+&#x20;     { "name": "EU 21", "description": "Cỡ EU 21" },\
+&#x20;     { "name": "EU 22", "description": "Cỡ EU 22" },\
+&#x20;     { "name": "EU 23", "description": "Cỡ EU 23" },\
+&#x20;     { "name": "EU 24", "description": "Cỡ EU 24" },\
+&#x20;     { "name": "EU 25", "description": "Cỡ EU 25" },\
+&#x20;     { "name": "EU 26", "description": "Cỡ EU 26" },\
+&#x20;     { "name": "EU 27", "description": "Cỡ EU 27" },\
+&#x20;     { "name": "EU 28", "description": "Cỡ EU 28" },\
+&#x20;     { "name": "EU 29", "description": "Cỡ EU 29" },\
+&#x20;     { "name": "EU 30", "description": "Cỡ EU 30" },\
+&#x20;     { "name": "EU 31", "description": "Cỡ EU 31" },\
+&#x20;     { "name": "EU 32", "description": "Cỡ EU 32" },\
+&#x20;     { "name": "EU 33", "description": "Cỡ EU 33" },\
+&#x20;     { "name": "EU 34", "description": "Cỡ EU 34" },\
+&#x20;     { "name": "EU 35", "description": "Cỡ EU 35" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại giày dép",\
+&#x20;   "description": "Kiểu giày dép theo thiết kế và mục đích sử dụng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Shoes",\
+&#x20;     "Women Shoes",\
+&#x20;     "Kid Fashion",\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Giày thể thao", "description": "Sports Shoes" },\
+&#x20;     { "name": "Giày chạy bộ", "description": "Running Shoes" },\
+&#x20;     { "name": "Giày đi bộ", "description": "Walking Shoes" },\
+&#x20;     { "name": "Giày sneaker", "description": "Sneakers" },\
+&#x20;     { "name": "Giày tây", "description": "Dress Shoes" },\
+&#x20;     { "name": "Giày lười", "description": "Loafers" },\
+&#x20;     { "name": "Giày búp bê", "description": "Ballet Flats" },\
+&#x20;     { "name": "Giày cao gót", "description": "High Heels" },\
+&#x20;     { "name": "Giày đế bệt", "description": "Flat Shoes" },\
+&#x20;     { "name": "Bốt", "description": "Boots" },\
+&#x20;     { "name": "Sandal", "description": "Sandals" },\
+&#x20;     { "name": "Dép xỏ ngón", "description": "Flip-Flops" },\
+&#x20;     { "name": "Dép lê", "description": "Slides" },\
+&#x20;     { "name": "Giày lười Mule", "description": "Mules" },\
+&#x20;     { "name": "Giày leo núi", "description": "Hiking Shoes" },\
+&#x20;     { "name": "Giày đá bóng", "description": "Football Boots" },\
+&#x20;     { "name": "Giày cầu lông", "description": "Badminton Shoes" },\
+&#x20;     { "name": "Giày bảo hộ", "description": "Safety Shoes" },\
+&#x20;     { "name": "Giày công sở", "description": "Office Shoes" },\
+&#x20;     { "name": "Giày trẻ em", "description": "Children's Shoes" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kiểu đóng giày dép",\
+&#x20;   "description": "Cơ chế cố định hoặc đóng mở giày dép.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Shoes",\
+&#x20;     "Women Shoes",\
+&#x20;     "Kid Fashion",\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Buộc dây", "description": "Lace-Up" },\
+&#x20;     { "name": "Xỏ chân", "description": "Slip-On" },\
+&#x20;     { "name": "Dán khóa Velcro", "description": "Hook-and-Loop" },\
+&#x20;     { "name": "Khóa cài", "description": "Buckle" },\
+&#x20;     { "name": "Khóa kéo", "description": "Zipper" },\
+&#x20;     { "name": "Dây quai", "description": "Strap" },\
+&#x20;     { "name": "Thun co giãn", "description": "Elastic Closure" },\
+&#x20;     { "name": "Khóa xoay", "description": "Dial Closure" },\
+&#x20;     { "name": "Không khóa", "description": "No Closure" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Chất liệu đế giày",\
+&#x20;   "description": "Vật liệu chính cấu thành phần đế giày.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Shoes",\
+&#x20;     "Women Shoes",\
+&#x20;     "Kid Fashion",\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Cao su", "description": "Rubber" },\
+&#x20;     { "name": "EVA", "description": "Ethylene Vinyl Acetate" },\
+&#x20;     { "name": "Phylon", "description": "Phylon Foam" },\
+&#x20;     { "name": "PU", "description": "Polyurethane" },\
+&#x20;     { "name": "TPU", "description": "Thermoplastic Polyurethane" },\
+&#x20;     { "name": "PVC", "description": "Polyvinyl Chloride" },\
+&#x20;     { "name": "Nhựa TPR", "description": "Thermoplastic Rubber" },\
+&#x20;     { "name": "Da", "description": "Leather" },\
+&#x20;     { "name": "Gỗ", "description": "Wood" },\
+&#x20;     { "name": "Nút bần", "description": "Cork" },\
+&#x20;     { "name": "Đế kết hợp nhiều vật liệu", "description": "Mixed Materials" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại túi",\
+&#x20;   "description": "Phân loại túi theo thiết kế và mục đích sử dụng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Bags",\
+&#x20;     "Women Bags",\
+&#x20;     "Fashion Accessories",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Sport & Outdoor",\
+&#x20;     "Moms, Kids & Babies"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Balo", "description": "Backpack" },\
+&#x20;     { "name": "Túi đeo vai", "description": "Shoulder Bag" },\
+&#x20;     { "name": "Túi đeo chéo", "description": "Crossbody Bag" },\
+&#x20;     { "name": "Túi xách tay", "description": "Handbag" },\
+&#x20;     { "name": "Túi tote", "description": "Tote Bag" },\
+&#x20;     { "name": "Túi clutch", "description": "Clutch Bag" },\
+&#x20;     { "name": "Túi đeo hông", "description": "Waist Bag" },\
+&#x20;     { "name": "Túi đeo ngực", "description": "Chest Bag" },\
+&#x20;     { "name": "Túi laptop", "description": "Laptop Bag" },\
+&#x20;     { "name": "Cặp công sở", "description": "Briefcase" },\
+&#x20;     { "name": "Túi du lịch", "description": "Travel Bag" },\
+&#x20;     { "name": "Vali", "description": "Suitcase" },\
+&#x20;     { "name": "Ví dài", "description": "Long Wallet" },\
+&#x20;     { "name": "Ví gấp", "description": "Bifold Wallet" },\
+&#x20;     { "name": "Ví đựng thẻ", "description": "Card Holder" },\
+&#x20;     { "name": "Túi đựng mỹ phẩm", "description": "Cosmetic Bag" },\
+&#x20;     { "name": "Túi đựng đồ mẹ và bé", "description": "Diaper Bag" },\
+&#x20;     { "name": "Túi thể thao", "description": "Sports Bag" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kích cỡ túi",\
+&#x20;   "description": "Phân loại kích thước túi theo nhóm kích cỡ phổ biến.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Men Bags",\
+&#x20;     "Women Bags",\
+&#x20;     "Fashion Accessories"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Mini", "description": "Túi siêu nhỏ" },\
+&#x20;     { "name": "Nhỏ", "description": "Small" },\
+&#x20;     { "name": "Trung bình", "description": "Medium" },\
+&#x20;     { "name": "Lớn", "description": "Large" },\
+&#x20;     { "name": "Cỡ đại", "description": "Extra Large" },\
+&#x20;     { "name": "Đựng vừa điện thoại", "description": "Phone Size" },\
+&#x20;     { "name": "Đựng vừa máy tính bảng", "description": "Tablet Size" },\
+&#x20;     { "name": "Đựng vừa laptop 13 inch", "description": "Fits 13-Inch Laptop" },\
+&#x20;     { "name": "Đựng vừa laptop 14 inch", "description": "Fits 14-Inch Laptop" },\
+&#x20;     { "name": "Đựng vừa laptop 15.6 inch", "description": "Fits 15.6-Inch Laptop" },\
+&#x20;     { "name": "Đựng vừa laptop 17 inch", "description": "Fits 17-Inch Laptop" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại phụ kiện thời trang",\
+&#x20;   "description": "Phân loại phụ kiện thời trang theo công dụng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Fashion Accessories",\
+&#x20;     "Men Bags",\
+&#x20;     "Women Bags",\
+&#x20;     "Watches"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Thắt lưng", "description": "Belt" },\
+&#x20;     { "name": "Ví", "description": "Wallet" },\
+&#x20;     { "name": "Cà vạt", "description": "Tie" },\
+&#x20;     { "name": "Nơ", "description": "Bow Tie" },\
+&#x20;     { "name": "Khăn choàng", "description": "Scarf" },\
+&#x20;     { "name": "Mũ lưỡi trai", "description": "Baseball Cap" },\
+&#x20;     { "name": "Mũ rộng vành", "description": "Wide-Brim Hat" },\
+&#x20;     { "name": "Mũ len", "description": "Beanie" },\
+&#x20;     { "name": "Kính mắt", "description": "Eyewear" },\
+&#x20;     { "name": "Kính râm", "description": "Sunglasses" },\
+&#x20;     { "name": "Găng tay", "description": "Gloves" },\
+&#x20;     { "name": "Tất", "description": "Socks" },\
+&#x20;     { "name": "Băng đô", "description": "Headband" },\
+&#x20;     { "name": "Kẹp tóc", "description": "Hair Clip" },\
+&#x20;     { "name": "Dây buộc tóc", "description": "Hair Tie" },\
+&#x20;     { "name": "Khẩu trang thời trang", "description": "Fashion Face Mask" },\
+&#x20;     { "name": "Móc khóa", "description": "Keychain" },\
+&#x20;     { "name": "Ô dù", "description": "Umbrella" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Chất liệu trang sức",\
+&#x20;   "description": "Chất liệu chính của trang sức và phụ kiện kim loại.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Fashion Accessories",\
+&#x20;     "Watches"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Vàng 10K", "description": "10-Karat Gold" },\
+&#x20;     { "name": "Vàng 14K", "description": "14-Karat Gold" },\
+&#x20;     { "name": "Vàng 18K", "description": "18-Karat Gold" },\
+&#x20;     { "name": "Vàng 24K", "description": "24-Karat Gold" },\
+&#x20;     { "name": "Vàng trắng", "description": "White Gold" },\
+&#x20;     { "name": "Vàng hồng", "description": "Rose Gold" },\
+&#x20;     { "name": "Bạc 925", "description": "Sterling Silver" },\
+&#x20;     { "name": "Bạch kim", "description": "Platinum" },\
+&#x20;     { "name": "Thép không gỉ 316L", "description": "316L Stainless Steel" },\
+&#x20;     { "name": "Titan", "description": "Titanium" },\
+&#x20;     { "name": "Đồng thau", "description": "Brass" },\
+&#x20;     { "name": "Đồng", "description": "Copper" },\
+&#x20;     { "name": "Ngọc trai nước ngọt", "description": "Freshwater Pearl" },\
+&#x20;     { "name": "Ngọc trai tự nhiên", "description": "Natural Pearl" },\
+&#x20;     { "name": "Đá quý tự nhiên", "description": "Natural Gemstone" },\
+&#x20;     { "name": "Đá zircon", "description": "Zircon" },\
+&#x20;     { "name": "Đá cubic zirconia", "description": "Cubic Zirconia" },\
+&#x20;     { "name": "Pha lê", "description": "Crystal" },\
+&#x20;     { "name": "Nhựa acrylic", "description": "Acrylic" },\
+&#x20;     { "name": "Hợp kim", "description": "Alloy" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kiểu hiển thị đồng hồ",\
+&#x20;   "description": "Công nghệ hiển thị thời gian của đồng hồ.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Watches"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Kim", "description": "Analog" },\
+&#x20;     { "name": "Điện tử", "description": "Digital" },\
+&#x20;     { "name": "Kim kết hợp điện tử", "description": "Analog-Digital" },\
+&#x20;     { "name": "Màn hình cảm ứng", "description": "Touchscreen" },\
+&#x20;     { "name": "Màn hình AMOLED", "description": "AMOLED Display" },\
+&#x20;     { "name": "Màn hình LCD", "description": "LCD Display" },\
+&#x20;     { "name": "Màn hình OLED", "description": "OLED Display" },\
+&#x20;     { "name": "Màn hình e-paper", "description": "Electronic Paper Display" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Đường kính mặt số đồng hồ",\
+&#x20;   "description": "Đường kính mặt đồng hồ tính bằng milimét.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Watches"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "20 mm", "description": "Đường kính 20 milimét" },\
+&#x20;     { "name": "22 mm", "description": "Đường kính 22 milimét" },\
+&#x20;     { "name": "24 mm", "description": "Đường kính 24 milimét" },\
+&#x20;     { "name": "26 mm", "description": "Đường kính 26 milimét" },\
+&#x20;     { "name": "28 mm", "description": "Đường kính 28 milimét" },\
+&#x20;     { "name": "30 mm", "description": "Đường kính 30 milimét" },\
+&#x20;     { "name": "32 mm", "description": "Đường kính 32 milimét" },\
+&#x20;     { "name": "34 mm", "description": "Đường kính 34 milimét" },\
+&#x20;     { "name": "36 mm", "description": "Đường kính 36 milimét" },\
+&#x20;     { "name": "38 mm", "description": "Đường kính 38 milimét" },\
+&#x20;     { "name": "40 mm", "description": "Đường kính 40 milimét" },\
+&#x20;     { "name": "42 mm", "description": "Đường kính 42 milimét" },\
+&#x20;     { "name": "44 mm", "description": "Đường kính 44 milimét" },\
+&#x20;     { "name": "46 mm", "description": "Đường kính 46 milimét" },\
+&#x20;     { "name": "48 mm", "description": "Đường kính 48 milimét" },\
+&#x20;     { "name": "50 mm", "description": "Đường kính 50 milimét" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Chất liệu dây đồng hồ",\
+&#x20;   "description": "Vật liệu chính của dây đeo đồng hồ.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Watches"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Thép không gỉ", "description": "Stainless Steel" },\
+&#x20;     { "name": "Da thật", "description": "Genuine Leather" },\
+&#x20;     { "name": "Da tổng hợp", "description": "Synthetic Leather" },\
+&#x20;     { "name": "Silicone", "description": "Silicone" },\
+&#x20;     { "name": "Cao su", "description": "Rubber" },\
+&#x20;     { "name": "Nylon", "description": "Nylon" },\
+&#x20;     { "name": "Vải", "description": "Fabric" },\
+&#x20;     { "name": "Titan", "description": "Titanium" },\
+&#x20;     { "name": "Gốm sứ", "description": "Ceramic" },\
+&#x20;     { "name": "Nhựa", "description": "Plastic" },\
+&#x20;     { "name": "Lưới thép", "description": "Milanese Mesh" },\
+&#x20;     { "name": "Hợp kim", "description": "Metal Alloy" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Bộ máy đồng hồ",\
+&#x20;   "description": "Cơ chế vận hành bộ máy của đồng hồ.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Watches"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Quartz chạy pin", "description": "Quartz Battery Movement" },\
+&#x20;     { "name": "Cơ tự động", "description": "Automatic Mechanical" },\
+&#x20;     { "name": "Cơ lên dây cót", "description": "Manual-Winding Mechanical" },\
+&#x20;     { "name": "Năng lượng mặt trời", "description": "Solar Powered" },\
+&#x20;     { "name": "Kinetic", "description": "Kinetic Movement" },\
+&#x20;     { "name": "Điện tử", "description": "Electronic Movement" },\
+&#x20;     { "name": "Đồng hồ thông minh", "description": "Smartwatch Platform" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Khả năng chống nước của đồng hồ",\
+&#x20;   "description": "Mức chống nước theo thông số công bố của nhà sản xuất.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Watches"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Không chống nước", "description": "Not Water Resistant" },\
+&#x20;     { "name": "Chống nước cơ bản", "description": "Basic Water Resistance" },\
+&#x20;     { "name": "3 ATM / 30 m", "description": "3 ATM, 30-Meter Rating" },\
+&#x20;     { "name": "5 ATM / 50 m", "description": "5 ATM, 50-Meter Rating" },\
+&#x20;     { "name": "10 ATM / 100 m", "description": "10 ATM, 100-Meter Rating" },\
+&#x20;     { "name": "20 ATM / 200 m", "description": "20 ATM, 200-Meter Rating" },\
+&#x20;     { "name": "30 ATM / 300 m", "description": "30 ATM, 300-Meter Rating" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Dung lượng RAM",\
+&#x20;   "description": "Dung lượng bộ nhớ truy cập ngẫu nhiên của thiết bị.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "1 GB", "description": "1 Gigabyte" },\
+&#x20;     { "name": "2 GB", "description": "2 Gigabyte" },\
+&#x20;     { "name": "3 GB", "description": "3 Gigabyte" },\
+&#x20;     { "name": "4 GB", "description": "4 Gigabyte" },\
+&#x20;     { "name": "6 GB", "description": "6 Gigabyte" },\
+&#x20;     { "name": "8 GB", "description": "8 Gigabyte" },\
+&#x20;     { "name": "12 GB", "description": "12 Gigabyte" },\
+&#x20;     { "name": "16 GB", "description": "16 Gigabyte" },\
+&#x20;     { "name": "18 GB", "description": "18 Gigabyte" },\
+&#x20;     { "name": "24 GB", "description": "24 Gigabyte" },\
+&#x20;     { "name": "32 GB", "description": "32 Gigabyte" },\
+&#x20;     { "name": "48 GB", "description": "48 Gigabyte" },\
+&#x20;     { "name": "64 GB", "description": "64 Gigabyte" },\
+&#x20;     { "name": "96 GB", "description": "96 Gigabyte" },\
+&#x20;     { "name": "128 GB", "description": "128 Gigabyte" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Bộ nhớ trong ROM",\
+&#x20;   "description": "Dung lượng lưu trữ nội bộ của thiết bị.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "8 GB", "description": "8 Gigabyte" },\
+&#x20;     { "name": "16 GB", "description": "16 Gigabyte" },\
+&#x20;     { "name": "32 GB", "description": "32 Gigabyte" },\
+&#x20;     { "name": "64 GB", "description": "64 Gigabyte" },\
+&#x20;     { "name": "128 GB", "description": "128 Gigabyte" },\
+&#x20;     { "name": "256 GB", "description": "256 Gigabyte" },\
+&#x20;     { "name": "512 GB", "description": "512 Gigabyte" },\
+&#x20;     { "name": "1 TB", "description": "1 Terabyte" },\
+&#x20;     { "name": "2 TB", "description": "2 Terabyte" },\
+&#x20;     { "name": "4 TB", "description": "4 Terabyte" },\
+&#x20;     { "name": "8 TB", "description": "8 Terabyte" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Công nghệ mạng di động",\
+&#x20;   "description": "Thế hệ mạng di động được thiết bị hỗ trợ.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "2G", "description": "Mạng di động thế hệ thứ hai" },\
+&#x20;     { "name": "3G", "description": "Mạng di động thế hệ thứ ba" },\
+&#x20;     { "name": "4G LTE", "description": "Long-Term Evolution" },\
+&#x20;     { "name": "5G", "description": "Mạng di động thế hệ thứ năm" },\
+&#x20;     { "name": "Wi-Fi only", "description": "Chỉ kết nối mạng Wi-Fi" },\
+&#x20;     { "name": "Không hỗ trợ mạng di động", "description": "No Cellular Connectivity" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Hệ điều hành",\
+&#x20;   "description": "Hệ điều hành chính của thiết bị điện tử.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Android", "description": "Android OS" },\
+&#x20;     { "name": "iOS", "description": "Apple iOS" },\
+&#x20;     { "name": "iPadOS", "description": "Apple iPadOS" },\
+&#x20;     { "name": "Windows", "description": "Microsoft Windows" },\
+&#x20;     { "name": "macOS", "description": "Apple macOS" },\
+&#x20;     { "name": "Linux", "description": "Linux OS" },\
+&#x20;     { "name": "ChromeOS", "description": "Google ChromeOS" },\
+&#x20;     { "name": "Wear OS", "description": "Wear OS by Google" },\
+&#x20;     { "name": "HarmonyOS", "description": "Huawei HarmonyOS" },\
+&#x20;     { "name": "Hệ điều hành độc quyền", "description": "Proprietary Operating System" },\
+&#x20;     { "name": "Không có hệ điều hành", "description": "No Operating System" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kích thước màn hình",\
+&#x20;   "description": "Nhóm kích thước đường chéo màn hình tính bằng inch.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics",\
+&#x20;     "Cameras"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Dưới 4 inch", "description": "Under 4 Inches" },\
+&#x20;     { "name": "4.0–4.9 inch", "description": "4.0–4.9 Inches" },\
+&#x20;     { "name": "5.0–5.4 inch", "description": "5.0–5.4 Inches" },\
+&#x20;     { "name": "5.5–5.9 inch", "description": "5.5–5.9 Inches" },\
+&#x20;     { "name": "6.0–6.4 inch", "description": "6.0–6.4 Inches" },\
+&#x20;     { "name": "6.5–6.9 inch", "description": "6.5–6.9 Inches" },\
+&#x20;     { "name": "7.0–9.9 inch", "description": "7.0–9.9 Inches" },\
+&#x20;     { "name": "10.0–12.9 inch", "description": "10.0–12.9 Inches" },\
+&#x20;     { "name": "13.0–14.9 inch", "description": "13.0–14.9 Inches" },\
+&#x20;     { "name": "15.0–17.9 inch", "description": "15.0–17.9 Inches" },\
+&#x20;     { "name": "18.0–23.9 inch", "description": "18.0–23.9 Inches" },\
+&#x20;     { "name": "24.0–31.9 inch", "description": "24.0–31.9 Inches" },\
+&#x20;     { "name": "32.0–39.9 inch", "description": "32.0–39.9 Inches" },\
+&#x20;     { "name": "40.0–49.9 inch", "description": "40.0–49.9 Inches" },\
+&#x20;     { "name": "50.0–59.9 inch", "description": "50.0–59.9 Inches" },\
+&#x20;     { "name": "60 inch trở lên", "description": "60 Inches and Above" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Dung lượng pin",\
+&#x20;   "description": "Dung lượng pin theo đơn vị mAh, chủ yếu dùng cho thiết bị di động và thiết bị điện tử có pin.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Consumer Electronics",\
+&#x20;     "Cameras"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Dưới 1.000 mAh", "description": "Under 1,000 mAh" },\
+&#x20;     { "name": "1.000 mAh", "description": "1,000 mAh" },\
+&#x20;     { "name": "1.500 mAh", "description": "1,500 mAh" },\
+&#x20;     { "name": "2.000 mAh", "description": "2,000 mAh" },\
+&#x20;     { "name": "2.500 mAh", "description": "2,500 mAh" },\
+&#x20;     { "name": "3.000 mAh", "description": "3,000 mAh" },\
+&#x20;     { "name": "3.500 mAh", "description": "3,500 mAh" },\
+&#x20;     { "name": "4.000 mAh", "description": "4,000 mAh" },\
+&#x20;     { "name": "4.500 mAh", "description": "4,500 mAh" },\
+&#x20;     { "name": "5.000 mAh", "description": "5,000 mAh" },\
+&#x20;     { "name": "5.500 mAh", "description": "5,500 mAh" },\
+&#x20;     { "name": "6.000 mAh", "description": "6,000 mAh" },\
+&#x20;     { "name": "7.000 mAh", "description": "7,000 mAh" },\
+&#x20;     { "name": "8.000 mAh", "description": "8,000 mAh" },\
+&#x20;     { "name": "10.000 mAh", "description": "10,000 mAh" },\
+&#x20;     { "name": "12.000 mAh", "description": "12,000 mAh" },\
+&#x20;     { "name": "15.000 mAh", "description": "15,000 mAh" },\
+&#x20;     { "name": "20.000 mAh", "description": "20,000 mAh" },\
+&#x20;     { "name": "30.000 mAh", "description": "30,000 mAh" },\
+&#x20;     { "name": "50.000 mAh trở lên", "description": "50,000 mAh and Above" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại kết nối",\
+&#x20;   "description": "Phương thức kết nối hoặc giao tiếp được thiết bị hỗ trợ.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics",\
+&#x20;     "Cameras",\
+&#x20;     "Home Appliances",\
+&#x20;     "Automotive",\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Có dây", "description": "Wired" },\
+&#x20;     { "name": "Bluetooth", "description": "Bluetooth" },\
+&#x20;     { "name": "Wi-Fi", "description": "Wireless LAN" },\
+&#x20;     { "name": "NFC", "description": "Near-Field Communication" },\
+&#x20;     { "name": "USB", "description": "Universal Serial Bus" },\
+&#x20;     { "name": "USB-C", "description": "USB Type-C" },\
+&#x20;     { "name": "USB-A", "description": "USB Type-A" },\
+&#x20;     { "name": "Lightning", "description": "Apple Lightning Connector" },\
+&#x20;     { "name": "HDMI", "description": "High-Definition Multimedia Interface" },\
+&#x20;     { "name": "DisplayPort", "description": "DisplayPort Interface" },\
+&#x20;     { "name": "Ethernet", "description": "Wired Ethernet Network" },\
+&#x20;     { "name": "RF 2.4 GHz", "description": "2.4 GHz Radio Frequency" },\
+&#x20;     { "name": "RF 5 GHz", "description": "5 GHz Radio Frequency" },\
+&#x20;     { "name": "Hồng ngoại", "description": "Infrared" },\
+&#x20;     { "name": "GPS", "description": "Global Positioning System" },\
+&#x20;     { "name": "Mạng di động", "description": "Cellular Network" },\
+&#x20;     { "name": "Không dây độc quyền", "description": "Proprietary Wireless Connection" },\
+&#x20;     { "name": "Không hỗ trợ kết nối", "description": "No Connectivity" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Chuẩn cổng kết nối",\
+&#x20;   "description": "Loại cổng vật lý hoặc giao tiếp dữ liệu của thiết bị.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics",\
+&#x20;     "Cameras",\
+&#x20;     "Home Appliances",\
+&#x20;     "Automotive"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "USB-A", "description": "USB Type-A" },\
+&#x20;     { "name": "USB-C", "description": "USB Type-C" },\
+&#x20;     { "name": "Micro USB", "description": "Micro USB" },\
+&#x20;     { "name": "Mini USB", "description": "Mini USB" },\
+&#x20;     { "name": "Lightning", "description": "Lightning Connector" },\
+&#x20;     { "name": "HDMI", "description": "HDMI" },\
+&#x20;     { "name": "Mini HDMI", "description": "Mini HDMI" },\
+&#x20;     { "name": "Micro HDMI", "description": "Micro HDMI" },\
+&#x20;     { "name": "DisplayPort", "description": "DisplayPort" },\
+&#x20;     { "name": "Mini DisplayPort", "description": "Mini DisplayPort" },\
+&#x20;     { "name": "Thunderbolt 3", "description": "Thunderbolt 3" },\
+&#x20;     { "name": "Thunderbolt 4", "description": "Thunderbolt 4" },\
+&#x20;     { "name": "Thunderbolt 5", "description": "Thunderbolt 5" },\
+&#x20;     { "name": "Jack 3.5 mm", "description": "3.5 mm Audio Jack" },\
+&#x20;     { "name": "RJ45 Ethernet", "description": "RJ45 Network Port" },\
+&#x20;     { "name": "SATA", "description": "Serial ATA" },\
+&#x20;     { "name": "PCIe", "description": "Peripheral Component Interconnect Express" },\
+&#x20;     { "name": "SD Card", "description": "SD Card Slot" },\
+&#x20;     { "name": "MicroSD", "description": "MicroSD Card Slot" },\
+&#x20;     { "name": "Không có cổng kết nối", "description": "No Physical Ports" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Độ phân giải màn hình",\
+&#x20;   "description": "Chuẩn độ phân giải hiển thị của màn hình hoặc thiết bị có màn hình.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics",\
+&#x20;     "Cameras"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "SD", "description": "Standard Definition" },\
+&#x20;     { "name": "HD 720p", "description": "1280 × 720 Pixels" },\
+&#x20;     { "name": "Full HD 1080p", "description": "1920 × 1080 Pixels" },\
+&#x20;     { "name": "WUXGA", "description": "1920 × 1200 Pixels" },\
+&#x20;     { "name": "2K", "description": "Độ phân giải khoảng 2.000 Pixel theo chiều ngang" },\
+&#x20;     { "name": "QHD 1440p", "description": "2560 × 1440 Pixels" },\
+&#x20;     { "name": "WQHD+", "description": "Độ phân giải QHD mở rộng" },\
+&#x20;     { "name": "4K UHD", "description": "3840 × 2160 Pixels" },\
+&#x20;     { "name": "5K", "description": "Độ phân giải khoảng 5.000 Pixel theo chiều ngang" },\
+&#x20;     { "name": "8K UHD", "description": "7680 × 4320 Pixels" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Độ phân giải camera",\
+&#x20;   "description": "Độ phân giải ảnh tĩnh của camera hoặc máy ảnh.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Cameras",\
+&#x20;     "Consumer Electronics"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Dưới 5 MP", "description": "Under 5 Megapixels" },\
+&#x20;     { "name": "5 MP", "description": "5 Megapixels" },\
+&#x20;     { "name": "8 MP", "description": "8 Megapixels" },\
+&#x20;     { "name": "12 MP", "description": "12 Megapixels" },\
+&#x20;     { "name": "16 MP", "description": "16 Megapixels" },\
+&#x20;     { "name": "20 MP", "description": "20 Megapixels" },\
+&#x20;     { "name": "24 MP", "description": "24 Megapixels" },\
+&#x20;     { "name": "32 MP", "description": "32 Megapixels" },\
+&#x20;     { "name": "40 MP", "description": "40 Megapixels" },\
+&#x20;     { "name": "48 MP", "description": "48 Megapixels" },\
+&#x20;     { "name": "50 MP", "description": "50 Megapixels" },\
+&#x20;     { "name": "64 MP", "description": "64 Megapixels" },\
+&#x20;     { "name": "108 MP", "description": "108 Megapixels" },\
+&#x20;     { "name": "200 MP", "description": "200 Megapixels" },\
+&#x20;     { "name": "Trên 200 MP", "description": "Over 200 Megapixels" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Độ phân giải video",\
+&#x20;   "description": "Độ phân giải quay video của máy ảnh hoặc thiết bị ghi hình.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Cameras",\
+&#x20;     "Consumer Electronics"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "480p", "description": "Standard Definition Video" },\
+&#x20;     { "name": "720p", "description": "HD Video" },\
+&#x20;     { "name": "1080p", "description": "Full HD Video" },\
+&#x20;     { "name": "2K", "description": "2K Video" },\
+&#x20;     { "name": "4K", "description": "4K UHD Video" },\
+&#x20;     { "name": "5.7K", "description": "5.7K Video" },\
+&#x20;     { "name": "6K", "description": "6K Video" },\
+&#x20;     { "name": "8K", "description": "8K UHD Video" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại cảm biến máy ảnh",\
+&#x20;   "description": "Kích thước hoặc hệ loại cảm biến hình ảnh của máy ảnh.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Cameras"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Full Frame", "description": "Cảm biến toàn khung 35 mm" },\
+&#x20;     { "name": "APS-C", "description": "Advanced Photo System Type-C" },\
+&#x20;     { "name": "Micro Four Thirds", "description": "Cảm biến Four Thirds" },\
+&#x20;     { "name": "1 inch", "description": "Cảm biến loại 1 inch" },\
+&#x20;     { "name": "1/1.3 inch", "description": "Cảm biến loại 1/1.3 inch" },\
+&#x20;     { "name": "1/1.7 inch", "description": "Cảm biến loại 1/1.7 inch" },\
+&#x20;     { "name": "1/2.3 inch", "description": "Cảm biến loại 1/2.3 inch" },\
+&#x20;     { "name": "Medium Format", "description": "Cảm biến định dạng trung bình" },\
+&#x20;     { "name": "CCD", "description": "Charge-Coupled Device" },\
+&#x20;     { "name": "CMOS", "description": "Complementary Metal-Oxide-Semiconductor" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Ngàm ống kính",\
+&#x20;   "description": "Chuẩn ngàm tương thích giữa máy ảnh và ống kính.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Cameras"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Canon RF", "description": "Canon RF Mount" },\
+&#x20;     { "name": "Canon EF", "description": "Canon EF Mount" },\
+&#x20;     { "name": "Canon EF-S", "description": "Canon EF-S Mount" },\
+&#x20;     { "name": "Nikon Z", "description": "Nikon Z Mount" },\
+&#x20;     { "name": "Nikon F", "description": "Nikon F Mount" },\
+&#x20;     { "name": "Sony E", "description": "Sony E Mount" },\
+&#x20;     { "name": "Sony A", "description": "Sony A Mount" },\
+&#x20;     { "name": "Fujifilm X", "description": "Fujifilm X Mount" },\
+&#x20;     { "name": "Fujifilm G", "description": "Fujifilm G Mount" },\
+&#x20;     { "name": "Micro Four Thirds", "description": "Micro Four Thirds Mount" },\
+&#x20;     { "name": "L-Mount", "description": "L-Mount Alliance" },\
+&#x20;     { "name": "Pentax K", "description": "Pentax K Mount" },\
+&#x20;     { "name": "Leica M", "description": "Leica M Mount" },\
+&#x20;     { "name": "Ngàm khác", "description": "Other Lens Mount" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại thiết bị âm thanh",\
+&#x20;   "description": "Phân loại thiết bị âm thanh theo kiểu thiết kế.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Tai nghe nhét tai", "description": "In-Ear Headphones" },\
+&#x20;     { "name": "Tai nghe earbud", "description": "Earbud Headphones" },\
+&#x20;     { "name": "Tai nghe chụp tai", "description": "Over-Ear Headphones" },\
+&#x20;     { "name": "Tai nghe on-ear", "description": "On-Ear Headphones" },\
+&#x20;     { "name": "Tai nghe true wireless", "description": "True Wireless Stereo" },\
+&#x20;     { "name": "Tai nghe có dây", "description": "Wired Headphones" },\
+&#x20;     { "name": "Tai nghe gaming", "description": "Gaming Headset" },\
+&#x20;     { "name": "Microphone", "description": "Microphone" },\
+&#x20;     { "name": "Loa Bluetooth", "description": "Bluetooth Speaker" },\
+&#x20;     { "name": "Loa máy tính", "description": "Computer Speakers" },\
+&#x20;     { "name": "Loa soundbar", "description": "Soundbar" },\
+&#x20;     { "name": "Loa karaoke", "description": "Karaoke Speaker" },\
+&#x20;     { "name": "Loa bookshelf", "description": "Bookshelf Speaker" },\
+&#x20;     { "name": "Loa subwoofer", "description": "Subwoofer" },\
+&#x20;     { "name": "Dàn âm thanh", "description": "Home Audio System" },\
+&#x20;     { "name": "Máy nghe nhạc", "description": "Portable Music Player" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Công nghệ chống ồn",\
+&#x20;   "description": "Công nghệ giảm tiếng ồn trên thiết bị âm thanh.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Không chống ồn", "description": "No Noise Cancellation" },\
+&#x20;     { "name": "Chống ồn thụ động", "description": "Passive Noise Isolation" },\
+&#x20;     { "name": "Chống ồn chủ động ANC", "description": "Active Noise Cancellation" },\
+&#x20;     { "name": "Chống ồn cuộc gọi ENC", "description": "Environmental Noise Cancellation" },\
+&#x20;     { "name": "ANC thích ứng", "description": "Adaptive Active Noise Cancellation" },\
+&#x20;     { "name": "ANC kết hợp ENC", "description": "ANC and ENC" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Công suất định mức",\
+&#x20;   "description": "Nhóm công suất hoạt động theo đơn vị watt.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics",\
+&#x20;     "Home Appliances",\
+&#x20;     "Tools & Home Improvement",\
+&#x20;     "Automotive",\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Dưới 5 W", "description": "Under 5 Watts" },\
+&#x20;     { "name": "5 W", "description": "5 Watts" },\
+&#x20;     { "name": "10 W", "description": "10 Watts" },\
+&#x20;     { "name": "15 W", "description": "15 Watts" },\
+&#x20;     { "name": "20 W", "description": "20 Watts" },\
+&#x20;     { "name": "30 W", "description": "30 Watts" },\
+&#x20;     { "name": "45 W", "description": "45 Watts" },\
+&#x20;     { "name": "65 W", "description": "65 Watts" },\
+&#x20;     { "name": "90 W", "description": "90 Watts" },\
+&#x20;     { "name": "100 W", "description": "100 Watts" },\
+&#x20;     { "name": "120 W", "description": "120 Watts" },\
+&#x20;     { "name": "150 W", "description": "150 Watts" },\
+&#x20;     { "name": "200 W", "description": "200 Watts" },\
+&#x20;     { "name": "300 W", "description": "300 Watts" },\
+&#x20;     { "name": "500 W", "description": "500 Watts" },\
+&#x20;     { "name": "750 W", "description": "750 Watts" },\
+&#x20;     { "name": "1.000 W", "description": "1,000 Watts" },\
+&#x20;     { "name": "1.500 W", "description": "1,500 Watts" },\
+&#x20;     { "name": "2.000 W", "description": "2,000 Watts" },\
+&#x20;     { "name": "3.000 W", "description": "3,000 Watts" },\
+&#x20;     { "name": "Trên 3.000 W", "description": "Over 3,000 Watts" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Điện áp định mức",\
+&#x20;   "description": "Điện áp hoạt động theo thông số kỹ thuật của sản phẩm.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Mobile Gadgets",\
+&#x20;     "Computer Accessories",\
+&#x20;     "Consumer Electronics",\
+&#x20;     "Home Appliances",\
+&#x20;     "Tools & Home Improvement",\
+&#x20;     "Automotive"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "5 V", "description": "5 Volt" },\
+&#x20;     { "name": "9 V", "description": "9 Volt" },\
+&#x20;     { "name": "12 V", "description": "12 Volt" },\
+&#x20;     { "name": "19 V", "description": "19 Volt" },\
+&#x20;     { "name": "24 V", "description": "24 Volt" },\
+&#x20;     { "name": "36 V", "description": "36 Volt" },\
+&#x20;     { "name": "48 V", "description": "48 Volt" },\
+&#x20;     { "name": "60 V", "description": "60 Volt" },\
+&#x20;     { "name": "72 V", "description": "72 Volt" },\
+&#x20;     { "name": "100–120 V", "description": "100–120 Volt" },\
+&#x20;     { "name": "220–230 V", "description": "220–230 Volt" },\
+&#x20;     { "name": "240 V", "description": "240 Volt" },\
+&#x20;     { "name": "Điện áp kép", "description": "Dual Voltage" },\
+&#x20;     { "name": "Đa điện áp", "description": "Multi-Voltage" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Dung tích thiết bị gia dụng",\
+&#x20;   "description": "Dung tích chứa theo đơn vị lít, phù hợp với thiết bị có khoang hoặc bình chứa.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Home Appliances"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Dưới 1 L", "description": "Under 1 Liter" },\
+&#x20;     { "name": "1 L", "description": "1 Liter" },\
+&#x20;     { "name": "1.5 L", "description": "1.5 Liters" },\
+&#x20;     { "name": "2 L", "description": "2 Liters" },\
+&#x20;     { "name": "3 L", "description": "3 Liters" },\
+&#x20;     { "name": "5 L", "description": "5 Liters" },\
+&#x20;     { "name": "7 L", "description": "7 Liters" },\
+&#x20;     { "name": "10 L", "description": "10 Liters" },\
+&#x20;     { "name": "15 L", "description": "15 Liters" },\
+&#x20;     { "name": "20 L", "description": "20 Liters" },\
+&#x20;     { "name": "30 L", "description": "30 Liters" },\
+&#x20;     { "name": "50 L", "description": "50 Liters" },\
+&#x20;     { "name": "80 L", "description": "80 Liters" },\
+&#x20;     { "name": "100 L", "description": "100 Liters" },\
+&#x20;     { "name": "150 L", "description": "150 Liters" },\
+&#x20;     { "name": "200 L", "description": "200 Liters" },\
+&#x20;     { "name": "250 L", "description": "250 Liters" },\
+&#x20;     { "name": "300 L", "description": "300 Liters" },\
+&#x20;     { "name": "400 L", "description": "400 Liters" },\
+&#x20;     { "name": "500 L trở lên", "description": "500 Liters and Above" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Khối lượng giặt",\
+&#x20;   "description": "Khối lượng quần áo khô tối đa mà máy giặt có thể xử lý trong một chu trình.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Home Appliances"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "5 kg", "description": "5 Kilograms" },\
+&#x20;     { "name": "6 kg", "description": "6 Kilograms" },\
+&#x20;     { "name": "7 kg", "description": "7 Kilograms" },\
+&#x20;     { "name": "8 kg", "description": "8 Kilograms" },\
+&#x20;     { "name": "9 kg", "description": "9 Kilograms" },\
+&#x20;     { "name": "10 kg", "description": "10 Kilograms" },\
+&#x20;     { "name": "11 kg", "description": "11 Kilograms" },\
+&#x20;     { "name": "12 kg", "description": "12 Kilograms" },\
+&#x20;     { "name": "13 kg", "description": "13 Kilograms" },\
+&#x20;     { "name": "14 kg", "description": "14 Kilograms" },\
+&#x20;     { "name": "15 kg", "description": "15 Kilograms" },\
+&#x20;     { "name": "Trên 15 kg", "description": "Over 15 Kilograms" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Mức tiết kiệm năng lượng",\
+&#x20;   "description": "Phân loại hiệu suất năng lượng theo nhãn hoặc công nghệ được nhà sản xuất công bố.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Home Appliances",\
+&#x20;     "Consumer Electronics"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Nhãn năng lượng 1 sao", "description": "1-Star Energy Label" },\
+&#x20;     { "name": "Nhãn năng lượng 2 sao", "description": "2-Star Energy Label" },\
+&#x20;     { "name": "Nhãn năng lượng 3 sao", "description": "3-Star Energy Label" },\
+&#x20;     { "name": "Nhãn năng lượng 4 sao", "description": "4-Star Energy Label" },\
+&#x20;     { "name": "Nhãn năng lượng 5 sao", "description": "5-Star Energy Label" },\
+&#x20;     { "name": "Công nghệ Inverter", "description": "Inverter Technology" },\
+&#x20;     { "name": "Công nghệ tiết kiệm điện khác", "description": "Other Energy-Saving Technology" },\
+&#x20;     { "name": "Không có thông tin", "description": "Not Specified" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại da",\
+&#x20;   "description": "Loại da phù hợp với sản phẩm chăm sóc da hoặc mỹ phẩm.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Beauty",\
+&#x20;     "Health"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Da thường", "description": "Normal Skin" },\
+&#x20;     { "name": "Da dầu", "description": "Oily Skin" },\
+&#x20;     { "name": "Da khô", "description": "Dry Skin" },\
+&#x20;     { "name": "Da hỗn hợp", "description": "Combination Skin" },\
+&#x20;     { "name": "Da nhạy cảm", "description": "Sensitive Skin" },\
+&#x20;     { "name": "Da dễ nổi mụn", "description": "Acne-Prone Skin" },\
+&#x20;     { "name": "Da thiếu nước", "description": "Dehydrated Skin" },\
+&#x20;     { "name": "Da lão hóa", "description": "Mature or Aging Skin" },\
+&#x20;     { "name": "Mọi loại da", "description": "All Skin Types" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại tóc",\
+&#x20;   "description": "Đặc điểm tóc phù hợp với sản phẩm chăm sóc tóc.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Beauty",\
+&#x20;     "Health"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Tóc thường", "description": "Normal Hair" },\
+&#x20;     { "name": "Tóc dầu", "description": "Oily Hair" },\
+&#x20;     { "name": "Tóc khô", "description": "Dry Hair" },\
+&#x20;     { "name": "Tóc hỗn hợp", "description": "Combination Hair" },\
+&#x20;     { "name": "Tóc xoăn", "description": "Curly Hair" },\
+&#x20;     { "name": "Tóc thẳng", "description": "Straight Hair" },\
+&#x20;     { "name": "Tóc gợn sóng", "description": "Wavy Hair" },\
+&#x20;     { "name": "Tóc nhuộm", "description": "Color-Treated Hair" },\
+&#x20;     { "name": "Tóc hư tổn", "description": "Damaged Hair" },\
+&#x20;     { "name": "Tóc mỏng", "description": "Fine or Thin Hair" },\
+&#x20;     { "name": "Tóc dày", "description": "Thick Hair" },\
+&#x20;     { "name": "Mọi loại tóc", "description": "All Hair Types" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Dạng sản phẩm mỹ phẩm",\
+&#x20;   "description": "Dạng bào chế hoặc kết cấu của sản phẩm làm đẹp.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Beauty"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Nước", "description": "Liquid" },\
+&#x20;     { "name": "Nước cân bằng", "description": "Toner" },\
+&#x20;     { "name": "Tinh chất", "description": "Serum" },\
+&#x20;     { "name": "Tinh chất cô đặc", "description": "Ampoule" },\
+&#x20;     { "name": "Sữa dưỡng", "description": "Emulsion" },\
+&#x20;     { "name": "Lotion", "description": "Lotion" },\
+&#x20;     { "name": "Kem", "description": "Cream" },\
+&#x20;     { "name": "Gel", "description": "Gel" },\
+&#x20;     { "name": "Dầu", "description": "Oil" },\
+&#x20;     { "name": "Sáp", "description": "Wax" },\
+&#x20;     { "name": "Bột", "description": "Powder" },\
+&#x20;     { "name": "Phấn nén", "description": "Pressed Powder" },\
+&#x20;     { "name": "Dạng thỏi", "description": "Stick" },\
+&#x20;     { "name": "Dạng xịt", "description": "Spray" },\
+&#x20;     { "name": "Dạng bọt", "description": "Foam" },\
+&#x20;     { "name": "Dạng lỏng sệt", "description": "Essence" },\
+&#x20;     { "name": "Mặt nạ giấy", "description": "Sheet Mask" },\
+&#x20;     { "name": "Mặt nạ rửa", "description": "Wash-Off Mask" },\
+&#x20;     { "name": "Miếng dán", "description": "Patch" },\
+&#x20;     { "name": "Khăn ướt", "description": "Wet Wipes" },\
+&#x20;     { "name": "Dạng viên", "description": "Solid Tablet" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Dung tích tịnh",\
+&#x20;   "description": "Dung tích sản phẩm theo mililít hoặc lít, dùng cho các mặt hàng dạng lỏng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Beauty",\
+&#x20;     "Health",\
+&#x20;     "Home Care",\
+&#x20;     "Home Appliances",\
+&#x20;     "Grocery",\
+&#x20;     "Moms, Kids & Babies",\
+&#x20;     "Pets"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "5 mL", "description": "5 Milliliters" },\
+&#x20;     { "name": "10 mL", "description": "10 Milliliters" },\
+&#x20;     { "name": "15 mL", "description": "15 Milliliters" },\
+&#x20;     { "name": "20 mL", "description": "20 Milliliters" },\
+&#x20;     { "name": "30 mL", "description": "30 Milliliters" },\
+&#x20;     { "name": "50 mL", "description": "50 Milliliters" },\
+&#x20;     { "name": "60 mL", "description": "60 Milliliters" },\
+&#x20;     { "name": "75 mL", "description": "75 Milliliters" },\
+&#x20;     { "name": "100 mL", "description": "100 Milliliters" },\
+&#x20;     { "name": "120 mL", "description": "120 Milliliters" },\
+&#x20;     { "name": "150 mL", "description": "150 Milliliters" },\
+&#x20;     { "name": "180 mL", "description": "180 Milliliters" },\
+&#x20;     { "name": "200 mL", "description": "200 Milliliters" },\
+&#x20;     { "name": "250 mL", "description": "250 Milliliters" },\
+&#x20;     { "name": "300 mL", "description": "300 Milliliters" },\
+&#x20;     { "name": "400 mL", "description": "400 Milliliters" },\
+&#x20;     { "name": "500 mL", "description": "500 Milliliters" },\
+&#x20;     { "name": "750 mL", "description": "750 Milliliters" },\
+&#x20;     { "name": "1 L", "description": "1 Liter" },\
+&#x20;     { "name": "1.5 L", "description": "1.5 Liters" },\
+&#x20;     { "name": "2 L", "description": "2 Liters" },\
+&#x20;     { "name": "5 L", "description": "5 Liters" },\
+&#x20;     { "name": "10 L trở lên", "description": "10 Liters and Above" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Khối lượng tịnh",\
+&#x20;   "description": "Khối lượng sản phẩm theo gam hoặc kilôgam, không bao gồm bao bì.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Beauty",\
+&#x20;     "Health",\
+&#x20;     "Home Care",\
+&#x20;     "Grocery",\
+&#x20;     "Moms, Kids & Babies",\
+&#x20;     "Pets"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "5 g", "description": "5 Grams" },\
+&#x20;     { "name": "10 g", "description": "10 Grams" },\
+&#x20;     { "name": "15 g", "description": "15 Grams" },\
+&#x20;     { "name": "20 g", "description": "20 Grams" },\
+&#x20;     { "name": "25 g", "description": "25 Grams" },\
+&#x20;     { "name": "30 g", "description": "30 Grams" },\
+&#x20;     { "name": "50 g", "description": "50 Grams" },\
+&#x20;     { "name": "75 g", "description": "75 Grams" },\
+&#x20;     { "name": "100 g", "description": "100 Grams" },\
+&#x20;     { "name": "150 g", "description": "150 Grams" },\
+&#x20;     { "name": "200 g", "description": "200 Grams" },\
+&#x20;     { "name": "250 g", "description": "250 Grams" },\
+&#x20;     { "name": "300 g", "description": "300 Grams" },\
+&#x20;     { "name": "400 g", "description": "400 Grams" },\
+&#x20;     { "name": "500 g", "description": "500 Grams" },\
+&#x20;     { "name": "750 g", "description": "750 Grams" },\
+&#x20;     { "name": "1 kg", "description": "1 Kilogram" },\
+&#x20;     { "name": "1.5 kg", "description": "1.5 Kilograms" },\
+&#x20;     { "name": "2 kg", "description": "2 Kilograms" },\
+&#x20;     { "name": "3 kg", "description": "3 Kilograms" },\
+&#x20;     { "name": "5 kg", "description": "5 Kilograms" },\
+&#x20;     { "name": "10 kg", "description": "10 Kilograms" },\
+&#x20;     { "name": "20 kg trở lên", "description": "20 Kilograms and Above" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Chỉ số chống nắng SPF",\
+&#x20;   "description": "Chỉ số SPF được công bố trên sản phẩm chống nắng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Beauty",\
+&#x20;     "Health"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "SPF 10", "description": "Sun Protection Factor 10" },\
+&#x20;     { "name": "SPF 15", "description": "Sun Protection Factor 15" },\
+&#x20;     { "name": "SPF 20", "description": "Sun Protection Factor 20" },\
+&#x20;     { "name": "SPF 25", "description": "Sun Protection Factor 25" },\
+&#x20;     { "name": "SPF 30", "description": "Sun Protection Factor 30" },\
+&#x20;     { "name": "SPF 35", "description": "Sun Protection Factor 35" },\
+&#x20;     { "name": "SPF 40", "description": "Sun Protection Factor 40" },\
+&#x20;     { "name": "SPF 45", "description": "Sun Protection Factor 45" },\
+&#x20;     { "name": "SPF 50", "description": "Sun Protection Factor 50" },\
+&#x20;     { "name": "SPF 50+", "description": "Sun Protection Factor 50 Plus" },\
+&#x20;     { "name": "Không áp dụng", "description": "Not Applicable" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Mức bảo vệ PA",\
+&#x20;   "description": "Mức bảo vệ chống tia UVA được công bố trên sản phẩm chống nắng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Beauty",\
+&#x20;     "Health"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "PA+", "description": "PA Plus" },\
+&#x20;     { "name": "PA++", "description": "PA Double Plus" },\
+&#x20;     { "name": "PA+++", "description": "PA Triple Plus" },\
+&#x20;     { "name": "PA++++", "description": "PA Four Plus" },\
+&#x20;     { "name": "Không ghi PA", "description": "PA Rating Not Specified" },\
+&#x20;     { "name": "Không áp dụng", "description": "Not Applicable" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Dạng sản phẩm chăm sóc sức khỏe",\
+&#x20;   "description": "Dạng dùng hoặc dạng bào chế được ghi trên nhãn sản phẩm chăm sóc sức khỏe.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Health"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Viên nén", "description": "Tablet" },\
+&#x20;     { "name": "Viên nang cứng", "description": "Hard Capsule" },\
+&#x20;     { "name": "Viên nang mềm", "description": "Softgel Capsule" },\
+&#x20;     { "name": "Viên sủi", "description": "Effervescent Tablet" },\
+&#x20;     { "name": "Viên nhai", "description": "Chewable Tablet" },\
+&#x20;     { "name": "Viên ngậm", "description": "Lozenge" },\
+&#x20;     { "name": "Bột", "description": "Powder" },\
+&#x20;     { "name": "Cốm", "description": "Granules" },\
+&#x20;     { "name": "Dung dịch uống", "description": "Oral Solution" },\
+&#x20;     { "name": "Siro", "description": "Syrup" },\
+&#x20;     { "name": "Hỗn dịch", "description": "Suspension" },\
+&#x20;     { "name": "Gel bôi ngoài", "description": "Topical Gel" },\
+&#x20;     { "name": "Kem bôi ngoài", "description": "Topical Cream" },\
+&#x20;     { "name": "Dầu xoa", "description": "Massage Oil or Balm" },\
+&#x20;     { "name": "Xịt", "description": "Spray" },\
+&#x20;     { "name": "Miếng dán", "description": "Patch" },\
+&#x20;     { "name": "Ống uống", "description": "Drinkable Ampoule" },\
+&#x20;     { "name": "Dạng khác", "description": "Other Form" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Nhóm tuổi sử dụng sản phẩm sức khỏe",\
+&#x20;   "description": "Nhóm tuổi sử dụng theo thông tin và hướng dẫn chính thức trên nhãn sản phẩm.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Health",\
+&#x20;     "Moms, Kids & Babies"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Trẻ sơ sinh 0–3 tháng", "description": "Newborn 0–3 Months" },\
+&#x20;     { "name": "Trẻ sơ sinh 3–12 tháng", "description": "Infants 3–12 Months" },\
+&#x20;     { "name": "Trẻ nhỏ 1–3 tuổi", "description": "Toddlers 1–3 Years" },\
+&#x20;     { "name": "Trẻ em 4–6 tuổi", "description": "Children 4–6 Years" },\
+&#x20;     { "name": "Trẻ em 7–12 tuổi", "description": "Children 7–12 Years" },\
+&#x20;     { "name": "Thanh thiếu niên 13–17 tuổi", "description": "Teenagers 13–17 Years" },\
+&#x20;     { "name": "Người trưởng thành", "description": "Adults" },\
+&#x20;     { "name": "Người cao tuổi", "description": "Seniors" },\
+&#x20;     { "name": "Phụ nữ mang thai", "description": "Pregnant Women" },\
+&#x20;     { "name": "Phụ nữ cho con bú", "description": "Breastfeeding Women" },\
+&#x20;     { "name": "Mọi lứa tuổi theo hướng dẫn nhãn", "description": "All Ages as Directed on Label" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Điều kiện bảo quản",\
+&#x20;   "description": "Điều kiện bảo quản được khuyến nghị trên nhãn sản phẩm.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Beauty",\
+&#x20;     "Health",\
+&#x20;     "Home Care",\
+&#x20;     "Moms, Kids & Babies",\
+&#x20;     "Grocery",\
+&#x20;     "Pets"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Nhiệt độ phòng", "description": "Room Temperature" },\
+&#x20;     { "name": "Nơi khô ráo, thoáng mát", "description": "Cool and Dry Place" },\
+&#x20;     { "name": "Tránh ánh nắng trực tiếp", "description": "Keep Away from Direct Sunlight" },\
+&#x20;     { "name": "Bảo quản dưới 25°C", "description": "Store Below 25°C" },\
+&#x20;     { "name": "Bảo quản dưới 30°C", "description": "Store Below 30°C" },\
+&#x20;     { "name": "Bảo quản lạnh 2–8°C", "description": "Refrigerated at 2–8°C" },\
+&#x20;     { "name": "Ngăn đông", "description": "Frozen Storage" },\
+&#x20;     { "name": "Sau khi mở nắp cần bảo quản lạnh", "description": "Refrigerate After Opening" },\
+&#x20;     { "name": "Đậy kín sau khi sử dụng", "description": "Keep Tightly Sealed After Use" },\
+&#x20;     { "name": "Theo hướng dẫn trên nhãn", "description": "Follow Label Instructions" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Hương vị",\
+&#x20;   "description": "Hương vị chính của thực phẩm, đồ uống hoặc sản phẩm có hương vị.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Beauty",\
+&#x20;     "Health",\
+&#x20;     "Grocery",\
+&#x20;     "Moms, Kids & Babies",\
+&#x20;     "Pets"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Tự nhiên", "description": "Natural Flavor" },\
+&#x20;     { "name": "Không hương vị", "description": "Unflavored" },\
+&#x20;     { "name": "Dâu tây", "description": "Strawberry" },\
+&#x20;     { "name": "Việt quất", "description": "Blueberry" },\
+&#x20;     { "name": "Cam", "description": "Orange" },\
+&#x20;     { "name": "Chanh", "description": "Lemon" },\
+&#x20;     { "name": "Chanh dây", "description": "Passion Fruit" },\
+&#x20;     { "name": "Xoài", "description": "Mango" },\
+&#x20;     { "name": "Chuối", "description": "Banana" },\
+&#x20;     { "name": "Táo", "description": "Apple" },\
+&#x20;     { "name": "Dưa hấu", "description": "Watermelon" },\
+&#x20;     { "name": "Nho", "description": "Grape" },\
+&#x20;     { "name": "Đào", "description": "Peach" },\
+&#x20;     { "name": "Dừa", "description": "Coconut" },\
+&#x20;     { "name": "Sô cô la", "description": "Chocolate" },\
+&#x20;     { "name": "Vani", "description": "Vanilla" },\
+&#x20;     { "name": "Cà phê", "description": "Coffee" },\
+&#x20;     { "name": "Trà xanh", "description": "Green Tea" },\
+&#x20;     { "name": "Matcha", "description": "Matcha" },\
+&#x20;     { "name": "Sữa", "description": "Milk" },\
+&#x20;     { "name": "Mật ong", "description": "Honey" },\
+&#x20;     { "name": "Thịt gà", "description": "Chicken" },\
+&#x20;     { "name": "Thịt bò", "description": "Beef" },\
+&#x20;     { "name": "Cá", "description": "Fish" },\
+&#x20;     { "name": "Hải sản", "description": "Seafood" },\
+&#x20;     { "name": "Hỗn hợp", "description": "Mixed Flavors" },\
+&#x20;     { "name": "Khác", "description": "Other Flavor" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Chế độ ăn",\
+&#x20;   "description": "Đặc tính chế độ ăn được nhà sản xuất công bố trên nhãn.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Grocery",\
+&#x20;     "Health",\
+&#x20;     "Moms, Kids & Babies"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Thông thường", "description": "Regular Diet" },\
+&#x20;     { "name": "Ăn chay", "description": "Vegetarian" },\
+&#x20;     { "name": "Thuần chay", "description": "Vegan" },\
+&#x20;     { "name": "Không gluten", "description": "Gluten-Free" },\
+&#x20;     { "name": "Không lactose", "description": "Lactose-Free" },\
+&#x20;     { "name": "Không đường bổ sung", "description": "No Added Sugar" },\
+&#x20;     { "name": "Không đường", "description": "Sugar-Free" },\
+&#x20;     { "name": "Ít đường", "description": "Low Sugar" },\
+&#x20;     { "name": "Ít muối", "description": "Low Sodium" },\
+&#x20;     { "name": "Giàu chất xơ", "description": "High Fiber" },\
+&#x20;     { "name": "Giàu protein", "description": "High Protein" },\
+&#x20;     { "name": "Keto", "description": "Ketogenic Diet" },\
+&#x20;     { "name": "Hữu cơ", "description": "Organic" },\
+&#x20;     { "name": "Halal", "description": "Halal-Certified" },\
+&#x20;     { "name": "Kosher", "description": "Kosher-Certified" },\
+&#x20;     { "name": "Không biến đổi gen theo công bố", "description": "Non-GMO as Declared" },\
+&#x20;     { "name": "Không áp dụng", "description": "Not Applicable" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Không gian sử dụng",\
+&#x20;   "description": "Không gian hoặc khu vực phù hợp để sử dụng sản phẩm.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Home Appliances",\
+&#x20;     "Home Living",\
+&#x20;     "Home Care",\
+&#x20;     "Tools & Home Improvement",\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Phòng khách", "description": "Living Room" },\
+&#x20;     { "name": "Phòng ngủ", "description": "Bedroom" },\
+&#x20;     { "name": "Phòng ăn", "description": "Dining Room" },\
+&#x20;     { "name": "Nhà bếp", "description": "Kitchen" },\
+&#x20;     { "name": "Phòng tắm", "description": "Bathroom" },\
+&#x20;     { "name": "Phòng làm việc", "description": "Home Office" },\
+&#x20;     { "name": "Phòng trẻ em", "description": "Children's Room" },\
+&#x20;     { "name": "Ban công", "description": "Balcony" },\
+&#x20;     { "name": "Sân vườn", "description": "Garden" },\
+&#x20;     { "name": "Ngoài trời", "description": "Outdoor" },\
+&#x20;     { "name": "Trong nhà", "description": "Indoor" },\
+&#x20;     { "name": "Nhà kho", "description": "Storage Room" },\
+&#x20;     { "name": "Nhà xưởng", "description": "Workshop" },\
+&#x20;     { "name": "Văn phòng", "description": "Office" },\
+&#x20;     { "name": "Đa không gian", "description": "Multiple Spaces" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại đồ nội thất",\
+&#x20;   "description": "Phân loại sản phẩm nội thất theo công năng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Home Living"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Bàn", "description": "Table" },\
+&#x20;     { "name": "Ghế", "description": "Chair" },\
+&#x20;     { "name": "Sofa", "description": "Sofa" },\
+&#x20;     { "name": "Giường", "description": "Bed" },\
+&#x20;     { "name": "Nệm", "description": "Mattress" },\
+&#x20;     { "name": "Tủ quần áo", "description": "Wardrobe" },\
+&#x20;     { "name": "Tủ ngăn kéo", "description": "Drawer Cabinet" },\
+&#x20;     { "name": "Tủ bếp", "description": "Kitchen Cabinet" },\
+&#x20;     { "name": "Kệ sách", "description": "Bookshelf" },\
+&#x20;     { "name": "Kệ trang trí", "description": "Display Shelf" },\
+&#x20;     { "name": "Kệ giày", "description": "Shoe Rack" },\
+&#x20;     { "name": "Kệ tivi", "description": "TV Stand" },\
+&#x20;     { "name": "Bàn làm việc", "description": "Office Desk" },\
+&#x20;     { "name": "Bàn ăn", "description": "Dining Table" },\
+&#x20;     { "name": "Bàn trà", "description": "Coffee Table" },\
+&#x20;     { "name": "Rèm cửa", "description": "Curtains" },\
+&#x20;     { "name": "Thảm", "description": "Rug or Carpet" },\
+&#x20;     { "name": "Đèn trang trí", "description": "Decorative Lighting" },\
+&#x20;     { "name": "Bộ chăn ga gối", "description": "Bedding Set" },\
+&#x20;     { "name": "Đồ trang trí", "description": "Home Decoration" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Bề mặt sử dụng chất tẩy rửa",\
+&#x20;   "description": "Loại bề mặt phù hợp với sản phẩm vệ sinh và chăm sóc nhà cửa.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Home Care",\
+&#x20;     "Home Appliances",\
+&#x20;     "Home Living",\
+&#x20;     "Automotive"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Đa bề mặt", "description": "Multi-Surface" },\
+&#x20;     { "name": "Sàn gạch", "description": "Tile Floor" },\
+&#x20;     { "name": "Sàn gỗ", "description": "Wood Floor" },\
+&#x20;     { "name": "Kính", "description": "Glass" },\
+&#x20;     { "name": "Thép không gỉ", "description": "Stainless Steel" },\
+&#x20;     { "name": "Nhựa", "description": "Plastic" },\
+&#x20;     { "name": "Đá tự nhiên", "description": "Natural Stone" },\
+&#x20;     { "name": "Vải và thảm", "description": "Fabric and Carpet" },\
+&#x20;     { "name": "Da", "description": "Leather" },\
+&#x20;     { "name": "Nhà bếp", "description": "Kitchen Surfaces" },\
+&#x20;     { "name": "Nhà tắm", "description": "Bathroom Surfaces" },\
+&#x20;     { "name": "Bồn cầu", "description": "Toilet Bowl" },\
+&#x20;     { "name": "Nội thất ô tô", "description": "Automotive Interior" },\
+&#x20;     { "name": "Ngoại thất ô tô", "description": "Automotive Exterior" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Dạng sản phẩm vệ sinh",\
+&#x20;   "description": "Dạng vật lý của sản phẩm chăm sóc và vệ sinh nhà cửa.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Home Care"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Dung dịch", "description": "Liquid" },\
+&#x20;     { "name": "Dạng xịt", "description": "Spray" },\
+&#x20;     { "name": "Dạng bọt", "description": "Foam" },\
+&#x20;     { "name": "Dạng gel", "description": "Gel" },\
+&#x20;     { "name": "Dạng bột", "description": "Powder" },\
+&#x20;     { "name": "Dạng hạt", "description": "Granules" },\
+&#x20;     { "name": "Viên nén", "description": "Tablet" },\
+&#x20;     { "name": "Viên giặt", "description": "Laundry Pod" },\
+&#x20;     { "name": "Dạng sáp", "description": "Wax" },\
+&#x20;     { "name": "Dạng thanh", "description": "Bar" },\
+&#x20;     { "name": "Khăn ướt", "description": "Wet Wipes" },\
+&#x20;     { "name": "Dạng kem", "description": "Cream" },\
+&#x20;     { "name": "Tinh dầu", "description": "Essential Oil" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Nhóm hương",\
+&#x20;   "description": "Nhóm mùi hương chính của sản phẩm thơm hoặc sản phẩm có hương liệu.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Beauty",\
+&#x20;     "Home Care",\
+&#x20;     "Home Living",\
+&#x20;     "Automotive",\
+&#x20;     "Pets"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Hoa", "description": "Floral" },\
+&#x20;     { "name": "Trái cây", "description": "Fruity" },\
+&#x20;     { "name": "Cam chanh", "description": "Citrus" },\
+&#x20;     { "name": "Thảo mộc", "description": "Herbal" },\
+&#x20;     { "name": "Gỗ", "description": "Woody" },\
+&#x20;     { "name": "Xạ hương", "description": "Musk" },\
+&#x20;     { "name": "Hương biển", "description": "Aquatic" },\
+&#x20;     { "name": "Hương tươi mát", "description": "Fresh" },\
+&#x20;     { "name": "Hương phấn", "description": "Powdery" },\
+&#x20;     { "name": "Hương ngọt", "description": "Sweet" },\
+&#x20;     { "name": "Hương vani", "description": "Vanilla" },\
+&#x20;     { "name": "Hương phương Đông", "description": "Oriental" },\
+&#x20;     { "name": "Hương gia vị", "description": "Spicy" },\
+&#x20;     { "name": "Hương trà", "description": "Tea" },\
+&#x20;     { "name": "Hương cà phê", "description": "Coffee" },\
+&#x20;     { "name": "Không mùi", "description": "Fragrance-Free" },\
+&#x20;     { "name": "Hương hỗn hợp", "description": "Mixed Fragrance" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Nguồn cấp năng lượng của dụng cụ",\
+&#x20;   "description": "Nguồn năng lượng hoặc cơ chế vận hành của dụng cụ và thiết bị.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Tools & Home Improvement",\
+&#x20;     "Automotive",\
+&#x20;     "Sport & Outdoor",\
+&#x20;     "Home Appliances"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Thủ công", "description": "Manual" },\
+&#x20;     { "name": "Điện có dây", "description": "Corded Electric" },\
+&#x20;     { "name": "Pin sạc", "description": "Rechargeable Battery" },\
+&#x20;     { "name": "Pin dùng một lần", "description": "Disposable Battery" },\
+&#x20;     { "name": "Khí nén", "description": "Pneumatic" },\
+&#x20;     { "name": "Thủy lực", "description": "Hydraulic" },\
+&#x20;     { "name": "Xăng", "description": "Gasoline" },\
+&#x20;     { "name": "Dầu diesel", "description": "Diesel" },\
+&#x20;     { "name": "Năng lượng mặt trời", "description": "Solar Power" },\
+&#x20;     { "name": "USB", "description": "USB Power" },\
+&#x20;     { "name": "Điện lưới", "description": "Mains Electricity" },\
+&#x20;     { "name": "Gas", "description": "Gas Fuel" },\
+&#x20;     { "name": "Kết hợp nhiều nguồn", "description": "Hybrid Power Source" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại dụng cụ",\
+&#x20;   "description": "Phân loại dụng cụ theo công dụng và cơ chế hoạt động.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Tools & Home Improvement"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Máy khoan", "description": "Drill" },\
+&#x20;     { "name": "Máy vặn vít", "description": "Screwdriver Driver" },\
+&#x20;     { "name": "Máy khoan búa", "description": "Hammer Drill" },\
+&#x20;     { "name": "Máy mài góc", "description": "Angle Grinder" },\
+&#x20;     { "name": "Máy cưa đĩa", "description": "Circular Saw" },\
+&#x20;     { "name": "Máy cưa lọng", "description": "Jigsaw" },\
+&#x20;     { "name": "Máy cưa kiếm", "description": "Reciprocating Saw" },\
+&#x20;     { "name": "Máy chà nhám", "description": "Sander" },\
+&#x20;     { "name": "Máy bào", "description": "Planer" },\
+&#x20;     { "name": "Máy hàn", "description": "Welding Machine" },\
+&#x20;     { "name": "Máy nén khí", "description": "Air Compressor" },\
+&#x20;     { "name": "Máy phun rửa áp lực", "description": "Pressure Washer" },\
+&#x20;     { "name": "Cờ lê", "description": "Wrench" },\
+&#x20;     { "name": "Mỏ lết", "description": "Adjustable Wrench" },\
+&#x20;     { "name": "Kìm", "description": "Pliers" },\
+&#x20;     { "name": "Tua vít", "description": "Screwdriver" },\
+&#x20;     { "name": "Bộ dụng cụ sửa chữa", "description": "Tool Set" },\
+&#x20;     { "name": "Thước đo", "description": "Measuring Tool" },\
+&#x20;     { "name": "Dụng cụ cắt", "description": "Cutting Tool" },\
+&#x20;     { "name": "Dụng cụ làm vườn", "description": "Gardening Tool" },\
+&#x20;     { "name": "Thiết bị bảo hộ", "description": "Protective Equipment" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại phương tiện tương thích",\
+&#x20;   "description": "Nhóm phương tiện được thiết kế để sử dụng phụ tùng hoặc phụ kiện.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Automotive"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Xe máy số", "description": "Underbone Motorcycle" },\
+&#x20;     { "name": "Xe tay ga", "description": "Scooter" },\
+&#x20;     { "name": "Mô tô phân khối lớn", "description": "Motorcycle" },\
+&#x20;     { "name": "Xe đạp", "description": "Bicycle" },\
+&#x20;     { "name": "Xe đạp điện", "description": "Electric Bicycle" },\
+&#x20;     { "name": "Xe máy điện", "description": "Electric Motorcycle" },\
+&#x20;     { "name": "Ô tô con", "description": "Passenger Car" },\
+&#x20;     { "name": "SUV", "description": "Sport Utility Vehicle" },\
+&#x20;     { "name": "Crossover", "description": "Crossover Utility Vehicle" },\
+&#x20;     { "name": "Bán tải", "description": "Pickup Truck" },\
+&#x20;     { "name": "Xe tải", "description": "Truck" },\
+&#x20;     { "name": "Xe van", "description": "Van" },\
+&#x20;     { "name": "Xe buýt", "description": "Bus" },\
+&#x20;     { "name": "Xe điện", "description": "Electric Vehicle" },\
+&#x20;     { "name": "Đa dòng xe", "description": "Multiple Vehicle Types" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Dung tích động cơ",\
+&#x20;   "description": "Nhóm dung tích xi-lanh của động cơ đốt trong tính bằng cm³.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Automotive"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Dưới 50 cc", "description": "Under 50 Cubic Centimeters" },\
+&#x20;     { "name": "50–110 cc", "description": "50–110 Cubic Centimeters" },\
+&#x20;     { "name": "111–125 cc", "description": "111–125 Cubic Centimeters" },\
+&#x20;     { "name": "126–150 cc", "description": "126–150 Cubic Centimeters" },\
+&#x20;     { "name": "151–175 cc", "description": "151–175 Cubic Centimeters" },\
+&#x20;     { "name": "176–250 cc", "description": "176–250 Cubic Centimeters" },\
+&#x20;     { "name": "251–400 cc", "description": "251–400 Cubic Centimeters" },\
+&#x20;     { "name": "401–600 cc", "description": "401–600 Cubic Centimeters" },\
+&#x20;     { "name": "601–750 cc", "description": "601–750 Cubic Centimeters" },\
+&#x20;     { "name": "751–1.000 cc", "description": "751–1,000 Cubic Centimeters" },\
+&#x20;     { "name": "Trên 1.000 cc", "description": "Over 1,000 Cubic Centimeters" },\
+&#x20;     { "name": "Động cơ điện", "description": "Electric Motor, No Cylinder Displacement" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Cấp độ nhớt dầu động cơ",\
+&#x20;   "description": "Cấp độ nhớt SAE thường gặp của dầu động cơ.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Automotive"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "SAE 0W-16", "description": "SAE Viscosity Grade 0W-16" },\
+&#x20;     { "name": "SAE 0W-20", "description": "SAE Viscosity Grade 0W-20" },\
+&#x20;     { "name": "SAE 0W-30", "description": "SAE Viscosity Grade 0W-30" },\
+&#x20;     { "name": "SAE 0W-40", "description": "SAE Viscosity Grade 0W-40" },\
+&#x20;     { "name": "SAE 5W-20", "description": "SAE Viscosity Grade 5W-20" },\
+&#x20;     { "name": "SAE 5W-30", "description": "SAE Viscosity Grade 5W-30" },\
+&#x20;     { "name": "SAE 5W-40", "description": "SAE Viscosity Grade 5W-40" },\
+&#x20;     { "name": "SAE 5W-50", "description": "SAE Viscosity Grade 5W-50" },\
+&#x20;     { "name": "SAE 10W-30", "description": "SAE Viscosity Grade 10W-30" },\
+&#x20;     { "name": "SAE 10W-40", "description": "SAE Viscosity Grade 10W-40" },\
+&#x20;     { "name": "SAE 10W-50", "description": "SAE Viscosity Grade 10W-50" },\
+&#x20;     { "name": "SAE 15W-40", "description": "SAE Viscosity Grade 15W-40" },\
+&#x20;     { "name": "SAE 20W-50", "description": "SAE Viscosity Grade 20W-50" },\
+&#x20;     { "name": "SAE 30", "description": "SAE Single-Grade Oil 30" },\
+&#x20;     { "name": "SAE 40", "description": "SAE Single-Grade Oil 40" },\
+&#x20;     { "name": "Dầu hộp số", "description": "Transmission or Gear Oil; not an engine-oil viscosity grade" },\
+&#x20;     { "name": "Dầu phanh", "description": "Brake Fluid; not an engine-oil viscosity grade" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kích cỡ lốp xe",\
+&#x20;   "description": "Các cỡ lốp thông dụng cho xe máy và ô tô; phải kiểm tra thông số tương thích của từng xe.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Automotive"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "70/90-17", "description": "Kích cỡ lốp xe máy 70/90-17" },\
+&#x20;     { "name": "80/90-14", "description": "Kích cỡ lốp xe máy 80/90-14" },\
+&#x20;     { "name": "80/90-17", "description": "Kích cỡ lốp xe máy 80/90-17" },\
+&#x20;     { "name": "90/90-14", "description": "Kích cỡ lốp xe máy 90/90-14" },\
+&#x20;     { "name": "90/90-17", "description": "Kích cỡ lốp xe máy 90/90-17" },\
+&#x20;     { "name": "100/80-17", "description": "Kích cỡ lốp xe máy 100/80-17" },\
+&#x20;     { "name": "110/70-17", "description": "Kích cỡ lốp xe máy 110/70-17" },\
+&#x20;     { "name": "120/70-17", "description": "Kích cỡ lốp xe máy 120/70-17" },\
+&#x20;     { "name": "145/70R12", "description": "Kích cỡ lốp ô tô 145/70R12" },\
+&#x20;     { "name": "155/65R14", "description": "Kích cỡ lốp ô tô 155/65R14" },\
+&#x20;     { "name": "165/65R14", "description": "Kích cỡ lốp ô tô 165/65R14" },\
+&#x20;     { "name": "175/65R14", "description": "Kích cỡ lốp ô tô 175/65R14" },\
+&#x20;     { "name": "185/65R15", "description": "Kích cỡ lốp ô tô 185/65R15" },\
+&#x20;     { "name": "195/65R15", "description": "Kích cỡ lốp ô tô 195/65R15" },\
+&#x20;     { "name": "205/55R16", "description": "Kích cỡ lốp ô tô 205/55R16" },\
+&#x20;     { "name": "215/60R16", "description": "Kích cỡ lốp ô tô 215/60R16" },\
+&#x20;     { "name": "225/45R17", "description": "Kích cỡ lốp ô tô 225/45R17" },\
+&#x20;     { "name": "225/55R18", "description": "Kích cỡ lốp ô tô 225/55R18" },\
+&#x20;     { "name": "235/60R18", "description": "Kích cỡ lốp ô tô 235/60R18" },\
+&#x20;     { "name": "265/65R17", "description": "Kích cỡ lốp ô tô 265/65R17" },\
+&#x20;     { "name": "Cỡ khác", "description": "Other Tire Size" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Điện áp ắc quy phương tiện",\
+&#x20;   "description": "Điện áp danh định của ắc quy hoặc pin phương tiện.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Automotive"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "6 V", "description": "6 Volt" },\
+&#x20;     { "name": "12 V", "description": "12 Volt" },\
+&#x20;     { "name": "24 V", "description": "24 Volt" },\
+&#x20;     { "name": "36 V", "description": "36 Volt" },\
+&#x20;     { "name": "48 V", "description": "48 Volt" },\
+&#x20;     { "name": "60 V", "description": "60 Volt" },\
+&#x20;     { "name": "72 V", "description": "72 Volt" },\
+&#x20;     { "name": "96 V", "description": "96 Volt" },\
+&#x20;     { "name": "144 V", "description": "144 Volt" },\
+&#x20;     { "name": "400 V", "description": "400 Volt" },\
+&#x20;     { "name": "800 V", "description": "800 Volt" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Độ tuổi phù hợp",\
+&#x20;   "description": "Độ tuổi sử dụng hoặc nhóm tuổi phù hợp theo thông tin của nhà sản xuất.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Kid Fashion",\
+&#x20;     "Moms, Kids & Babies",\
+&#x20;     "Toys",\
+&#x20;     "Books & Stationery",\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "0–3 tháng", "description": "0–3 Months" },\
+&#x20;     { "name": "3–6 tháng", "description": "3–6 Months" },\
+&#x20;     { "name": "6–12 tháng", "description": "6–12 Months" },\
+&#x20;     { "name": "1–2 tuổi", "description": "1–2 Years" },\
+&#x20;     { "name": "2–3 tuổi", "description": "2–3 Years" },\
+&#x20;     { "name": "3–5 tuổi", "description": "3–5 Years" },\
+&#x20;     { "name": "6–8 tuổi", "description": "6–8 Years" },\
+&#x20;     { "name": "9–12 tuổi", "description": "9–12 Years" },\
+&#x20;     { "name": "13–17 tuổi", "description": "13–17 Years" },\
+&#x20;     { "name": "18 tuổi trở lên", "description": "18 Years and Above" },\
+&#x20;     { "name": "Mọi lứa tuổi", "description": "All Ages" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kích cỡ tã bỉm",\
+&#x20;   "description": "Cỡ tã hoặc bỉm theo ký hiệu thông dụng của nhà sản xuất.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Moms, Kids & Babies"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Sơ sinh NB", "description": "Newborn" },\
+&#x20;     { "name": "Size S", "description": "Small" },\
+&#x20;     { "name": "Size M", "description": "Medium" },\
+&#x20;     { "name": "Size L", "description": "Large" },\
+&#x20;     { "name": "Size XL", "description": "Extra Large" },\
+&#x20;     { "name": "Size XXL", "description": "Double Extra Large" },\
+&#x20;     { "name": "Size XXXL", "description": "Triple Extra Large" },\
+&#x20;     { "name": "Quần bỉm", "description": "Pull-Up Pants" },\
+&#x20;     { "name": "Miếng lót sơ sinh", "description": "Newborn Diaper Pad" },\
+&#x20;     { "name": "Bỉm người lớn", "description": "Adult Diaper" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Dung tích bình sữa",\
+&#x20;   "description": "Dung tích danh định của bình sữa hoặc bình uống cho trẻ em.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Moms, Kids & Babies"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "60 mL", "description": "60 Milliliters" },\
+&#x20;     { "name": "90 mL", "description": "90 Milliliters" },\
+&#x20;     { "name": "120 mL", "description": "120 Milliliters" },\
+&#x20;     { "name": "150 mL", "description": "150 Milliliters" },\
+&#x20;     { "name": "160 mL", "description": "160 Milliliters" },\
+&#x20;     { "name": "180 mL", "description": "180 Milliliters" },\
+&#x20;     { "name": "240 mL", "description": "240 Milliliters" },\
+&#x20;     { "name": "250 mL", "description": "250 Milliliters" },\
+&#x20;     { "name": "300 mL", "description": "300 Milliliters" },\
+&#x20;     { "name": "330 mL", "description": "330 Milliliters" },\
+&#x20;     { "name": "500 mL", "description": "500 Milliliters" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại đồ chơi",\
+&#x20;   "description": "Phân loại đồ chơi theo hình thức chơi và công năng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Toys",\
+&#x20;     "Moms, Kids & Babies"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Đồ chơi lắp ráp", "description": "Building Toys" },\
+&#x20;     { "name": "Khối xếp hình", "description": "Building Blocks" },\
+&#x20;     { "name": "Búp bê", "description": "Dolls" },\
+&#x20;     { "name": "Thú nhồi bông", "description": "Plush Toys" },\
+&#x20;     { "name": "Ô tô mô hình", "description": "Toy Cars" },\
+&#x20;     { "name": "Máy bay mô hình", "description": "Model Aircraft" },\
+&#x20;     { "name": "Tàu hỏa mô hình", "description": "Model Trains" },\
+&#x20;     { "name": "Đồ chơi điều khiển từ xa", "description": "Remote-Controlled Toys" },\
+&#x20;     { "name": "Trò chơi xếp hình", "description": "Jigsaw Puzzles" },\
+&#x20;     { "name": "Trò chơi bàn", "description": "Board Games" },\
+&#x20;     { "name": "Đồ chơi giáo dục", "description": "Educational Toys" },\
+&#x20;     { "name": "Đồ chơi STEM", "description": "STEM Toys" },\
+&#x20;     { "name": "Robot", "description": "Robotics Toys" },\
+&#x20;     { "name": "Đồ chơi nhập vai", "description": "Role-Play Toys" },\
+&#x20;     { "name": "Đồ chơi âm nhạc", "description": "Musical Toys" },\
+&#x20;     { "name": "Đồ chơi ngoài trời", "description": "Outdoor Toys" },\
+&#x20;     { "name": "Đồ chơi vận động", "description": "Active Play Toys" },\
+&#x20;     { "name": "Đất nặn", "description": "Modeling Clay" },\
+&#x20;     { "name": "Đồ chơi thủ công", "description": "Arts and Crafts Toys" },\
+&#x20;     { "name": "Mô hình sưu tầm", "description": "Collectible Figures" },\
+&#x20;     { "name": "Đồ chơi nhà tắm", "description": "Bath Toys" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Nguồn điện đồ chơi",\
+&#x20;   "description": "Nguồn cấp điện hoặc cách vận hành của đồ chơi.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Toys",\
+&#x20;     "Moms, Kids & Babies"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Không cần pin", "description": "No Battery Required" },\
+&#x20;     { "name": "Pin AA", "description": "AA Battery" },\
+&#x20;     { "name": "Pin AAA", "description": "AAA Battery" },\
+&#x20;     { "name": "Pin cúc áo", "description": "Button Cell Battery" },\
+&#x20;     { "name": "Pin sạc tích hợp", "description": "Built-In Rechargeable Battery" },\
+&#x20;     { "name": "Pin sạc tháo rời", "description": "Removable Rechargeable Battery" },\
+&#x20;     { "name": "Sạc USB", "description": "USB Charging" },\
+&#x20;     { "name": "Năng lượng mặt trời", "description": "Solar Powered" },\
+&#x20;     { "name": "Điện lưới", "description": "Mains Powered" },\
+&#x20;     { "name": "Lên dây cót", "description": "Wind-Up Mechanism" },\
+&#x20;     { "name": "Điều khiển cơ học", "description": "Mechanical Operation" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại thú cưng",\
+&#x20;   "description": "Loài vật phù hợp với sản phẩm dành cho thú cưng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Pets"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Chó", "description": "Dog" },\
+&#x20;     { "name": "Mèo", "description": "Cat" },\
+&#x20;     { "name": "Cá cảnh", "description": "Ornamental Fish" },\
+&#x20;     { "name": "Chim cảnh", "description": "Pet Birds" },\
+&#x20;     { "name": "Thỏ", "description": "Rabbit" },\
+&#x20;     { "name": "Hamster", "description": "Hamster" },\
+&#x20;     { "name": "Chuột lang", "description": "Guinea Pig" },\
+&#x20;     { "name": "Rùa", "description": "Turtle" },\
+&#x20;     { "name": "Bò sát", "description": "Reptiles" },\
+&#x20;     { "name": "Lưỡng cư", "description": "Amphibians" },\
+&#x20;     { "name": "Động vật có vú nhỏ", "description": "Small Mammals" },\
+&#x20;     { "name": "Nhiều loài thú cưng", "description": "Multiple Pet Types" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Giai đoạn phát triển của thú cưng",\
+&#x20;   "description": "Giai đoạn tuổi thọ phù hợp với sản phẩm dành cho thú cưng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Pets"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Sơ sinh", "description": "Newborn" },\
+&#x20;     { "name": "Con non", "description": "Baby or Juvenile" },\
+&#x20;     { "name": "Đang phát triển", "description": "Growing Stage" },\
+&#x20;     { "name": "Trưởng thành", "description": "Adult" },\
+&#x20;     { "name": "Cao tuổi", "description": "Senior" },\
+&#x20;     { "name": "Mọi giai đoạn", "description": "All Life Stages" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại thức ăn thú cưng",\
+&#x20;   "description": "Dạng thức ăn hoặc sản phẩm dinh dưỡng dành cho thú cưng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Pets"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Thức ăn khô", "description": "Dry Food or Kibble" },\
+&#x20;     { "name": "Thức ăn ướt", "description": "Wet Food" },\
+&#x20;     { "name": "Pate", "description": "Pâté" },\
+&#x20;     { "name": "Thức ăn đông lạnh", "description": "Frozen Food" },\
+&#x20;     { "name": "Thức ăn sấy khô", "description": "Dehydrated Food" },\
+&#x20;     { "name": "Thức ăn đông khô", "description": "Freeze-Dried Food" },\
+&#x20;     { "name": "Bánh thưởng", "description": "Pet Treats" },\
+&#x20;     { "name": "Xương gặm", "description": "Chew Treats" },\
+&#x20;     { "name": "Sữa thay thế", "description": "Milk Replacer" },\
+&#x20;     { "name": "Cỏ khô", "description": "Hay" },\
+&#x20;     { "name": "Viên thức ăn", "description": "Pellets" },\
+&#x20;     { "name": "Hạt giống", "description": "Seeds" },\
+&#x20;     { "name": "Thức ăn thủy sinh", "description": "Aquatic Animal Feed" },\
+&#x20;     { "name": "Thực phẩm bổ sung", "description": "Nutritional Supplement" },\
+&#x20;     { "name": "Thức ăn tươi", "description": "Fresh Food" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Khối lượng đóng gói thức ăn thú cưng",\
+&#x20;   "description": "Khối lượng tịnh của một gói thức ăn thú cưng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Pets"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "50 g", "description": "50 Grams" },\
+&#x20;     { "name": "100 g", "description": "100 Grams" },\
+&#x20;     { "name": "200 g", "description": "200 Grams" },\
+&#x20;     { "name": "400 g", "description": "400 Grams" },\
+&#x20;     { "name": "500 g", "description": "500 Grams" },\
+&#x20;     { "name": "800 g", "description": "800 Grams" },\
+&#x20;     { "name": "1 kg", "description": "1 Kilogram" },\
+&#x20;     { "name": "1.5 kg", "description": "1.5 Kilograms" },\
+&#x20;     { "name": "2 kg", "description": "2 Kilograms" },\
+&#x20;     { "name": "3 kg", "description": "3 Kilograms" },\
+&#x20;     { "name": "5 kg", "description": "5 Kilograms" },\
+&#x20;     { "name": "7 kg", "description": "7 Kilograms" },\
+&#x20;     { "name": "10 kg", "description": "10 Kilograms" },\
+&#x20;     { "name": "15 kg", "description": "15 Kilograms" },\
+&#x20;     { "name": "20 kg", "description": "20 Kilograms" },\
+&#x20;     { "name": "Trên 20 kg", "description": "Over 20 Kilograms" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại sách",\
+&#x20;   "description": "Phân loại sách theo nội dung và công năng.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Books & Stationery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Văn học", "description": "Literature" },\
+&#x20;     { "name": "Tiểu thuyết", "description": "Novel" },\
+&#x20;     { "name": "Truyện ngắn", "description": "Short Stories" },\
+&#x20;     { "name": "Sách giáo khoa", "description": "Textbook" },\
+&#x20;     { "name": "Sách tham khảo", "description": "Reference Book" },\
+&#x20;     { "name": "Sách học ngoại ngữ", "description": "Language Learning Book" },\
+&#x20;     { "name": "Sách thiếu nhi", "description": "Children's Book" },\
+&#x20;     { "name": "Truyện tranh", "description": "Comic Book" },\
+&#x20;     { "name": "Manga", "description": "Manga" },\
+&#x20;     { "name": "Sách kỹ năng", "description": "Self-Help Book" },\
+&#x20;     { "name": "Kinh doanh", "description": "Business Book" },\
+&#x20;     { "name": "Khoa học", "description": "Science Book" },\
+&#x20;     { "name": "Công nghệ", "description": "Technology Book" },\
+&#x20;     { "name": "Lịch sử", "description": "History Book" },\
+&#x20;     { "name": "Địa lý", "description": "Geography Book" },\
+&#x20;     { "name": "Du lịch", "description": "Travel Book" },\
+&#x20;     { "name": "Nấu ăn", "description": "Cookbook" },\
+&#x20;     { "name": "Sách nghệ thuật", "description": "Art Book" },\
+&#x20;     { "name": "Sách tô màu", "description": "Coloring Book" },\
+&#x20;     { "name": "Sách hoạt động", "description": "Activity Book" },\
+&#x20;     { "name": "Từ điển", "description": "Dictionary" },\
+&#x20;     { "name": "Bách khoa toàn thư", "description": "Encyclopedia" },\
+&#x20;     { "name": "Sách chuyên ngành", "description": "Professional or Academic Book" },\
+&#x20;     { "name": "Khác", "description": "Other Book Type" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Ngôn ngữ sách",\
+&#x20;   "description": "Ngôn ngữ chính được sử dụng trong nội dung sách.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Books & Stationery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Tiếng Việt", "description": "Vietnamese" },\
+&#x20;     { "name": "Tiếng Anh", "description": "English" },\
+&#x20;     { "name": "Tiếng Trung", "description": "Chinese" },\
+&#x20;     { "name": "Tiếng Nhật", "description": "Japanese" },\
+&#x20;     { "name": "Tiếng Hàn", "description": "Korean" },\
+&#x20;     { "name": "Tiếng Pháp", "description": "French" },\
+&#x20;     { "name": "Tiếng Đức", "description": "German" },\
+&#x20;     { "name": "Tiếng Tây Ban Nha", "description": "Spanish" },\
+&#x20;     { "name": "Tiếng Nga", "description": "Russian" },\
+&#x20;     { "name": "Tiếng Thái", "description": "Thai" },\
+&#x20;     { "name": "Tiếng Indonesia", "description": "Indonesian" },\
+&#x20;     { "name": "Song ngữ", "description": "Bilingual" },\
+&#x20;     { "name": "Đa ngôn ngữ", "description": "Multilingual" },\
+&#x20;     { "name": "Ngôn ngữ khác", "description": "Other Language" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Hình thức sách",\
+&#x20;   "description": "Hình thức đóng và định dạng xuất bản của sách.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Books & Stationery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Bìa mềm", "description": "Paperback" },\
+&#x20;     { "name": "Bìa cứng", "description": "Hardcover" },\
+&#x20;     { "name": "Bìa gập", "description": "French Flap Cover" },\
+&#x20;     { "name": "Lò xo", "description": "Spiral Bound" },\
+&#x20;     { "name": "Đóng ghim", "description": "Staple Bound" },\
+&#x20;     { "name": "Sách bỏ túi", "description": "Pocket Book" },\
+&#x20;     { "name": "Sách tranh", "description": "Picture Book" },\
+&#x20;     { "name": "Sách điện tử", "description": "E-book" },\
+&#x20;     { "name": "Sách nói", "description": "Audiobook" },\
+&#x20;     { "name": "Bộ sách", "description": "Book Set" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Khổ giấy",\
+&#x20;   "description": "Khổ giấy theo hệ thống kích thước ISO hoặc các chuẩn giấy phổ biến.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Books & Stationery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "A0", "description": "841 × 1189 mm" },\
+&#x20;     { "name": "A1", "description": "594 × 841 mm" },\
+&#x20;     { "name": "A2", "description": "420 × 594 mm" },\
+&#x20;     { "name": "A3", "description": "297 × 420 mm" },\
+&#x20;     { "name": "A4", "description": "210 × 297 mm" },\
+&#x20;     { "name": "A5", "description": "148 × 210 mm" },\
+&#x20;     { "name": "A6", "description": "105 × 148 mm" },\
+&#x20;     { "name": "B4", "description": "250 × 353 mm, ISO Series" },\
+&#x20;     { "name": "B5", "description": "176 × 250 mm, ISO Series" },\
+&#x20;     { "name": "Letter", "description": "215.9 × 279.4 mm" },\
+&#x20;     { "name": "Legal", "description": "215.9 × 355.6 mm" },\
+&#x20;     { "name": "Executive", "description": "184.15 × 266.7 mm" },\
+&#x20;     { "name": "A3+", "description": "Khổ A3 mở rộng" },\
+&#x20;     { "name": "Khổ tùy chỉnh", "description": "Custom Size" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Định lượng giấy",\
+&#x20;   "description": "Khối lượng giấy trên mỗi mét vuông, tính bằng g/m².",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Books & Stationery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "40 gsm", "description": "40 Grams per Square Meter" },\
+&#x20;     { "name": "50 gsm", "description": "50 Grams per Square Meter" },\
+&#x20;     { "name": "60 gsm", "description": "60 Grams per Square Meter" },\
+&#x20;     { "name": "70 gsm", "description": "70 Grams per Square Meter" },\
+&#x20;     { "name": "75 gsm", "description": "75 Grams per Square Meter" },\
+&#x20;     { "name": "80 gsm", "description": "80 Grams per Square Meter" },\
+&#x20;     { "name": "90 gsm", "description": "90 Grams per Square Meter" },\
+&#x20;     { "name": "100 gsm", "description": "100 Grams per Square Meter" },\
+&#x20;     { "name": "120 gsm", "description": "120 Grams per Square Meter" },\
+&#x20;     { "name": "150 gsm", "description": "150 Grams per Square Meter" },\
+&#x20;     { "name": "180 gsm", "description": "180 Grams per Square Meter" },\
+&#x20;     { "name": "200 gsm", "description": "200 Grams per Square Meter" },\
+&#x20;     { "name": "250 gsm", "description": "250 Grams per Square Meter" },\
+&#x20;     { "name": "300 gsm", "description": "300 Grams per Square Meter" },\
+&#x20;     { "name": "350 gsm", "description": "350 Grams per Square Meter" },\
+&#x20;     { "name": "Trên 350 gsm", "description": "Over 350 Grams per Square Meter" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Cỡ ngòi bút",\
+&#x20;   "description": "Độ rộng đầu ngòi hoặc đầu viết, tính bằng milimét nếu có thông số.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Books & Stationery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "0.28 mm", "description": "0.28 Millimeter" },\
+&#x20;     { "name": "0.38 mm", "description": "0.38 Millimeter" },\
+&#x20;     { "name": "0.4 mm", "description": "0.4 Millimeter" },\
+&#x20;     { "name": "0.5 mm", "description": "0.5 Millimeter" },\
+&#x20;     { "name": "0.6 mm", "description": "0.6 Millimeter" },\
+&#x20;     { "name": "0.7 mm", "description": "0.7 Millimeter" },\
+&#x20;     { "name": "0.8 mm", "description": "0.8 Millimeter" },\
+&#x20;     { "name": "1.0 mm", "description": "1.0 Millimeter" },\
+&#x20;     { "name": "1.2 mm", "description": "1.2 Millimeter" },\
+&#x20;     { "name": "1.5 mm", "description": "1.5 Millimeter" },\
+&#x20;     { "name": "2.0 mm", "description": "2.0 Millimeter" },\
+&#x20;     { "name": "Ngòi bút máy F", "description": "Fine Fountain Pen Nib" },\
+&#x20;     { "name": "Ngòi bút máy M", "description": "Medium Fountain Pen Nib" },\
+&#x20;     { "name": "Ngòi bút máy B", "description": "Broad Fountain Pen Nib" },\
+&#x20;     { "name": "Ngòi cọ", "description": "Brush Tip" },\
+&#x20;     { "name": "Đầu dẹt", "description": "Chisel Tip" },\
+&#x20;     { "name": "Đầu đạn", "description": "Bullet Tip" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Màu mực",\
+&#x20;   "description": "Màu mực của bút, bút máy, bút lông hoặc dụng cụ viết.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Books & Stationery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Đen", "description": "Black Ink" },\
+&#x20;     { "name": "Xanh dương", "description": "Blue Ink" },\
+&#x20;     { "name": "Xanh đen", "description": "Blue-Black Ink" },\
+&#x20;     { "name": "Đỏ", "description": "Red Ink" },\
+&#x20;     { "name": "Xanh lá", "description": "Green Ink" },\
+&#x20;     { "name": "Tím", "description": "Purple Ink" },\
+&#x20;     { "name": "Hồng", "description": "Pink Ink" },\
+&#x20;     { "name": "Cam", "description": "Orange Ink" },\
+&#x20;     { "name": "Vàng", "description": "Yellow Ink" },\
+&#x20;     { "name": "Nâu", "description": "Brown Ink" },\
+&#x20;     { "name": "Trắng", "description": "White Ink" },\
+&#x20;     { "name": "Bạc", "description": "Silver Ink" },\
+&#x20;     { "name": "Vàng ánh kim", "description": "Metallic Gold Ink" },\
+&#x20;     { "name": "Mực trong suốt", "description": "Clear Ink" },\
+&#x20;     { "name": "Nhiều màu", "description": "Multicolor Ink" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại thực phẩm",\
+&#x20;   "description": "Phân loại thực phẩm và hàng bách hóa theo nhóm sản phẩm.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Grocery"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Rau củ", "description": "Vegetables" },\
+&#x20;     { "name": "Trái cây", "description": "Fruits" },\
+&#x20;     { "name": "Thịt", "description": "Meat" },\
+&#x20;     { "name": "Hải sản", "description": "Seafood" },\
+&#x20;     { "name": "Trứng", "description": "Eggs" },\
+&#x20;     { "name": "Sữa và chế phẩm từ sữa", "description": "Milk and Dairy Products" },\
+&#x20;     { "name": "Gạo và ngũ cốc", "description": "Rice and Grains" },\
+&#x20;     { "name": "Mì và bún khô", "description": "Noodles and Dried Rice Vermicelli" },\
+&#x20;     { "name": "Thực phẩm ăn liền", "description": "Ready-to-Eat Food" },\
+&#x20;     { "name": "Thực phẩm đóng hộp", "description": "Canned Food" },\
+&#x20;     { "name": "Thực phẩm đông lạnh", "description": "Frozen Food" },\
+&#x20;     { "name": "Thực phẩm chế biến", "description": "Processed Food" },\
+&#x20;     { "name": "Bánh mì và bánh ngọt", "description": "Bread and Pastries" },\
+&#x20;     { "name": "Bánh kẹo", "description": "Confectionery" },\
+&#x20;     { "name": "Đồ ăn nhẹ", "description": "Snacks" },\
+&#x20;     { "name": "Gia vị", "description": "Seasonings" },\
+&#x20;     { "name": "Nước chấm và nước sốt", "description": "Dipping Sauces and Sauces" },\
+&#x20;     { "name": "Dầu ăn", "description": "Cooking Oil" },\
+&#x20;     { "name": "Đường và chất tạo ngọt", "description": "Sugar and Sweeteners" },\
+&#x20;     { "name": "Cà phê", "description": "Coffee" },\
+&#x20;     { "name": "Trà", "description": "Tea" },\
+&#x20;     { "name": "Nước uống", "description": "Beverages" },\
+&#x20;     { "name": "Nước đóng chai", "description": "Bottled Water" },\
+&#x20;     { "name": "Thực phẩm hữu cơ", "description": "Organic Food" },\
+&#x20;     { "name": "Thực phẩm cho trẻ em", "description": "Baby Food" },\
+&#x20;     { "name": "Thực phẩm bổ sung", "description": "Food Supplement" },\
+&#x20;     { "name": "Đồ ăn chay", "description": "Vegetarian Food" },\
+&#x20;     { "name": "Khác", "description": "Other Food Categories" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại hoạt động thể thao",\
+&#x20;   "description": "Môn thể thao hoặc hoạt động ngoài trời phù hợp với sản phẩm.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Chạy bộ", "description": "Running" },\
+&#x20;     { "name": "Đi bộ", "description": "Walking" },\
+&#x20;     { "name": "Tập gym", "description": "Gym Training" },\
+&#x20;     { "name": "Yoga", "description": "Yoga" },\
+&#x20;     { "name": "Pilates", "description": "Pilates" },\
+&#x20;     { "name": "Đạp xe", "description": "Cycling" },\
+&#x20;     { "name": "Leo núi", "description": "Mountaineering" },\
+&#x20;     { "name": "Đi bộ đường dài", "description": "Hiking" },\
+&#x20;     { "name": "Cắm trại", "description": "Camping" },\
+&#x20;     { "name": "Bơi lội", "description": "Swimming" },\
+&#x20;     { "name": "Cầu lông", "description": "Badminton" },\
+&#x20;     { "name": "Quần vợt", "description": "Tennis" },\
+&#x20;     { "name": "Bóng đá", "description": "Football" },\
+&#x20;     { "name": "Bóng rổ", "description": "Basketball" },\
+&#x20;     { "name": "Bóng chuyền", "description": "Volleyball" },\
+&#x20;     { "name": "Golf", "description": "Golf" },\
+&#x20;     { "name": "Câu cá", "description": "Fishing" },\
+&#x20;     { "name": "Leo tường", "description": "Rock Climbing" },\
+&#x20;     { "name": "Võ thuật", "description": "Martial Arts" },\
+&#x20;     { "name": "Bóng bàn", "description": "Table Tennis" },\
+&#x20;     { "name": "Trượt ván", "description": "Skateboarding" },\
+&#x20;     { "name": "Thể thao dưới nước", "description": "Water Sports" },\
+&#x20;     { "name": "Dã ngoại", "description": "Outdoor Recreation" },\
+&#x20;     { "name": "Đa môn thể thao", "description": "Multisport" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Trình độ thể thao",\
+&#x20;   "description": "Trình độ người dùng phù hợp với dụng cụ thể thao.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Người mới bắt đầu", "description": "Beginner" },\
+&#x20;     { "name": "Cơ bản", "description": "Basic" },\
+&#x20;     { "name": "Trung cấp", "description": "Intermediate" },\
+&#x20;     { "name": "Nâng cao", "description": "Advanced" },\
+&#x20;     { "name": "Chuyên nghiệp", "description": "Professional" },\
+&#x20;     { "name": "Mọi trình độ", "description": "All Skill Levels" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Kích cỡ bóng thể thao",\
+&#x20;   "description": "Kích cỡ tiêu chuẩn của các loại bóng thể thao.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Sport & Outdoor"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Size 1", "description": "Cỡ bóng 1" },\
+&#x20;     { "name": "Size 2", "description": "Cỡ bóng 2" },\
+&#x20;     { "name": "Size 3", "description": "Cỡ bóng 3" },\
+&#x20;     { "name": "Size 4", "description": "Cỡ bóng 4" },\
+&#x20;     { "name": "Size 5", "description": "Cỡ bóng 5" },\
+&#x20;     { "name": "Size 6", "description": "Cỡ bóng 6" },\
+&#x20;     { "name": "Size 7", "description": "Cỡ bóng 7" },\
+&#x20;     { "name": "Size 8", "description": "Cỡ bóng 8" },\
+&#x20;     { "name": "Size 9", "description": "Cỡ bóng 9" },\
+&#x20;     { "name": "Size 10", "description": "Cỡ bóng 10" },\
+&#x20;     { "name": "Không áp dụng", "description": "Not Applicable" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Loại dịch vụ hoặc voucher",\
+&#x20;   "description": "Phân loại dịch vụ, phiếu quà tặng hoặc mã ưu đãi.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Tickets, Vouchers & Services"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Voucher mua sắm", "description": "Shopping Voucher" },\
+&#x20;     { "name": "Voucher ăn uống", "description": "Dining Voucher" },\
+&#x20;     { "name": "Voucher du lịch", "description": "Travel Voucher" },\
+&#x20;     { "name": "Voucher khách sạn", "description": "Hotel Voucher" },\
+&#x20;     { "name": "Voucher làm đẹp", "description": "Beauty Service Voucher" },\
+&#x20;     { "name": "Voucher giải trí", "description": "Entertainment Voucher" },\
+&#x20;     { "name": "Voucher vận chuyển", "description": "Transportation Voucher" },\
+&#x20;     { "name": "Voucher giao đồ ăn", "description": "Food Delivery Voucher" },\
+&#x20;     { "name": "Thẻ quà tặng", "description": "Gift Card" },\
+&#x20;     { "name": "Mã giảm giá", "description": "Discount Code" },\
+&#x20;     { "name": "Vé sự kiện", "description": "Event Ticket" },\
+&#x20;     { "name": "Vé xem phim", "description": "Movie Ticket" },\
+&#x20;     { "name": "Vé tham quan", "description": "Attraction Ticket" },\
+&#x20;     { "name": "Vé phương tiện công cộng", "description": "Public Transport Ticket" },\
+&#x20;     { "name": "Dịch vụ sửa chữa", "description": "Repair Service" },\
+&#x20;     { "name": "Dịch vụ vệ sinh", "description": "Cleaning Service" },\
+&#x20;     { "name": "Dịch vụ đào tạo", "description": "Training Service" },\
+&#x20;     { "name": "Dịch vụ trực tuyến", "description": "Online Service" },\
+&#x20;     { "name": "Nạp tiền điện thoại", "description": "Mobile Top-Up" },\
+&#x20;     { "name": "Thẻ thành viên", "description": "Membership Card" },\
+&#x20;     { "name": "Gói thuê bao", "description": "Subscription Plan" },\
+&#x20;     { "name": "Khác", "description": "Other Service or Voucher" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Mệnh giá voucher",\
+&#x20;   "description": "Mệnh giá hoặc giá trị quy đổi của voucher.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Tickets, Vouchers & Services"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "10.000 VND", "description": "10,000 Vietnamese Dong" },\
+&#x20;     { "name": "20.000 VND", "description": "20,000 Vietnamese Dong" },\
+&#x20;     { "name": "30.000 VND", "description": "30,000 Vietnamese Dong" },\
+&#x20;     { "name": "50.000 VND", "description": "50,000 Vietnamese Dong" },\
+&#x20;     { "name": "100.000 VND", "description": "100,000 Vietnamese Dong" },\
+&#x20;     { "name": "150.000 VND", "description": "150,000 Vietnamese Dong" },\
+&#x20;     { "name": "200.000 VND", "description": "200,000 Vietnamese Dong" },\
+&#x20;     { "name": "300.000 VND", "description": "300,000 Vietnamese Dong" },\
+&#x20;     { "name": "500.000 VND", "description": "500,000 Vietnamese Dong" },\
+&#x20;     { "name": "1.000.000 VND", "description": "1,000,000 Vietnamese Dong" },\
+&#x20;     { "name": "2.000.000 VND", "description": "2,000,000 Vietnamese Dong" },\
+&#x20;     { "name": "5.000.000 VND", "description": "5,000,000 Vietnamese Dong" },\
+&#x20;     { "name": "Giảm theo phần trăm", "description": "Percentage Discount" },\
+&#x20;     { "name": "Giảm số tiền cố định", "description": "Fixed Amount Discount" },\
+&#x20;     { "name": "Theo mệnh giá do nhà cung cấp quy định", "description": "Provider-Defined Denomination" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Hình thức sử dụng voucher",\
+&#x20;   "description": "Cách thức áp dụng hoặc quy đổi voucher.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Tickets, Vouchers & Services"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Sử dụng trực tuyến", "description": "Online Redemption" },\
+&#x20;     { "name": "Sử dụng tại cửa hàng", "description": "In-Store Redemption" },\
+&#x20;     { "name": "Sử dụng tại quầy", "description": "Counter Redemption" },\
+&#x20;     { "name": "Quét mã QR", "description": "QR Code Redemption" },\
+&#x20;     { "name": "Nhập mã voucher", "description": "Voucher Code Entry" },\
+&#x20;     { "name": "Xuất trình vé điện tử", "description": "Present E-Ticket" },\
+&#x20;     { "name": "Đổi vé giấy", "description": "Paper Ticket Exchange" },\
+&#x20;     { "name": "Áp dụng tự động", "description": "Automatic Redemption" },\
+&#x20;     { "name": "Đặt lịch trước", "description": "Advance Booking Required" },\
+&#x20;     { "name": "Cần xác nhận với nhà cung cấp", "description": "Provider Confirmation Required" }\
+&#x20;   ]\
+&#x20; },\
+&#x20; {\
+&#x20;   "name": "Thời hạn voucher",\
+&#x20;   "description": "Khoảng thời gian hiệu lực phổ biến của voucher; ngày hết hạn thực tế phải lấy từ sản phẩm cụ thể.",\
+&#x20;   "applicableCategories": [\
+&#x20;     "Tickets, Vouchers & Services"\
+&#x20;   ],\
+&#x20;   "specifications": [\
+&#x20;     { "name": "Trong ngày", "description": "Same-Day Validity" },\
+&#x20;     { "name": "7 ngày", "description": "7 Days" },\
+&#x20;     { "name": "14 ngày", "description": "14 Days" },\
+&#x20;     { "name": "30 ngày", "description": "30 Days" },\
+&#x20;     { "name": "60 ngày", "description": "60 Days" },\
+&#x20;     { "name": "90 ngày", "description": "90 Days" },\
+&#x20;     { "name": "180 ngày", "description": "180 Days" },\
+&#x20;     { "name": "6 tháng", "description": "6 Months" },\
+&#x20;     { "name": "1 năm", "description": "1 Year" },\
+&#x20;     { "name": "2 năm", "description": "2 Years" },\
+&#x20;     { "name": "Theo ngày hết hạn cụ thể", "description": "Specific Expiration Date" },\
+&#x20;     { "name": "Không có thời hạn cố định", "description": "No Fixed Expiration Period" }\
+&#x20;   ]\
+&#x20; }\
+]

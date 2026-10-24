@@ -24,6 +24,9 @@ import AdminLayout from '../features/admin/AdminLayout';
 import AdminDashboard from '../features/admin/AdminDashboard';
 import UserManagementPage from '../features/admin/UserManagementPage';
 import CommissionPage from '../features/admin/CommissionPage';
+import SpecificationManagementPage from '../features/admin/SpecificationManagementPage';
+import RolePermissionPage from '../features/admin/RolePermissionPage';
+import CategoryManagementPage from '../features/admin/CategoryManagementPage';
 
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
@@ -85,6 +88,9 @@ export const AppRoutes = () => {
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="users" element={<UserManagementPage />} />
         <Route path="commissions" element={<CommissionPage />} />
+        <Route path="specifications" element={<SpecificationManagementPage />} />
+        <Route path="roles" element={<RolePermissionPage />} />
+        <Route path="categories" element={<CategoryManagementPage />} />
       </Route>
     </Routes>
   );

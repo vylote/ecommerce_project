@@ -110,10 +110,10 @@ public class Product {
     @EqualsAndHashCode.Exclude
     List<SpecificProduct> specificProducts;
 
-    @OneToOne(mappedBy = "product", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    ImportReceipt importReceipt;
+    List<ImportReceipt> importReceipts;
 
     @Version
     @Column(name = "version")
