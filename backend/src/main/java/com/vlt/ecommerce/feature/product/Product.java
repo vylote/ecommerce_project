@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.vlt.ecommerce.feature.cart.CartItem;
+import com.vlt.ecommerce.feature.inventory.ImportReceipt;
 import com.vlt.ecommerce.feature.order.OrderItem;
 import com.vlt.ecommerce.feature.review.Review;
 import com.vlt.ecommerce.feature.shop.Shop;
@@ -24,6 +25,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.*;
@@ -97,6 +99,21 @@ public class Product {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<Review> reviews;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<ProductSpecification> productSpecifications;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<SpecificProduct> specificProducts;
+
+    @OneToOne(mappedBy = "product", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    ImportReceipt importReceipt;
 
     @Version
     @Column(name = "version")

@@ -46,6 +46,9 @@ public class SecurityConfig {
             "/categories", "/categories/**", "/images/**",
             "/shops/**", "/users/**",
             "/products", "/products/**",
+            "/specification-types", "/specification-types/**",
+            "/specifications", "/specifications/**",
+            "/variants/**",
             "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**"
     };
 
@@ -63,6 +66,7 @@ public class SecurityConfig {
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http.authorizeHttpRequests(request -> request
+                .requestMatchers("/error").permitAll()
                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                 .anyRequest().authenticated());

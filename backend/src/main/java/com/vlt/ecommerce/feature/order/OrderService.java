@@ -36,7 +36,9 @@ import com.vlt.ecommerce.feature.payment.Payment;
 import com.vlt.ecommerce.feature.payment.Payment.PaymentMethod;
 import com.vlt.ecommerce.feature.payment.Payment.PaymentStatus;
 import com.vlt.ecommerce.feature.product.Product;
+import com.vlt.ecommerce.feature.product.SpecificProduct;
 import com.vlt.ecommerce.feature.product.repository.ProductRepository;
+import com.vlt.ecommerce.feature.product.repository.SpecificProductRepository;
 import com.vlt.ecommerce.feature.shop.Shop;
 import com.vlt.ecommerce.feature.shop.repository.ShopRepository;
 import com.vlt.ecommerce.feature.user.Address;
@@ -66,6 +68,7 @@ public class OrderService {
     AddressRepository addressRepository;
     ShopRepository shopRepository;
     ProductRepository productRepository;
+    SpecificProductRepository specificProductRepository;
     AddressMapper addressMapper;
     OrderMapper orderMapper;
     ObjectMapper objectMapper;
@@ -124,7 +127,15 @@ public class OrderService {
 
             for (CartItem shopItem : shopItems) {
                 Product product = shopItem.getProduct();
+                SpecificProduct variant = shopItem.getSpecificProduct();
                 int orderQuantity = shopItem.getQuantity();
+
+                if (variant != null) {
+                    int variantUpdated = specificProductRepository.decrementStock(variant.getId(), orderQuantity);
+                    if (variantUpdated == 0) {
+                        throw new AppException(ErrorCode.OUT_OF_STOCK);
+                    }
+                }
 
                 int updatedRows = productRepository.decrementStockAndIncrementSold(product.getId(), orderQuantity);
 
@@ -132,26 +143,35 @@ public class OrderService {
                     throw new AppException(ErrorCode.OUT_OF_STOCK);
                 }
 
-                BigDecimal itemTotalPrice = product.getPrice().multiply(BigDecimal.valueOf(orderQuantity));
+                BigDecimal unitPrice = (variant != null) ? variant.getPrice() : product.getPrice();
+                BigDecimal itemTotalPrice = unitPrice.multiply(BigDecimal.valueOf(orderQuantity));
 
-                String primaryImage = null;
-                if (product.getImages() != null && !product.getImages().isEmpty()) {
-                    primaryImage = product.getImages().stream()
+                String itemImage = null;
+                if (variant != null && variant.getImageUrl() != null && !variant.getImageUrl().isBlank()) {
+                    itemImage = variant.getImageUrl();
+                } else if (product.getImages() != null && !product.getImages().isEmpty()) {
+                    itemImage = product.getImages().stream()
                         .filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))
                         .map(img -> img.getUrl())
                         .findFirst()
                         .orElse(product.getImages().get(0).getUrl());
                 }
 
+                String itemName = product.getName();
+                if (variant != null && variant.getName() != null && !variant.getName().isBlank()) {
+                    itemName = itemName + " - " + variant.getName();
+                }
+
                 OrderItem orderItem = OrderItem.builder()
                         .order(newOrder)
                         .product(product)
+                        .specificProduct(variant)
                         .shop(product.getShop())
-                        .productName(product.getName())
-                        .productPrice(product.getPrice())
+                        .productName(itemName)
+                        .productPrice(unitPrice)
                         .quantity(orderQuantity)
                         .totalPrice(itemTotalPrice)
-                        .productImageUrl(primaryImage)
+                        .productImageUrl(itemImage)
                         .build();
 
                 newOrder.getItems().add(orderItem);
@@ -270,21 +290,19 @@ public class OrderService {
         return PageResponse.of(orderPage, content);
     }
 
-    @PreAuthorize("hasAnyRole('BUYER', 'SELLER')")
+    @PreAuthorize("hasAnyRole('BUYER', 'SELLER', 'ADMIN')")
     public OrderResponse getDetailOrder(Long id) {
         User user = getCurrentUser();
 
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        boolean isBuyer = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_BUYER"));
-        boolean isSeller = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_SELLER"));
+        boolean isBuyer = order.getBuyer() != null && order.getBuyer().getId().equals(user.getId());
+        boolean isSeller = order.getShop() != null && order.getShop().getSeller() != null 
+                && order.getShop().getSeller().getId().equals(user.getId());
+        boolean isAdmin = user.getRoles().stream().anyMatch(r -> r.getName().equals("ROLE_ADMIN"));
 
-        if (isBuyer && !order.getBuyer().getId().equals(user.getId())) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-        
-        if (isSeller && !order.getShop().getSeller().getId().equals(user.getId())) {
+        if (!isBuyer && !isSeller && !isAdmin) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
@@ -321,6 +339,9 @@ public class OrderService {
         }
 
         for (OrderItem item : order.getItems()) {
+            if (item.getSpecificProduct() != null) {
+                specificProductRepository.incrementStock(item.getSpecificProduct().getId(), item.getQuantity());
+            }
             productRepository.restoreStockAndDecrementSold(item.getProduct().getId(), item.getQuantity());
         }
         

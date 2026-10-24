@@ -22,4 +22,7 @@ public class CartItemResponse {
     Integer quantity;
     BigDecimal totalPrice; // Tổng tiền = quantity * price
     LocalDateTime addedAt;
+    Long specificProductId;
+    String variantName;
+    String sku;
 }

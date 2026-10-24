@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
 import com.vlt.ecommerce.feature.product.Product;
+import com.vlt.ecommerce.feature.product.SpecificProduct;
 import com.vlt.ecommerce.feature.user.User;
 
 import jakarta.persistence.Column;
@@ -16,7 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,9 +25,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Entity
-@Table(name = "cart_items", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"buyer_id", "product_id"}) // Ràng buộc chống trùng lặp sản phẩm
-})
+@Table(name = "cart_items")
 @Data
 @Builder
 @NoArgsConstructor
@@ -50,4 +48,8 @@ public class CartItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specific_product_id")
+    SpecificProduct specificProduct;
 }

@@ -22,4 +22,6 @@ public interface CommissionRecordRepository extends JpaRepository<CommissionReco
 
     @Query("SELECT SUM(c.commissionAmount) FROM CommissionRecord c")
     BigDecimal sumTotalCommissionRevenue();
+
+    boolean existsByOrderItemId(Long orderItemId);
 }

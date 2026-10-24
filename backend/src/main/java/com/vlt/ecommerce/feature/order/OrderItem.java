@@ -4,6 +4,7 @@ package com.vlt.ecommerce.feature.order;
 import java.math.BigDecimal;
 
 import com.vlt.ecommerce.feature.product.Product;
+import com.vlt.ecommerce.feature.product.SpecificProduct;
 import com.vlt.ecommerce.feature.shop.Shop;
 
 import jakarta.persistence.Column;
@@ -49,6 +50,10 @@ public class OrderItem {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "specific_product_id")
+    SpecificProduct specificProduct;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)

@@ -27,6 +27,9 @@ public interface ProductMapper {
     @Mapping(target = "averageRating", ignore = true)
     @Mapping(target = "reviewCount", ignore = true)
     @Mapping(target = "version", ignore = true)
+    @Mapping(target = "productSpecifications", ignore = true)
+    @Mapping(target = "specificProducts", ignore = true)
+    @Mapping(target = "importReceipt", ignore = true)
     Product toProduct(ProductRequest request);
 
     @Mapping(target = "category", source = "product.category")
@@ -48,6 +51,9 @@ public interface ProductMapper {
     @Mapping(target = "averageRating", ignore = true)
     @Mapping(target = "reviewCount", ignore = true)
     @Mapping(target = "version", ignore = true)
+    @Mapping(target = "productSpecifications", ignore = true)
+    @Mapping(target = "specificProducts", ignore = true)
+    @Mapping(target = "importReceipt", ignore = true)
     void updateProduct(ProductRequest request, @MappingTarget Product product);
 
     List<ProductResponse> toProductResponseList(List<Product> products);

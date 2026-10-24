@@ -28,7 +28,10 @@ public enum ErrorCode {
     CANNOT_BUY_OWN_PRODUCT(1022, "Chủ shop không thể tự mua hoặc đánh giá sản phẩm của chính mình!", HttpStatus.BAD_REQUEST),
     TRANSACTION_PROCESSING(1024, "Hệ thống đang xử lý, vui lòng không thao tác quá nhanh!", HttpStatus.CONFLICT),
     INVALID_DATA(1021, "Dữ liệu không hợp lệ hoặc file tải lên trống", HttpStatus.BAD_REQUEST),
-    USER_LOCKED(1025, "Tài khoản của bạn đã bị khóa!", HttpStatus.FORBIDDEN);
+    USER_LOCKED(1025, "Tài khoản của bạn đã bị khóa!", HttpStatus.FORBIDDEN),
+    COMMISSION_ALREADY_RECORDED(1026, "Đơn hàng hoặc sản phẩm này đã được tính phí hoa hồng trước đó!", HttpStatus.CONFLICT),
+    PLEASE_SELECT_VARIANT(1027, "Sản phẩm có biến thể, vui lòng chọn phân loại hàng cụ thể!", HttpStatus.BAD_REQUEST),
+    PRODUCT_HAS_NO_VARIANTS(1028, "Sản phẩm này là sản phẩm đơn, không có biến thể!", HttpStatus.BAD_REQUEST);
 
     int code;
     String message;

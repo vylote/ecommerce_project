@@ -17,6 +17,8 @@ public class OrderItemResponse {
     Integer quantity;
     BigDecimal totalPrice;
     Long productId;
+    Long specificProductId;
+    String variantName;
     Long shopId;
     String productImageUrl; 
 }

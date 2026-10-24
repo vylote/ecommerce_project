@@ -1,0 +1,854 @@
+{
+	"info": {
+		"_postman_id": "a987d6e5-4c3b-2a10-9876-543210abcdef",
+		"name": "VLT E-Commerce - Nhóm 1: Đặc Tả & Biến Thể SKU",
+		"description": "Bộ test API Postman cho Nhóm 1: SpecificationType, Specification, ProductSpecification, SpecificProduct (SKU).\n\nTài khoản test:\n- Seller: seller_tech@gmail.com / Password123@\n- Admin: admin@gmail.com / Password123@",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "0. Xác thực (Auth)",
+			"item": [
+				{
+					"name": "0.1 Đăng nhập Seller (seller_tech)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"seller_tech@gmail.com\",\n  \"password\": \"Password123@\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Đăng nhập với vai trò Seller Tech. Cookie accessToken và refreshToken sẽ tự động được Postman lưu vào Cookie Jar."
+					},
+					"response": []
+				},
+				{
+					"name": "0.2 Đăng nhập Admin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"Password123@\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Đăng nhập với vai trò Admin."
+					},
+					"response": []
+				},
+				{
+					"name": "0.3 Kiểm tra phiên (/auth/me)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						},
+						"description": "Kiểm tra thông tin tài khoản hiện tại đang đăng nhập."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "1. Loại Đặc Tả (SpecificationType)",
+			"item": [
+				{
+					"name": "1.1 Tạo Loại đặc tả mới (vd: Màu sắc)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.result && jsonData.result.id) {",
+									"        pm.collectionVariables.set(\"specTypeId\", jsonData.result.id);",
+									"        console.log(\"Saved specTypeId:\", jsonData.result.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Màu sắc\",\n  \"description\": \"Phân loại màu sắc của sản phẩm\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/specification-types",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"specification-types"
+							]
+						},
+						"description": "Tạo nhóm thuộc tính mới (vd: Màu sắc, Kích cỡ, Dung lượng). Quyền: ADMIN hoặc SELLER."
+					},
+					"response": []
+				},
+				{
+					"name": "1.2 Tạo Loại đặc tả mới (vd: Dung lượng)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Dung lượng bộ nhớ\",\n  \"description\": \"Dung lượng RAM/ROM hoặc ổ cứng\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/specification-types",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"specification-types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "1.3 Lấy danh sách tất cả Loại đặc tả",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/specification-types",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"specification-types"
+							]
+						},
+						"description": "Public: Trả về danh sách tất cả các loại đặc tả kèm các giá trị con bên trong."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Giá Trị Đặc Tả (Specification)",
+			"item": [
+				{
+					"name": "2.1 Thêm Giá trị đặc tả (POST /specifications)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.result && jsonData.result.id) {",
+									"        pm.collectionVariables.set(\"specId\", jsonData.result.id);",
+									"        console.log(\"Saved specId:\", jsonData.result.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specificationTypeId\": {{specTypeId}},\n  \"name\": \"Titan Tự Nhiên\",\n  \"description\": \"Màu sắc Titanium tự nhiên\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/specifications",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"specifications"
+							]
+						},
+						"description": "Tạo giá trị đặc tả mới theo specificationTypeId trong body."
+					},
+					"response": []
+				},
+				{
+					"name": "2.2 Thêm Giá trị đặc tả (POST /specification-types/{id}/specifications)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Titan Xanh\",\n  \"description\": \"Màu sắc Titanium xanh biển\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/specification-types/{{specTypeId}}/specifications",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"specification-types",
+								"{{specTypeId}}",
+								"specifications"
+							]
+						},
+						"description": "Tạo giá trị đặc tả trực tiếp theo URL path."
+					},
+					"response": []
+				},
+				{
+					"name": "2.3 Lấy danh sách Giá trị theo Loại đặc tả",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/specifications?typeId={{specTypeId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"specifications"
+							],
+							"query": [
+								{
+									"key": "typeId",
+									"value": "{{specTypeId}}"
+								}
+							]
+						},
+						"description": "Public: Lọc danh sách giá trị thuộc 1 nhóm đặc tả."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Đặc Tả Sản Phẩm (ProductSpecification)",
+			"item": [
+				{
+					"name": "3.1 Gắn Thông số đặc tả vào Sản phẩm",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"specificationId\": {{specId}},\n  \"customValue\": \"Chất liệu Titanium Hàng Không Vũ Trụ\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productId}}/specifications",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{productId}}",
+								"specifications"
+							]
+						},
+						"description": "Seller gắn thông số kỹ thuật kèm customValue vào sản phẩm cha của mình."
+					},
+					"response": []
+				},
+				{
+					"name": "3.2 Xem danh sách Thông số kỹ thuật của Sản phẩm",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productId}}/specifications",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{productId}}",
+								"specifications"
+							]
+						},
+						"description": "Public: Xem tất cả thông số kỹ thuật đã gắn cho sản phẩm."
+					},
+					"response": []
+				},
+				{
+					"name": "3.3 Gỡ Thông số đặc tả khỏi Sản phẩm",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productId}}/specifications/{{specId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{productId}}",
+								"specifications",
+								"{{specId}}"
+							]
+						},
+						"description": "Seller gỡ 1 thông số đặc tả khỏi sản phẩm cha."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Biến Thể Sản Phẩm (SpecificProduct / SKU)",
+			"item": [
+				{
+					"name": "4.1 Tạo Biến thể SKU mới (stockQuantity = 0)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.result && jsonData.result.id) {",
+									"        pm.collectionVariables.set(\"variantId\", jsonData.result.id);",
+									"        console.log(\"Saved variantId:\", jsonData.result.id);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Phiên bản Titan Tự Nhiên 256GB\",\n  \"sku\": \"IP15PM-NAT-256G\",\n  \"price\": 29990000.00,\n  \"imageUrl\": \"https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productId}}/variants",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{productId}}",
+								"variants"
+							]
+						},
+						"description": "Seller tạo biến thể SKU mới cho sản phẩm cha. Tồn kho tự động khởi tạo bằng 0."
+					},
+					"response": []
+				},
+				{
+					"name": "4.2 Lấy danh sách Biến thể của Sản phẩm",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/products/{{productId}}/variants?onlyActive=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"products",
+								"{{productId}}",
+								"variants"
+							],
+							"query": [
+								{
+									"key": "onlyActive",
+									"value": "false"
+								}
+							]
+						},
+						"description": "Lấy tất cả biến thể của sản phẩm (truyền onlyActive=true để chỉ lấy biến thể đang mở bán)."
+					},
+					"response": []
+				},
+				{
+					"name": "4.3 Xem chi tiết 1 Biến thể theo ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/variants/{{variantId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"variants",
+								"{{variantId}}"
+							]
+						},
+						"description": "Xem chi tiết một biến thể cụ thể theo ID."
+					},
+					"response": []
+				},
+				{
+					"name": "4.4 Cập nhật Biến thể (Đổi giá, tên, ảnh, trạng thái)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Phiên bản Titan Tự Nhiên 256GB (Giảm Giá)\",\n  \"sku\": \"IP15PM-NAT-256G\",\n  \"price\": 28490000.00,\n  \"imageUrl\": \"https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500\",\n  \"isActive\": true\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/variants/{{variantId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"variants",
+								"{{variantId}}"
+							]
+						},
+						"description": "Seller cập nhật thông tin biến thể sản phẩm."
+					},
+					"response": []
+				},
+				{
+					"name": "4.5 Xóa Biến thể",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/variants/{{variantId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"variants",
+								"{{variantId}}"
+							]
+						},
+						"description": "Xóa biến thể (Tự động chuyển sang isActive = false nếu biến thể này đã từng có đơn hàng)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Giỏ hàng & Đặt hàng Biến thể (Cart & Order Flow)",
+			"item": [
+				{
+					"name": "5.1 Đăng nhập Buyer (test2)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"test2@gmail.com\",\n  \"password\": \"Password123@\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Đăng nhập với vai trò Buyer (test2@gmail.com / Password123@)."
+					},
+					"response": []
+				},
+				{
+					"name": "5.2 Thêm Biến thể SKU vào giỏ hàng",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.result && jsonData.result.id) {",
+									"    pm.collectionVariables.set(\"cartItemId\", jsonData.result.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": {{productId}},\n  \"specificProductId\": {{variantId}},\n  \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cart"
+							]
+						},
+						"description": "Thêm sản phẩm có biến thể cụ thể (specificProductId) vào giỏ hàng."
+					},
+					"response": []
+				},
+				{
+					"name": "5.3 Thêm sản phẩm thường (không biến thể) vào giỏ hàng",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"productId\": {{productId}},\n  \"specificProductId\": null,\n  \"quantity\": 1\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cart"
+							]
+						},
+						"description": "Thêm sản phẩm thường không có biến thể vào giỏ hàng (specificProductId = null). Lưu ý: Nếu sản phẩm đã tạo biến thể (SpecificProduct), hệ thống sẽ bắt buộc chọn biến thể và trả về lỗi code 1027: 'Sản phẩm có biến thể, vui lòng chọn phân loại hàng cụ thể!'."
+					},
+					"response": []
+				},
+				{
+					"name": "5.4 Xem toàn bộ giỏ hàng (Hiển thị variantName, price, sku)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/cart",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cart"
+							]
+						},
+						"description": "Lấy danh sách sản phẩm trong giỏ hàng. Response sẽ trả về variantName, specificProductId, sku, và giá động theo biến thể."
+					},
+					"response": []
+				},
+				{
+					"name": "5.5 Cập nhật số lượng item trong giỏ hàng",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quantity\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/cart/{{cartItemId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"cart",
+								"{{cartItemId}}"
+							]
+						},
+						"description": "Cập nhật số lượng của mục hàng trong giỏ."
+					},
+					"response": []
+				},
+				{
+					"name": "5.6 Đặt hàng với các mục trong giỏ (Tự động trừ kho biến thể)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.result && jsonData.result.length > 0) {",
+									"    pm.collectionVariables.set(\"orderId\", jsonData.result[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cartItemIds\": [{{cartItemId}}],\n  \"addressId\": {{addressId}},\n  \"paymentMethod\": \"COD\",\n  \"note\": \"Giao hàng giờ hành chính\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/orders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders"
+							]
+						},
+						"description": "Tạo đơn hàng từ giỏ hàng. Hệ thống tự động snapshot thông tin biến thể vào OrderItem và trừ kho atomic của SpecificProduct."
+					},
+					"response": []
+				},
+				{
+					"name": "5.7 Xem lịch sử đơn hàng của tôi",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData && jsonData.result && jsonData.result.data && jsonData.result.data.length > 0) {",
+									"    pm.collectionVariables.set(\"orderId\", jsonData.result.data[0].id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/history?page=1&size=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"history"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						},
+						"description": "Xem danh sách đơn hàng đã đặt của người mua."
+					},
+					"response": []
+				},
+				{
+					"name": "5.8 Xem chi tiết đơn hàng (Kiểm tra specificProductId & variantName)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{orderId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{orderId}}"
+							]
+						},
+						"description": "Xem chi tiết một đơn hàng theo orderId."
+					},
+					"response": []
+				},
+				{
+					"name": "5.9 Hủy đơn hàng (Tự động hoàn kho biến thể)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/orders/{{orderId}}/cancel",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"orders",
+								"{{orderId}}",
+								"cancel"
+							]
+						},
+						"description": "Hủy đơn hàng đang ở trạng thái PENDING. Hệ thống tự động hoàn lại số lượng tồn kho cho SpecificProduct và Product cha."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080/api/v1",
+			"type": "string"
+		},
+		{
+			"key": "productId",
+			"value": "52",
+			"type": "string"
+		},
+		{
+			"key": "specTypeId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "specId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "variantId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "cartItemId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "addressId",
+			"value": "3",
+			"type": "string"
+		},
+		{
+			"key": "orderId",
+			"value": "4",
+			"type": "string"
+		}
+	]
+}

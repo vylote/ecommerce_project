@@ -32,23 +32,23 @@ public class CartController {
             .build();
     }
 
-    @PostMapping("/items")
+    @PostMapping({"", "/items"})
     public ApiResponse<CartItemResponse> add(@RequestBody @Valid CartItemRequest request) {
         return ApiResponse.<CartItemResponse>builder()
             .result(cartService.add(request))
             .build();
     }
 
-    @PutMapping("/items/{productId}")
-    public ApiResponse<CartItemResponse> update(@RequestBody @Valid CartItemRequest request, @PathVariable Long productId) {
+    @PutMapping({"/items/{identifier}", "/{identifier}"})
+    public ApiResponse<CartItemResponse> update(@RequestBody @Valid CartItemRequest request, @PathVariable Long identifier) {
         return ApiResponse.<CartItemResponse>builder()
-            .result(cartService.update(request, productId))
+            .result(cartService.update(request, identifier))
             .build();
     }
 
-    @DeleteMapping("/items/{productId}")
-    public ApiResponse<String> remove(@PathVariable Long productId) {
-        cartService.remove(productId);
+    @DeleteMapping({"/items/{identifier}", "/{identifier}"})
+    public ApiResponse<String> remove(@PathVariable Long identifier) {
+        cartService.remove(identifier);
         return ApiResponse.<String>builder()
             .result("da xoa san pham khoi gio hang")
             .build();

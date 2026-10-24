@@ -11,6 +11,8 @@ import com.vlt.ecommerce.feature.order.dto.response.OrderItemResponse;
 @Mapper(componentModel = "spring")
 public interface OrderItemMapper {
     @Mapping(target = "productId", source = "product.id")
+    @Mapping(target = "specificProductId", source = "specificProduct.id")
+    @Mapping(target = "variantName", source = "specificProduct.name")
     @Mapping(target = "shopId", source = "shop.id")
     @Mapping(target = "productImageUrl", source = "productImageUrl")
     OrderItemResponse toOrderItemResponse(OrderItem orderItem);

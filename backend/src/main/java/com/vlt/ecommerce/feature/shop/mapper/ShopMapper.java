@@ -25,6 +25,7 @@ public interface ShopMapper {
     @Mapping(target = "products", ignore = true) 
     @Mapping(target = "rating", ignore = true) 
     @Mapping(target = "categories", ignore = true) 
+    @Mapping(target = "importReceipts", ignore = true)
     Shop tShop(ShopRequest request);
 
     @Mapping(target = "id", ignore = true)
@@ -34,6 +35,7 @@ public interface ShopMapper {
     @Mapping(target = "products", ignore = true) 
     @Mapping(target = "rating", ignore = true) 
     @Mapping(target = "categories", ignore = true) 
+    @Mapping(target = "importReceipts", ignore = true)
     void updateShopFromRequest(ShopRequest request, @MappingTarget Shop shop);
 
     List<ShopResponse> toShopResponses(List<Shop> shops);

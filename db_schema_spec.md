@@ -184,6 +184,7 @@
   * `product_image_url` (VARCHAR(500)): Ảnh tại thời điểm mua.
   * `order_id` (FK -> orders.id, NOT NULL): Thuộc đơn hàng nào.
   * `product_id` (FK -> products.id, NOT NULL): Tham chiếu sản phẩm gốc.
+  * `specific_product_id` (FK -> specific_products.id, NOT NULL): Sản phẩm cụ thể mà khách thực tế đã chọn mua.
   * `shop_id` (FK -> shops.id, NOT NULL): Tham chiếu cửa hàng.
 
 ## 16. Thực thể payments (Thanh toán)
@@ -254,3 +255,79 @@
   * `order_id` (FK -> orders.id, NOT NULL): Thuộc đơn nào.
   * `order_item_id` (FK -> order_items.id, NOT NULL, UNIQUE): Thuộc mặt hàng cụ thể nào (1-1).
   * `seller_id` (FK -> users.id, NOT NULL): Shop bị thu phí.
+
+## 21. Thực thể specification_types (Loại đặc tả)
+* **Mô tả:** Phân nhóm các đặc tả kỹ thuật sản phẩm (vd: Màu sắc, Kích cỡ, Bộ nhớ, Cấu hình).
+* **Bộ khóa duy nhất:**
+  * **Khóa chính (PK):** id (BIGINT)
+  * **Khóa ứng viên (Unique):** name
+* **Thuộc tính:**
+  * `id` (PK, BIGINT): Mã loại đặc tả.
+  * `name` (VARCHAR(100), NOT NULL, UNIQUE): Tên loại đặc tả (Màu sắc, Kích cỡ, Bộ nhớ...).
+  * `description` (VARCHAR(255), NULL): Mô tả chi tiết nhóm đặc tả.
+  * `created_at` (TIMESTAMP, NOT NULL): Thời điểm khởi tạo.
+
+## 22. Thực thể specifications (Đặc tả)
+* **Mô tả:** Các giá trị đặc tả cụ thể thuộc từng loại đặc tả (vd: Đỏ, Xanh, Size L, 16GB, 512GB SSD).
+* **Bộ khóa duy nhất:**
+  * **Khóa chính (PK):** id (BIGINT)
+* **Thuộc tính:**
+  * `id` (PK, BIGINT): Mã đặc tả.
+  * `name` (VARCHAR(100), NOT NULL): Tên hoặc giá trị đặc tả (vd: Đỏ, 256GB).
+  * `description` (VARCHAR(255), NULL): Mô tả chi tiết.
+  * `specification_type_id` (FK -> specification_types.id, NOT NULL): Thuộc loại đặc tả nào.
+
+## 23. Thực thể product_specifications (Đặc tả sản phẩm)
+* **Mô tả:** Bảng trung gian gán các đặc tả cho từng sản phẩm (Sản phẩm 1-N Đặc tả sản phẩm N-1 Đặc tả).
+* **Bộ khóa duy nhất:**
+  * **Khóa chính (PK):** id (BIGINT)
+  * **Khóa phức hợp (Unique):** (product_id, specification_id)
+* **Thuộc tính:**
+  * `id` (PK, BIGINT): Mã bản ghi đặc tả sản phẩm.
+  * `product_id` (FK -> products.id, NOT NULL): Sản phẩm được gắn đặc tả.
+  * `specification_id` (FK -> specifications.id, NOT NULL): Đặc tả được gắn.
+  * `custom_value` (VARCHAR(255), NULL): Giá trị tùy biến bổ sung nếu cần (vd: "16GB DDR5 4800MHz").
+
+## 24. Thực thể specific_products (Sản phẩm cụ thể)
+* **Mô tả:** Biến thể / phiên bản cụ thể (SKU) của sản phẩm, là đơn vị thực tế lưu kho và khách hàng đặt mua.
+* **Bộ khóa duy nhất:**
+  * **Khóa chính (PK):** id (BIGINT)
+  * **Khóa ứng viên (Unique):** sku
+* **Thuộc tính:**
+  * `id` (PK, BIGINT): Mã sản phẩm cụ thể.
+  * `product_id` (FK -> products.id, NOT NULL): Thuộc sản phẩm chung nào.
+  * `name` (VARCHAR(255), NOT NULL): Tên biến thể (vd: "iPhone 15 Pro Max - Titan Tự Nhiên 256GB").
+  * `sku` (VARCHAR(100), NOT NULL, UNIQUE): Mã quản lý kho hàng.
+  * `price` (DECIMAL(15,2), NOT NULL): Giá bán thực tế.
+  * `stock_quantity` (INT, NOT NULL, DEFAULT 0): Số lượng tồn kho.
+  * `image_url` (VARCHAR(500), NULL): Ảnh riêng của biến thể.
+  * `is_active` (BOOLEAN, DEFAULT TRUE): Trạng thái mở bán.
+  * `created_at`, `updated_at` (TIMESTAMP): Dấu vết thời gian.
+
+## 25. Thực thể import_receipts (Phiếu nhập kho)
+* **Mô tả:** Chứng từ nhập kho hàng hóa, mỗi phiếu nhập cho đúng 1 sản phẩm.
+* **Bộ khóa duy nhất:**
+  * **Khóa chính (PK):** id (BIGINT)
+  * **Khóa ứng viên (Unique):** receipt_code
+* **Thuộc tính:**
+  * `id` (PK, BIGINT): Mã phiếu nhập kho.
+  * `receipt_code` (VARCHAR(50), NOT NULL, UNIQUE): Mã số chứng từ (vd: PNK-20261012-001).
+  * `user_id` (FK -> users.id, NOT NULL): Tài khoản người lập phiếu nhập kho.
+  * `product_id` (FK -> products.id, NOT NULL): Sản phẩm được nhập kho (quan hệ 1-1).
+  * `shop_id` (FK -> shops.id, NOT NULL): Thuộc cửa hàng nào.
+  * `total_cost` (DECIMAL(15,2), NOT NULL, DEFAULT 0.00): Tổng giá trị tiền hàng nhập.
+  * `note` (TEXT, NULL): Ghi chú, nhà cung cấp.
+  * `status` (VARCHAR(20), NOT NULL, DEFAULT 'COMPLETED'): Trạng thái phiếu (PENDING, COMPLETED, CANCELLED).
+  * `created_at` (TIMESTAMP, NOT NULL): Thời điểm lập phiếu.
+
+## 26. Thực thể import_receipt_details (Chi tiết phiếu nhập kho)
+* **Mô tả:** Từng dòng hàng trong phiếu nhập kho, ghi nhận sản phẩm cụ thể, số lượng và giá vốn nhập.
+* **Bộ khóa duy nhất:**
+  * **Khóa chính (PK):** id (BIGINT)
+* **Thuộc tính:**
+  * `id` (PK, BIGINT): Mã dòng chi tiết phiếu nhập.
+  * `receipt_id` (FK -> import_receipts.id, NOT NULL): Thuộc phiếu nhập kho nào.
+  * `specific_product_id` (FK -> specific_products.id, NOT NULL): Sản phẩm cụ thể được nhập.
+  * `quantity` (INT, NOT NULL): Số lượng nhập.
+  * `import_price` (DECIMAL(15,2), NOT NULL): Đơn giá vốn nhập.
+  * `total_price` (DECIMAL(15,2), NOT NULL): Thành tiền (= quantity × import_price).

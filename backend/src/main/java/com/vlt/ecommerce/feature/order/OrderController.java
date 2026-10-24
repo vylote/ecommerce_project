@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,71 +32,71 @@ public class OrderController {
     @PostMapping
     public ApiResponse<List<OrderResponse>> create(@RequestBody @Valid OrderRequest request) {
         return ApiResponse.<List<OrderResponse>>builder()
-            .result(orderService.create(request))
-            .build();
+                .result(orderService.create(request))
+                .build();
     }
 
-    @PatchMapping("/{id}/confirm")
+    @RequestMapping(value = "/{id}/confirm", method = { RequestMethod.PATCH, RequestMethod.POST })
     public ApiResponse<OrderResponse> confirmOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
-            .result(orderService.confirmOrder(id))
-            .build();
+                .result(orderService.confirmOrder(id))
+                .build();
     }
 
-    @PatchMapping("/{id}/ship")
+    @RequestMapping(value = "/{id}/ship", method = { RequestMethod.PATCH, RequestMethod.POST })
     public ApiResponse<OrderResponse> shipOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
-            .result(orderService.shipOrder(id))
-            .build();
+                .result(orderService.shipOrder(id))
+                .build();
     }
 
-    @PatchMapping("/{id}/complete")
+    @RequestMapping(value = "/{id}/complete", method = { RequestMethod.PATCH, RequestMethod.POST })
     public ApiResponse<OrderResponse> completeOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
-            .result(orderService.completeOrder(id))
-            .build();
+                .result(orderService.completeOrder(id))
+                .build();
     }
 
-    @GetMapping
+    @GetMapping({ "", "/history" })
     public ApiResponse<PageResponse<OrderResponse>> getOwnHistoryOrder(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "10") int size,
-        @RequestParam(required = false) OrderStatus status) {
-        
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) OrderStatus status) {
+
         return ApiResponse.<PageResponse<OrderResponse>>builder()
-            .result(orderService.getOwnHistoryOrder(page, size, status))
-            .build();
+                .result(orderService.getOwnHistoryOrder(page, size, status))
+                .build();
     }
 
-    @PatchMapping("/{id}/cancel")
+    @RequestMapping(value = "/{id}/cancel", method = { RequestMethod.PATCH, RequestMethod.POST })
     public ApiResponse<OrderResponse> cancelOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
-            .result(orderService.cancelOrder(id))
-            .build();
+                .result(orderService.cancelOrder(id))
+                .build();
     }
 
     @GetMapping("/seller")
     public ApiResponse<PageResponse<OrderResponse>> getSellerOrders(
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "10") int size,
-        @RequestParam(required = false) OrderStatus status) {
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) OrderStatus status) {
 
         return ApiResponse.<PageResponse<OrderResponse>>builder()
-            .result(orderService.getSellerOrders(page, size, status))
-            .build();
+                .result(orderService.getSellerOrders(page, size, status))
+                .build();
     }
 
     @GetMapping("/{id}")
     public ApiResponse<OrderResponse> getDetailOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
-            .result(orderService.getDetailOrder(id))
-            .build();
+                .result(orderService.getDetailOrder(id))
+                .build();
     }
 
     @GetMapping("/seller/dashboard/stats")
     public ApiResponse<Map<OrderStatus, Long>> getSellerDashboardStats() {
         return ApiResponse.<Map<OrderStatus, Long>>builder()
-            .result(orderService.getDashboardStats())
-            .build();
+                .result(orderService.getDashboardStats())
+                .build();
     }
 }

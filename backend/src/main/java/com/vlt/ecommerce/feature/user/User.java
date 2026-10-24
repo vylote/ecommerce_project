@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.vlt.ecommerce.feature.cart.CartItem;
+import com.vlt.ecommerce.feature.inventory.ImportReceipt;
 import com.vlt.ecommerce.feature.order.Order;
 import com.vlt.ecommerce.feature.review.Review;
 import com.vlt.ecommerce.feature.shop.Shop;
@@ -81,6 +82,11 @@ public class User {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<Review> reviews;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<ImportReceipt> importReceipts;
 }
 
 /* ==============================================================================

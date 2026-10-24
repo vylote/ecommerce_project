@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.vlt.ecommerce.feature.inventory.ImportReceipt;
 import com.vlt.ecommerce.feature.product.Category;
 import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.user.User;
@@ -76,6 +77,11 @@ public class Shop {
     @ToString.Exclude          // <--- THÊM DÒNG NÀY
     @EqualsAndHashCode.Exclude // <--- THÊM DÒNG NÀY
     Set<Category> categories = new HashSet<>();
+
+    @OneToMany(mappedBy = "shop", fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    List<ImportReceipt> importReceipts;
 }
 
 /* ==============================================================================

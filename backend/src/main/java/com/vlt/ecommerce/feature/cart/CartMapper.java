@@ -17,14 +17,40 @@ public interface CartMapper {
     @Mapping(target = "buyer", ignore = true)
     CartItem toCartItem(CartItemRequest request);
 
-    @Mapping(target = "productId", source = "product.id")
-    @Mapping(target = "productName", source = "product.name")
-    @Mapping(target = "productPrice", source = "product.price")
-    @Mapping(target = "totalPrice", expression = "java(cartItem.getProduct().getPrice().multiply(java.math.BigDecimal.valueOf(cartItem.getQuantity())))")
-    @Mapping(source = "product.shop.id", target = "shopId")       // Móc shopId từ product
-    @Mapping(source = "product.shop.name", target = "shopName")
-    @Mapping(expression = "java(cartItem.getProduct().getImages().isEmpty() ? null : cartItem.getProduct().getImages().get(0).getUrl())", target = "imageUrl")
-    CartItemResponse toCartItemResponse(CartItem cartItem);
+    default CartItemResponse toCartItemResponse(CartItem cartItem) {
+        if (cartItem == null) return null;
+        var product = cartItem.getProduct();
+        var variant = cartItem.getSpecificProduct();
+
+        java.math.BigDecimal price = (variant != null && variant.getPrice() != null)
+                ? variant.getPrice()
+                : (product != null ? product.getPrice() : java.math.BigDecimal.ZERO);
+
+        java.math.BigDecimal totalPrice = price.multiply(java.math.BigDecimal.valueOf(cartItem.getQuantity()));
+
+        String imageUrl = null;
+        if (variant != null && variant.getImageUrl() != null && !variant.getImageUrl().isEmpty()) {
+            imageUrl = variant.getImageUrl();
+        } else if (product != null && product.getImages() != null && !product.getImages().isEmpty()) {
+            imageUrl = product.getImages().get(0).getUrl();
+        }
+
+        return CartItemResponse.builder()
+                .id(cartItem.getId())
+                .productId(product != null ? product.getId() : null)
+                .productName(product != null ? product.getName() : null)
+                .productPrice(price)
+                .totalPrice(totalPrice)
+                .quantity(cartItem.getQuantity())
+                .addedAt(cartItem.getAddedAt())
+                .shopId(product != null && product.getShop() != null ? product.getShop().getId() : null)
+                .shopName(product != null && product.getShop() != null ? product.getShop().getName() : null)
+                .imageUrl(imageUrl)
+                .specificProductId(variant != null ? variant.getId() : null)
+                .variantName(variant != null ? variant.getName() : null)
+                .sku(variant != null ? variant.getSku() : null)
+                .build();
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "addedAt", ignore = true)

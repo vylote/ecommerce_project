@@ -1,0 +1,72 @@
+package com.vlt.ecommerce.feature.product.controller;
+
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.vlt.ecommerce.common.dto.ApiResponse;
+import com.vlt.ecommerce.feature.product.dto.request.SpecificationRequest;
+import com.vlt.ecommerce.feature.product.dto.request.SpecificationTypeRequest;
+import com.vlt.ecommerce.feature.product.dto.response.SpecificationResponse;
+import com.vlt.ecommerce.feature.product.dto.response.SpecificationTypeResponse;
+import com.vlt.ecommerce.feature.product.service.SpecificationService;
+
+import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
+@RestController
+@RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+public class SpecificationController {
+    SpecificationService specificationService;
+
+    // ================= SPECIFICATION TYPES =================
+    @GetMapping("/specification-types")
+    public ApiResponse<List<SpecificationTypeResponse>> getAllSpecificationTypes() {
+        return ApiResponse.<List<SpecificationTypeResponse>>builder()
+                .result(specificationService.getAllSpecificationTypes())
+                .build();
+    }
+
+    @PostMapping("/specification-types")
+    public ApiResponse<SpecificationTypeResponse> createSpecificationType(
+            @RequestBody @Valid SpecificationTypeRequest request) {
+        return ApiResponse.<SpecificationTypeResponse>builder()
+                .result(specificationService.createSpecificationType(request))
+                .build();
+    }
+
+    // ================= SPECIFICATIONS =================
+    @GetMapping("/specifications")
+    public ApiResponse<List<SpecificationResponse>> getSpecifications(
+            @RequestParam(name = "typeId") Long typeId) {
+        return ApiResponse.<List<SpecificationResponse>>builder()
+                .result(specificationService.getSpecificationsByType(typeId))
+                .build();
+    }
+
+    @PostMapping("/specifications")
+    public ApiResponse<SpecificationResponse> createSpecification(
+            @RequestBody @Valid SpecificationRequest request) {
+        return ApiResponse.<SpecificationResponse>builder()
+                .result(specificationService.createSpecification(request))
+                .build();
+    }
+
+    @PostMapping("/specification-types/{typeId}/specifications")
+    public ApiResponse<SpecificationResponse> createSpecificationForType(
+            @PathVariable Long typeId,
+            @RequestBody @Valid SpecificationRequest request) {
+        request.setSpecificationTypeId(typeId);
+        return ApiResponse.<SpecificationResponse>builder()
+                .result(specificationService.createSpecification(request))
+                .build();
+    }
+}

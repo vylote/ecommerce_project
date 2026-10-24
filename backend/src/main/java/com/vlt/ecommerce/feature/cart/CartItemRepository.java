@@ -11,6 +11,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long>{
     Optional<CartItem> findByBuyerIdAndProductId(Long buyerId, Long productId);
+    Optional<CartItem> findByBuyerIdAndProductIdAndSpecificProductId(Long buyerId, Long productId, Long specificProductId);
+    Optional<CartItem> findByBuyerIdAndProductIdAndSpecificProductIsNull(Long buyerId, Long productId);
     @Modifying
     @Query("DELETE FROM CartItem c WHERE c.buyer.id = :buyerId")
     void deleteAllByBuyerId(@Param("buyerId") Long buyerId);

@@ -38,8 +38,28 @@ public class GlobalExceptionHandler {
         }
 
         @SuppressWarnings("rawtypes")
+        @ExceptionHandler(value = org.springframework.web.HttpRequestMethodNotSupportedException.class)
+        ResponseEntity<ApiResponse> handlingMethodNotSupported(org.springframework.web.HttpRequestMethodNotSupportedException e) {
+                return ResponseEntity.status(405).body(
+                                ApiResponse.builder()
+                                                .code(405)
+                                                .message("Phương thức HTTP " + e.getMethod() + " không được hỗ trợ cho đường dẫn này")
+                                                .build());
+        }
+
+        @SuppressWarnings("rawtypes")
+        @ExceptionHandler(value = org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+        ResponseEntity<ApiResponse> handlingMethodArgumentTypeMismatch(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException e) {
+                return ResponseEntity.status(400).body(
+                                ApiResponse.builder()
+                                                .code(1021)
+                                                .message("Tham số '" + e.getName() + "' không hợp lệ: '" + e.getValue() + "' sai định dạng!")
+                                                .build());
+        }
+
+        @SuppressWarnings("rawtypes")
         @ExceptionHandler(value = Exception.class)
-        ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException e) {
+        ResponseEntity<ApiResponse> handlingException(Exception e) {
                 log.error("BẮT ĐƯỢC THỦ PHẠM GÂY LỖI 9999: ", e);
                 ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
 
@@ -65,7 +85,7 @@ public class GlobalExceptionHandler {
         @SuppressWarnings("rawtypes")
         @ExceptionHandler(value = MethodArgumentNotValidException.class)
         ResponseEntity<ApiResponse> handlingValidationException(MethodArgumentNotValidException e) {
-                String errorMessage = e.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+                String errorMessage = e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
 
                 ErrorCode errorCode = ErrorCode.INVALID_DATA;
 
@@ -79,11 +99,20 @@ public class GlobalExceptionHandler {
         @SuppressWarnings("rawtypes")
         @ExceptionHandler(value = DataIntegrityViolationException.class)
         ResponseEntity<ApiResponse> handlingDataIntegrityViolationException(DataIntegrityViolationException e) {
-                log.warn("Lỗi trùng lặp dữ liệu (Nghi ngờ Double Submit): {}", e.getMessage());
+                String message = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+                log.warn("Lỗi vi phạm toàn vẹn dữ liệu: {}", message);
 
-                ErrorCode errorCode = ErrorCode.TRANSACTION_PROCESSING;
-                if (e.getMessage() != null && e.getMessage().contains("uq_review")) {
+                ErrorCode errorCode;
+                if (message.contains("idempotency")) {
+                        errorCode = ErrorCode.TRANSACTION_PROCESSING;
+                } else if (message.contains("uq_review")) {
                         errorCode = ErrorCode.REVIEW_ALREADY_EXISTED;
+                } else if (message.contains("commission_records") || message.contains("order_item_id")) {
+                        errorCode = ErrorCode.COMMISSION_ALREADY_RECORDED;
+                } else if (message.contains("foreign key") || message.contains("fk_")) {
+                        errorCode = ErrorCode.INVALID_DATA;
+                } else {
+                        errorCode = ErrorCode.RESOURCE_EXISTED;
                 }
 
                 return ResponseEntity.status(errorCode.getStatusCode()).body(

@@ -83,6 +83,11 @@ public class CommissionService {
         LocalDate today = LocalDate.now();
 
         for (OrderItem item : order.getItems()) {
+            if (commissionRecordRepository.existsByOrderItemId(item.getId())) {
+                log.warn("Món hàng OrderItem #{} của đơn #{} đã được tính hoa hồng trước đó, bỏ qua.", item.getId(), order.getId());
+                continue;
+            }
+
             Long categoryId = item.getProduct().getCategory().getId();
             
             CommissionConfig config = commissionConfigRepository

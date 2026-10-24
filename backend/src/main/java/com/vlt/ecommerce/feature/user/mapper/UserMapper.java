@@ -24,6 +24,7 @@ public interface UserMapper {
     @Mapping(target = "cartItems", ignore = true)
     @Mapping(target = "orders", ignore = true)
     @Mapping(target = "reviews", ignore = true)
+    @Mapping(target = "importReceipts", ignore = true)
     User toUser(RegisterRequest request);
     UserResponse toUserResponse(User user);
 
@@ -42,5 +43,6 @@ public interface UserMapper {
     @Mapping(target = "orders", ignore = true)
     @Mapping(target = "reviews", ignore = true)
     @Mapping(target = "avatarUrl", ignore = true)
+    @Mapping(target = "importReceipts", ignore = true)
     void updateUserProfile(UpdateProfileRequest request, @MappingTarget User user);
 }
