@@ -44,4 +44,11 @@ public interface OrderRepository extends JpaRepository<Order, Long>{
            "FROM Order o WHERE o.shop.id = :shopId " +
            "GROUP BY o.status")
     List<OrderStatusStat> countOrdersByStatusForShop(@Param("shopId") Long shopId);
+
+    List<Order> findByShopIdAndCreatedAtAfter(Long shopId, java.time.LocalDateTime after);
+    List<Order> findByShopId(Long shopId);
+    List<Order> findByCreatedAtAfter(java.time.LocalDateTime after);
+
+    @Query("SELECT o.status AS status, COUNT(o.id) AS count FROM Order o GROUP BY o.status")
+    List<OrderStatusStat> countAllOrdersByStatus();
 }

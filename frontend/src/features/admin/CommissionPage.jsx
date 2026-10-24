@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, TrendingUp, ShoppingCart, Percent, Settings2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { DollarSign, TrendingUp, ShoppingCart, Percent, Settings2, BarChart2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 
@@ -77,10 +78,19 @@ export default function CommissionPage() {
       
       {/* 1. THỐNG KÊ TỔNG QUAN */}
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-6">
-          <TrendingUp className="text-blue-500" />
-          Thống Kê Sàn Giao Dịch
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <TrendingUp className="text-blue-500" />
+            Thống Kê Sàn Giao Dịch
+          </h2>
+          <Link
+            to="/admin"
+            className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1.5 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors"
+          >
+            <BarChart2 className="w-3.5 h-3.5" />
+            Xem đồ thị phân tích chu kỳ →
+          </Link>
+        </div>
         
         {loading ? (
           <div className="flex justify-center py-10"><span className="loading loading-spinner text-blue-500"></span></div>

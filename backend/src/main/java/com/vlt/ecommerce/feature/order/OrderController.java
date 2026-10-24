@@ -16,6 +16,7 @@ import com.vlt.ecommerce.common.dto.ApiResponse;
 import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.feature.order.dto.request.OrderRequest;
 import com.vlt.ecommerce.feature.order.dto.response.OrderResponse;
+import com.vlt.ecommerce.feature.order.dto.response.SellerAnalyticsResponse;
 
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -97,6 +98,17 @@ public class OrderController {
     public ApiResponse<Map<OrderStatus, Long>> getSellerDashboardStats() {
         return ApiResponse.<Map<OrderStatus, Long>>builder()
                 .result(orderService.getDashboardStats())
+                .build();
+    }
+
+    @GetMapping("/seller/dashboard/analytics")
+    public ApiResponse<SellerAnalyticsResponse> getSellerAnalytics(
+            @RequestParam(defaultValue = "DAY") String period,
+            @RequestParam(defaultValue = "7") int range,
+            @RequestParam(required = false) Integer days) {
+        int finalRange = (days != null) ? days : range;
+        return ApiResponse.<SellerAnalyticsResponse>builder()
+                .result(orderService.getSellerAnalytics(period, finalRange))
                 .build();
     }
 }

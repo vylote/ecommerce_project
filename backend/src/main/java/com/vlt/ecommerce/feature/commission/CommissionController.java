@@ -53,4 +53,13 @@ public class CommissionController {
                 .result(commissionService.getAdminStats())
                 .build();
     }
+
+    @GetMapping("/stats/admin/analytics")
+    public ApiResponse<com.vlt.ecommerce.feature.commission.dto.response.AdminAnalyticsResponse> getAdminAnalytics(
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "DAY") String period,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "7") int range) {
+        return ApiResponse.<com.vlt.ecommerce.feature.commission.dto.response.AdminAnalyticsResponse>builder()
+                .result(commissionService.getAdminAnalytics(period, range))
+                .build();
+    }
 }

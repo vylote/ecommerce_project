@@ -24,4 +24,6 @@ public interface CommissionRecordRepository extends JpaRepository<CommissionReco
     BigDecimal sumTotalCommissionRevenue();
 
     boolean existsByOrderItemId(Long orderItemId);
+
+    java.util.List<CommissionRecord> findByRecordedAtAfter(java.time.LocalDateTime after);
 }
