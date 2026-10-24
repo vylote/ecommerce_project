@@ -14,8 +14,14 @@ import com.vlt.ecommerce.feature.shop.dto.response.ShopResponse;
 @Mapper(componentModel = "spring", uses = {CategoryMapper.class})
 public interface ShopMapper {
     @Mapping(source = "seller.id", target = "sellerId")
+    @Mapping(source = "seller.fullName", target = "sellerName")
+    @Mapping(source = "seller.email", target = "sellerEmail")
+    @Mapping(source = "seller.phone", target = "sellerPhone")
     @Mapping(source = "shop.rating", target = "rating")
+    @Mapping(source = "shop.isActive", target = "isActive")
+    @Mapping(source = "shop.createdAt", target = "createdAt")
     @Mapping(source = "shop.categories", target = "categories")
+    @Mapping(expression = "java(shop.getProducts() != null ? (long) shop.getProducts().size() : 0L)", target = "productCount")
     ShopResponse toShopResponse(Shop shop);
 
     @Mapping(target = "id", ignore = true)

@@ -179,4 +179,37 @@ public class ShopService {
         List<ShopResponse> content = shopMapper.toShopResponses(shopPage.getContent());
         return PageResponse.of(shopPage, content);
     }
+
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @Transactional(readOnly = true)
+    public PageResponse<ShopResponse> getShopsForAdmin(String keyword, Boolean isActive, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+        String kw = (keyword != null && !keyword.trim().isEmpty()) ? keyword.trim() : null;
+        Page<Shop> shopPage = shopRepository.findShopsForAdmin(kw, isActive, pageable);
+        List<ShopResponse> content = shopMapper.toShopResponses(shopPage.getContent());
+        return PageResponse.of(shopPage, content);
+    }
+
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public ShopResponse toggleShopStatus(Long shopId) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+
+        shop.setIsActive(!Boolean.TRUE.equals(shop.getIsActive()));
+        return shopMapper.toShopResponse(shopRepository.save(shop));
+    }
+
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    public java.util.Map<String, Long> getShopStatsForAdmin() {
+        long total = shopRepository.count();
+        long active = shopRepository.countByIsActive(true);
+        long locked = shopRepository.countByIsActive(false);
+
+        java.util.Map<String, Long> stats = new java.util.HashMap<>();
+        stats.put("total", total);
+        stats.put("active", active);
+        stats.put("locked", locked);
+        return stats;
+    }
 }

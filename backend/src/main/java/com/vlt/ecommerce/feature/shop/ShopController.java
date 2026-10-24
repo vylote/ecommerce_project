@@ -81,4 +81,29 @@ public class ShopController {
             .result(shopService.searchShops(keyword, page, size))
             .build();
     }
+
+    @GetMapping("/admin")
+    public ApiResponse<PageResponse<ShopResponse>> getShopsForAdmin(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<ShopResponse>>builder()
+                .result(shopService.getShopsForAdmin(keyword, isActive, page, size))
+                .build();
+    }
+
+    @org.springframework.web.bind.annotation.PatchMapping("/admin/{id}/toggle-status")
+    public ApiResponse<ShopResponse> toggleShopStatus(@PathVariable Long id) {
+        return ApiResponse.<ShopResponse>builder()
+                .result(shopService.toggleShopStatus(id))
+                .build();
+    }
+
+    @GetMapping("/admin/stats")
+    public ApiResponse<java.util.Map<String, Long>> getShopStatsForAdmin() {
+        return ApiResponse.<java.util.Map<String, Long>>builder()
+                .result(shopService.getShopStatsForAdmin())
+                .build();
+    }
 }

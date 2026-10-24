@@ -20,4 +20,19 @@ public interface ShopRepository extends JpaRepository<Shop, Long>{
         @Param("keyword") String keyword, 
         Pageable pageable
     );
+
+    @Query("SELECT s FROM Shop s LEFT JOIN s.seller u WHERE " +
+           "(:keyword IS NULL OR :keyword = '' OR " +
+           " LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           " LOWER(s.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           " LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           " LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+           "(:isActive IS NULL OR s.isActive = :isActive)")
+    Page<Shop> findShopsForAdmin(
+        @Param("keyword") String keyword, 
+        @Param("isActive") Boolean isActive, 
+        Pageable pageable
+    );
+
+    long countByIsActive(Boolean isActive);
 }
