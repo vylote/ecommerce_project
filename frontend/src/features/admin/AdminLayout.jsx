@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  Users, DollarSign, BarChart2, Shield, LogOut, Home, Settings, Layers, FolderTree, KeyRound
+  Users, DollarSign, BarChart2, Shield, LogOut, Home, Settings, Layers, FolderTree, KeyRound, Store
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
@@ -44,6 +44,7 @@ export default function AdminLayout() {
     { path: '/admin/categories', icon: <FolderTree size={18} />, label: 'Quản lý danh mục' },
     { path: '/admin/roles', icon: <KeyRound size={18} />, label: 'Quản lý phân quyền' },
     { path: '/admin/users', icon: <Users size={18} />, label: 'Quản lý người dùng' },
+    { path: '/admin/shops', icon: <Store size={18} />, label: 'Quản lý gian hàng' },
     { path: '/admin/commissions', icon: <DollarSign size={18} />, label: 'Quản lý hoa hồng sàn' },
     { path: '/admin/specifications', icon: <Layers size={18} />, label: 'Quản lý đặc tả & biến thể' },
     { path: '/admin/settings', icon: <Settings size={18} />, label: 'Cài đặt hệ thống' },
@@ -90,7 +91,7 @@ export default function AdminLayout() {
                     <Home size={16} /> Trang người mua
                   </Link>
 
-                  <div className="h-px bg-gray-100 my-1"></div> 
+                  <div className="h-px bg-gray-100 my-1"></div>
 
                   <button
                     onClick={handleLogout}
@@ -112,18 +113,19 @@ export default function AdminLayout() {
               {MENU_ITEMS.map((item, idx) => {
                 const isActive = location.pathname.startsWith(item.path);
                 return (
-                <li key={idx}>
-                  <Link
-                    to={item.path}
-                    className={`flex items-center gap-3 p-2.5 rounded-lg text-sm transition-colors ${isActive
+                  <li key={idx}>
+                    <Link
+                      to={item.path}
+                      className={`flex items-center gap-3 p-2.5 rounded-lg text-sm transition-colors ${isActive
                         ? 'bg-[#eff6ff] text-[#3b82f6] font-bold border border-blue-100'
                         : 'hover:bg-gray-50 text-gray-700 font-medium'
-                      }`}
-                  >
-                    {item.icon} {item.label}
-                  </Link>
-                </li>
-              )})}
+                        }`}
+                    >
+                      {item.icon} {item.label}
+                    </Link>
+                  </li>
+                )
+              })}
             </ul>
           </nav>
         </aside>

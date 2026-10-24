@@ -27,6 +27,7 @@ import CommissionPage from '../features/admin/CommissionPage';
 import SpecificationManagementPage from '../features/admin/SpecificationManagementPage';
 import RolePermissionPage from '../features/admin/RolePermissionPage';
 import CategoryManagementPage from '../features/admin/CategoryManagementPage';
+import ShopManagementPage from '../features/admin/ShopManagementPage';
 
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
@@ -87,6 +88,7 @@ export const AppRoutes = () => {
         <Route index element={<Navigate to="dashboard" />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="users" element={<UserManagementPage />} />
+        <Route path="shops" element={<ShopManagementPage />} />
         <Route path="commissions" element={<CommissionPage />} />
         <Route path="specifications" element={<SpecificationManagementPage />} />
         <Route path="roles" element={<RolePermissionPage />} />

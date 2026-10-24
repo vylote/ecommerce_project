@@ -368,17 +368,20 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-xs flex items-center gap-3">
+        <Link to="/admin/shops" className="bg-white border border-gray-200 hover:border-emerald-300 rounded-xl p-4 shadow-xs hover:shadow-md transition-all flex items-center gap-3">
           <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
             <Store className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs text-gray-500 font-medium">Gian hàng (Shops)</div>
+            <div className="text-xs text-gray-500 font-medium flex items-center gap-1">
+              <span>Gian hàng (Shops)</span>
+              <ArrowUpRight className="w-3 h-3 text-emerald-600" />
+            </div>
             <div className="text-xl font-bold text-gray-900 mt-0.5">
               {analytics.totalShops || 0}
             </div>
           </div>
-        </div>
+        </Link>
 
         <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-xs flex items-center gap-3">
           <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
@@ -651,7 +654,24 @@ export default function AdminDashboard() {
         <h3 className="font-bold text-gray-800 text-lg mb-4">
           Phím Tắt Quản Trị Hệ Thống
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <Link
+            to="/admin/shops"
+            className="bg-white border border-gray-200 rounded-xl p-5 shadow-xs hover:shadow-md hover:border-emerald-300 transition-all flex items-start gap-3.5 group"
+          >
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+              <Store size={22} />
+            </div>
+            <div>
+              <h4 className="font-bold text-gray-800 group-hover:text-emerald-600 transition-colors text-sm">
+                Quản lý gian hàng
+              </h4>
+              <p className="text-xs text-gray-500 mt-1">
+                Giám sát hoạt động, khóa/mở khóa gian hàng vi phạm.
+              </p>
+            </div>
+          </Link>
+
           <Link
             to="/admin/users"
             className="bg-white border border-gray-200 rounded-xl p-5 shadow-xs hover:shadow-md hover:border-blue-300 transition-all flex items-start gap-3.5 group"
