@@ -1,12 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   FolderTree, Plus, Edit2, Trash2, Search, RefreshCw, Folder,
   Image as ImageIcon, CheckCircle, XCircle, ArrowRight, ExternalLink,
-  ChevronRight, Layers
+  ChevronRight, Layers, X, UploadCloud, Link as LinkIcon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
+import Pagination from '../../shared/components/Pagination';
+
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
+
+// Helper lấy URL ảnh hoàn chỉnh cho danh mục (hỗ trợ cả ảnh Cloudinary và ảnh nội bộ backend như automotive.png)
+const getCategoryImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) {
+    return url;
+  }
+  const cleanName = url.startsWith('/') ? url.substring(1) : url;
+  return `${BASE_URL}/images/categories/${cleanName}`;
+};
 
 // Hàm helper tạo slug từ tên tiếng Việt
 const generateSlug = (str) => {
@@ -27,9 +40,16 @@ export default function CategoryManagementPage() {
   const [searchKeyword, setSearchKeyword] = useState('');
   const [filterParentId, setFilterParentId] = useState('ALL');
 
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(15);
+
   // Modal Thêm/Sửa
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
+
   const [categoryForm, setCategoryForm] = useState({
     id: null,
     name: '',
@@ -69,6 +89,48 @@ export default function CategoryManagementPage() {
       isActive: true,
     });
     setShowModal(true);
+  };
+
+  const handleOpenCreateChild = (parentCat) => {
+    setIsEditing(false);
+    setCategoryForm({
+      id: null,
+      name: '',
+      slug: '',
+      parentId: String(parentCat.id),
+      imageUrl: '',
+      isActive: true,
+    });
+    setShowModal(true);
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Vui lòng chọn file hình ảnh (PNG, JPG, WebP...)');
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api.post('/categories/upload-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const url = res.data?.result;
+      if (url) {
+        setCategoryForm((prev) => ({ ...prev, imageUrl: url }));
+        toast.success('Tải ảnh biểu tượng lên thành công!');
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Không thể tải ảnh lên');
+    } finally {
+      setUploadingImage(false);
+      e.target.value = '';
+    }
   };
 
   const handleOpenEdit = (cat) => {
@@ -171,6 +233,18 @@ export default function CategoryManagementPage() {
 
     return matchSearch && matchParent;
   });
+
+  // Tự động về trang 1 khi lọc hoặc tìm kiếm
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchKeyword, filterParentId]);
+
+  const totalItems = filteredCategories.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+  const paginatedCategories = filteredCategories.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   return (
     <div className="space-y-6 animate-fade-in pb-16">
@@ -303,7 +377,7 @@ export default function CategoryManagementPage() {
                   </td>
                 </tr>
               ) : (
-                filteredCategories.map((cat) => {
+                paginatedCategories.map((cat) => {
                   const isParent = !cat.parentId;
                   const parentObj = categories.find((c) => c.id === cat.parentId);
 
@@ -314,7 +388,14 @@ export default function CategoryManagementPage() {
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
                             {cat.imageUrl ? (
-                              <img src={cat.imageUrl} alt={cat.name} className="w-full h-full object-cover" />
+                              <img
+                                src={getCategoryImageUrl(cat.imageUrl)}
+                                alt={cat.name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
                             ) : (
                               <Folder size={16} className={isParent ? 'text-blue-500' : 'text-gray-400'} />
                             )}
@@ -377,6 +458,15 @@ export default function CategoryManagementPage() {
                       </td>
                       <td className="text-right">
                         <div className="flex items-center justify-end gap-1">
+                          {isParent && (
+                            <button
+                              onClick={() => handleOpenCreateChild(cat)}
+                              className="p-1.5 hover:text-emerald-600 text-gray-400 rounded hover:bg-emerald-50 transition-colors"
+                              title="Thêm danh mục con vào ngành này"
+                            >
+                              <Plus size={14} />
+                            </button>
+                          )}
                           <button
                             onClick={() => handleOpenEdit(cat)}
                             className="p-1.5 hover:text-blue-600 text-gray-400 rounded hover:bg-gray-100"
@@ -400,6 +490,22 @@ export default function CategoryManagementPage() {
             </tbody>
           </table>
         </div>
+
+        {/* THANH PHÂN TRANG */}
+        <div className="border-t border-gray-100 px-4 py-1 bg-gray-50/50">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={setCurrentPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setCurrentPage(1);
+            }}
+            pageSizeOptions={[10, 15, 25, 50, 100]}
+          />
+        </div>
       </div>
 
       {/* ================= MODAL THÊM / SỬA DANH MỤC ================= */}
@@ -415,7 +521,7 @@ export default function CategoryManagementPage() {
               </div>
               <button
                 onClick={() => setShowModal(false)}
-                className="btn btn-sm btn-ghost btn-circle"
+                className="btn btn-sm btn-ghost btn-circle text-gray-500 hover:text-gray-800"
               >
                 <X size={18} />
               </button>
@@ -471,17 +577,76 @@ export default function CategoryManagementPage() {
                 </select>
               </div>
 
+              {/* UPLOAD / NHẬP HÌNH ẢNH DANH MỤC */}
               <div className="form-control">
                 <label className="label font-semibold text-xs text-gray-700">
-                  Link ảnh icon / biểu tượng
+                  Hình ảnh / Icon biểu tượng danh mục
                 </label>
-                <input
-                  type="url"
-                  value={categoryForm.imageUrl}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, imageUrl: e.target.value })}
-                  placeholder="https://example.com/icon-fashion.png"
-                  className="input input-sm input-bordered w-full focus:border-blue-500 text-xs"
-                />
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    {categoryForm.imageUrl ? (
+                      <div className="relative w-16 h-16 rounded-xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center shrink-0 shadow-xs">
+                        <img
+                          src={getCategoryImageUrl(categoryForm.imageUrl)}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setCategoryForm((prev) => ({ ...prev, imageUrl: '' }))}
+                          className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white p-0.5 rounded-full transition-colors"
+                          title="Xóa ảnh"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 shrink-0 bg-gray-50/50">
+                        <ImageIcon size={20} />
+                        <span className="text-[9px] mt-0.5">Chưa có</span>
+                      </div>
+                    )}
+
+                    <div className="flex-1 space-y-2">
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        accept="image/*"
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploadingImage}
+                        className="btn btn-sm btn-outline border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 w-full gap-2 text-xs"
+                      >
+                        {uploadingImage ? (
+                          <>
+                            <span className="loading loading-spinner loading-xs"></span>
+                            Đang tải ảnh lên...
+                          </>
+                        ) : (
+                          <>
+                            <UploadCloud size={15} /> Tải ảnh từ máy tính
+                          </>
+                        )}
+                      </button>
+
+                      <div className="relative">
+                        <LinkIcon size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input
+                          type="url"
+                          value={categoryForm.imageUrl}
+                          onChange={(e) => setCategoryForm({ ...categoryForm, imageUrl: e.target.value })}
+                          placeholder="Hoặc dán trực tiếp đường dẫn URL ảnh..."
+                          className="input input-xs input-bordered w-full pl-8 focus:border-blue-500 text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
@@ -511,7 +676,7 @@ export default function CategoryManagementPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={saving}
+                  disabled={saving || uploadingImage}
                   className="btn btn-sm bg-[#3b82f6] hover:bg-blue-600 text-white border-none px-6"
                 >
                   {saving ? <span className="loading loading-spinner loading-xs"></span> : 'Lưu danh mục'}

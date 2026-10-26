@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
+import Pagination from '../../shared/components/Pagination';
 
 // Gom nhóm các quyền theo module chức năng để hiển thị trực quan
 const PERMISSION_GROUPS = [
@@ -76,6 +77,14 @@ export default function RolePermissionPage() {
   const [roleSearch, setRoleSearch] = useState('');
   const [permSearch, setPermSearch] = useState('');
   const [userSearch, setUserSearch] = useState('');
+
+  // Phân trang cho Permissions
+  const [permPage, setPermPage] = useState(1);
+  const [permPageSize, setPermPageSize] = useState(10);
+
+  // Phân trang cho User-Roles
+  const [userRolePage, setUserRolePage] = useState(1);
+  const [userRolePageSize, setUserRolePageSize] = useState(10);
 
   // Tải dữ liệu từ backend
   const fetchData = async () => {
@@ -308,6 +317,31 @@ export default function RolePermissionPage() {
       u.email?.toLowerCase().includes(userSearch.toLowerCase()) ||
       u.fullName?.toLowerCase().includes(userSearch.toLowerCase()) ||
       u.phone?.toLowerCase().includes(userSearch.toLowerCase())
+  );
+
+  // Reset trang khi tìm kiếm
+  useEffect(() => {
+    setPermPage(1);
+  }, [permSearch]);
+
+  useEffect(() => {
+    setUserRolePage(1);
+  }, [userSearch]);
+
+  // Phân trang Permissions
+  const totalPermItems = filteredPermissions.length;
+  const totalPermPages = Math.ceil(totalPermItems / permPageSize) || 1;
+  const paginatedPermissions = filteredPermissions.slice(
+    (permPage - 1) * permPageSize,
+    permPage * permPageSize
+  );
+
+  // Phân trang User-Roles
+  const totalUserRoleItems = filteredUsers.length;
+  const totalUserRolePages = Math.ceil(totalUserRoleItems / userRolePageSize) || 1;
+  const paginatedUsers = filteredUsers.slice(
+    (userRolePage - 1) * userRolePageSize,
+    userRolePage * userRolePageSize
   );
 
   return (
@@ -546,9 +580,9 @@ export default function RolePermissionPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredPermissions.map((perm, idx) => (
+                  paginatedPermissions.map((perm, idx) => (
                     <tr key={perm.id} className="hover:bg-gray-50/70">
-                      <td className="font-semibold text-gray-400">{idx + 1}</td>
+                      <td className="font-semibold text-gray-400">{(permPage - 1) * permPageSize + idx + 1}</td>
                       <td>
                         <span className="font-bold text-gray-800 font-mono text-xs bg-gray-100 px-2 py-0.5 rounded border border-gray-200">
                           {perm.name}
@@ -578,6 +612,22 @@ export default function RolePermissionPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Phân trang Permissions */}
+          <div className="border-t border-gray-100 pt-2">
+            <Pagination
+              currentPage={permPage}
+              totalPages={totalPermPages}
+              totalItems={totalPermItems}
+              pageSize={permPageSize}
+              onPageChange={setPermPage}
+              onPageSizeChange={(newSize) => {
+                setPermPageSize(newSize);
+                setPermPage(1);
+              }}
+              pageSizeOptions={[10, 20, 50]}
+            />
           </div>
         </div>
       )}
@@ -620,7 +670,7 @@ export default function RolePermissionPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredUsers.map((u) => {
+                  paginatedUsers.map((u) => {
                     const userRoles = u.roles || [];
                     return (
                       <tr key={u.id} className="hover:bg-gray-50/70">
@@ -679,6 +729,22 @@ export default function RolePermissionPage() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Phân trang User-Roles */}
+          <div className="border-t border-gray-100 pt-2">
+            <Pagination
+              currentPage={userRolePage}
+              totalPages={totalUserRolePages}
+              totalItems={totalUserRoleItems}
+              pageSize={userRolePageSize}
+              onPageChange={setUserRolePage}
+              onPageSizeChange={(newSize) => {
+                setUserRolePageSize(newSize);
+                setUserRolePage(1);
+              }}
+              pageSizeOptions={[10, 20, 50]}
+            />
           </div>
         </div>
       )}

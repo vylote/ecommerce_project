@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Search, Lock, Unlock, ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
+import Pagination from '../../shared/components/Pagination';
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -21,13 +24,14 @@ export default function UserManagementPage() {
       const res = await api.get('/users', {
         params: {
           page: page,
-          size: 10,
+          size: pageSize,
           email: searchQuery || undefined
         }
       });
       const data = res.data.result;
-      setUsers(data.data);
-      setTotalPages(data.totalPages);
+      setUsers(data.data || []);
+      setTotalPages(data.totalPages || 1);
+      setTotalUsers(data.totalElements || (data.data || []).length);
     } catch (error) {
       toast.error('Không thể tải danh sách người dùng');
     } finally {
@@ -38,7 +42,7 @@ export default function UserManagementPage() {
   useEffect(() => {
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, searchQuery]);
+  }, [page, pageSize, searchQuery]);
 
   // Đóng modal bằng phím Esc
   useEffect(() => {
@@ -166,13 +170,20 @@ export default function UserManagementPage() {
         </table>
       </div>
 
-      {!loading && totalPages > 1 && (
-        <div className="mt-4 flex justify-end">
-          <div className="join gap-1">
-            <button disabled={page === 1} onClick={() => setPage(page - 1)} className="join-item btn btn-sm bg-white border-gray-300">«</button>
-            <button className="join-item btn btn-sm bg-blue-500 text-white border-blue-500 hover:bg-blue-600">{page}</button>
-            <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="join-item btn btn-sm bg-white border-gray-300">»</button>
-          </div>
+      {!loading && (
+        <div className="mt-4 border-t border-gray-100 pt-3">
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            totalItems={totalUsers}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={(newSize) => {
+              setPageSize(newSize);
+              setPage(1);
+            }}
+            pageSizeOptions={[10, 20, 50]}
+          />
         </div>
       )}
 

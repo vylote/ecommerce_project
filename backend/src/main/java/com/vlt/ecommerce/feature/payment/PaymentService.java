@@ -60,9 +60,17 @@ public class PaymentService {
     @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public PaymentResponse confirmMockPayment(Long paymentId) {
-        Payment payment = paymentRepository.findById(paymentId)
+        User buyer = getCurrentUser();
+
+        Payment payment = paymentRepository.findByIdForUpdate(paymentId)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
         
+        // Chống IDOR: Chỉ người mua sở hữu đơn hàng mới có quyền thanh toán
+        if (payment.getOrder() == null || payment.getOrder().getBuyer() == null
+                || !payment.getOrder().getBuyer().getId().equals(buyer.getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
         if (payment.getStatus() == Payment.PaymentStatus.PAID) {
             throw new AppException(ErrorCode.PAYMENT_ALREADY_PROCESSED);
         }

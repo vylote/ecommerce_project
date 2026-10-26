@@ -1,13 +1,16 @@
 package com.vlt.ecommerce.feature.shop;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -132,9 +135,14 @@ public class ShopService {
         Shop shop = shopRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        return shopMapper.toShopResponse(shop);
+        ShopResponse response = shopMapper.toShopResponse(shop);
+        // Bảo vệ quyền riêng tư: Ẩn email và SĐT cá nhân của chủ shop đối với khách xem công khai
+        response.setSellerEmail(null);
+        response.setSellerPhone(null);
+        return response;
     }
 
+    @PreAuthorize("hasRole('SELLER')")
     public ShopResponse getMyShop() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -180,7 +188,7 @@ public class ShopService {
         return PageResponse.of(shopPage, content);
     }
 
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional(readOnly = true)
     public PageResponse<ShopResponse> getShopsForAdmin(String keyword, Boolean isActive, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
@@ -190,7 +198,7 @@ public class ShopService {
         return PageResponse.of(shopPage, content);
     }
 
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ShopResponse toggleShopStatus(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
@@ -200,13 +208,13 @@ public class ShopService {
         return shopMapper.toShopResponse(shopRepository.save(shop));
     }
 
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
-    public java.util.Map<String, Long> getShopStatsForAdmin() {
+    @PreAuthorize("hasRole('ADMIN')")
+    public Map<String, Long> getShopStatsForAdmin() {
         long total = shopRepository.count();
         long active = shopRepository.countByIsActive(true);
         long locked = shopRepository.countByIsActive(false);
 
-        java.util.Map<String, Long> stats = new java.util.HashMap<>();
+        Map<String, Long> stats = new HashMap<>();
         stats.put("total", total);
         stats.put("active", active);
         stats.put("locked", locked);

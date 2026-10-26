@@ -3,12 +3,17 @@ import { Link } from 'react-router-dom';
 import { DollarSign, TrendingUp, ShoppingCart, Percent, Settings2, BarChart2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
+import Pagination from '../../shared/components/Pagination';
 
 export default function CommissionPage() {
   const [stats, setStats] = useState(null);
   const [configs, setConfigs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [newFee, setNewFee] = useState('');
@@ -160,26 +165,53 @@ export default function CommissionPage() {
               ) : configs.length === 0 ? (
                 <tr><td colSpan="4" className="text-center py-10 text-gray-500">Chưa có cấu hình hoa hồng nào</td></tr>
               ) : (
-                configs.map((c, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50">
-                    <td className="px-5 py-4 font-semibold text-gray-800">
-                      {getCategoryName(c.categoryId)}
-                    </td>
-                    <td className="px-5 py-4 font-bold text-blue-600">
-                      {(c.rate * 100).toFixed(1)}%
-                    </td>
-                    <td className="px-5 py-4 text-gray-600">
-                      {c.effectiveFrom}
-                    </td>
-                    <td className="px-5 py-4 text-gray-500 text-xs">
-                      ID: {c.createdById}
-                    </td>
-                  </tr>
-                ))
+                (() => {
+                  const totalItems = configs.length;
+                  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+                  const paginatedConfigs = configs.slice(
+                    (currentPage - 1) * pageSize,
+                    currentPage * pageSize
+                  );
+
+                  return paginatedConfigs.map((c, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50">
+                      <td className="px-5 py-4 font-semibold text-gray-800">
+                        {getCategoryName(c.categoryId)}
+                      </td>
+                      <td className="px-5 py-4 font-bold text-blue-600">
+                        {(c.rate * 100).toFixed(1)}%
+                      </td>
+                      <td className="px-5 py-4 text-gray-600">
+                        {c.effectiveFrom}
+                      </td>
+                      <td className="px-5 py-4 text-gray-500 text-xs">
+                        ID: {c.createdById}
+                      </td>
+                    </tr>
+                  ));
+                })()
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Thanh phân trang */}
+        {!loading && configs.length > 0 && (
+          <div className="border-t border-gray-100 pt-3">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.ceil(configs.length / pageSize) || 1}
+              totalItems={configs.length}
+              pageSize={pageSize}
+              onPageChange={setCurrentPage}
+              onPageSizeChange={(newSize) => {
+                setPageSize(newSize);
+                setCurrentPage(1);
+              }}
+              pageSizeOptions={[5, 10, 20]}
+            />
+          </div>
+        )}
       </div>
 
       {/* Modal Cập Nhật Hoa Hồng */}

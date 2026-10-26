@@ -40,8 +40,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String path = request.getRequestURI();
-        if (path.startsWith("/auth/login") || path.startsWith("/auth/register") || path.startsWith("/auth/refresh")) {
+        // Cho qua ngay lập tức đối với preflight request OPTIONS
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Kiểm tra servletPath (bỏ context-path /api/v1) hoặc URI chứa endpoint xác thực
+        String servletPath = request.getServletPath();
+        String uri = request.getRequestURI();
+        if (servletPath.startsWith("/auth/login") || servletPath.startsWith("/auth/register") || servletPath.startsWith("/auth/refresh")
+                || uri.contains("/auth/login") || uri.contains("/auth/register") || uri.contains("/auth/refresh")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -69,14 +78,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (blacklistService.isSsidBlacklisted(ssid)) {
                     log.warn("Chặn truy cập: Phiên đăng nhập {} đã bị thu hồi", ssid);
-                    sendErrorResponse(response, ErrorCode.UNAUTHENTICATED, "Phiên đăng nhập đã bị thu hồi từ xa.");
+                    sendErrorResponse(request, response, ErrorCode.UNAUTHENTICATED, "Phiên đăng nhập đã bị thu hồi từ xa.");
                     return;
                 }
 
                 User user = userRepository.findById(userId).orElse(null);
                 if (user == null || Boolean.FALSE.equals(user.getIsActive())) {
                     log.warn("Chặn truy cập: User bị khóa hoặc không tồn tại. UserId: {}", userId);
-                    sendErrorResponse(response, ErrorCode.USER_LOCKED, ErrorCode.USER_LOCKED.getMessage());
+                    sendErrorResponse(request, response, ErrorCode.USER_LOCKED, ErrorCode.USER_LOCKED.getMessage());
                     return;
                 }
 
@@ -99,19 +108,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
             } catch (Exception e) {
-                log.error("Token JWT không hợp lệ hoặc đã hết hạn cho request {}: {}", path, e.getMessage());
-                sendErrorResponse(response, ErrorCode.UNAUTHENTICATED, ErrorCode.UNAUTHENTICATED.getMessage());
+                log.error("Token JWT không hợp lệ hoặc đã hết hạn cho request {}: {}", uri, e.getMessage());
+                sendErrorResponse(request, response, ErrorCode.UNAUTHENTICATED, ErrorCode.UNAUTHENTICATED.getMessage());
                 return;
             }
         } else {
-            log.debug("Không tìm thấy accessToken cookie trong request: {}", path);
+            log.debug("Không tìm thấy accessToken cookie trong request: {}", uri);
         }
         
         filterChain.doFilter(request, response);
     }
 
-    private void sendErrorResponse(HttpServletResponse response, ErrorCode errorCode, String customMessage)
+    private void sendErrorResponse(HttpServletRequest request, HttpServletResponse response, ErrorCode errorCode, String customMessage)
             throws IOException {
+        String origin = request.getHeader("Origin");
+        if (origin != null && !origin.isBlank()) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+            response.setHeader("Access-Control-Allow-Credentials", "true");
+            response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH");
+            response.setHeader("Access-Control-Allow-Headers", "*");
+        }
         response.setStatus(errorCode.getStatusCode().value());
         response.setContentType("application/json;charset=UTF-8");
         String jsonResponse = String.format(

@@ -1,8 +1,11 @@
 package com.vlt.ecommerce.feature.shop;
 
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -10,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
@@ -93,7 +95,7 @@ public class ShopController {
                 .build();
     }
 
-    @org.springframework.web.bind.annotation.PatchMapping("/admin/{id}/toggle-status")
+    @PatchMapping("/admin/{id}/toggle-status")
     public ApiResponse<ShopResponse> toggleShopStatus(@PathVariable Long id) {
         return ApiResponse.<ShopResponse>builder()
                 .result(shopService.toggleShopStatus(id))
@@ -101,8 +103,8 @@ public class ShopController {
     }
 
     @GetMapping("/admin/stats")
-    public ApiResponse<java.util.Map<String, Long>> getShopStatsForAdmin() {
-        return ApiResponse.<java.util.Map<String, Long>>builder()
+    public ApiResponse<Map<String, Long>> getShopStatsForAdmin() {
+        return ApiResponse.<Map<String, Long>>builder()
                 .result(shopService.getShopStatsForAdmin())
                 .build();
     }

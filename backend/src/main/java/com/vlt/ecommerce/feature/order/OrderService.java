@@ -198,7 +198,8 @@ public class OrderService {
     public OrderResponse confirmOrder(Long id) {
         User seller = getCurrentUser();
 
-        Order order = orderRepository.findById(id)
+        // Sử dụng khóa bi quan (Pessimistic Lock) để chống xung đột race condition giữa Seller xác nhận và Buyer hủy đơn
+        Order order = orderRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (order.getStatus() != OrderStatus.PENDING) {
@@ -228,7 +229,7 @@ public class OrderService {
     public OrderResponse shipOrder(Long id) {
         User seller = getCurrentUser();
 
-        Order order = orderRepository.findById(id)
+        Order order = orderRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (order.getStatus() != OrderStatus.CONFIRMED) {
@@ -320,7 +321,8 @@ public class OrderService {
     public OrderResponse cancelOrder(Long id) {
         User buyer = getCurrentUser();
 
-        Order order = orderRepository.findById(id)
+        // Sử dụng khóa bi quan (Pessimistic Lock) để chống hủy đơn kép và hoàn lặp tồn kho
+        Order order = orderRepository.findByIdForUpdate(id)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (!order.getBuyer().getId().equals(buyer.getId())) {
