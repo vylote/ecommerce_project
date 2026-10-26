@@ -345,9 +345,16 @@ export default function CheckoutPage() {
                         <span className="text-xl opacity-50">📦</span>
                       )}
                     </div>
-                    <span className="text-sm line-clamp-2">
-                      {item.productName}
-                    </span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-sm font-medium line-clamp-2 text-gray-800">
+                        {item.productName}
+                      </span>
+                      {item.variantName && (
+                        <span className="text-xs text-gray-500 mt-0.5">
+                          Phân loại: <strong className="text-gray-700">{item.variantName}</strong>
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div className="col-span-2 text-center text-sm text-gray-600">
                     ₫{item.productPrice.toLocaleString("vi-VN")}

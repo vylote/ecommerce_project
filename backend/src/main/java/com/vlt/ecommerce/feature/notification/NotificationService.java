@@ -2,6 +2,7 @@ package com.vlt.ecommerce.feature.notification;
 
 import java.util.List;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
+import com.vlt.ecommerce.config.RabbitMQConfig;
+import com.vlt.ecommerce.feature.notification.dto.NotificationMessage;
 import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
@@ -30,6 +33,7 @@ public class NotificationService {
     NotificationClient notificationClient;
     NotificationMapper notificationMapper;
     UserRepository userRepository;
+    RabbitTemplate rabbitTemplate;
 
     public void createAndPushNotification(Long userId, String type, String title, String message, Long refId) {
         log.info("--- [NOTIFICATION] BẮT ĐẦU XỬ LÝ THÔNG BÁO CHO USER {} ---", userId);
@@ -46,12 +50,31 @@ public class NotificationService {
 
         Notification savedNotification = notificationRepository.save(notification);
 
+        NotificationMessage messagePayload = NotificationMessage.builder()
+                .id(savedNotification.getId())
+                .userId(userId)
+                .type(type)
+                .title(title)
+                .message(message)
+                .refId(refId)
+                .createdAt(savedNotification.getCreatedAt())
+                .build();
+
         try {
-            log.info("=> Bắt đầu gọi API sang Node.js...");
-            notificationClient.pushNotification(userId, savedNotification);
-            log.info("=> Gọi API Node.js hoàn tất!");
+            log.info("=> Bắn thông báo bất đồng bộ qua RabbitMQ Exchange: {}", RabbitMQConfig.NOTIFICATION_EXCHANGE);
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.NOTIFICATION_EXCHANGE,
+                    RabbitMQConfig.NOTIFICATION_ROUTING_KEY,
+                    messagePayload
+            );
+            log.info("=> Đã gửi thông báo vào RabbitMQ thành công!");
         } catch (Exception e) {
-            log.error("!!! BẮT ĐƯỢC LỖI GỌI NODE.JS (NHƯNG DB VẪN AN TOÀN): ", e.getMessage());
+            log.error("!!! BẮT ĐƯỢC LỖI GỬI RABBITMQ (KÍCH HOẠT FALLBACK HTTP SANG NODE.JS): {}", e.getMessage());
+            try {
+                notificationClient.pushNotification(userId, savedNotification);
+            } catch (Exception ex) {
+                log.error("Fallback HTTP cũng thất bại: {}", ex.getMessage());
+            }
         }
     }
 

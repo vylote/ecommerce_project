@@ -109,7 +109,9 @@ export default function DailyDiscovery() {
                       
                       <div className="space-y-1.5 mt-auto">
                         <div className="text-primary font-bold text-base">
-                          {product.price ? product.price.toLocaleString('vi-VN') : 0} ₫
+                          {product.minPrice && product.maxPrice && product.minPrice !== product.maxPrice
+                            ? `${Number(product.minPrice).toLocaleString('vi-VN')} ₫ - ${Number(product.maxPrice).toLocaleString('vi-VN')} ₫`
+                            : `${Number(product.price || 0).toLocaleString('vi-VN')} ₫`}
                         </div>
                         <div className="flex justify-between items-center">
                           <div className="flex items-center text-warning text-xs">

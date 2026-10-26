@@ -35,6 +35,10 @@ public interface ProductMapper {
     @Mapping(target = "category", source = "product.category")
     @Mapping(target = "averageRating", source = "product.averageRating")
     @Mapping(target = "reviewCount", source = "product.reviewCount")
+    @Mapping(target = "minPrice", ignore = true)
+    @Mapping(target = "maxPrice", ignore = true)
+    @Mapping(target = "hasVariants", ignore = true)
+    @Mapping(target = "variants", ignore = true)
     ProductResponse toProductResponse(Product product);
 
     @Mapping(target = "id", ignore = true)

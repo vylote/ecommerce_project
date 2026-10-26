@@ -44,6 +44,18 @@ export default function OrdersPage() {
 
   useEffect(() => {
     fetchOrders(page);
+
+    const handleRealtimeUpdate = () => {
+      fetchOrders(page);
+    };
+
+    window.addEventListener("order_updated", handleRealtimeUpdate);
+    window.addEventListener("new_notification", handleRealtimeUpdate);
+
+    return () => {
+      window.removeEventListener("order_updated", handleRealtimeUpdate);
+      window.removeEventListener("new_notification", handleRealtimeUpdate);
+    };
   }, [page, activeTab]);
 
   const handleTabChange = (tabValue) => {

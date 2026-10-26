@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import api from "../../shared/utils/api";
 import { logout } from "../../store/slice/authSlice";
 import UserAvatar from "./UserAvatar";
+import NotificationDropdown from "./NotificationDropdown";
 
 export default function Navbar() {
   const { user } = useSelector((state) => state.auth);
@@ -114,23 +115,7 @@ export default function Navbar() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-1 hover:opacity-80">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-3.5 w-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
-              Thông báo
-            </button>
+            <NotificationDropdown user={user} />
             <span className="w-px h-3 bg-white/30" />
             <button className="hover:opacity-80">Hỗ trợ</button>
             <span className="w-px h-3 bg-white/30" />

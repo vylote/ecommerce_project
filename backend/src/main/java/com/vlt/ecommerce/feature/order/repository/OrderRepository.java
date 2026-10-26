@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.feature.order.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,15 +19,18 @@ import com.vlt.ecommerce.feature.order.dto.response.OrderStatusStat;
 import jakarta.persistence.LockModeType;
 
 public interface OrderRepository extends JpaRepository<Order, Long>{
-    // Dành cho BUYER: Kéo luôn danh sách items để tránh N+1 Query
-    @EntityGraph(attributePaths = {"items"})
+    // Dành cho BUYER: Kéo luôn danh sách items và payment để tránh N+1 Query
+    @EntityGraph(attributePaths = {"items", "payment"})
     Page<Order> findByBuyerIdAndStatus(Long buyerId, OrderStatus status, Pageable pageable);
-    @EntityGraph(attributePaths = {"items"})
+
+    @EntityGraph(attributePaths = {"items", "payment"})
     Page<Order> findByBuyerId(Long buyerId, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"items"})
+    // Dành cho SHOP: Kéo luôn danh sách items và payment để tránh N+1 Query
+    @EntityGraph(attributePaths = {"items", "payment"})
     Page<Order> findByShopId(Long shopId, Pageable pageable);
-    @EntityGraph(attributePaths = {"items"})
+
+    @EntityGraph(attributePaths = {"items", "payment"})
     Page<Order> findByShopIdAndStatus(Long shopId, OrderStatus status, Pageable pageable);
 
     @Query("SELECT o FROM Order o JOIN FETCH o.shop s JOIN FETCH s.seller WHERE o.id = :id")
@@ -45,9 +49,14 @@ public interface OrderRepository extends JpaRepository<Order, Long>{
            "GROUP BY o.status")
     List<OrderStatusStat> countOrdersByStatusForShop(@Param("shopId") Long shopId);
 
-    List<Order> findByShopIdAndCreatedAtAfter(Long shopId, java.time.LocalDateTime after);
+    @EntityGraph(attributePaths = {"payment"})
+    List<Order> findByShopIdAndCreatedAtAfter(Long shopId, LocalDateTime after);
+
+    @EntityGraph(attributePaths = {"payment"})
     List<Order> findByShopId(Long shopId);
-    List<Order> findByCreatedAtAfter(java.time.LocalDateTime after);
+
+    @EntityGraph(attributePaths = {"payment"})
+    List<Order> findByCreatedAtAfter(LocalDateTime after);
 
     @Query("SELECT o.status AS status, COUNT(o.id) AS count FROM Order o GROUP BY o.status")
     List<OrderStatusStat> countAllOrdersByStatus();

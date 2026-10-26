@@ -21,14 +21,17 @@ import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.product.Category;
 import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.product.ProductImage;
+import com.vlt.ecommerce.feature.product.SpecificProduct;
 import com.vlt.ecommerce.feature.product.dto.request.ProductRequest;
 import com.vlt.ecommerce.feature.product.dto.response.ProductImageResponse;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
+import com.vlt.ecommerce.feature.product.dto.response.SpecificProductResponse;
 import com.vlt.ecommerce.feature.product.mapper.ProductImageMapper;
 import com.vlt.ecommerce.feature.product.mapper.ProductMapper;
 import com.vlt.ecommerce.feature.product.repository.CategoryRepository;
 import com.vlt.ecommerce.feature.product.repository.ProductImageRepository;
 import com.vlt.ecommerce.feature.product.repository.ProductRepository;
+import com.vlt.ecommerce.feature.product.repository.SpecificProductRepository;
 import com.vlt.ecommerce.feature.review.Review;
 import com.vlt.ecommerce.feature.review.ReviewMapper;
 import com.vlt.ecommerce.feature.review.ReviewRepository;
@@ -55,6 +58,7 @@ public class ProductService {
     ReviewRepository reviewRepository;
     ReviewMapper reviewMapper;
     CategoryRepository categoryRepository;
+    SpecificProductRepository specificProductRepository;
 
     CloudinaryService cloudinaryService;
     ShopService shopService;
@@ -126,11 +130,42 @@ public class ProductService {
         }
     }
 
+    @Transactional(readOnly = true)
     public ProductResponse getDetailProduct(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
-        return productMapper.toProductResponse(product);
+        ProductResponse response = productMapper.toProductResponse(product);
+        List<SpecificProduct> variants = specificProductRepository.findByProductIdAndIsActiveTrue(id);
+        if (variants != null && !variants.isEmpty()) {
+            response.setHasVariants(true);
+            BigDecimal minP = variants.stream().map(SpecificProduct::getPrice).min(BigDecimal::compareTo).orElse(product.getPrice());
+            BigDecimal maxP = variants.stream().map(SpecificProduct::getPrice).max(BigDecimal::compareTo).orElse(product.getPrice());
+            int totalStock = variants.stream().mapToInt(SpecificProduct::getStockQuantity).sum();
+            response.setMinPrice(minP);
+            response.setMaxPrice(maxP);
+            response.setStockQuantity(totalStock);
+            response.setVariants(variants.stream().map(v -> SpecificProductResponse.builder()
+                    .id(v.getId())
+                    .productId(product.getId())
+                    .productName(product.getName())
+                    .name(v.getName())
+                    .sku(v.getSku())
+                    .price(v.getPrice())
+                    .stockQuantity(v.getStockQuantity())
+                    .imageUrl(v.getImageUrl())
+                    .isActive(v.getIsActive())
+                    .createdAt(v.getCreatedAt())
+                    .updatedAt(v.getUpdatedAt())
+                    .build()).toList());
+        } else {
+            response.setHasVariants(false);
+            response.setMinPrice(product.getPrice());
+            response.setMaxPrice(product.getPrice());
+            response.setVariants(Collections.emptyList());
+        }
+
+        return response;
     }
 
     // lay danh sach san pham phan trang + filter

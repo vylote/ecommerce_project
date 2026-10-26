@@ -1,5 +1,6 @@
 notification:
   service-url: http://localhost:3000
 
-# Bạn có thể ghi đè các cấu hình khác nếu cần chạy local khác với gốc
-# Ví dụ: Tắt cache redis local, đổi port...
+app:
+  order:
+    expiration-ttl-ms: 30000 # Môi trường dev test: 30 giây

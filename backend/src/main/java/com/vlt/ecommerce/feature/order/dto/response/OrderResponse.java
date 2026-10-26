@@ -28,4 +28,6 @@ public class OrderResponse {
     List<OrderItemResponse> items;
     LocalDateTime createdAt;
     Boolean reviewed;
+    String paymentMethod;
+    String paymentStatus;
 }

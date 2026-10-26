@@ -21,6 +21,8 @@ public interface OrderMapper {
     @Mapping(target = "shopName", source = "shop.name")
     @Mapping(target = "shopId", source = "shop.id")
     @Mapping(target = "reviewed", ignore = true)
+    @Mapping(target = "paymentMethod", source = "payment.method")
+    @Mapping(target = "paymentStatus", source = "payment.status")
     OrderResponse toOrderResponse(Order order);
 
     @Mapping(target = "id", ignore = true)

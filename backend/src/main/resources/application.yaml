@@ -11,9 +11,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
-      hibernate.format_sql: true
+      hibernate.format_sql: false
       hibernate.jdbc.time_zone: Asia/Ho_Chi_Minh
   jackson:
     default-property-inclusion: non_null
@@ -28,6 +28,11 @@ spring:
     redis:
       host: localhost
       port: 6379
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
 server:
   port: 8080
@@ -49,15 +54,18 @@ springdoc:
 notification:
   service-url: ${NOTIFICATION_SERVICE_URL:http://localhost:3000}
 
+app:
+  order:
+    expiration-ttl-ms: ${ORDER_EXPIRATION_TTL_MS:900000} # Mặc định 15 phút (900,000 ms)
+
 logging:
   file:
     name: logs/ecommerce-app.log
   level:
-    org.springframework.orm.jpa.JpaTransactionManager: DEBUG
-    org.springframework.transaction: DEBUG
-    org.hibernate.engine.transaction.internal.TransactionImpl: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
-    org.springframework.security: DEBUG
+    com.vlt.ecommerce: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.orm.jdbc.bind: WARN
   logback:
     rollingpolicy:
       max-file-size: 10MB # Khi file đạt 10MB, nó sẽ tự cắt sang file mới (ví dụ: ecommerce-app-1.log)

@@ -7,7 +7,7 @@ import { Toaster } from "react-hot-toast";
 import { AppRoutes } from "./routes/AppRoutes";
 import { loginSuccess, logout, setInitialized } from "./store/slice/authSlice";
 import api from "./shared/utils/api";
-import { useNotification } from "./shared/hooks/useNotification";
+import { useNotification } from "./shared/hooks/useNotification.jsx";
 
 function App() {
   const dispatch = useDispatch();

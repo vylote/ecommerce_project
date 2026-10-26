@@ -12,15 +12,19 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.experimental.NonFinal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,6 +32,7 @@ import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.event.OrderStatusChangedEvent;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
+import com.vlt.ecommerce.config.RabbitMQConfig;
 import com.vlt.ecommerce.feature.cart.CartItem;
 import com.vlt.ecommerce.feature.cart.CartItemRepository;
 import com.vlt.ecommerce.feature.commission.CommissionService;
@@ -78,6 +83,10 @@ public class OrderService {
     OrderMapper orderMapper;
     ObjectMapper objectMapper;
     ApplicationEventPublisher eventPublisher;
+    RabbitTemplate rabbitTemplate;
+    @NonFinal
+    @Value("${app.order.expiration-ttl-ms:900000}")
+    int orderExpirationTtlMs;
 
     @PreAuthorize("hasRole('BUYER')")
     @Transactional
@@ -187,10 +196,37 @@ public class OrderService {
             Order savedOrder = orderRepository.save(newOrder);
             createdOrders.add(savedOrder);
             eventPublisher.publishEvent(new OrderStatusChangedEvent(this, savedOrder.getId()));
+
+            // Lên lịch tự động hủy đơn sau 15 phút nếu khách không thanh toán
+            sendOrderExpirationSchedule(savedOrder.getId());
         }
 
         cartItemRepository.deleteAll(cartItems); 
         return orderMapper.toOrderResponses(createdOrders);
+    }
+
+    private void sendOrderExpirationSchedule(Long orderId) {
+        try {
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.ORDER_DELAY_EXCHANGE,
+                    RabbitMQConfig.ORDER_DELAY_ROUTING_KEY,
+                    orderId,
+                    message -> {
+                        // Thiết lập thời gian sống (TTL) linh hoạt theo từng message lấy từ cấu hình
+                        message.getMessageProperties().setExpiration(String.valueOf(orderExpirationTtlMs));
+                        return message;
+                    }
+            );
+            String durationStr = (orderExpirationTtlMs < 60000)
+                    ? (orderExpirationTtlMs / 1000) + " giây"
+                    : (orderExpirationTtlMs < 3600000)
+                    ? (orderExpirationTtlMs / 60000) + " phút"
+                    : (orderExpirationTtlMs / 3600000) + " giờ";
+            log.info("⏰ Đã lên lịch tự động hủy đơn hàng #{} sau {} qua RabbitMQ TTL",
+                    orderId, durationStr);
+        } catch (Exception e) {
+            log.warn("Không thể lên lịch tự động hủy cho đơn hàng #{}: {}", orderId, e.getMessage());
+        }
     }
 
     @Transactional

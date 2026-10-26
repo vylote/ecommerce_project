@@ -1,6 +1,10 @@
 notification:
   service-url: ${NOTIFICATION_SERVICE_URL}
 
+app:
+  order:
+    expiration-ttl-ms: ${ORDER_EXPIRATION_TTL_MS:3600000} # Môi trường production: 1 giờ (3,600,000 ms)
+
 # Trên server thường cấu hình tắt show-sql hoặc ddl-auto: validate
 spring:
   jpa:
