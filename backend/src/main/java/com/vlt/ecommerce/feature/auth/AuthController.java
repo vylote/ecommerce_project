@@ -20,6 +20,10 @@ import com.vlt.ecommerce.feature.auth.dto.request.RegisterRequest;
 import com.vlt.ecommerce.feature.auth.dto.response.TokenResponse;
 import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
 
+import com.vlt.ecommerce.feature.auth.dto.request.GoogleCompleteRegistrationRequest;
+import com.vlt.ecommerce.feature.auth.dto.request.GoogleLoginRequest;
+import com.vlt.ecommerce.feature.auth.dto.response.GoogleAuthResponse;
+
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -34,12 +38,73 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AuthController {
         AuthService authService;
+        GoogleAuthService googleAuthService;
         SessionService sessionService;
+
+        @PostMapping("/send-email-otp")
+        public ApiResponse<String> sendEmailOtp(@RequestBody @Valid com.vlt.ecommerce.feature.auth.dto.request.SendOtpRequest request) {
+                authService.sendEmailOtp(request);
+                return ApiResponse.<String>builder()
+                                .result("Mã xác thực OTP đã được gửi đến email của bạn")
+                                .build();
+        }
 
         @PostMapping("/register")
         public ApiResponse<UserResponse> register(@RequestBody @Valid RegisterRequest request) {
                 return ApiResponse.<UserResponse>builder()
                                 .result(authService.register(request))
+                                .build();
+        }
+
+        @PostMapping("/google")
+        public ResponseEntity<ApiResponse<GoogleAuthResponse>> googleLogin(
+                        @RequestBody @Valid GoogleLoginRequest request,
+                        @RequestHeader(value = "User-Agent", required = false) String userAgent) {
+                GoogleAuthResponse authResponse = googleAuthService.authenticateGoogle(request, userAgent);
+
+                if (Boolean.TRUE.equals(authResponse.getIsNewUser())) {
+                        return ResponseEntity.ok(ApiResponse.<GoogleAuthResponse>builder()
+                                        .result(authResponse)
+                                        .build());
+                }
+
+                // Nếu là tài khoản cũ -> Nặn cookie đăng nhập
+                TokenResponse tokenResponse = authResponse.getTokenResponse();
+                ResponseCookie jwtCookie = buildCookie("accessToken", tokenResponse.getAccessToken(), 24 * 60 * 60);
+                ResponseCookie refreshCookie = buildCookie("refreshToken", tokenResponse.getRefreshToken(), 7 * 24 * 60 * 60);
+
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .body(ApiResponse.<GoogleAuthResponse>builder()
+                                                .result(authResponse)
+                                                .build());
+        }
+
+        @PostMapping("/google/complete-registration")
+        public ResponseEntity<ApiResponse<String>> completeGoogleRegistration(
+                        @RequestBody @Valid GoogleCompleteRegistrationRequest request,
+                        @RequestHeader(value = "User-Agent", required = false) String userAgent) {
+                TokenResponse tokenResponse = googleAuthService.completeRegistration(request, userAgent);
+
+                ResponseCookie jwtCookie = buildCookie("accessToken", tokenResponse.getAccessToken(), 24 * 60 * 60);
+                ResponseCookie refreshCookie = buildCookie("refreshToken", tokenResponse.getRefreshToken(), 7 * 24 * 60 * 60);
+
+                return ResponseEntity.ok()
+                                .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
+                                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                                .body(ApiResponse.<String>builder()
+                                                .result("Đăng ký tài khoản thành công")
+                                                .build());
+        }
+
+        private ResponseCookie buildCookie(String name, String value, long maxAgeSeconds) {
+                return ResponseCookie.from(name, value)
+                                .httpOnly(true)
+                                .secure(false)
+                                .path("/")
+                                .maxAge(maxAgeSeconds)
+                                .sameSite("Lax")
                                 .build();
         }
 

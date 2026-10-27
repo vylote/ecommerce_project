@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react'; // Import icon con mắt
+import { Eye, EyeOff, Mail, Lock, ArrowRight, Loader2, ShieldAlert } from 'lucide-react';
 import api from '../../shared/utils/api';
 import { loginSuccess } from '../../store/slice/authSlice';
 import AuthLayout from '../../shared/components/AuthLayout';
 import loginBg from '../../assets/login-bg.jpg';
+import { useI18n } from '../../shared/i18n';
+import GoogleAuthButton from './GoogleAuthButton';
 
 export default function LoginPage() {
+  const { t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // State quản lý việc ẩn/hiện mật khẩu
   const [showPassword, setShowPassword] = useState(false);
@@ -30,6 +35,7 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg('');
+    setIsSubmitting(true);
     try {
       // 1. Gọi API Login để lấy Token/Cookie
       await api.post('/auth/login', { email, password });
@@ -48,125 +54,177 @@ export default function LoginPage() {
       }
     } catch (err) {
       if (err.response?.data?.code === 1025) {
-        setErrorMsg('Tài khoản của bạn đã bị khóa!');
+        setErrorMsg(t("auth.error_locked"));
       } else {
-        setErrorMsg('Tài khoản hoặc mật khẩu không chính xác!');
+        setErrorMsg(t("auth.error_invalid_credentials"));
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <AuthLayout bgImage={loginBg}>
-      <div className="card-body p-8">
-        <h2 className="text-3xl font-extrabold text-center text-base-content mb-1">
-          Đăng Nhập
-        </h2>
-        <p className="text-center text-sm text-base-content/60 mb-6">
-          Chào mừng bạn quay lại
-        </p>
+      <div className="p-7 sm:p-9">
+        {/* Header Icon & Title */}
+        <div className="text-center mb-7">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green-50 border border-green-200/80 mb-3 shadow-inner">
+            <Lock className="w-6 h-6 text-[#22B14C]" />
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+            {t("auth.login_title")}
+          </h2>
+          <p className="text-sm text-gray-500 mt-1">
+            {t("auth.login_subtitle")}
+          </p>
+        </div>
 
         {errorMsg && (
-          <div className="alert alert-error text-sm rounded-xl p-3 mb-5 text-error-content shadow-sm">
-            <span>{errorMsg}</span>
+          <div className="flex items-center gap-2.5 bg-red-50/90 border border-red-200/80 text-red-700 text-sm rounded-xl p-3.5 mb-5 shadow-xs animate-shake">
+            <ShieldAlert className="w-5 h-5 shrink-0 text-red-500" />
+            <span className="font-medium text-xs sm:text-sm">{errorMsg}</span>
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div className="form-control w-full">
-            <label className="label w-full justify-start pb-1.5">
-              <span className="label-text font-semibold">Email</span>
+        <form onSubmit={handleLogin} className="space-y-4">
+          {/* Email or Phone input */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+              {t("auth.email_or_phone")}
             </label>
-            <input
-              type="email"
-              placeholder="vidu@email.com"
-              className="input input-bordered w-full bg-base-200 border-2 border-base-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20 placeholder:text-base-content/40 transition-colors"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <span className="label-text-alt text-base-content/50 mt-1.5">
-              Dùng email đã đăng ký tài khoản
-            </span>
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#22B14C] transition-colors">
+                <Mail className="w-4 h-4" />
+              </div>
+              <input
+                type="text"
+                placeholder={t("auth.email_or_phone_placeholder")}
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-50/70 hover:bg-white focus:bg-white border border-gray-200 focus:border-[#22B14C] focus:ring-4 focus:ring-[#22B14C]/15 rounded-xl text-sm text-gray-800 placeholder-gray-400 outline-none transition-all shadow-2xs"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <p className="text-[11px] text-gray-400 mt-1 pl-1">
+              {t("auth.email_or_phone_help")}
+            </p>
           </div>
 
-          <div className="form-control w-full">
-            <div className="flex items-center justify-between pb-1.5">
-              <label className="label p-0">
-                <span className="label-text font-semibold">Mật khẩu</span>
+          {/* Password input */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                {t("auth.password")}
               </label>
               <Link
                 to="/forgot-password"
-                className="label-text-alt font-medium text-secondary hover:text-secondary/80 hover:underline"
+                className="text-xs font-semibold text-[#22B14C] hover:text-[#188c3a] transition-colors"
               >
-                Quên mật khẩu?
+                {t("auth.forgot_password")}
               </Link>
             </div>
-            
-            {/* VÙNG CHỨA INPUT MẬT KHẨU VÀ ICON CON MẮT */}
-            <div className="relative">
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#22B14C] transition-colors">
+                <Lock className="w-4 h-4" />
+              </div>
               <input
-                // Đổi type qua lại giữa text và password
                 type={showPassword ? "text" : "password"} 
-                placeholder="Tối thiểu 6 ký tự"
-                // Thêm pr-10 để chữ không bị tràn vào icon con mắt
-                className="input input-bordered w-full bg-base-200 border-2 border-base-300 focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/20 placeholder:text-base-content/40 transition-colors pr-10"
+                placeholder={t("auth.password_placeholder")}
+                className="w-full pl-10 pr-11 py-2.5 bg-gray-50/70 hover:bg-white focus:bg-white border border-gray-200 focus:border-[#22B14C] focus:ring-4 focus:ring-[#22B14C]/15 rounded-xl text-sm text-gray-800 placeholder-gray-400 outline-none transition-all shadow-2xs"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
               />
-              
-              {/* Nút bấm con mắt */}
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/50 hover:text-base-content transition-colors focus:outline-none"
+                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none transition-colors"
                 onClick={() => setShowPassword(!showPassword)}
-                tabIndex="-1" // Không focus vào nút này khi ấn Tab
+                tabIndex="-1"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4 text-gray-500" />}
               </button>
             </div>
           </div>
 
-          <div className="form-control pt-2">
+          {/* Remember me row */}
+          <div className="flex items-center justify-between pt-1">
+            <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-gray-600">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded text-[#22B14C] focus:ring-[#22B14C] border-gray-300 accent-[#22B14C] cursor-pointer"
+              />
+              <span>{t("auth.remember_me")}</span>
+            </label>
+          </div>
+
+          {/* Submit Button */}
+          <div className="pt-2">
             <button
               type="submit"
-              className="btn btn-primary w-full h-13 text-base font-bold tracking-wide border-none shadow-[0_14px_36px_-8px_rgba(34,177,76,0.6)] hover:shadow-[0_18px_40px_-8px_rgba(34,177,76,0.75)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all"
+              disabled={isSubmitting}
+              className="group relative w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#22B14C] to-[#168a37] hover:from-[#1ea143] hover:to-[#13762f] shadow-lg shadow-[#22B14C]/30 hover:shadow-[#22B14C]/45 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-70 disabled:pointer-events-none"
             >
-              ĐĂNG NHẬP
+              {isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <span>{t("auth.login_btn")}</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </button>
           </div>
         </form>
 
-        <div className="divider text-base-content/40 text-xs">HOẶC</div>
+        {/* Divider */}
+        <div className="my-5 flex items-center gap-3">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider shrink-0 select-none">
+            {t("auth.or")}
+          </span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
 
-        <p className="text-center text-sm text-base-content/70">
-          Mới biết đến chúng tôi?{' '}
-          <Link
-            to="/register"
-            className="font-bold text-secondary hover:text-secondary/80 hover:underline"
-          >
-            Đăng ký
-          </Link>
-        </p>
+        {/* Google Sign-in Button */}
+        <div className="mb-5">
+          <GoogleAuthButton />
+        </div>
+
+        {/* Register footer link */}
+        <div className="rounded-2xl bg-gray-50/80 border border-gray-100 p-3.5 text-center">
+          <p className="text-xs text-gray-600">
+            {t("auth.new_to_shop")}{' '}
+            <Link
+              to="/register"
+              className="font-bold text-[#22B14C] hover:text-[#188c3a] underline-offset-2 hover:underline transition-all inline-flex items-center gap-0.5"
+            >
+              {t("auth.register_now")}
+            </Link>
+          </p>
+        </div>
       </div>
 
       {showLockedModal && (
-        <div className="modal modal-open bg-black/50 backdrop-blur-sm">
-          <div className="modal-box text-center p-6 bg-white animate-fade-in-up shadow-2xl rounded-2xl">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50">
-              <span className="text-red-500 text-3xl font-bold">!</span>
+        <div className="modal modal-open bg-black/60 backdrop-blur-md">
+          <div className="modal-box text-center p-7 bg-white animate-fade-in-up shadow-2xl rounded-3xl border border-gray-100">
+            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-100 shadow-inner">
+              <ShieldAlert className="w-8 h-8 text-red-500" />
             </div>
-            <h3 className="font-bold text-2xl text-gray-800 mb-2">Tài khoản bị khóa</h3>
-            <p className="py-4 text-gray-600">
-              Tài khoản của bạn đã bị khóa do vi phạm chính sách của chúng tôi. Bạn đã bị buộc đăng xuất khỏi hệ thống.
+            <h3 className="font-extrabold text-2xl text-gray-900 mb-2">
+              {t("auth.account_locked_title")}
+            </h3>
+            <p className="text-sm text-gray-600 leading-relaxed py-2">
+              {t("auth.account_locked_desc")}
             </p>
             <div className="modal-action justify-center mt-6">
               <button 
-                className="btn btn-error text-white w-full max-w-[200px] shadow-lg shadow-red-200" 
+                className="btn w-full bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold border-none shadow-lg shadow-red-500/25 cursor-pointer" 
                 onClick={() => setShowLockedModal(false)}
               >
-                ĐÃ HIỂU
+                {t("auth.understand_btn")}
               </button>
             </div>
           </div>

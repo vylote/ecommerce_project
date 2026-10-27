@@ -13,6 +13,9 @@ import com.vlt.ecommerce.feature.user.User;
 public interface UserRepository extends JpaRepository<User, Long>{
     Boolean existsByEmail(String email);
     Optional<User> findByEmail(String email);
+    Boolean existsByPhone(String phone);
+    Optional<User> findByPhone(String phone);
+    Optional<User> findByEmailOrPhone(String email, String phone);
 
     @Query("SELECT u FROM User u WHERE "+
            "(:email IS NULL OR u.email LIKE CONCAT('%', :email, '%')) AND"+ 

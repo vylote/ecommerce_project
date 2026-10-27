@@ -9,9 +9,8 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LoginRequest {
-    @NotBlank
-    @Email
+    @NotBlank(message = "Email hoặc Số điện thoại không được để trống")
     String email;
-    @NotBlank
+    @NotBlank(message = "Mật khẩu không được để trống")
     String password;
 }

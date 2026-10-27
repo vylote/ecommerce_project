@@ -37,7 +37,9 @@ api.interceptors.response.use(
     if (
       originalRequest.url.includes('/auth/login') || 
       originalRequest.url.includes('/auth/register') ||
-      originalRequest.url.includes('/auth/refresh')
+      originalRequest.url.includes('/auth/refresh') ||
+      originalRequest.url.includes('/auth/google') ||
+      originalRequest.url.includes('/auth/send-email-otp')
     ) {
       return Promise.reject(error);
     }

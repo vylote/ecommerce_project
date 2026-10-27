@@ -47,7 +47,10 @@ const CartPage = () => {
   // 3. XỬ LÝ CẬP NHẬT SỐ LƯỢNG
   const handleUpdateQuantity = async (cartItemId, currentQty, change, item) => {
     const newQty = currentQty + change;
-    if (newQty < 1) return;
+    if (newQty <= 0) {
+      handleRemove(cartItemId);
+      return;
+    }
 
     // Cập nhật giao diện trước cho mượt (Optimistic Update)
     setCartItems(items => items.map(it => 
@@ -186,8 +189,13 @@ const CartPage = () => {
                            onChange={() => handleSelectItem(item.id)} />
                     <div className="w-20 h-20 min-w-20 max-w-20 min-h-20 max-h-20 shrink-0 border border-gray-200 rounded-sm overflow-hidden bg-gray-50 flex items-center justify-center">
                       <img 
-                        src={item.imageUrl || 'https://via.placeholder.com/80'} 
+                        src={item.imageUrl || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E"} 
                         alt={item.productName} 
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
+                        }}
                         className="w-full h-full object-cover" 
                       />
                     </div>

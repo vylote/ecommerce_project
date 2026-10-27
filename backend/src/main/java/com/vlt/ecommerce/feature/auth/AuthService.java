@@ -43,20 +43,56 @@ public class AuthService {
     SessionRepository sessionRepository;
     RoleRepository roleRepository;
     SessionService sessionService;
+    org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
+    com.vlt.ecommerce.common.mail.EmailService emailService;
 
-    public UserResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+    public void sendEmailOtp(com.vlt.ecommerce.feature.auth.dto.request.SendOtpRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+
+        if (userRepository.existsByEmail(email)) {
             throw new AppException(ErrorCode.RESOURCE_EXISTED);
         }
+
+        // Sinh mã OTP 6 chữ số ngẫu nhiên
+        String otp = String.format("%06d", new java.security.SecureRandom().nextInt(1_000_000));
+
+        // Lưu vào Redis với TTL 5 phút
+        String redisKey = "EMAIL_OTP:" + email;
+        redisTemplate.opsForValue().set(redisKey, otp, 5, java.util.concurrent.TimeUnit.MINUTES);
+
+        // Gửi email OTP
+        emailService.sendOtpEmail(email, otp);
+    }
+
+    public UserResponse register(RegisterRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+
+        if (userRepository.existsByEmail(email)) {
+            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+        }
+
+        if (userRepository.existsByPhone(request.getPhone())) {
+            throw new AppException(ErrorCode.PHONE_EXISTED);
+        }
+
+        // Xác thực mã OTP từ Redis
+        String redisKey = "EMAIL_OTP:" + email;
+        String cachedOtp = redisTemplate.opsForValue().get(redisKey);
+        if (cachedOtp == null || !cachedOtp.equals(request.getOtp().trim())) {
+            throw new AppException(ErrorCode.INVALID_OTP);
+        }
+
+        // Đã xác thực thành công -> Xóa OTP khỏi Redis
+        redisTemplate.delete(redisKey);
 
         Role buyerRole = roleRepository.findByName("ROLE_BUYER")
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         User user = userMapper.toUser(request);
-        user.setEmail(request.getEmail());
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setFullName(request.getFullName());
-        user.setPhone(request.getPhone());
+        user.setFullName(request.getFullName().trim());
+        user.setPhone(request.getPhone().trim());
         user.setRoles(new HashSet<>(Collections.singletonList(buyerRole)));
         user.setIsActive(true);
 
@@ -64,7 +100,8 @@ public class AuthService {
     }
     
     public TokenResponse login(LoginRequest request, String userAgent) {
-        var user = userRepository.findByEmail(request.getEmail())
+        String identifier = request.getEmail().trim();
+        var user = userRepository.findByEmailOrPhone(identifier, identifier)
                 .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {

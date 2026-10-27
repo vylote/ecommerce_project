@@ -50,7 +50,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String servletPath = request.getServletPath();
         String uri = request.getRequestURI();
         if (servletPath.startsWith("/auth/login") || servletPath.startsWith("/auth/register") || servletPath.startsWith("/auth/refresh")
-                || uri.contains("/auth/login") || uri.contains("/auth/register") || uri.contains("/auth/refresh")) {
+                || servletPath.startsWith("/auth/google") || servletPath.startsWith("/auth/send-email-otp")
+                || uri.contains("/auth/login") || uri.contains("/auth/register") || uri.contains("/auth/refresh")
+                || uri.contains("/auth/google") || uri.contains("/auth/send-email-otp")) {
             filterChain.doFilter(request, response);
             return;
         }

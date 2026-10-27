@@ -31,7 +31,10 @@ public enum ErrorCode {
     USER_LOCKED(1025, "Tài khoản của bạn đã bị khóa!", HttpStatus.FORBIDDEN),
     COMMISSION_ALREADY_RECORDED(1026, "Đơn hàng hoặc sản phẩm này đã được tính phí hoa hồng trước đó!", HttpStatus.CONFLICT),
     PLEASE_SELECT_VARIANT(1027, "Sản phẩm có biến thể, vui lòng chọn phân loại hàng cụ thể!", HttpStatus.BAD_REQUEST),
-    PRODUCT_HAS_NO_VARIANTS(1028, "Sản phẩm này là sản phẩm đơn, không có biến thể!", HttpStatus.BAD_REQUEST);
+    PRODUCT_HAS_NO_VARIANTS(1028, "Sản phẩm này là sản phẩm đơn, không có biến thể!", HttpStatus.BAD_REQUEST),
+    INVALID_OTP(1029, "Mã xác thực OTP không chính xác hoặc đã hết hạn!", HttpStatus.BAD_REQUEST),
+    PHONE_EXISTED(1030, "Số điện thoại này đã được sử dụng bởi một tài khoản khác!", HttpStatus.CONFLICT),
+    EMAIL_EXISTED(1031, "Email này đã được đăng ký tài khoản!", HttpStatus.CONFLICT);
 
     int code;
     String message;

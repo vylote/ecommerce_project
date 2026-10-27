@@ -29,4 +29,7 @@ public class RegisterRequest {
         message = "Số điện thoại không hợp lệ"
     )
     String phone;
+
+    @NotBlank(message = "Mã OTP không được để trống")
+    String otp;
 }
