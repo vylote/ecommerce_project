@@ -8,6 +8,7 @@ import { AppRoutes } from "./routes/AppRoutes";
 import { loginSuccess, logout, setInitialized } from "./store/slice/authSlice";
 import api from "./shared/utils/api";
 import { useNotification } from "./shared/hooks/useNotification.jsx";
+import { I18nProvider } from "./shared/i18n";
 
 function App() {
   const dispatch = useDispatch();
@@ -67,10 +68,12 @@ function App() {
 
   // 4. RENDER GIAO DIỆN CHÍNH KHI ĐÃ XÁC THỰC XONG
   return (
-    <BrowserRouter>
-      <Toaster position="top-right" />
-      <AppRoutes notifications={notifications} unreadCount={unreadCount} />
-    </BrowserRouter>
+    <I18nProvider>
+      <BrowserRouter>
+        <Toaster position="top-right" />
+        <AppRoutes notifications={notifications} unreadCount={unreadCount} />
+      </BrowserRouter>
+    </I18nProvider>
   );
 }
 

@@ -47,7 +47,10 @@ public class Notification {
 
     @Column(name = "is_read", nullable = false)
     @Builder.Default
-    boolean isRead = false;
+    Boolean isRead = false;
+
+    @Column(name = "read_at")
+    LocalDateTime readAt;
 
     @Column(name = "ref_id")
     Long refId; // ID của Order hoặc tài nguyên liên quan để Frontend làm link bấm vào

@@ -111,8 +111,12 @@ export const useNotification = (userId) => {
       const pageResult = response.data.result;
 
       if (pageResult && pageResult.data) {
-        setNotifications(pageResult.data);
-        const unread = pageResult.data.filter((n) => !n.isRead).length;
+        const normalized = pageResult.data.map((item) => ({
+          ...item,
+          isRead: item.isRead === true || item.read === true,
+        }));
+        setNotifications(normalized);
+        const unread = normalized.filter((n) => !n.isRead).length;
         setUnreadCount(unread);
       }
     } catch (error) {
@@ -131,8 +135,14 @@ export const useNotification = (userId) => {
     getOrCreateSocket(userId);
 
     const handlePayload = (payload) => {
-      setNotifications((prevList) => [payload, ...prevList]);
-      setUnreadCount((prev) => prev + 1);
+      const normalized = {
+        ...payload,
+        isRead: payload.isRead === true || payload.read === true,
+      };
+      setNotifications((prevList) => [normalized, ...prevList]);
+      if (!normalized.isRead) {
+        setUnreadCount((prev) => prev + 1);
+      }
     };
 
     socketListeners.add(handlePayload);
@@ -146,7 +156,11 @@ export const useNotification = (userId) => {
     try {
       await api.patch(`/notifications/${id}/read`);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+        prev.map((n) =>
+          n.id === id
+            ? { ...n, isRead: true, read: true, readAt: new Date().toISOString() }
+            : n
+        )
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (e) {
@@ -157,7 +171,14 @@ export const useNotification = (userId) => {
   const markAllAsRead = async () => {
     try {
       await api.patch("/notifications/read-all");
-      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setNotifications((prev) =>
+        prev.map((n) => ({
+          ...n,
+          isRead: true,
+          read: true,
+          readAt: new Date().toISOString(),
+        }))
+      );
       setUnreadCount(0);
     } catch (e) {
       console.error("Lỗi đánh dấu tất cả đã đọc:", e);

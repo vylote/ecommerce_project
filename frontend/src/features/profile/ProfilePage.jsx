@@ -6,18 +6,19 @@ import Navbar from "../../shared/components/Navbar";
 import ProfileSidebar from "./ProfileSidebar";
 import { updateUser } from "../../store/slice/authSlice";
 import UserAvatar from "../../shared/components/UserAvatar";
+import { useI18n } from "../../shared/i18n";
 
 export default function ProfilePage() {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const fileInputRef = useRef(null);
+  const { t } = useI18n();
 
   const [fullName, setFullName] = useState(user?.fullName || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [avatarFile, setAvatarFile] = useState(null);
   const [localPreview, setLocalPreview] = useState(""); // chỉ cho ảnh blob mới chọn
   const [saving, setSaving] = useState(false);
-
 
   // Dọn blob URL khi đổi ảnh hoặc unmount (effect này đồng bộ với hệ thống ngoài nên hợp lệ)
   useEffect(() => {
@@ -31,11 +32,11 @@ export default function ProfilePage() {
     if (!file) return;
 
     if (!["image/jpeg", "image/png"].includes(file.type)) {
-      toast.error("Chỉ hỗ trợ định dạng .JPEG, .PNG");
+      toast.error(t("profile.format_error"));
       return;
     }
     if (file.size > 1024 * 1024) {
-      toast.error("Dung lượng file tối đa là 1MB");
+      toast.error(t("profile.size_error"));
       return;
     }
     setAvatarFile(file);
@@ -62,9 +63,9 @@ export default function ProfilePage() {
       setAvatarFile(null);
       setLocalPreview(""); // quay về dùng avatarUrl từ Redux (URL Cloudinary mới)
 
-      toast.success("Cập nhật hồ sơ thành công");
+      toast.success(t("profile.update_success"));
     } catch (error) {
-      toast.error(error.response?.data?.message || "Cập nhật thất bại");
+      toast.error(error.response?.data?.message || t("profile.update_failed"));
     } finally {
       setSaving(false);
     }
@@ -78,9 +79,9 @@ export default function ProfilePage() {
 
         <div className="flex-1 bg-white rounded-sm shadow-sm p-8">
           <div className="border-b pb-4 mb-6">
-            <h1 className="text-xl font-medium text-gray-800">Hồ sơ của tôi</h1>
+            <h1 className="text-xl font-medium text-gray-800">{t("profile.title")}</h1>
             <p className="text-sm text-gray-500 mt-1">
-              Quản lý thông tin hồ sơ để bảo mật tài khoản
+              {t("profile.subtitle")}
             </p>
           </div>
 
@@ -90,16 +91,16 @@ export default function ProfilePage() {
               <form onSubmit={handleSave} className="space-y-6">
                 <div className="flex items-center">
                   <label className="w-32 text-right pr-5 text-sm text-gray-500">
-                    Email
+                    {t("profile.email")}
                   </label>
                   <div className="text-sm font-medium text-gray-800">
-                    {user?.email || "Chưa cập nhật"}
+                    {user?.email || t("profile.not_updated")}
                   </div>
                 </div>
 
                 <div className="flex items-center">
                   <label className="w-32 text-right pr-5 text-sm text-gray-500">
-                    Tên
+                    {t("profile.name")}
                   </label>
                   <input
                     type="text"
@@ -111,7 +112,7 @@ export default function ProfilePage() {
 
                 <div className="flex items-center">
                   <label className="w-32 text-right pr-5 text-sm text-gray-500">
-                    Số điện thoại
+                    {t("profile.phone")}
                   </label>
                   <input
                     type="text"
@@ -126,9 +127,9 @@ export default function ProfilePage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="bg-[#ee4d2d] hover:bg-[#d73211] text-white px-8 py-2 rounded-sm text-sm font-medium disabled:opacity-70 transition-colors"
+                    className="bg-[#ee4d2d] hover:bg-[#d73211] text-white px-8 py-2 rounded-sm text-sm font-medium disabled:opacity-70 transition-colors cursor-pointer"
                   >
-                    {saving ? "Đang lưu..." : "Lưu"}
+                    {saving ? t("profile.saving") : t("profile.save")}
                   </button>
                 </div>
               </form>
@@ -155,14 +156,14 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current.click()}
-                className="bg-white border border-gray-300 text-gray-700 px-4 py-2 text-sm rounded-sm hover:bg-gray-50 transition-colors"
+                className="bg-white border border-gray-300 text-gray-700 px-4 py-2 text-sm rounded-sm hover:bg-gray-50 transition-colors cursor-pointer"
               >
-                Chọn Ảnh
+                {t("profile.select_image")}
               </button>
 
               <div className="text-gray-400 text-xs mt-4 text-center leading-relaxed">
-                Dụng lượng file tối đa 1 MB <br />
-                Định dạng: .JPEG, .PNG
+                {t("profile.image_rules_size")} <br />
+                {t("profile.image_rules_format")}
               </div>
             </div>
           </div>

@@ -5,29 +5,15 @@ import toast from "react-hot-toast";
 import api from "../../shared/utils/api";
 import Navbar from "../../shared/components/Navbar";
 import ConfirmDialog from "../../shared/components/ConfirmDialog";
-import { Store } from "lucide-react"; // Thêm icon cho đẹp
+import { Store } from "lucide-react";
 import ReviewModal from "./ReviewModal";
-
-const TABS = [
-  { value: "ALL", label: "Tất cả" },
-  { value: "PENDING", label: "Chờ xác nhận" },
-  { value: "CONFIRMED", label: "Đã xác nhận" },
-  { value: "SHIPPING", label: "Đang giao" },
-  { value: "COMPLETED", label: "Hoàn thành" },
-  { value: "CANCELLED", label: "Đã hủy" },
-];
-
-const STATUS_LABEL = {
-  PENDING: "Chờ xác nhận",
-  CONFIRMED: "Đã xác nhận",
-  SHIPPING: "Đang giao",
-  COMPLETED: "Hoàn thành",
-  CANCELLED: "Đã hủy",
-};
+import ProfileSidebar from "../profile/ProfileSidebar";
+import { useI18n } from "../../shared/i18n";
 
 export default function OrdersPage() {
   const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
+  const { t } = useI18n();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +27,32 @@ export default function OrdersPage() {
 
   // State cho Đánh giá sản phẩm
   const [reviewOrder, setReviewOrder] = useState(null);
+
+  const tabs = [
+    { value: "ALL", label: t("order.tabs.all") },
+    { value: "PENDING", label: t("order.tabs.pending") },
+    { value: "CONFIRMED", label: t("order.tabs.confirmed") },
+    { value: "SHIPPING", label: t("order.tabs.shipping") },
+    { value: "COMPLETED", label: t("order.tabs.completed") },
+    { value: "CANCELLED", label: t("order.tabs.cancelled") },
+  ];
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "PENDING":
+        return t("order.tabs.pending");
+      case "CONFIRMED":
+        return t("order.tabs.confirmed");
+      case "SHIPPING":
+        return t("order.tabs.shipping");
+      case "COMPLETED":
+        return t("order.tabs.completed");
+      case "CANCELLED":
+        return t("order.tabs.cancelled");
+      default:
+        return status;
+    }
+  };
 
   useEffect(() => {
     fetchOrders(page);
@@ -76,7 +88,7 @@ export default function OrdersPage() {
       setOrders(res.data.result.data || []);
       setTotalPages(res.data.result.totalPages || 1);
     } catch (error) {
-      toast.error("Không thể tải danh sách đơn hàng");
+      toast.error(t("order.loading_error") || "Không thể tải danh sách đơn hàng");
     } finally {
       setLoading(false);
     }
@@ -86,7 +98,7 @@ export default function OrdersPage() {
     try {
       setProcessingId(orderId);
       await api.patch(`/orders/${orderId}/cancel`);
-      toast.success("Đã hủy đơn hàng");
+      toast.success(t("order.cancel_success") || "Đã hủy đơn hàng");
       fetchOrders(page);
     } catch (error) {
       toast.error(error.response?.data?.message || "Không thể hủy đơn hàng");
@@ -99,7 +111,7 @@ export default function OrdersPage() {
     try {
       setProcessingId(orderId);
       await api.patch(`/orders/${orderId}/complete`);
-      toast.success("Đã xác nhận hoàn tất đơn hàng");
+      toast.success(t("order.complete_success") || "Đã xác nhận hoàn tất đơn hàng");
       fetchOrders(page);
     } catch (error) {
       toast.error(
@@ -112,11 +124,10 @@ export default function OrdersPage() {
 
   const handleCancel = (orderId) => {
     setConfirmState({
-      title: "Hủy đơn hàng",
-      message:
-        "Bạn chắc chắn muốn hủy đơn hàng này? Hành động này không thể hoàn tác.",
-      confirmText: "Hủy đơn hàng",
-      cancelText: "Không",
+      title: t("order.cancel_confirm_title"),
+      message: t("order.cancel_confirm_message"),
+      confirmText: t("order.cancel_confirm_btn"),
+      cancelText: t("order.cancel_confirm_cancel"),
       variant: "danger",
       onConfirm: () => cancelOrderRequest(orderId),
     });
@@ -124,10 +135,10 @@ export default function OrdersPage() {
 
   const handleComplete = (orderId) => {
     setConfirmState({
-      title: "Xác nhận đã nhận hàng",
-      message: "Bạn xác nhận đã nhận được hàng cho đơn này chứ?",
-      confirmText: "Đã nhận hàng",
-      cancelText: "Chưa",
+      title: t("order.complete_confirm_title"),
+      message: t("order.complete_confirm_message"),
+      confirmText: t("order.complete_confirm_btn"),
+      cancelText: t("order.complete_confirm_cancel"),
       variant: "primary",
       onConfirm: () => completeOrderRequest(orderId),
     });
@@ -139,63 +150,17 @@ export default function OrdersPage() {
 
       <div className="max-w-[1200px] mx-auto py-6 flex gap-5">
         {/* Sidebar */}
-        <div className="w-48 shrink-0">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-200 shrink-0 bg-gray-100 flex items-center justify-center">
-              {user?.avatarUrl ? (
-                <img
-                  src={user.avatarUrl}
-                  alt="avatar"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <img
-                  src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || "U")}&background=random`}
-                  alt="avatar"
-                  className="w-full h-full object-cover"
-                />
-              )}
-            </div>
-            <div>
-              <div className="font-semibold text-sm text-gray-800 line-clamp-1">
-                {user?.fullName}
-              </div>
-              <Link
-                to="/profile"
-                className="text-xs text-gray-500 hover:text-[#ee4d2d]"
-              >
-                Sửa hồ sơ
-              </Link>
-            </div>
-          </div>
-          <nav className="flex flex-col gap-1 text-sm font-medium">
-            <Link
-              to="/profile"
-              className="py-2 text-gray-700 hover:text-[#ee4d2d]"
-            >
-              Tài khoản của tôi
-            </Link>
-            <Link to="/orders" className="py-2 text-[#ee4d2d]">
-              Đơn Mua
-            </Link>
-            <span className="py-2 text-gray-400 cursor-not-allowed">
-              Kho Voucher
-            </span>
-            <span className="py-2 text-gray-400 cursor-not-allowed">
-              Shopee Xu
-            </span>
-          </nav>
-        </div>
+        <ProfileSidebar />
 
         {/* Main content */}
         <div className="flex-1">
           {/* Tabs */}
           <div className="flex bg-white rounded-sm shadow-sm mb-4">
-            {TABS.map((tab) => (
+            {tabs.map((tab) => (
               <button
                 key={tab.value}
-                onClick={() => setActiveTab(tab.value)}
-                className={`flex-1 py-4 text-center text-sm font-medium transition-colors ${
+                onClick={() => handleTabChange(tab.value)}
+                className={`flex-1 py-4 text-center text-sm font-medium transition-colors cursor-pointer ${
                   activeTab === tab.value
                     ? "text-[#ee4d2d] border-b-2 border-[#ee4d2d]"
                     : "text-gray-700 hover:text-[#ee4d2d]"
@@ -208,14 +173,14 @@ export default function OrdersPage() {
 
           {loading ? (
             <div className="text-center py-20 text-gray-500 bg-white rounded-sm shadow-sm">
-              Đang tải đơn hàng...
+              {t("order.loading")}
             </div>
           ) : orders.length === 0 ? (
             <div className="text-center py-24 bg-white rounded-sm shadow-sm text-gray-500 flex flex-col items-center justify-center">
               <div className="text-6xl opacity-30 mb-4">🛒</div>
-              Chưa có đơn hàng nào
+              {t("order.empty")}
               {activeTab !== "ALL"
-                ? ` ở trạng thái "${STATUS_LABEL[activeTab]}"`
+                ? ` ${t("order.in_status")} "${getStatusLabel(activeTab)}"`
                 : ""}
               .
             </div>
@@ -230,11 +195,11 @@ export default function OrdersPage() {
                     <div className="flex justify-between items-center px-6 py-4 border-b">
                       <div className="flex items-center gap-2 font-medium text-sm text-gray-800">
                         <span className="bg-[#ee4d2d] text-white text-xs px-1.5 py-0.5 rounded-sm">
-                          Yêu Thích
+                          {t("order.favorite")}
                         </span>
                         {shopLabel}
-                        <button className="bg-primary/10 text-primary border border-primary px-2 py-0.5 text-xs rounded-sm flex items-center gap-1 hover:bg-primary/20 transition-colors ml-2">
-                          <Store size={12} /> Xem Shop
+                        <button className="bg-primary/10 text-primary border border-primary px-2 py-0.5 text-xs rounded-sm flex items-center gap-1 hover:bg-primary/20 transition-colors ml-2 cursor-pointer">
+                          <Store size={12} /> {t("order.view_shop")}
                         </button>
                       </div>
                       <span
@@ -246,7 +211,7 @@ export default function OrdersPage() {
                               : "text-[#ee4d2d]"
                         }`}
                       >
-                        {STATUS_LABEL[order.status] || order.status}
+                        {getStatusLabel(order.status)}
                       </span>
                     </div>
 
@@ -289,7 +254,7 @@ export default function OrdersPage() {
                     {/* Tổng tiền + hành động */}
                     <div className="bg-[#fffefb] px-6 py-5 border-t flex flex-col items-end">
                       <div className="text-sm mb-5 flex items-center">
-                        <span className="text-gray-600 mr-2">Thành tiền:</span>
+                        <span className="text-gray-600 mr-2">{t("order.total_amount")}</span>
                         <span className="font-medium text-[#ee4d2d] text-2xl">
                           ₫{order.totalAmount?.toLocaleString("vi-VN")}
                         </span>
@@ -300,31 +265,31 @@ export default function OrdersPage() {
                           <button
                             onClick={() => handleCancel(order.id)}
                             disabled={processingId === order.id}
-                            className="w-40 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
+                            className="w-40 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
                           >
-                            Hủy Đơn Hàng
+                            {t("order.cancel_order")}
                           </button>
                         )}
                         {order.status === "SHIPPING" && (
                           <button
                             onClick={() => handleComplete(order.id)}
                             disabled={processingId === order.id}
-                            className="w-40 py-2 text-sm bg-[#ee4d2d] text-white rounded-sm hover:bg-[#d73211] transition-colors disabled:opacity-50"
+                            className="w-40 py-2 text-sm bg-[#ee4d2d] text-white rounded-sm hover:bg-[#d73211] transition-colors disabled:opacity-50 cursor-pointer"
                           >
-                            Đã Nhận Hàng
+                            {t("order.received_order")}
                           </button>
                         )}
                         {order.status === "COMPLETED" && (
                           <button 
                             onClick={() => !order.reviewed && setReviewOrder(order)}
                             disabled={order.reviewed}
-                            className={`w-40 py-2 text-sm rounded-sm transition-colors ${
+                            className={`w-40 py-2 text-sm rounded-sm transition-colors cursor-pointer ${
                               order.reviewed 
                                 ? "text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed" 
                                 : "text-[#ee4d2d] bg-white border border-[#ee4d2d] hover:bg-orange-50"
                             }`}
                           >
-                            {order.reviewed ? "Đã Đánh Giá" : "Đánh Giá"}
+                            {order.reviewed ? t("order.rated") : t("order.rate")}
                           </button>
                         )}
                         {order.status === "CANCELLED" && (
@@ -334,9 +299,9 @@ export default function OrdersPage() {
                                 `/product/${order.items?.[0]?.productId}`,
                               )
                             }
-                            className="w-40 py-2 text-sm text-[#ee4d2d] bg-white border border-[#ee4d2d] rounded-sm hover:bg-orange-50 transition-colors"
+                            className="w-40 py-2 text-sm text-[#ee4d2d] bg-white border border-[#ee4d2d] rounded-sm hover:bg-orange-50 transition-colors cursor-pointer"
                           >
-                            Mua Lại
+                            {t("order.repurchase")}
                           </button>
                         )}
                       </div>
@@ -359,7 +324,7 @@ export default function OrdersPage() {
                   «
                 </button>
                 <button className="join-item btn btn-sm bg-[#ee4d2d] text-white border-[#ee4d2d] hover:bg-[#ee4d2d]">
-                  Trang {page} / {totalPages}
+                  {t("order.page")} {page} / {totalPages}
                 </button>
                 <button
                   disabled={page === totalPages}

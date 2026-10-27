@@ -2,6 +2,8 @@ package com.vlt.ecommerce.feature.notification;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +15,9 @@ public class NotificationResponse {
     String type;
     String title;
     String message;
-    boolean isRead;
+    @JsonProperty("isRead")
+    Boolean isRead;
     Long refId;
+    LocalDateTime readAt;
     LocalDateTime createdAt;
 }

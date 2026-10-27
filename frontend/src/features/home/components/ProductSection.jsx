@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../shared/utils/api";
+import { useI18n } from "../../../shared/i18n";
 
 export default function ProductSection() {
+  const { t } = useI18n();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pageInfo, setPageInfo] = useState({
@@ -56,7 +58,7 @@ export default function ProductSection() {
       <div className="space-y-4">
         <div className="bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm flex items-center justify-between">
           <h3 className="text-lg font-bold text-neutral uppercase tracking-wider">
-            Gợi Ý Hôm Nay
+            {t("home.daily_discovery")}
           </h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
@@ -80,7 +82,7 @@ export default function ProductSection() {
     <div className="space-y-4">
       <div className="bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm flex items-center justify-between">
         <h3 className="text-lg font-bold text-neutral uppercase tracking-wider">
-          Gợi Ý Hôm Nay
+          {t("home.daily_discovery")}
         </h3>
       </div>
 
@@ -134,7 +136,7 @@ export default function ProductSection() {
                       </span>
                     </div>
                     <div className="text-xs text-base-content/50">
-                      Đã bán {product.soldCount || 0}
+                      {t("home.sold")} {product.soldCount || 0}
                     </div>
                   </div>
                 </div>
@@ -150,7 +152,7 @@ export default function ProductSection() {
             to="/daily-discovery"
             className="btn btn-outline btn-primary px-8"
           >
-            Xem thêm
+            {t("home.view_more")}
           </Link>
         </div>
       )}

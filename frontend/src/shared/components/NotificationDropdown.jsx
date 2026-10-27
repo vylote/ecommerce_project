@@ -2,12 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Bell, CheckCheck, Package, Truck, CheckCircle, XCircle, ShoppingBag } from 'lucide-react';
 import { useNotification } from '../hooks/useNotification.jsx';
+import { useI18n } from '../i18n';
 
 export default function NotificationDropdown({ user }) {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
+  const { t } = useI18n();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotification(user?.id);
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export default function NotificationDropdown({ user }) {
         type="button"
         onClick={handleClickButton}
         className="flex items-center gap-1.5 hover:opacity-80 relative py-1 focus:outline-none transition-opacity cursor-pointer"
-        title="Thông báo"
+        title={t('nav.notifications')}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +70,7 @@ export default function NotificationDropdown({ user }) {
             d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
           />
         </svg>
-        <span>Thông báo</span>
+        <span>{t('nav.notifications')}</span>
         {user && unreadCount > 0 && (
           <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-4 text-center leading-tight shadow-xs animate-pulse">
             {unreadCount > 99 ? '99+' : unreadCount}
@@ -77,16 +79,20 @@ export default function NotificationDropdown({ user }) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white text-gray-800 border border-gray-100 rounded-xl shadow-2xl z-50 overflow-hidden origin-top-right animate-fade-in text-left">
-          {/* Header dropdown */}
-          <div className="p-3 border-b border-gray-100 flex items-center justify-between bg-gray-50/80">
+        <div className="absolute left-1/2 -translate-x-[35%] sm:-translate-x-[38%] mt-2.5 w-84 sm:w-[400px] bg-white text-gray-800 border border-gray-100 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] z-50 text-left animate-in fade-in duration-200">
+          {/* Mũi tên chỉ hướng tam giác trỏ thẳng vào nút Thông báo */}
+          <div className="absolute -top-2 left-[35%] sm:left-[38%] -translate-x-1/2 w-3.5 h-3.5 bg-gray-50 border-t border-l border-gray-200 rotate-45 z-20 pointer-events-none" />
+
+          <div className="rounded-2xl overflow-hidden">
+            {/* Header dropdown */}
+            <div className="p-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50 relative z-10">
             <div className="flex items-center gap-2">
               <span className="font-bold text-xs text-gray-900 uppercase tracking-wide">
-                Thông báo mới nhận
+                {t('notif.title')}
               </span>
               {unreadCount > 0 && (
                 <span className="bg-green-100 text-green-700 text-[11px] font-semibold px-2 py-0.5 rounded-full">
-                  {unreadCount} chưa đọc
+                  {unreadCount} {t('notif.unread')}
                 </span>
               )}
             </div>
@@ -96,7 +102,7 @@ export default function NotificationDropdown({ user }) {
                 onClick={markAllAsRead}
                 className="text-xs text-green-600 hover:text-green-700 font-medium hover:underline flex items-center gap-1 cursor-pointer"
               >
-                <CheckCheck size={13} /> Đọc tất cả
+                <CheckCheck size={13} /> {t('notif.mark_all_read')}
               </button>
             )}
           </div>
@@ -106,7 +112,7 @@ export default function NotificationDropdown({ user }) {
             {notifications.length === 0 ? (
               <div className="py-10 text-center text-gray-400 text-xs">
                 <span className="text-3xl block mb-2">📭</span>
-                Chưa có thông báo nào
+                {t('notif.empty')}
               </div>
             ) : (
               notifications.slice(0, 15).map((notif) => (
@@ -117,32 +123,54 @@ export default function NotificationDropdown({ user }) {
                     setIsOpen(false);
                     navigate('/orders');
                   }}
-                  className={`p-3.5 flex gap-3 items-start hover:bg-gray-50 cursor-pointer transition-colors ${
+                  className={`p-3.5 flex gap-3 items-start hover:bg-gray-50 cursor-pointer transition-colors relative group ${
                     !notif.isRead ? 'bg-green-50/30' : ''
                   }`}
                 >
                   <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
                     {getIcon(notif.type)}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-0 pr-6">
                     <div className="flex items-center justify-between gap-1">
                       <p className="text-xs font-bold text-gray-900 line-clamp-1">{notif.title}</p>
-                      {!notif.isRead && <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />}
                     </div>
                     <p className="text-xs text-gray-600 line-clamp-2 mt-0.5 leading-relaxed">
                       {notif.message}
                     </p>
-                    <span className="text-[10px] text-gray-400 mt-1 block">
-                      {notif.createdAt
-                        ? new Date(notif.createdAt).toLocaleTimeString('vi-VN', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            day: '2-digit',
-                            month: '2-digit',
-                          })
-                        : 'Vừa xong'}
-                    </span>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] text-gray-400">
+                        {notif.createdAt
+                          ? new Date(notif.createdAt).toLocaleTimeString('vi-VN', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              day: '2-digit',
+                              month: '2-digit',
+                            })
+                          : 'Vừa xong'}
+                      </span>
+                      {notif.isRead && notif.readAt && (
+                        <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1 py-0.2 rounded font-medium">
+                          Đã đọc
+                        </span>
+                      )}
+                    </div>
                   </div>
+                  {!notif.isRead && (
+                    <div className="absolute right-3 top-3.5 flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (notif.id) markAsRead(notif.id);
+                        }}
+                        className="w-5 h-5 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-green-600 hover:border-green-500 hover:bg-green-50 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer shadow-2xs"
+                        title="Đánh dấu đã đọc"
+                      >
+                        <CheckCheck size={11} />
+                      </button>
+                      <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -155,11 +183,12 @@ export default function NotificationDropdown({ user }) {
               onClick={() => setIsOpen(false)}
               className="text-xs font-semibold text-green-700 hover:text-green-800 block"
             >
-              Xem tất cả đơn mua →
+              {t('notif.view_all_orders')}
             </Link>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+    )}
+  </div>
   );
 }

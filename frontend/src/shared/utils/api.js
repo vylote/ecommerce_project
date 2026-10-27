@@ -7,6 +7,16 @@ const api = axios.create({
   withCredentials: true,
 });
 
+// Request Interceptor: Tự động đính kèm ngôn ngữ (Accept-Language) vào mọi request API
+api.interceptors.request.use(
+  (config) => {
+    const lang = localStorage.getItem("app_lang") || "vi";
+    config.headers["Accept-Language"] = lang;
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 let isRefreshing = false;
 let failedQueue = [];
 

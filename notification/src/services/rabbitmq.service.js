@@ -42,6 +42,8 @@ const initRabbitMQ = async () => {
                         type: data.type,
                         title: data.title,
                         message: data.message,
+                        isRead: data.isRead ?? false,
+                        readAt: data.readAt || null,
                         refId: data.refId,
                         createdAt: data.createdAt || new Date().toISOString()
                     };

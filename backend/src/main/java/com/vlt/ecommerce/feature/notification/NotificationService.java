@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.feature.notification;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -45,6 +46,8 @@ public class NotificationService {
             .type(type)
             .title(title)
             .message(message)
+            .isRead(false)
+            .readAt(null)
             .refId(refId)
             .build();
 
@@ -56,6 +59,8 @@ public class NotificationService {
                 .type(type)
                 .title(title)
                 .message(message)
+                .isRead(false)
+                .readAt(null)
                 .refId(refId)
                 .createdAt(savedNotification.getCreatedAt())
                 .build();
@@ -99,7 +104,9 @@ public class NotificationService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        notification.setRead(true);
+        notification.setIsRead(true);
+        notification.setReadAt(LocalDateTime.now());
+        notificationRepository.save(notification);
     }
 
     @Transactional

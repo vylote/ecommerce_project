@@ -4,6 +4,7 @@ import api from '../../shared/utils/api';
 import Navbar from '../../shared/components/Navbar';
 import ProfileSidebar from './ProfileSidebar';
 import { Plus, X } from 'lucide-react';
+import { useI18n } from '../../shared/i18n';
 
 const formatAddress = (addr) => {
   if (!addr) return '';
@@ -21,6 +22,7 @@ const INITIAL_FORM_STATE = {
 };
 
 export default function AddressPage() {
+  const { t } = useI18n();
   const [addresses, setAddresses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -91,11 +93,11 @@ export default function AddressPage() {
       if (editingId) {
         // Cập nhật
         await api.put(`/addresses/${editingId}`, formData);
-        toast.success('Cập nhật địa chỉ thành công');
+        toast.success(t('address.update_success'));
       } else {
         // Thêm mới
         await api.post('/addresses', formData);
-        toast.success('Thêm địa chỉ mới thành công');
+        toast.success(t('address.add_success'));
       }
       handleCloseModal();
       fetchAddresses(); // Refresh danh sách
@@ -107,10 +109,10 @@ export default function AddressPage() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) return;
+    if (!window.confirm(t('address.delete_confirm'))) return;
     try {
       await api.delete(`/addresses/${id}`);
-      toast.success('Đã xóa địa chỉ');
+      toast.success(t('address.delete_success'));
       fetchAddresses();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Không thể xóa địa chỉ');
@@ -122,7 +124,7 @@ export default function AddressPage() {
       // Gửi lại nguyên data của địa chỉ đó nhưng set isDefault = true
       // Theo code BE của bạn, nó sẽ tự động chạy hàm resetDefaultAddress cho các địa chỉ cũ
       await api.put(`/addresses/${addr.id}`, { ...addr, isDefault: true });
-      toast.success('Đã thiết lập làm địa chỉ mặc định');
+      toast.success(t('address.set_default_success'));
       fetchAddresses();
     } catch (error) {
       toast.error('Không thể thiết lập mặc định');
@@ -137,19 +139,19 @@ export default function AddressPage() {
 
         <div className="flex-1 bg-white rounded-sm shadow-sm p-8">
           <div className="flex justify-between items-center border-b pb-4 mb-6">
-            <h1 className="text-xl font-medium text-gray-800">Địa chỉ của tôi</h1>
+            <h1 className="text-xl font-medium text-gray-800">{t("address.title")}</h1>
             <button 
               onClick={handleOpenAddModal}
-              className="bg-[#ee4d2d] hover:bg-[#d73211] text-white px-4 py-2 rounded-sm text-sm font-medium flex items-center gap-1 transition-colors"
+              className="bg-[#ee4d2d] hover:bg-[#d73211] text-white px-4 py-2 rounded-sm text-sm font-medium flex items-center gap-1 transition-colors cursor-pointer"
             >
-              <Plus size={16} /> Thêm địa chỉ mới
+              <Plus size={16} /> {t("address.add_new")}
             </button>
           </div>
 
           {loading ? (
-            <div className="text-center py-10 text-gray-500">Đang tải địa chỉ...</div>
+            <div className="text-center py-10 text-gray-500">{t("address.loading")}</div>
           ) : addresses.length === 0 ? (
-            <div className="text-center py-10 text-gray-500">Bạn chưa có địa chỉ nào.</div>
+            <div className="text-center py-10 text-gray-500">{t("address.empty")}</div>
           ) : (
             <div className="space-y-0">
               {addresses.map((addr) => (
@@ -164,32 +166,32 @@ export default function AddressPage() {
                     <div className="text-gray-600 mb-2">{addr.ward}, {addr.district}, {addr.province}</div>
                     {addr.isDefault && (
                       <span className="border border-[#ee4d2d] text-[#ee4d2d] text-xs px-2 py-0.5 rounded-sm">
-                        Mặc định
+                        {t("address.default")}
                       </span>
                     )}
                   </div>
                   
                   <div className="flex flex-col items-end gap-3 text-sm">
                     <div className="space-x-3">
-                      <button onClick={() => handleOpenEditModal(addr)} className="text-blue-600 hover:underline">
-                        Cập nhật
+                      <button onClick={() => handleOpenEditModal(addr)} className="text-blue-600 hover:underline cursor-pointer">
+                        {t("address.update")}
                       </button>
                       {!addr.isDefault && (
-                        <button onClick={() => handleDelete(addr.id)} className="text-blue-600 hover:underline">
-                          Xóa
+                        <button onClick={() => handleDelete(addr.id)} className="text-blue-600 hover:underline cursor-pointer">
+                          {t("address.delete")}
                         </button>
                       )}
                     </div>
                     <button 
                       onClick={() => handleSetDefault(addr)}
                       disabled={addr.isDefault}
-                      className={`px-3 py-1 border rounded-sm transition-colors ${
+                      className={`px-3 py-1 border rounded-sm transition-colors cursor-pointer ${
                         addr.isDefault 
                           ? 'border-gray-200 text-gray-400 bg-white cursor-not-allowed' 
                           : 'border-gray-300 text-gray-700 hover:bg-gray-50'
                       }`}
                     >
-                      Thiết lập mặc định
+                      {t("address.set_default")}
                     </button>
                   </div>
                 </div>
@@ -205,9 +207,9 @@ export default function AddressPage() {
           <div className="bg-white rounded-sm w-[500px] shadow-lg overflow-hidden">
             <div className="px-6 py-4 border-b flex justify-between items-center">
               <h2 className="text-lg font-medium text-gray-800">
-                {editingId ? 'Cập nhật địa chỉ' : 'Địa chỉ mới'}
+                {editingId ? t("address.modal_edit_title") : t("address.modal_add_title")}
               </h2>
-              <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600">
+              <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600 cursor-pointer">
                 <X size={20} />
               </button>
             </div>
@@ -216,12 +218,12 @@ export default function AddressPage() {
               <div className="p-6 space-y-4">
                 <div className="flex gap-4">
                   <input 
-                    type="text" name="fullName" placeholder="Họ và tên" required
+                    type="text" name="fullName" placeholder={t("address.full_name")} required
                     value={formData.fullName} onChange={handleInputChange}
                     className="w-1/2 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
                   />
                   <input 
-                    type="text" name="phone" placeholder="Số điện thoại" required
+                    type="text" name="phone" placeholder={t("address.phone")} required
                     value={formData.phone} onChange={handleInputChange}
                     className="w-1/2 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
                   />
@@ -229,24 +231,24 @@ export default function AddressPage() {
 
                 <div className="flex gap-4">
                   <input 
-                    type="text" name="province" placeholder="Tỉnh/Thành phố" required
+                    type="text" name="province" placeholder={t("address.province")} required
                     value={formData.province} onChange={handleInputChange}
                     className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
                   />
                   <input 
-                    type="text" name="district" placeholder="Quận/Huyện" required
+                    type="text" name="district" placeholder={t("address.district")} required
                     value={formData.district} onChange={handleInputChange}
                     className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
                   />
                   <input 
-                    type="text" name="ward" placeholder="Phường/Xã" required
+                    type="text" name="ward" placeholder={t("address.ward")} required
                     value={formData.ward} onChange={handleInputChange}
                     className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
                   />
                 </div>
 
                 <input 
-                  type="text" name="detail" placeholder="Địa chỉ cụ thể (Số nhà, Tên đường...)" required
+                  type="text" name="detail" placeholder={t("address.detail")} required
                   value={formData.detail} onChange={handleInputChange}
                   className="w-full border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
                 />
@@ -257,22 +259,22 @@ export default function AddressPage() {
                     checked={formData.isDefault} onChange={handleInputChange}
                     className="w-4 h-4 accent-[#ee4d2d]"
                   />
-                  <span className="text-sm text-gray-700">Đặt làm địa chỉ mặc định</span>
+                  <span className="text-sm text-gray-700">{t("address.set_as_default")}</span>
                 </label>
               </div>
 
               <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t">
                 <button 
                   type="button" onClick={handleCloseModal}
-                  className="px-6 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-100 transition-colors"
+                  className="px-6 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-100 transition-colors cursor-pointer"
                 >
-                  Trở lại
+                  {t("address.back")}
                 </button>
                 <button 
                   type="submit" disabled={submitting}
-                  className="px-6 py-2 text-sm text-white bg-[#ee4d2d] rounded-sm hover:bg-[#d73211] transition-colors disabled:opacity-70"
+                  className="px-6 py-2 text-sm text-white bg-[#ee4d2d] rounded-sm hover:bg-[#d73211] transition-colors disabled:opacity-70 cursor-pointer"
                 >
-                  {submitting ? 'Đang lưu...' : 'Hoàn thành'}
+                  {submitting ? t("address.submitting") : t("address.submit")}
                 </button>
               </div>
             </form>

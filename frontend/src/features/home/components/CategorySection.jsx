@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../shared/utils/api";
+import { useI18n } from "../../../shared/i18n";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1";
 export default function CategorySection() {
+  const { t } = useI18n();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -95,7 +97,7 @@ export default function CategorySection() {
     <div className="bg-base-100 rounded-sm border border-base-200 shadow-sm">
       <div className="p-4 flex items-center justify-between">
         <h3 className="text-base font-medium text-neutral/70 uppercase tracking-wide">
-          Danh Mục
+          {t("home.categories")}
         </h3>
       </div>
 

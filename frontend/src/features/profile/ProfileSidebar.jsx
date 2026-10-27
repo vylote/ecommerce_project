@@ -2,10 +2,12 @@ import { Link, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { User, ClipboardList, Ticket, Coins } from "lucide-react";
 import UserAvatar from "../../shared/components/UserAvatar";
+import { useI18n } from "../../shared/i18n";
 
 export default function ProfileSidebar() {
   const { user } = useSelector((state) => state.auth);
   const location = useLocation();
+  const { t } = useI18n();
 
   const isProfile = location.pathname === "/profile";
   const isAddress = location.pathname === "/profile/addresses";
@@ -39,7 +41,7 @@ export default function ProfileSidebar() {
                 d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
               />
             </svg>
-            Sửa hồ sơ
+            {t("profile.edit_profile")}
           </Link>
         </div>
       </div>
@@ -57,7 +59,7 @@ export default function ProfileSidebar() {
             }`}
           >
             <User size={18} className="text-blue-500" />
-            <span>Tài khoản của tôi</span>
+            <span>{t("profile.my_account")}</span>
           </Link>
 
           {/* Các mục Con: Thụt lề bằng pl-7 (padding-left) */}
@@ -66,18 +68,18 @@ export default function ProfileSidebar() {
               to="/profile"
               className={`transition-colors ${isProfile ? "text-[#ee4d2d] font-medium" : "hover:text-[#ee4d2d]"}`}
             >
-              Hồ sơ
+              {t("profile.profile")}
             </Link>
             <Link
               to="/profile/addresses"
               className={`transition-colors ${isAddress ? "text-[#ee4d2d] font-medium" : "hover:text-[#ee4d2d]"}`}
             >
-              Địa chỉ
+              {t("profile.addresses")}
             </Link>
             <span className="text-gray-400 cursor-not-allowed">
-              Đổi mật khẩu
+              {t("profile.change_password")}
             </span>
-            <span className="text-gray-400 cursor-not-allowed">Ngân hàng</span>
+            <span className="text-gray-400 cursor-not-allowed">{t("profile.banks")}</span>
           </div>
         </div>
 
@@ -91,19 +93,19 @@ export default function ProfileSidebar() {
           }`}
         >
           <ClipboardList size={18} className="text-blue-500" />
-          <span>Đơn Mua</span>
+          <span>{t("nav.my_orders")}</span>
         </Link>
 
         {/* GROUP 3: KHO VOUCHER (Root level) */}
         <div className="flex items-center gap-2 text-gray-800 cursor-not-allowed">
           <Ticket size={18} className="text-[#ee4d2d]" />
-          <span>Kho Voucher</span>
+          <span>{t("profile.vouchers")}</span>
         </div>
 
         {/* GROUP 4: SHOPEE XU (Root level) */}
         <div className="flex items-center gap-2 text-gray-800 cursor-not-allowed">
           <Coins size={18} className="text-yellow-500" />
-          <span>Shopee Xu</span>
+          <span>{t("profile.coins")}</span>
         </div>
       </nav>
     </div>

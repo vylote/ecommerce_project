@@ -15,6 +15,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     /* mặc định jpa coi mọi @Query là lệnh đọc (SELECT) nên nếu thấy SQL bắt đầu bằng UPDATE, DELETE thì nó sẽ báo lỗi, khi thêm
     modify tức là đang kí xác nhận cáp quyền thay đổi dữ liệu */
     @Modifying
-    @Query("UPDATE Notification n SET n.isRead = true WHERE n.user.id = :userId AND n.isRead = false")
+    @Query("UPDATE Notification n SET n.isRead = true, n.readAt = CURRENT_TIMESTAMP WHERE n.user.id = :userId AND n.isRead = false")
     void markAllAsReadByUserId(@Param("userId") Long userId);
 }

@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 import { logout } from '../../store/slice/authSlice';
 import { useNotification } from '../../shared/hooks/useNotification.jsx';
+import SellerNotificationDropdown from './components/SellerNotificationDropdown';
 
 export default function SellerLayout() {
   const location = useLocation();
@@ -21,20 +22,15 @@ export default function SellerLayout() {
   // Hook thông báo thời gian thực
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotification(user?.id);
 
-  // --- STATE QUẢN LÝ DROPDOWN ---
+  // --- STATE QUẢN LÝ DROPDOWN AVATAR ---
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const notifDropdownRef = useRef(null);
 
   // Tự động đóng dropdown khi click ra ngoài vùng menu
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
-      }
-      if (notifDropdownRef.current && !notifDropdownRef.current.contains(event.target)) {
-        setIsNotifOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -91,90 +87,12 @@ export default function SellerLayout() {
             </Link>
 
             {/* ================= KHU VỰC THÔNG BÁO DROPDOWN ================= */}
-            <div className="relative" ref={notifDropdownRef}>
-              <button
-                onClick={() => setIsNotifOpen(!isNotifOpen)}
-                className="relative flex items-center gap-1.5 text-white/90 hover:text-white transition-colors focus:outline-none p-1.5 rounded-full hover:bg-white/10"
-                title="Thông báo"
-              >
-                <Bell size={20} />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[11px] font-bold px-1.5 py-0.2 rounded-full min-w-4 text-center ring-2 ring-green-600 animate-pulse">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
-              </button>
-
-              {isNotifOpen && (
-                <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white text-gray-800 border border-gray-100 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.15)] z-50 overflow-hidden origin-top-right">
-                  <div className="p-3.5 border-b border-gray-100 flex items-center justify-between bg-gray-50/70">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-gray-900">Thông báo Người Bán</span>
-                      {unreadCount > 0 && (
-                        <span className="bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-                          {unreadCount} mới
-                        </span>
-                      )}
-                    </div>
-                    {unreadCount > 0 && (
-                      <button
-                        onClick={markAllAsRead}
-                        className="text-xs text-green-600 hover:text-green-700 font-medium hover:underline"
-                      >
-                        Đọc tất cả
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="max-h-80 overflow-y-auto divide-y divide-gray-50">
-                    {notifications.length === 0 ? (
-                      <div className="py-8 text-center text-gray-400 text-sm">
-                        <span className="text-3xl block mb-2">📭</span>
-                        Chưa có thông báo nào
-                      </div>
-                    ) : (
-                      notifications.slice(0, 15).map((notif) => (
-                        <div
-                          key={notif.id || Math.random()}
-                          onClick={() => {
-                            if (!notif.isRead && notif.id) markAsRead(notif.id);
-                            setIsNotifOpen(false);
-                            navigate('/seller/orders');
-                          }}
-                          className={`p-3.5 flex gap-3 items-start hover:bg-gray-50 cursor-pointer transition-colors ${
-                            !notif.isRead ? 'bg-green-50/40' : ''
-                          }`}
-                        >
-                          <div className="w-8 h-8 rounded-full bg-green-100 text-green-700 flex items-center justify-center shrink-0 mt-0.5 text-base">
-                            {notif.type === 'NEW_ORDER' ? '🛒' : notif.type === 'PAYMENT_SUCCESS' ? '💰' : notif.type === 'ORDER_CANCELLED' ? '❌' : '🔔'}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-1">
-                              <p className="text-xs font-bold text-gray-900 line-clamp-1">{notif.title}</p>
-                              {!notif.isRead && <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />}
-                            </div>
-                            <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">{notif.message}</p>
-                            <span className="text-[10px] text-gray-400 mt-1 block">
-                              {notif.createdAt ? new Date(notif.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : 'Vừa xong'}
-                            </span>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  <div className="p-2 border-t border-gray-100 text-center bg-gray-50/50">
-                    <Link
-                      to="/seller/orders"
-                      onClick={() => setIsNotifOpen(false)}
-                      className="text-xs font-semibold text-green-700 hover:text-green-800"
-                    >
-                      Xem danh sách đơn hàng →
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
+            <SellerNotificationDropdown
+              notifications={notifications}
+              unreadCount={unreadCount}
+              markAsRead={markAsRead}
+              markAllAsRead={markAllAsRead}
+            />
 
             {/* ================= KHU VỰC AVATAR DROPDOWN ================= */}
             <div className="relative" ref={dropdownRef}>

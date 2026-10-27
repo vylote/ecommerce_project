@@ -4,9 +4,11 @@ import { Store, Trash2, ShoppingCart } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 import CartHeader from './CartHeader';
+import { useI18n } from '../../shared/i18n';
 
 const CartPage = () => {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,21 +22,21 @@ const CartPage = () => {
     try {
       setLoading(true);
       const res = await api.get('/cart');
-      setCartItems(res.data.result);
+      setCartItems(res.data.result || []);
     } catch (error) {
-      toast.error("Không thể tải giỏ hàng");
+      toast.error(t("cart.load_failed"));
     } finally {
       setLoading(false);
     }
   };
 
   // 2. GỘP NHÓM SẢN PHẨM THEO SHOP (Group by Shop)
-  const groupedCart = cartItems.reduce((acc, item) => {
+  const groupedCart = (cartItems || []).reduce((acc, item) => {
     const shopId = item.shopId;
     if (!acc[shopId]) {
       acc[shopId] = {
         shopId: shopId,
-        shopName: item.shopName || `Shop #${shopId}`, // API của bạn nên trả về shopName trong CartItemResponse
+        shopName: item.shopName || `Shop #${shopId}`,
         items: []
       };
     }
@@ -59,7 +61,7 @@ const CartPage = () => {
         quantity: newQty
       });
     } catch (error) {
-      toast.error(error.response?.data?.message || "Lỗi cập nhật số lượng");
+      toast.error(error.response?.data?.message || t("cart.update_qty_failed"));
       fetchCart(); // Rollback lại data thực tế nếu lỗi
     }
   };
@@ -71,9 +73,9 @@ const CartPage = () => {
       setCartItems(items => items.filter(item => item.id !== cartItemId));
       setSelectedItems(selected => selected.filter(id => id !== cartItemId));
       window.dispatchEvent(new Event('cart_updated'));
-      toast.success("Đã xóa sản phẩm");
+      toast.success(t("cart.delete_success"));
     } catch (error) {
-      toast.error("Không thể xóa sản phẩm");
+      toast.error(t("cart.delete_failed"));
     }
   };
 
@@ -102,7 +104,7 @@ const CartPage = () => {
 
   const handleCheckout = () => {
     if (selectedItems.length === 0) {
-      toast.error("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
+      toast.error(t("cart.select_item_alert"));
       return;
     }
     // Lọc ra toàn bộ thông tin của các item được tích chọn theo item.id
@@ -116,7 +118,7 @@ const CartPage = () => {
     return (
       <div className="bg-[#f5f5f5] min-h-screen">
         <CartHeader />
-        <div className="p-10 text-center">Đang tải giỏ hàng...</div>
+        <div className="p-10 text-center">{t("cart.loading")}</div>
       </div>
     );
   }
@@ -129,12 +131,12 @@ const CartPage = () => {
         <div className="max-w-6xl mx-auto py-8">
           <div className="bg-white rounded shadow-sm flex flex-col items-center justify-center py-24 px-4">
             <ShoppingCart size={96} strokeWidth={1} className="text-gray-300 mb-6" />
-            <p className="text-gray-500 mb-6">Giỏ hàng của bạn còn trống</p>
+            <p className="text-gray-500 mb-6">{t("cart.empty")}</p>
             <button
               onClick={() => navigate('/')}
-              className="px-10 py-3 bg-[#ee4d2d] hover:bg-[#d73211] text-white rounded font-medium transition-colors"
+              className="px-10 py-3 bg-[#ee4d2d] hover:bg-[#d73211] text-white rounded font-medium transition-colors cursor-pointer"
             >
-              Mua Ngay
+              {t("cart.buy_now")}
             </button>
           </div>
         </div>
@@ -155,12 +157,12 @@ const CartPage = () => {
               <input type="checkbox" className="mr-4 w-4 h-4 cursor-pointer" 
                      onChange={(e) => setSelectedItems(e.target.checked ? cartItems.map(i => i.id) : [])}
                      checked={selectedItems.length > 0 && selectedItems.length === cartItems.length} />
-              Sản Phẩm
+              {t("cart.product")}
             </div>
-            <div className="col-span-2 text-center">Đơn Giá</div>
-            <div className="col-span-2 text-center">Số Lượng</div>
-            <div className="col-span-2 text-center">Số Tiền</div>
-            <div className="col-span-1 text-center">Thao Tác</div>
+            <div className="col-span-2 text-center">{t("cart.unit_price")}</div>
+            <div className="col-span-2 text-center">{t("cart.quantity")}</div>
+            <div className="col-span-2 text-center">{t("cart.total_price")}</div>
+            <div className="col-span-1 text-center">{t("cart.action")}</div>
           </div>
 
           {/* Shop Sections */}
@@ -198,11 +200,11 @@ const CartPage = () => {
                       </span>
                       {item.variantName ? (
                         <span className="inline-block mt-1 text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded-xs w-fit border border-gray-200">
-                          Phân loại: <strong className="text-gray-800 font-medium">{item.variantName}</strong>
+                          {t("cart.variation")} <strong className="text-gray-800 font-medium">{item.variantName}</strong>
                         </span>
                       ) : (
                         <span className="inline-block mt-1 text-xs text-gray-400">
-                          Sản phẩm tiêu chuẩn
+                          {t("cart.standard_product")}
                         </span>
                       )}
                     </div>
@@ -228,7 +230,7 @@ const CartPage = () => {
                     <button 
                       onClick={() => handleRemove(item.id)} 
                       className="text-gray-400 hover:text-red-600 transition-colors"
-                      title="Xóa sản phẩm"
+                      title={t("cart.delete_product")}
                     >
                       <Trash2 size={18} className="mx-auto" />
                     </button>
@@ -248,22 +250,22 @@ const CartPage = () => {
                     setCartItems([]);
                     setSelectedItems([]);
                     window.dispatchEvent(new Event('cart_updated'));
-                    toast.success("Đã xóa toàn bộ giỏ hàng");
+                    toast.success(t("cart.delete_all_success"));
                   } catch (error) {
-                    toast.error("Không thể xóa giỏ hàng");
+                    toast.error(t("cart.delete_all_failed"));
                   }
                 }}
                 className="text-sm text-gray-500 hover:text-red-500"
               >
-                Xóa tất cả
+                {t("cart.delete_all")}
               </button>
             </div>
             <div className="flex items-center gap-4">
               <div className="text-sm">
-                Tổng thanh toán ({selectedItems.length} Sản phẩm): <span className="text-2xl font-bold text-[#ee4d2d] ml-2">{totalAmount.toLocaleString('vi-VN')}₫</span>
+                {t("cart.total_payment")} ({selectedItems.length} {t("cart.items_count")}): <span className="text-2xl font-bold text-[#ee4d2d] ml-2">{totalAmount.toLocaleString('vi-VN')}₫</span>
               </div>
               <button onClick={handleCheckout} className="px-10 py-3 bg-[#ee4d2d] hover:bg-[#d73211] text-white rounded font-medium transition-colors">
-                Mua Hàng
+                {t("cart.checkout_btn")}
               </button>
             </div>
           </div>

@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../shared/components/Navbar';
 import api from '../../shared/utils/api';
+import { useI18n } from '../../shared/i18n';
 
 export default function DailyDiscovery() {
+  const { t } = useI18n();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -61,7 +63,7 @@ export default function DailyDiscovery() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
         <div className="bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm mb-6">
           <h2 className="text-xl font-bold text-neutral uppercase tracking-wider">
-            Khám Phá Hàng Ngày
+            {t("home.daily_discovery_title")}
           </h2>
         </div>
 
@@ -121,7 +123,7 @@ export default function DailyDiscovery() {
                             <span>{product.averageRating ? Number(product.averageRating).toFixed(1) : "0.0"}</span>
                           </div>
                           <div className="text-xs text-base-content/50">
-                            Đã bán {product.soldCount || 0}
+                            {t("home.sold")} {product.soldCount || 0}
                           </div>
                         </div>
                       </div>
@@ -142,7 +144,7 @@ export default function DailyDiscovery() {
                     «
                   </button>
                   <button className="join-item btn bg-base-100 no-animation">
-                    Trang {page} / {pageInfo.totalPages}
+                    {t("order.page")} {page} / {pageInfo.totalPages}
                   </button>
                   <button 
                     className="join-item btn btn-outline"
