@@ -7,4 +7,4 @@ app:
 
 spring:
   rabbitmq:
-    virtual-host: ${RABBITMQ_VHOST:ecommerce_dev}
+    virtual-host: ${RABBITMQ_VHOST:/}

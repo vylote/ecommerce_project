@@ -5,9 +5,10 @@ const RABBITMQ_HOST = process.env.RABBITMQ_HOST || 'localhost';
 const RABBITMQ_PORT = process.env.RABBITMQ_PORT || 5672;
 const RABBITMQ_USERNAME = process.env.RABBITMQ_USERNAME || 'guest';
 const RABBITMQ_PASSWORD = process.env.RABBITMQ_PASSWORD || 'guest';
-const RABBITMQ_VHOST = process.env.RABBITMQ_VHOST || (process.env.NODE_ENV === 'production' ? 'ecommerce_prod' : 'ecommerce_dev');
+const vhostParam = process.env.RABBITMQ_VHOST;
+const vhostPath = (!vhostParam || vhostParam === '/') ? '' : encodeURIComponent(vhostParam);
 
-const RABBITMQ_URL = process.env.RABBITMQ_URL || `amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}:${RABBITMQ_PORT}/${RABBITMQ_VHOST}`;
+const RABBITMQ_URL = process.env.RABBITMQ_URL || `amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}:${RABBITMQ_PORT}/${vhostPath}`;
 const QUEUE_NAME = 'notification.queue';
 const FANOUT_EXCHANGE_NAME = 'notification.fanout.exchange';
 const EXCHANGE_NAME = 'notification.exchange';

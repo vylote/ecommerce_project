@@ -25,24 +25,24 @@ public class EmailNotificationConsumer {
 
     @RabbitListener(queues = RabbitMQConfig.NOTIFICATION_EMAIL_QUEUE)
     public void consumeEmailNotification(NotificationMessage message) {
-        log.info("📥 [RABBITMQ FANOUT -> EMAIL QUEUE] Nhận thông báo ID #{} cho User ID {}", 
+        log.info("[RABBITMQ FANOUT -> EMAIL QUEUE] Nhan thong bao ID #{} cho User ID {}", 
                 message.getId(), message.getUserId());
 
         if (message.getUserId() == null) {
-            log.warn("⚠️ [EMAIL CONSUMER] Bỏ qua vì không có userId trong message");
+            log.warn("[EMAIL CONSUMER] Bo qua vi khong co userId trong message");
             return;
         }
 
         try {
             User user = userRepository.findById(message.getUserId()).orElse(null);
             if (user == null) {
-                log.warn("⚠️ [EMAIL CONSUMER] Không tìm thấy user với id: {}", message.getUserId());
+                log.warn("[EMAIL CONSUMER] Khong tim thay user voi id: {}", message.getUserId());
                 return;
             }
 
             String email = user.getEmail();
             if (email == null || email.isBlank()) {
-                log.warn("⚠️ [EMAIL CONSUMER] User {} không có email hợp lệ", user.getId());
+                log.warn("[EMAIL CONSUMER] User {} khong co email hop le", user.getId());
                 return;
             }
 
@@ -54,7 +54,7 @@ public class EmailNotificationConsumer {
                     message.getRefId()
             );
         } catch (Exception e) {
-            log.error("❌ [EMAIL CONSUMER] Lỗi xử lý gửi email cho thông báo #{}: {}", message.getId(), e.getMessage(), e);
+            log.error("[EMAIL CONSUMER] Loi xu ly gui email cho thong bao #{}: {}", message.getId(), e.getMessage(), e);
         }
     }
 }

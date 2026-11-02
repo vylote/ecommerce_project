@@ -26,17 +26,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
             ClassPathResource resource = new ClassPathResource("static/images/categories/quanao.png");
             
             if (resource.exists()) {
-                System.out.println("✅ [THÀNH CÔNG] ĐÃ TÌM THẤY ẢNH!");
-                System.out.println("👉 Đường dẫn thực tế Java đang đọc: " + resource.getURL());
-                System.out.println("-> Nếu trình duyệt vẫn 404, hãy xóa cache trình duyệt (Ctrl + F5).");
+                System.out.println("[INFO] [DIAGNOSTIC] DA TIM THAY ANH TRONG CLASSPATH: " + resource.getURL());
+                System.out.println("[INFO] [DIAGNOSTIC] Neu trinh duyet van 404, hay xoa cache trinh duyet (Ctrl + F5).");
             } else {
-                System.out.println("❌ [THẤT BẠI] KHÔNG TÌM THẤY ẢNH TRONG CLASSPATH!");
-                System.out.println("👉 Mặc dù bạn đã bỏ ảnh vào thư mục 'src/main/resources/...', ");
-                System.out.println("   nhưng VS Code CHƯA copy nó sang thư mục biên dịch 'target/classes/'.");
-                System.out.println("🔧 CÁCH SỬA: Tắt Server -> Mở Terminal -> Gõ lệnh 'mvn clean compile' -> Bật lại Server.");
+                System.out.println("[WARN] [DIAGNOSTIC] KHONG TIM THAY ANH TRONG CLASSPATH!");
+                System.out.println("[WARN] [DIAGNOSTIC] File chua duoc sao chep sang 'target/classes/'. Chay 'mvn clean compile'.");
             }
         } catch (Exception e) {
-            System.out.println("⚠️ [LỖI HỆ THỐNG]: " + e.getMessage());
+            System.out.println("[ERROR] [DIAGNOSTIC]: " + e.getMessage());
         }
         System.out.println("=========================================================\n");
     }

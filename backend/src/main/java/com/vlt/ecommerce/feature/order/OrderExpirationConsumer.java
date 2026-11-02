@@ -47,7 +47,7 @@ public class OrderExpirationConsumer {
                         : (ttlMs < 3600000)
                         ? (ttlMs / 60000) + " phút"
                         : (ttlMs / 3600000) + " giờ";
-                log.info("⏰ Đơn hàng #{} đã quá hạn chờ thanh toán (TTL {}). Tiến hành tự động hủy và hoàn kho!", orderId, durationStr);
+                log.info("[ORDER EXPIRATION] Don hang #{} da qua han cho thanh toan (TTL {}). Tien hanh tu dong huy va hoan kho!", orderId, durationStr);
                 order.setStatus(OrderStatus.CANCELLED);
 
                 // Hoàn lại tồn kho cho sản phẩm và biến thể
@@ -60,9 +60,9 @@ public class OrderExpirationConsumer {
 
                 orderRepository.save(order);
                 eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order.getId()));
-                log.info(" Đã tự động hủy đơn hàng #{} và hoàn kho thành công qua RabbitMQ Dead Letter Queue!", orderId);
+                log.info("[ORDER EXPIRATION] Da tu dong huy don hang #{} va hoan kho thanh cong qua RabbitMQ Dead Letter Queue!", orderId);
             } else {
-                log.info("ℹ️ Đơn hàng #{} có trạng thái {} (không phải PENDING), bỏ qua hủy tự động.", orderId, order.getStatus());
+                log.info("[ORDER EXPIRATION] Don hang #{} co trang thai {} (khong phai PENDING), bo qua huy tu dong.", orderId, order.getStatus());
             }
         });
     }

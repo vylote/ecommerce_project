@@ -9,11 +9,11 @@ public class SmsService {
 
     public void sendNotificationSms(String phone, String title, String message, Long refId) {
         log.info("==========================================================");
-        log.info("📱 [SMS GATEWAY] Bắt đầu điều hướng tin nhắn SMS tới SĐT: {}", phone);
-        log.info("📱 [SMS TIÊU ĐỀ] {}", title);
-        log.info("📱 [SMS NỘI DUNG] {}", message);
+        log.info("[SMS GATEWAY] Dieu huong tin nhan SMS toi SDT: {}", phone);
+        log.info("[SMS TIEU DE] {}", title);
+        log.info("[SMS NOI DUNG] {}", message);
         if (refId != null) {
-            log.info("📱 [SMS THAM CHIẾU] Đơn hàng / Mã ref: #{}", refId);
+            log.info("[SMS THAM CHIEU] Don hang / Ma ref: #{}", refId);
         }
         log.info("==========================================================");
 
@@ -24,9 +24,9 @@ public class SmsService {
                     message,
                     refId != null ? " (Ref: #" + refId + ")" : ""
             );
-            log.info("✅ [SMS GATEWAY] Đã phân phát SMS thành công tới [{}] với nội dung: \"{}\"", phone, smsBody);
+            log.info("[SMS GATEWAY] Da phan phat SMS thanh cong toi [{}] voi noi dung: \"{}\"", phone, smsBody);
         } catch (Exception e) {
-            log.error("❌ [SMS GATEWAY] Lỗi khi gửi SMS tới {}: {}", phone, e.getMessage());
+            log.error("[SMS GATEWAY] Loi khi gui SMS toi {}: {}", phone, e.getMessage());
         }
     }
 }

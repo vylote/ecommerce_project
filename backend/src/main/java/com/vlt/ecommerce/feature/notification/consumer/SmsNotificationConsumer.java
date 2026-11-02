@@ -25,26 +25,25 @@ public class SmsNotificationConsumer {
 
     @RabbitListener(queues = RabbitMQConfig.NOTIFICATION_SMS_QUEUE)
     public void consumeSmsNotification(NotificationMessage message) {
-        log.info("📥 [RABBITMQ FANOUT -> SMS QUEUE] Nhận thông báo ID #{} cho User ID {}", 
+        log.info("[RABBITMQ FANOUT -> SMS QUEUE] Nhan thong bao ID #{} cho User ID {}", 
                 message.getId(), message.getUserId());
 
         if (message.getUserId() == null) {
-            log.warn("⚠️ [SMS CONSUMER] Bỏ qua vì không có userId trong message");
+            log.warn("[SMS CONSUMER] Bo qua vi khong co userId trong message");
             return;
         }
 
         try {
             User user = userRepository.findById(message.getUserId()).orElse(null);
             if (user == null) {
-                log.warn("⚠️ [SMS CONSUMER] Không tìm thấy user với id: {}", message.getUserId());
+                log.warn("[SMS CONSUMER] Khong tim thay user voi id: {}", message.getUserId());
                 return;
             }
 
             String phone = user.getPhone();
             if (phone == null || phone.isBlank()) {
-                // Nếu tài khoản chưa cập nhật số điện thoại trong hồ sơ, sử dụng số demo của user để mô phỏng nhận SMS
                 phone = "09" + String.format("%08d", user.getId());
-                log.info("ℹ️ [SMS CONSUMER] User #{} ({}) chưa cập nhật số điện thoại, mô phỏng gửi tới SĐT: {}", 
+                log.info("[SMS CONSUMER] User #{} ({}) chua cap nhat so dien thoai, mo phong gui toi SDT: {}", 
                         user.getId(), user.getFullName(), phone);
             }
 
@@ -55,7 +54,7 @@ public class SmsNotificationConsumer {
                     message.getRefId()
             );
         } catch (Exception e) {
-            log.error("❌ [SMS CONSUMER] Lỗi xử lý gửi SMS cho thông báo #{}: {}", message.getId(), e.getMessage(), e);
+            log.error("[SMS CONSUMER] Loi xu ly gui SMS cho thong bao #{}: {}", message.getId(), e.getMessage(), e);
         }
     }
 }

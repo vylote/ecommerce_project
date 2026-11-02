@@ -63,6 +63,7 @@ public class NotificationService {
                 .readAt(null)
                 .refId(refId)
                 .createdAt(savedNotification.getCreatedAt())
+                .sentTimestamp(System.currentTimeMillis())
                 .build();
 
         try {

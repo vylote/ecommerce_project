@@ -21,11 +21,11 @@ public class EmailService {
 
     public void sendOtpEmail(String toEmail, String otp) {
         log.info("==========================================================");
-        log.info("📧 [EMAIL OTP] Mã xác thực gửi đến {}: [{}] (Hạn 5 phút)", toEmail, otp);
+        log.info("[EMAIL OTP] Ma xac thuc gui den {}: [{}] (Han 5 phut)", toEmail, otp);
         log.info("==========================================================");
 
         if (mailSender == null || fromEmail == null || fromEmail.isBlank()) {
-            log.warn("⚠️ [EMAIL OTP] Chưa cấu hình SMTP Gmail (spring.mail.username). Sử dụng mã OTP trên log console để kiểm thử.");
+            log.warn("[EMAIL OTP] Chua cau hinh SMTP Gmail (spring.mail.username). Su dung ma OTP tren log console de kiem thu.");
             return;
         }
 
@@ -54,24 +54,24 @@ public class EmailService {
 
             helper.setText(htmlContent, true);
             mailSender.send(message);
-            log.info("✅ [EMAIL OTP] Đã gửi email thành công đến {}", toEmail);
+            log.info("[EMAIL OTP] Da gui email thanh cong den {}", toEmail);
         } catch (Exception e) {
-            log.error("❌ [EMAIL OTP] Không thể gửi email qua SMTP: {}", e.getMessage());
+            log.error("[EMAIL OTP] Khong the gui email qua SMTP: {}", e.getMessage());
         }
     }
 
     public void sendNotificationEmail(String toEmail, String fullName, String title, String content, Long refId) {
         log.info("==========================================================");
-        log.info("📧 [EMAIL NOTIFICATION] Gửi thông báo tới: {} ({})", toEmail, fullName != null ? fullName : "Quý khách");
-        log.info("📧 [TIÊU ĐỀ] {}", title);
-        log.info("📧 [NỘI DUNG] {}", content);
+        log.info("[EMAIL NOTIFICATION] Gui thong bao toi: {} ({})", toEmail, fullName != null ? fullName : "Quy khach");
+        log.info("[TIEU DE] {}", title);
+        log.info("[NOI DUNG] {}", content);
         if (refId != null) {
-            log.info("📧 [MÃ THAM CHIẾU] #{}", refId);
+            log.info("[MA THAM CHIEU] #{}", refId);
         }
         log.info("==========================================================");
 
         if (mailSender == null || fromEmail == null || fromEmail.isBlank()) {
-            log.info("ℹ️ [EMAIL NOTIFICATION] Chưa cấu hình SMTP Gmail. Mô phỏng gửi email thông báo thành công tới {}", toEmail);
+            log.info("[EMAIL NOTIFICATION] Chua cau hinh SMTP Gmail. Mo phong gui email thong bao thanh cong toi {}", toEmail);
             return;
         }
 
@@ -104,9 +104,9 @@ public class EmailService {
 
             helper.setText(htmlContent, true);
             mailSender.send(message);
-            log.info("✅ [EMAIL NOTIFICATION] Đã gửi email thành công qua SMTP tới {}", toEmail);
+            log.info("[EMAIL NOTIFICATION] Da gui email thanh cong qua SMTP toi {}", toEmail);
         } catch (Exception e) {
-            log.error("❌ [EMAIL NOTIFICATION] Gặp lỗi khi gửi email qua SMTP tới {}: {}", toEmail, e.getMessage());
+            log.error("[EMAIL NOTIFICATION] Gap loi khi gui email qua SMTP toi {}: {}", toEmail, e.getMessage());
         }
     }
 }

@@ -222,7 +222,7 @@ public class OrderService {
                     : (orderExpirationTtlMs < 3600000)
                     ? (orderExpirationTtlMs / 60000) + " phút"
                     : (orderExpirationTtlMs / 3600000) + " giờ";
-            log.info("⏰ Đã lên lịch tự động hủy đơn hàng #{} sau {} qua RabbitMQ TTL",
+            log.info("Đã lên lịch tự động hủy đơn hàng #{} sau {} qua RabbitMQ TTL",
                     orderId, durationStr);
         } catch (Exception e) {
             log.warn("Không thể lên lịch tự động hủy cho đơn hàng #{}: {}", orderId, e.getMessage());
