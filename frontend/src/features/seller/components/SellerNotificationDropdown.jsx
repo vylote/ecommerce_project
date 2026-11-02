@@ -121,14 +121,10 @@ export default function SellerNotificationDropdown({
         title="Thông báo người bán"
         aria-label="Thông báo người bán"
       >
-        {unreadCount > 0 ? (
-          <BellRing size={20} className="text-amber-300 animate-[wiggle_1s_ease-in-out_infinite]" />
-        ) : (
-          <Bell size={20} className="text-white/90 hover:text-white transition-colors" />
-        )}
+        <Bell size={20} className="text-white/90 hover:text-white transition-colors" />
 
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-rose-600 text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded-full min-w-4.5 text-center shadow-md ring-2 ring-emerald-600 animate-pulse">
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded-full min-w-4.5 text-center shadow-md ring-2 ring-emerald-600">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
@@ -136,7 +132,7 @@ export default function SellerNotificationDropdown({
 
       {/* Dropdown Popup */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-88 sm:w-[420px] bg-white text-gray-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 z-50 overflow-hidden origin-top-right transition-all animate-in fade-in duration-200">
+        <div className="absolute top-full right-0 mt-2.5 w-88 sm:w-[420px] bg-white text-gray-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 z-50 overflow-hidden origin-top-right transition-all animate-in fade-in duration-200">
           {/* Header Panel */}
           <div className="p-4 bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 text-white flex items-center justify-between">
             <div className="flex items-center gap-2.5">

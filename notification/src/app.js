@@ -1,4 +1,5 @@
-require ('dotenv').config()
+const path = require('path');
+require('dotenv').config({ path: [path.resolve(__dirname, '../../.env'), path.resolve(__dirname, '../.env')] });
 const express = require('express') //framework dùng để build web server và RESTful API 
 const http = require('http')
 const cors = require('cors') // cung cấp middleware xử lí Cross-Origin Resource Sharing

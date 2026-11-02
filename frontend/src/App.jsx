@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
-import { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 
 import { AppRoutes } from "./routes/AppRoutes";
 import { loginSuccess, logout, setInitialized } from "./store/slice/authSlice";
@@ -33,7 +33,7 @@ function App() {
         if (error.response?.status === 401) {
           dispatch(logout());
         } else {
-          Toaster.error("Không thể kết nối đến máy chủ, vui lòng thử lại sau!");
+          toast.error("Không thể kết nối đến máy chủ, vui lòng thử lại sau!");
         }
         console.log("[APP-6] Đã chạy xong dispatch logout trong catch.");
       } finally {
@@ -70,7 +70,7 @@ function App() {
   return (
     <I18nProvider>
       <BrowserRouter>
-        <Toaster position="top-right" />
+        <Toaster position="bottom-right" reverseOrder={false} />
         <AppRoutes notifications={notifications} unreadCount={unreadCount} />
       </BrowserRouter>
     </I18nProvider>

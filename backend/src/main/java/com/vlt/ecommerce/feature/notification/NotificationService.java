@@ -66,13 +66,13 @@ public class NotificationService {
                 .build();
 
         try {
-            log.info("=> Bắn thông báo bất đồng bộ qua RabbitMQ Exchange: {}", RabbitMQConfig.NOTIFICATION_EXCHANGE);
+            log.info("=> Bắn thông báo qua RabbitMQ Fanout Exchange (Web, Email, SMS): {}", RabbitMQConfig.NOTIFICATION_FANOUT_EXCHANGE);
             rabbitTemplate.convertAndSend(
-                    RabbitMQConfig.NOTIFICATION_EXCHANGE,
-                    RabbitMQConfig.NOTIFICATION_ROUTING_KEY,
+                    RabbitMQConfig.NOTIFICATION_FANOUT_EXCHANGE,
+                    "",
                     messagePayload
             );
-            log.info("=> Đã gửi thông báo vào RabbitMQ thành công!");
+            log.info("=> Đã phát tán thông báo tới tất cả các kênh (Fanout) thành công!");
         } catch (Exception e) {
             log.error("!!! BẮT ĐƯỢC LỖI GỬI RABBITMQ (KÍCH HOẠT FALLBACK HTTP SANG NODE.JS): {}", e.getMessage());
             try {

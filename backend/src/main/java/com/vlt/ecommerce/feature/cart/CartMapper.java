@@ -29,10 +29,10 @@ public interface CartMapper {
         java.math.BigDecimal totalPrice = price.multiply(java.math.BigDecimal.valueOf(cartItem.getQuantity()));
 
         String imageUrl = null;
-        if (variant != null && variant.getImageUrl() != null && !variant.getImageUrl().isEmpty()) {
+        if (variant != null && variant.getImageUrl() != null && !variant.getImageUrl().isEmpty() && !variant.getImageUrl().startsWith("blob:")) {
             imageUrl = variant.getImageUrl();
         } else if (product != null && product.getImages() != null && !product.getImages().isEmpty()) {
-            imageUrl = product.getImages().get(0).getUrl();
+            imageUrl = product.getImages().getFirst().getUrl();
         }
 
         return CartItemResponse.builder()

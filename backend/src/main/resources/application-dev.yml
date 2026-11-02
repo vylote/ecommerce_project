@@ -4,3 +4,7 @@ notification:
 app:
   order:
     expiration-ttl-ms: 30000 # Môi trường dev test: 30 giây
+
+spring:
+  rabbitmq:
+    virtual-host: ${RABBITMQ_VHOST:ecommerce_dev}

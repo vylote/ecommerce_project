@@ -419,10 +419,13 @@ export default function ProductDetailPage() {
                                 : "border-base-300 hover:border-primary/60 hover:text-primary bg-white text-base-content"
                             }`}
                           >
-                            {v.imageUrl && (
+                            {v.imageUrl && !v.imageUrl.startsWith("blob:") && (
                               <img
                                 src={v.imageUrl}
-                                alt={v.name}
+                                alt=""
+                                onError={(e) => {
+                                  e.currentTarget.style.display = "none";
+                                }}
                                 className="w-6 h-6 min-w-6 max-w-6 min-h-6 max-h-6 object-cover rounded-xs border shrink-0"
                               />
                             )}

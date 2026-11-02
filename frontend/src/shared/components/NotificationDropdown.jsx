@@ -72,7 +72,7 @@ export default function NotificationDropdown({ user }) {
         </svg>
         <span>{t('nav.notifications')}</span>
         {user && unreadCount > 0 && (
-          <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-4 text-center leading-tight shadow-xs animate-pulse">
+          <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full min-w-4 text-center leading-tight shadow-xs">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}

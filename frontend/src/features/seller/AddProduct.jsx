@@ -494,6 +494,7 @@ export default function AddProduct() {
       const newProductId = res.data.result.id;
 
       // 3. Upload hình ảnh sản phẩm
+      let uploadedPrimaryImageUrl = undefined;
       if (imageFiles.length > 0) {
         const uploadPromises = imageFiles.map((imgObj, index) => {
           const formData = new FormData();
@@ -506,7 +507,8 @@ export default function AddProduct() {
           });
         });
 
-        await Promise.all(uploadPromises);
+        const uploadResults = await Promise.all(uploadPromises);
+        uploadedPrimaryImageUrl = uploadResults[0]?.data?.result?.url;
       }
 
       // 3.1. Lưu các thuộc tính đặc tả chi tiết sản phẩm (Tab 2: Thông tin chi tiết)
@@ -532,7 +534,7 @@ export default function AddProduct() {
             name: v.name,
             sku: v.sku.trim() || undefined,
             price: Number(v.price),
-            imageUrl: imageFiles[0]?.previewUrl || undefined,
+            imageUrl: uploadedPrimaryImageUrl || undefined,
             isActive: true,
           });
           createdVariants.push({

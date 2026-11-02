@@ -59,4 +59,54 @@ public class EmailService {
             log.error("❌ [EMAIL OTP] Không thể gửi email qua SMTP: {}", e.getMessage());
         }
     }
+
+    public void sendNotificationEmail(String toEmail, String fullName, String title, String content, Long refId) {
+        log.info("==========================================================");
+        log.info("📧 [EMAIL NOTIFICATION] Gửi thông báo tới: {} ({})", toEmail, fullName != null ? fullName : "Quý khách");
+        log.info("📧 [TIÊU ĐỀ] {}", title);
+        log.info("📧 [NỘI DUNG] {}", content);
+        if (refId != null) {
+            log.info("📧 [MÃ THAM CHIẾU] #{}", refId);
+        }
+        log.info("==========================================================");
+
+        if (mailSender == null || fromEmail == null || fromEmail.isBlank()) {
+            log.info("ℹ️ [EMAIL NOTIFICATION] Chưa cấu hình SMTP Gmail. Mô phỏng gửi email thông báo thành công tới {}", toEmail);
+            return;
+        }
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail, "Ecommerce Marketplace");
+            helper.setTo(toEmail);
+            helper.setSubject("[Ecommerce] " + title);
+
+            String greetingName = (fullName != null && !fullName.isBlank()) ? fullName : "Quý khách";
+            String refInfo = (refId != null) ? "<p style=\"color: #6b7280; font-size: 13px; margin-top: 8px;\">Mã tham chiếu: <strong>#" + refId + "</strong></p>" : "";
+
+            String htmlContent = "<div style=\"font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 550px; margin: 0 auto; padding: 28px; border: 1px solid #e5e7eb; border-radius: 18px; background-color: #ffffff;\">"
+                    + "<div style=\"text-align: center; margin-bottom: 24px;\">"
+                    + "  <h2 style=\"color: #22B14C; margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px;\">ECOMMERCE</h2>"
+                    + "  <p style=\"color: #6b7280; font-size: 14px; margin-top: 4px;\">Thông báo hệ thống</p>"
+                    + "</div>"
+                    + "<p style=\"color: #374151; font-size: 15px; line-height: 1.6;\">Xin chào <strong>" + greetingName + "</strong>,</p>"
+                    + "<div style=\"background: #f8fafc; border-left: 4px solid #22B14C; border-radius: 8px; padding: 16px 20px; margin: 20px 0;\">"
+                    + "  <h3 style=\"margin: 0 0 8px 0; color: #1e293b; font-size: 16px; font-weight: 700;\">" + title + "</h3>"
+                    + "  <p style=\"margin: 0; color: #475569; font-size: 14px; line-height: 1.6;\">" + content + "</p>"
+                    +    refInfo
+                    + "</div>"
+                    + "<p style=\"color: #6b7280; font-size: 13px; line-height: 1.5;\">Bạn nhận được email này vì đã kích hoạt nhận thông báo từ hệ thống Ecommerce Marketplace.</p>"
+                    + "<hr style=\"border: none; border-top: 1px solid #f3f4f6; margin: 24px 0;\" />"
+                    + "<p style=\"color: #9ca3af; font-size: 12px; text-align: center; margin: 0;\">© 2026 Ecommerce Marketplace. All rights reserved.</p>"
+                    + "</div>";
+
+            helper.setText(htmlContent, true);
+            mailSender.send(message);
+            log.info("✅ [EMAIL NOTIFICATION] Đã gửi email thành công qua SMTP tới {}", toEmail);
+        } catch (Exception e) {
+            log.error("❌ [EMAIL NOTIFICATION] Gặp lỗi khi gửi email qua SMTP tới {}: {}", toEmail, e.getMessage());
+        }
+    }
 }

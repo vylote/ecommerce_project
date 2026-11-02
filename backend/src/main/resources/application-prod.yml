@@ -7,6 +7,8 @@ app:
 
 # Trên server thường cấu hình tắt show-sql hoặc ddl-auto: validate
 spring:
+  rabbitmq:
+    virtual-host: ${RABBITMQ_VHOST:ecommerce_prod}
   jpa:
     show-sql: false
     hibernate:

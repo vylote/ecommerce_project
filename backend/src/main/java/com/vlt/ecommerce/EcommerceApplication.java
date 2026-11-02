@@ -4,9 +4,9 @@ import java.util.TimeZone;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 @SpringBootApplication
 @EnableMethodSecurity
@@ -16,6 +16,7 @@ public class EcommerceApplication {
     public void init() {
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
     }
+
 	public static void main(String[] args) {
 		SpringApplication.run(EcommerceApplication.class, args);
 	}

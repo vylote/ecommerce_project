@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -19,9 +20,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Configuration
 public class RabbitMQConfig {
 
-    // ================= 1. HÀNG ĐỢI THÔNG BÁO (NOTIFICATION) =================
+    // ================= 1. FANOUT EXCHANGE CHO MULTI-CHANNEL NOTIFICATIONS (WEB, EMAIL, SMS) =================
+    public static final String NOTIFICATION_FANOUT_EXCHANGE = "notification.fanout.exchange";
+    public static final String NOTIFICATION_QUEUE = "notification.queue"; // Web push (Node.js microservice)
+    public static final String NOTIFICATION_EMAIL_QUEUE = "notification.email.queue"; // Email worker
+    public static final String NOTIFICATION_SMS_QUEUE = "notification.sms.queue"; // SMS worker
+
+    // (Giữ lại cấu hình Direct Exchange để tương thích ngược nếu cần)
     public static final String NOTIFICATION_EXCHANGE = "notification.exchange";
-    public static final String NOTIFICATION_QUEUE = "notification.queue";
     public static final String NOTIFICATION_ROUTING_KEY = "notification.routing.key";
 
     // ================= 2. HÀNG ĐỢI HỦY ĐƠN HÀNG HẾT HẠN (DELAY + DEAD LETTER QUEUE) =================
@@ -48,7 +54,12 @@ public class RabbitMQConfig {
         return template;
     }
 
-    // --- Cấu hình Beans cho Notification ---
+    // --- Cấu hình Beans cho Notification Fanout Exchange & Queues ---
+    @Bean
+    public FanoutExchange notificationFanoutExchange() {
+        return new FanoutExchange(NOTIFICATION_FANOUT_EXCHANGE, true, false);
+    }
+
     @Bean
     public DirectExchange notificationExchange() {
         return new DirectExchange(NOTIFICATION_EXCHANGE, true, false);
@@ -59,6 +70,35 @@ public class RabbitMQConfig {
         return new Queue(NOTIFICATION_QUEUE, true);
     }
 
+    @Bean
+    public Queue notificationEmailQueue() {
+        return new Queue(NOTIFICATION_EMAIL_QUEUE, true);
+    }
+
+    @Bean
+    public Queue notificationSmsQueue() {
+        return new Queue(NOTIFICATION_SMS_QUEUE, true);
+    }
+
+    // 1. Binding Web Push Queue tới Fanout Exchange
+    @Bean
+    public Binding notificationWebFanoutBinding(Queue notificationQueue, FanoutExchange notificationFanoutExchange) {
+        return BindingBuilder.bind(notificationQueue).to(notificationFanoutExchange);
+    }
+
+    // 2. Binding Email Queue tới Fanout Exchange
+    @Bean
+    public Binding notificationEmailFanoutBinding(Queue notificationEmailQueue, FanoutExchange notificationFanoutExchange) {
+        return BindingBuilder.bind(notificationEmailQueue).to(notificationFanoutExchange);
+    }
+
+    // 3. Binding SMS Queue tới Fanout Exchange
+    @Bean
+    public Binding notificationSmsFanoutBinding(Queue notificationSmsQueue, FanoutExchange notificationFanoutExchange) {
+        return BindingBuilder.bind(notificationSmsQueue).to(notificationFanoutExchange);
+    }
+
+    // Direct Binding cũ để duy trì tương thích
     @Bean
     public Binding notificationBinding(Queue notificationQueue, DirectExchange notificationExchange) {
         return BindingBuilder.bind(notificationQueue).to(notificationExchange).with(NOTIFICATION_ROUTING_KEY);
