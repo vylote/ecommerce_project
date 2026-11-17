@@ -1,3 +1,4 @@
+import ProductImage from "../../../shared/components/ProductImage";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../shared/utils/api";
@@ -97,22 +98,12 @@ export default function ProductSection() {
               className="card bg-base-100 rounded-xl border border-base-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all overflow-hidden group cursor-pointer flex flex-col"
             >
               <figure className="relative aspect-square bg-base-200 overflow-hidden shrink-0">
-                {displayImageUrl ? (
-                  <img
+                <ProductImage
                     src={displayImageUrl}
                     alt={product.name}
                     referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='36'%3E📦%3C/text%3E%3C/svg%3E";
-                    }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-base-content/20 bg-base-200">
-                    <span className="text-4xl opacity-50">📦</span>
-                  </div>
-                )}
               </figure>
 
               <div className="card-body p-3 flex flex-col justify-between flex-1 gap-2">

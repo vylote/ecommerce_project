@@ -1,3 +1,4 @@
+import ProductImage from "../../shared/components/ProductImage";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -335,15 +336,11 @@ export default function CheckoutPage() {
                 >
                   <div className="col-span-6 flex gap-3 items-center">
                     <div className="w-12 h-12 border shrink-0 bg-gray-100 flex items-center justify-center overflow-hidden">
-                      {item.imageUrl ? (
-                        <img
+                      <ProductImage
                           src={item.imageUrl}
                           alt={item.productName}
                           className="w-full h-full object-cover"
                         />
-                      ) : (
-                        <span className="text-xl opacity-50">📦</span>
-                      )}
                     </div>
                     <div className="flex flex-col min-w-0">
                       <span className="text-sm font-medium line-clamp-2 text-gray-800">

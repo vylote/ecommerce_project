@@ -1,3 +1,4 @@
+import ProductImage from "../../shared/components/ProductImage";
 import { useState, useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import Navbar from "../../shared/components/Navbar";
@@ -294,17 +295,11 @@ export default function SearchPage() {
                       className="border border-base-200 rounded-sm hover:border-primary transition-colors block overflow-hidden group"
                     >
                       <div className="aspect-square bg-base-200 w-full relative">
-                        {img ? (
-                          <img
+                        <ProductImage
                             src={img}
                             alt={p.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                           />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <span className="opacity-30">📦</span>
-                          </div>
-                        )}
                       </div>
                       <div className="p-2">
                         <div className="text-primary font-medium text-sm">
@@ -444,17 +439,11 @@ export default function SearchPage() {
                       className="bg-base-100 border border-transparent hover:border-primary shadow-[0_1px_1px_0_rgba(0,0,0,0.05)] hover:shadow-md hover:-translate-y-[1px] transition-all flex flex-col group relative pb-2"
                     >
                       <figure className="relative aspect-square bg-base-200 w-full overflow-hidden shrink-0">
-                        {displayImageUrl ? (
-                          <img
+                        <ProductImage
                             src={displayImageUrl}
                             alt={product.name}
                             className="w-full h-full object-cover"
                           />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-base-content/20 bg-base-200">
-                            <span className="text-3xl opacity-50">📦</span>
-                          </div>
-                        )}
                       </figure>
 
                       <div className="p-2 flex flex-col flex-1">

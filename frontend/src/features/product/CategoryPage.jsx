@@ -1,3 +1,4 @@
+import ProductImage from "../../shared/components/ProductImage";
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../shared/components/Navbar';
@@ -347,17 +348,11 @@ export default function CategoryPage() {
                       className="bg-base-100 border border-transparent hover:border-primary shadow-[0_1px_1px_0_rgba(0,0,0,0.05)] hover:shadow-md hover:-translate-y-[1px] transition-all flex flex-col group relative pb-2"
                     >
                       <figure className="relative aspect-square bg-base-200 w-full overflow-hidden shrink-0">
-                        {displayImageUrl ? (
-                          <img 
+                        <ProductImage
                             src={displayImageUrl} 
                             alt={product.name} 
                             className="w-full h-full object-cover"
                           />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-base-content/20 bg-base-200">
-                            <span className="text-3xl opacity-50">📦</span>
-                          </div>
-                        )}
                       </figure>
                       
                       <div className="p-2 flex flex-col flex-1">

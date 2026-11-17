@@ -149,6 +149,17 @@ export default {
   "cart.update_qty_failed": "Failed to update quantity",
 
   // ================= 9. LOGIN & REGISTER (AUTH) =================
+  "auth.language": "Language",
+  "auth.back_to_home": "Back to home",
+  "auth.show": "Show",
+  "auth.hide": "Hide",
+  "auth.show_password": "Show password",
+  "auth.hide_password": "Hide password",
+  "auth.logging_in": "Logging in...",
+  "auth.connecting_google": "Connecting to Google...",
+  "auth.sending_otp": "Sending verification code...",
+  "auth.verifying_otp": "Verifying...",
+  "auth.close": "Close",
   "auth.login_title": "Log In",
   "auth.login_subtitle": "Welcome back",
   "auth.register_title": "Create Account",

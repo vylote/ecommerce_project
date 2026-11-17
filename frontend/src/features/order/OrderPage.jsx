@@ -1,3 +1,4 @@
+import ProductImage from "../../shared/components/ProductImage";
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -224,15 +225,11 @@ export default function OrdersPage() {
                           className="flex items-center gap-4 px-6 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                           <div className="w-20 h-20 border shrink-0 bg-gray-100 flex items-center justify-center overflow-hidden">
-                            {item.productImageUrl ? (
-                              <img
+                            <ProductImage
                                 src={item.productImageUrl}
                                 alt={item.productName}
                                 className="w-full h-full object-cover"
                               />
-                            ) : (
-                              <span className="text-2xl">📦</span>
-                            )}
                           </div>
                           <div className="flex-1 text-sm">
                             <div className="line-clamp-2 text-gray-800 text-base">

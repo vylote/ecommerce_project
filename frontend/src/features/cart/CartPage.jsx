@@ -1,3 +1,4 @@
+import ProductImage from "../../shared/components/ProductImage";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, Trash2, ShoppingCart } from 'lucide-react';
@@ -188,16 +189,7 @@ const CartPage = () => {
                            checked={selectedItems.includes(item.id)}
                            onChange={() => handleSelectItem(item.id)} />
                     <div className="w-20 h-20 min-w-20 max-w-20 min-h-20 max-h-20 shrink-0 border border-gray-200 rounded-sm overflow-hidden bg-gray-50 flex items-center justify-center">
-                      <img 
-                        src={item.imageUrl || "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E"} 
-                        alt={item.productName} 
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
-                        }}
-                        className="w-full h-full object-cover" 
-                      />
+                      <ProductImage src={item.imageUrl} alt={item.productName} referrerPolicy="no-referrer" />
                     </div>
                     <div className="flex flex-col min-w-0 flex-1 pr-2">
                       <span 

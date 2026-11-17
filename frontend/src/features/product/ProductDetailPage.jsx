@@ -1,3 +1,4 @@
+import ProductImage from "../../shared/components/ProductImage";
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux"; // THÊM IMPORT NÀY
@@ -294,9 +295,7 @@ export default function ProductDetailPage() {
                   )}
                 </>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-4xl opacity-30">
-                  📦
-                </div>
+                <ProductImage alt={product.name} />
               )}
             </div>
 

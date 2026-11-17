@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, ArrowRight, Loader2, ShieldAlert } from 'lucide-react';
 import api from '../../shared/utils/api';
 import { loginSuccess } from '../../store/slice/authSlice';
 import AuthLayout from '../../shared/components/AuthLayout';
-import loginBg from '../../assets/login-bg.jpg';
 import { useI18n } from '../../shared/i18n';
 import GoogleAuthButton from './GoogleAuthButton';
 
@@ -23,11 +21,12 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [showLockedModal, setShowLockedModal] = useState(false);
+  const [showLockedModal, setShowLockedModal] = useState(
+    () => localStorage.getItem('account_locked_alert') === 'true'
+  );
 
   useEffect(() => {
     if (localStorage.getItem('account_locked_alert') === 'true') {
-      setShowLockedModal(true);
       localStorage.removeItem('account_locked_alert');
     }
   }, []);
@@ -64,165 +63,131 @@ export default function LoginPage() {
   };
 
   return (
-    <AuthLayout bgImage={loginBg}>
-      <div className="p-7 sm:p-9">
-        {/* Header Icon & Title */}
-        <div className="text-center mb-7">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green-50 border border-green-200/80 mb-3 shadow-inner">
-            <Lock className="w-6 h-6 text-[#22B14C]" />
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+    <AuthLayout>
+      <div className="p-6 sm:p-9">
+        <div className="mb-7">
+          <h1 className="text-2xl font-bold text-base-content">
             {t("auth.login_title")}
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          </h1>
+          <p className="text-sm text-base-content/60 mt-2">
             {t("auth.login_subtitle")}
           </p>
         </div>
 
         {errorMsg && (
-          <div className="flex items-center gap-2.5 bg-red-50/90 border border-red-200/80 text-red-700 text-sm rounded-xl p-3.5 mb-5 shadow-xs animate-shake">
-            <ShieldAlert className="w-5 h-5 shrink-0 text-red-500" />
-            <span className="font-medium text-xs sm:text-sm">{errorMsg}</span>
+          <div id="login-error" role="alert" className="bg-error/5 border border-error/30 text-error text-sm rounded-lg p-3 mb-5">
+            {errorMsg}
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          {/* Email or Phone input */}
+        <form onSubmit={handleLogin} className="space-y-5" aria-busy={isSubmitting}>
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label htmlFor="login-email" className="block text-sm font-medium mb-2">
               {t("auth.email_or_phone")}
             </label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#22B14C] transition-colors">
-                <Mail className="w-4 h-4" />
-              </div>
-              <input
-                type="text"
-                placeholder={t("auth.email_or_phone_placeholder")}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50/70 hover:bg-white focus:bg-white border border-gray-200 focus:border-[#22B14C] focus:ring-4 focus:ring-[#22B14C]/15 rounded-xl text-sm text-gray-800 placeholder-gray-400 outline-none transition-all shadow-2xs"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <p className="text-[11px] text-gray-400 mt-1 pl-1">
+            <input
+              id="login-email"
+              name="username"
+              type="text"
+              autoComplete="username"
+              placeholder={t("auth.email_or_phone_placeholder")}
+              className="w-full px-3 py-3 bg-base-100 border border-secondary/25 hover:border-secondary/40 focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-lg text-sm placeholder:text-base-content/40 outline-none transition-colors"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-describedby={errorMsg ? "login-email-help login-error" : "login-email-help"}
+              required
+            />
+            <p id="login-email-help" className="text-xs text-base-content/60 mt-2">
               {t("auth.email_or_phone_help")}
             </p>
           </div>
 
-          {/* Password input */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            <div className="flex items-center justify-between gap-3 mb-2">
+              <label htmlFor="login-password" className="block text-sm font-medium">
                 {t("auth.password")}
               </label>
-              <Link
-                to="/forgot-password"
-                className="text-xs font-semibold text-[#22B14C] hover:text-[#188c3a] transition-colors"
-              >
+              <Link to="/forgot-password" className="text-xs font-medium text-secondary hover:underline">
                 {t("auth.forgot_password")}
               </Link>
             </div>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#22B14C] transition-colors">
-                <Lock className="w-4 h-4" />
-              </div>
+            <div className="relative">
               <input
-                type={showPassword ? "text" : "password"} 
+                id="login-password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
                 placeholder={t("auth.password_placeholder")}
-                className="w-full pl-10 pr-11 py-2.5 bg-gray-50/70 hover:bg-white focus:bg-white border border-gray-200 focus:border-[#22B14C] focus:ring-4 focus:ring-[#22B14C]/15 rounded-xl text-sm text-gray-800 placeholder-gray-400 outline-none transition-all shadow-2xs"
+                className="w-full pl-3 pr-20 py-3 bg-base-100 border border-secondary/25 hover:border-secondary/40 focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-lg text-sm placeholder:text-base-content/40 outline-none transition-colors"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                aria-describedby={errorMsg ? "login-error" : undefined}
                 required
                 minLength={6}
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none transition-colors"
+                className="absolute inset-y-0 right-0 px-3 text-xs font-medium text-secondary hover:underline rounded-r-lg focus-visible:outline-primary"
                 onClick={() => setShowPassword(!showPassword)}
-                tabIndex="-1"
+                aria-controls="login-password"
+                aria-pressed={showPassword}
+                aria-label={t(showPassword ? "auth.hide_password" : "auth.show_password")}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4 text-gray-500" />}
+                {t(showPassword ? "auth.hide" : "auth.show")}
               </button>
             </div>
           </div>
 
-          {/* Remember me row */}
-          <div className="flex items-center justify-between pt-1">
-            <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-medium text-gray-600">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded text-[#22B14C] focus:ring-[#22B14C] border-gray-300 accent-[#22B14C] cursor-pointer"
-              />
-              <span>{t("auth.remember_me")}</span>
-            </label>
-          </div>
+          <label className="flex items-center gap-2 cursor-pointer text-sm text-base-content/70">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 rounded border-base-300 accent-primary cursor-pointer"
+            />
+            <span>{t("auth.remember_me")}</span>
+          </label>
 
-          {/* Submit Button */}
-          <div className="pt-2">
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="group relative w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#22B14C] to-[#168a37] hover:from-[#1ea143] hover:to-[#13762f] shadow-lg shadow-[#22B14C]/30 hover:shadow-[#22B14C]/45 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-70 disabled:pointer-events-none"
-            >
-              {isSubmitting ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <span>{t("auth.login_btn")}</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full py-3 px-4 rounded-lg text-sm font-semibold text-primary-content bg-primary hover:bg-secondary focus-visible:outline-secondary focus-visible:outline-offset-2 transition-colors disabled:opacity-60 disabled:cursor-wait"
+          >
+            {t(isSubmitting ? "auth.logging_in" : "auth.login_btn")}
+          </button>
         </form>
 
-        {/* Divider */}
-        <div className="my-5 flex items-center gap-3">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider shrink-0 select-none">
-            {t("auth.or")}
-          </span>
-          <div className="flex-1 h-px bg-gray-200" />
+        <div className="my-5 flex items-center gap-3" aria-hidden="true">
+          <div className="flex-1 h-px bg-base-300" />
+          <span className="text-xs text-base-content/50">{t("auth.or")}</span>
+          <div className="flex-1 h-px bg-base-300" />
         </div>
 
-        {/* Google Sign-in Button */}
-        <div className="mb-5">
-          <GoogleAuthButton />
-        </div>
+        <GoogleAuthButton />
 
-        {/* Register footer link */}
-        <div className="rounded-2xl bg-gray-50/80 border border-gray-100 p-3.5 text-center">
-          <p className="text-xs text-gray-600">
-            {t("auth.new_to_shop")}{' '}
-            <Link
-              to="/register"
-              className="font-bold text-[#22B14C] hover:text-[#188c3a] underline-offset-2 hover:underline transition-all inline-flex items-center gap-0.5"
-            >
-              {t("auth.register_now")}
-            </Link>
-          </p>
-        </div>
+        <p className="mt-7 pt-5 border-t border-base-300 text-center text-sm text-base-content/60">
+          {t("auth.new_to_shop")}{' '}
+          <Link to="/register" className="font-semibold text-secondary hover:underline">
+            {t("auth.register_now")}
+          </Link>
+        </p>
       </div>
 
       {showLockedModal && (
-        <div className="modal modal-open bg-black/60 backdrop-blur-md">
-          <div className="modal-box text-center p-7 bg-white animate-fade-in-up shadow-2xl rounded-3xl border border-gray-100">
-            <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-red-100 shadow-inner">
-              <ShieldAlert className="w-8 h-8 text-red-500" />
-            </div>
-            <h3 className="font-extrabold text-2xl text-gray-900 mb-2">
+        <div className="modal modal-open bg-black/40" role="dialog" aria-modal="true" aria-labelledby="locked-account-title">
+          <div className="modal-box p-7 bg-base-100 shadow-lg rounded-xl border border-base-300">
+            <h2 id="locked-account-title" className="font-bold text-xl mb-2">
               {t("auth.account_locked_title")}
-            </h3>
-            <p className="text-sm text-gray-600 leading-relaxed py-2">
+            </h2>
+            <p className="text-sm text-base-content/70 leading-relaxed py-2">
               {t("auth.account_locked_desc")}
             </p>
-            <div className="modal-action justify-center mt-6">
-              <button 
-                className="btn w-full bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold border-none shadow-lg shadow-red-500/25 cursor-pointer" 
+            <div className="modal-action mt-6">
+              <button
+                type="button"
+                className="w-full py-3 rounded-lg font-semibold bg-primary hover:bg-secondary text-primary-content transition-colors"
                 onClick={() => setShowLockedModal(false)}
+                autoFocus
               >
                 {t("auth.understand_btn")}
               </button>

@@ -149,6 +149,17 @@ export default {
   "cart.update_qty_failed": "Lỗi cập nhật số lượng",
 
   // ================= 9. ĐĂNG NHẬP & ĐĂNG KÝ (AUTH) =================
+  "auth.language": "Ngôn ngữ",
+  "auth.back_to_home": "Về trang chủ",
+  "auth.show": "Hiện",
+  "auth.hide": "Ẩn",
+  "auth.show_password": "Hiện mật khẩu",
+  "auth.hide_password": "Ẩn mật khẩu",
+  "auth.logging_in": "Đang đăng nhập...",
+  "auth.connecting_google": "Đang kết nối Google...",
+  "auth.sending_otp": "Đang gửi mã xác thực...",
+  "auth.verifying_otp": "Đang xác thực...",
+  "auth.close": "Đóng",
   "auth.login_title": "Đăng Nhập",
   "auth.login_subtitle": "Chào mừng bạn quay lại",
   "auth.register_title": "Tạo Tài Khoản",

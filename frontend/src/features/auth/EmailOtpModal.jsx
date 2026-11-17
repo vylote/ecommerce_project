@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Mail, ShieldCheck, Loader2, ArrowRight, X, RefreshCw } from 'lucide-react';
 import { useI18n } from '../../shared/i18n';
 
 export default function EmailOtpModal({
@@ -18,8 +17,6 @@ export default function EmailOtpModal({
 
   useEffect(() => {
     if (!isOpen) return;
-    setOtp('');
-    setCountdown(60);
 
     const timer = setInterval(() => {
       setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
@@ -30,11 +27,9 @@ export default function EmailOtpModal({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (otp.trim().length === 6) {
-      onConfirm(otp.trim());
-    }
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (otp.trim().length === 6) onConfirm(otp.trim());
   };
 
   const handleResend = async () => {
@@ -49,104 +44,62 @@ export default function EmailOtpModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden animate-scale-up">
-        {/* Nút đóng */}
-        <button
-          onClick={onClose}
-          type="button"
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-1.5 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" role="dialog" aria-modal="true" aria-labelledby="otp-title">
+      <div className="w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto bg-base-100 rounded-xl shadow-lg border border-base-300 p-6 sm:p-8">
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <h2 id="otp-title" className="text-xl font-bold">{t("auth.otp_title")}</h2>
+          <button type="button" onClick={onClose} disabled={loading} className="text-sm text-secondary hover:underline focus-visible:outline-primary">
+            {t("auth.close")}
+          </button>
+        </div>
+        <p className="text-sm text-base-content/60">{t("auth.otp_subtitle")}</p>
+        <p className="text-sm font-medium mt-2 mb-6 break-all">{email}</p>
 
-        <div className="p-6 sm:p-8">
-          {/* Header */}
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-green-50 to-emerald-100/70 border border-green-200/60 mb-3 shadow-inner">
-              <ShieldCheck className="w-7 h-7 text-[#22B14C]" />
-            </div>
-            <h3 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
-              {t("auth.otp_title")}
-            </h3>
-            <p className="text-xs sm:text-sm text-gray-500 mt-1">
-              {t("auth.otp_subtitle")}
-            </p>
-            <p className="text-sm font-bold text-gray-800 mt-1 bg-gray-50 py-1 px-3 rounded-lg inline-block border border-gray-200">
-              {email}
-            </p>
+        {errorMsg && (
+          <div id="otp-error" role="alert" className="p-3 mb-4 text-sm text-error bg-error/5 border border-error/30 rounded-lg">
+            {errorMsg}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-5" aria-busy={loading}>
+          <div>
+            <label htmlFor="register-otp" className="block text-sm font-medium mb-2">{t("auth.otp_placeholder")}</label>
+            <input
+              id="register-otp"
+              name="otp"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              pattern="[0-9]{6}"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+              placeholder="------"
+              autoFocus
+              className="w-full text-center text-2xl tracking-[0.4em] font-semibold py-3 px-4 bg-base-100 border border-secondary/25 hover:border-secondary/40 focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-lg outline-none transition-colors"
+              aria-describedby={errorMsg ? "otp-error" : undefined}
+              required
+            />
           </div>
 
-          {errorMsg && (
-            <div className="p-3 mb-4 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl font-medium text-center">
-              {errorMsg}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Input mã OTP 6 số */}
-            <div>
-              <div className="relative">
-                <input
-                  type="text"
-                  maxLength={6}
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                  placeholder="------"
-                  autoFocus
-                  className="w-full text-center text-2xl tracking-[12px] font-black py-3 px-4 bg-gray-50 hover:bg-white focus:bg-white border-2 border-gray-200 focus:border-[#22B14C] focus:ring-4 focus:ring-[#22B14C]/15 rounded-2xl text-gray-900 outline-none transition-all shadow-inner"
-                  required
-                />
-              </div>
-              <p className="text-[11px] text-gray-400 text-center mt-1.5">
-                {t("auth.otp_placeholder")}
-              </p>
-            </div>
-
-            {/* Resend OTP button & timer */}
-            <div className="text-center">
-              {countdown > 0 ? (
-                <span className="text-xs text-gray-500">
-                  {t("auth.resend_in")}{' '}
-                  <span className="font-bold text-[#22B14C]">{countdown}s</span>
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleResend}
-                  disabled={isResending}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#22B14C] hover:text-[#188c3a] transition-colors cursor-pointer"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isResending ? 'animate-spin' : ''}`} />
-                  <span>{t("auth.resend_otp_btn")}</span>
-                </button>
-              )}
-            </div>
-
-            {/* Dev hint */}
-            <div className="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/70 text-[11px] text-amber-800 leading-relaxed text-center">
-              💡 {t("auth.dev_otp_hint")}
-            </div>
-
-            {/* Submit button */}
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={loading || otp.length !== 6}
-                className="w-full py-3 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#22B14C] to-[#168a37] hover:from-[#1ea143] hover:to-[#13762f] shadow-lg shadow-[#22B14C]/30 hover:shadow-[#22B14C]/45 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:pointer-events-none"
-              >
-                {loading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                  <>
-                    <span>{t("auth.confirm_register_btn")}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
+          <div className="text-center text-sm text-base-content/60">
+            {countdown > 0 ? (
+              <span>{t("auth.resend_in")} <span className="font-medium text-secondary">{countdown}s</span></span>
+            ) : (
+              <button type="button" onClick={handleResend} disabled={isResending || loading} className="font-medium text-secondary hover:underline disabled:opacity-60">
+                {t(isResending ? "auth.sending_otp" : "auth.resend_otp_btn")}
               </button>
-            </div>
-          </form>
-        </div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading || otp.length !== 6}
+            className="w-full py-3 px-4 rounded-lg text-sm font-semibold text-primary-content bg-primary hover:bg-secondary focus-visible:outline-secondary focus-visible:outline-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {t(loading ? "auth.verifying_otp" : "auth.confirm_register_btn")}
+          </button>
+        </form>
       </div>
     </div>
   );

@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Phone, Mail, Lock, Eye, EyeOff, UserPlus, ArrowRight, Loader2, ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 import AuthLayout from '../../shared/components/AuthLayout';
-import loginBg from '../../assets/login-bg.jpg';
 import { useI18n } from '../../shared/i18n';
 import GoogleAuthButton from './GoogleAuthButton';
 import EmailOtpModal from './EmailOtpModal';
@@ -76,173 +74,118 @@ export default function RegisterPage() {
     }
   };
 
+  const inputClassName = "w-full px-3 py-3 bg-base-100 border border-secondary/25 hover:border-secondary/40 focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-lg text-sm placeholder:text-base-content/40 outline-none transition-colors";
+
   return (
-    <AuthLayout bgImage={loginBg}>
-      <div className="p-7 sm:p-9">
-        {/* Header Icon & Title */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-green-50 border border-green-200/80 mb-3 shadow-inner">
-            <UserPlus className="w-6 h-6 text-[#22B14C]" />
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+    <AuthLayout>
+      <div className="p-6 sm:p-9">
+        <div className="mb-7">
+          <h1 className="text-2xl font-bold text-base-content">
             {t("auth.register_title")}
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
+          </h1>
+          <p className="text-sm text-base-content/60 mt-2">
             {t("auth.register_subtitle")}
           </p>
         </div>
 
         {errorMsg && (
-          <div className="flex items-center gap-2.5 bg-red-50/90 border border-red-200/80 text-red-700 text-sm rounded-xl p-3.5 mb-5 shadow-xs animate-shake">
-            <ShieldAlert className="w-5 h-5 shrink-0 text-red-500" />
-            <span className="font-medium text-xs sm:text-sm">{errorMsg}</span>
+          <div id="register-error" role="alert" className="bg-error/5 border border-error/30 text-error text-sm rounded-lg p-3 mb-5">
+            {errorMsg}
           </div>
         )}
 
-        <form onSubmit={handleInitiateRegister} className="space-y-3.5">
-          {/* Full Name input */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-              {t("auth.fullname")}
-            </label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#22B14C] transition-colors">
-                <User className="w-4 h-4" />
-              </div>
-              <input 
-                type="text" 
-                name="fullName" 
-                placeholder={t("auth.fullname_placeholder")} 
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50/70 hover:bg-white focus:bg-white border border-gray-200 focus:border-[#22B14C] focus:ring-4 focus:ring-[#22B14C]/15 rounded-xl text-sm text-gray-800 placeholder-gray-400 outline-none transition-all shadow-2xs" 
-                onChange={handleChange} 
-                required 
+        <form onSubmit={handleInitiateRegister} className="space-y-5" aria-busy={isSubmitting}>
+          {[
+            { name: "fullName", label: "fullname", type: "text", autoComplete: "name" },
+            { name: "phone", label: "phone", type: "tel", autoComplete: "tel" },
+            { name: "email", label: "email", type: "email", autoComplete: "email" },
+          ].map(({ name, label, type, autoComplete }) => (
+            <div key={name}>
+              <label htmlFor={`register-${name}`} className="block text-sm font-medium mb-2">
+                {t(`auth.${label}`)}
+              </label>
+              <input
+                id={`register-${name}`}
+                name={name}
+                type={type}
+                autoComplete={autoComplete}
+                placeholder={t(`auth.${label}_placeholder`)}
+                className={inputClassName}
+                value={formData[name]}
+                onChange={handleChange}
+                aria-describedby={errorMsg ? "register-error" : undefined}
+                required
               />
             </div>
-          </div>
+          ))}
 
-          {/* Phone input */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-              {t("auth.phone")}
-            </label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#22B14C] transition-colors">
-                <Phone className="w-4 h-4" />
-              </div>
-              <input 
-                type="tel" 
-                name="phone" 
-                placeholder={t("auth.phone_placeholder")} 
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50/70 hover:bg-white focus:bg-white border border-gray-200 focus:border-[#22B14C] focus:ring-4 focus:ring-[#22B14C]/15 rounded-xl text-sm text-gray-800 placeholder-gray-400 outline-none transition-all shadow-2xs" 
-                onChange={handleChange} 
-                required 
-              />
-            </div>
-          </div>
-
-          {/* Email input */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
-              {t("auth.email")}
-            </label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#22B14C] transition-colors">
-                <Mail className="w-4 h-4" />
-              </div>
-              <input 
-                type="email" 
-                name="email" 
-                placeholder={t("auth.email_placeholder")} 
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50/70 hover:bg-white focus:bg-white border border-gray-200 focus:border-[#22B14C] focus:ring-4 focus:ring-[#22B14C]/15 rounded-xl text-sm text-gray-800 placeholder-gray-400 outline-none transition-all shadow-2xs" 
-                onChange={handleChange} 
-                required 
-              />
-            </div>
-          </div>
-
-          {/* Password input */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider mb-1.5">
+            <label htmlFor="register-password" className="block text-sm font-medium mb-2">
               {t("auth.password")}
             </label>
-            <div className="relative group">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#22B14C] transition-colors">
-                <Lock className="w-4 h-4" />
-              </div>
-              <input 
-                type={showPassword ? "text" : "password"} 
-                name="password" 
-                placeholder={t("auth.password_placeholder")} 
-                className="w-full pl-10 pr-11 py-2.5 bg-gray-50/70 hover:bg-white focus:bg-white border border-gray-200 focus:border-[#22B14C] focus:ring-4 focus:ring-[#22B14C]/15 rounded-xl text-sm text-gray-800 placeholder-gray-400 outline-none transition-all shadow-2xs" 
-                onChange={handleChange} 
-                required 
-                minLength={6} 
+            <div className="relative">
+              <input
+                id="register-password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                placeholder={t("auth.password_placeholder")}
+                className={`${inputClassName} pr-20`}
+                value={formData.password}
+                onChange={handleChange}
+                aria-describedby={errorMsg ? "register-error" : undefined}
+                required
+                minLength={6}
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 cursor-pointer focus:outline-none transition-colors"
+                className="absolute inset-y-0 right-0 px-3 text-xs font-medium text-secondary hover:underline rounded-r-lg focus-visible:outline-primary"
                 onClick={() => setShowPassword(!showPassword)}
-                tabIndex="-1"
+                aria-controls="register-password"
+                aria-pressed={showPassword}
+                aria-label={t(showPassword ? "auth.hide_password" : "auth.show_password")}
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4 text-gray-500" />}
+                {t(showPassword ? "auth.hide" : "auth.show")}
               </button>
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="pt-3">
-            <button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="group relative w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-[#22B14C] to-[#168a37] hover:from-[#1ea143] hover:to-[#13762f] shadow-lg shadow-[#22B14C]/30 hover:shadow-[#22B14C]/45 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-70 disabled:pointer-events-none"
-            >
-              {isSubmitting ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <>
-                  <span>{t("auth.register_btn")}</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full py-3 px-4 rounded-lg text-sm font-semibold text-primary-content bg-primary hover:bg-secondary focus-visible:outline-secondary focus-visible:outline-offset-2 transition-colors disabled:opacity-60 disabled:cursor-wait"
+          >
+            {t(isSubmitting ? "auth.sending_otp" : "auth.register_btn")}
+          </button>
         </form>
 
-        {/* Divider */}
-        <div className="my-5 flex items-center gap-3">
-          <div className="flex-1 h-px bg-gray-200" />
-          <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider shrink-0 select-none">
-            {t("auth.or")}
-          </span>
-          <div className="flex-1 h-px bg-gray-200" />
+        <div className="my-5 flex items-center gap-3" aria-hidden="true">
+          <div className="flex-1 h-px bg-base-300" />
+          <span className="text-xs text-base-content/50">{t("auth.or")}</span>
+          <div className="flex-1 h-px bg-base-300" />
         </div>
 
-        {/* Google Sign-in Button */}
-        <div className="mb-5">
-          <GoogleAuthButton />
-        </div>
+        <GoogleAuthButton />
 
-        {/* Login footer link */}
-        <div className="rounded-2xl bg-gray-50/80 border border-gray-100 p-3.5 text-center">
-          <p className="text-xs text-gray-600">
-            {t("auth.already_have_account")}{' '}
-            <Link to="/login" className="font-bold text-[#22B14C] hover:text-[#188c3a] underline-offset-2 hover:underline transition-all inline-flex items-center gap-0.5">
-              {t("auth.login_now")}
-            </Link>
-          </p>
-        </div>
+        <p className="mt-7 pt-5 border-t border-base-300 text-center text-sm text-base-content/60">
+          {t("auth.already_have_account")}{' '}
+          <Link to="/login" className="font-semibold text-secondary hover:underline">
+            {t("auth.login_now")}
+          </Link>
+        </p>
       </div>
 
-      {/* Modal Xác thực Email OTP */}
-      <EmailOtpModal
-        isOpen={otpModalOpen}
-        email={formData.email}
-        onClose={() => setOtpModalOpen(false)}
-        onConfirm={handleConfirmOtp}
-        onResend={handleResendOtp}
-        loading={otpLoading}
-        errorMsg={otpError}
-      />
+      {otpModalOpen && (
+        <EmailOtpModal
+          isOpen={otpModalOpen}
+          email={formData.email}
+          onClose={() => setOtpModalOpen(false)}
+          onConfirm={handleConfirmOtp}
+          onResend={handleResendOtp}
+          loading={otpLoading}
+          errorMsg={otpError}
+        />
+      )}
     </AuthLayout>
   );
 }
