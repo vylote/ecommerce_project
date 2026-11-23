@@ -1,11 +1,14 @@
 package com.vlt.ecommerce.feature.auth;
 
+import java.security.SecureRandom;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,9 +17,11 @@ import org.springframework.util.StringUtils;
 import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
+import com.vlt.ecommerce.common.mail.EmailService;
 import com.vlt.ecommerce.common.utils.DeviceUtils;
 import com.vlt.ecommerce.feature.auth.dto.request.LoginRequest;
 import com.vlt.ecommerce.feature.auth.dto.request.RegisterRequest;
+import com.vlt.ecommerce.feature.auth.dto.request.SendOtpRequest;
 import com.vlt.ecommerce.feature.auth.dto.response.TokenResponse;
 import com.vlt.ecommerce.feature.user.Role;
 import com.vlt.ecommerce.feature.user.User;
@@ -43,10 +48,10 @@ public class AuthService {
     SessionRepository sessionRepository;
     RoleRepository roleRepository;
     SessionService sessionService;
-    org.springframework.data.redis.core.StringRedisTemplate redisTemplate;
-    com.vlt.ecommerce.common.mail.EmailService emailService;
+    StringRedisTemplate redisTemplate;
+    EmailService emailService;
 
-    public void sendEmailOtp(com.vlt.ecommerce.feature.auth.dto.request.SendOtpRequest request) {
+    public void sendEmailOtp(SendOtpRequest request) {
         String email = request.getEmail().trim().toLowerCase();
 
         if (userRepository.existsByEmail(email)) {
@@ -54,11 +59,11 @@ public class AuthService {
         }
 
         // Sinh mã OTP 6 chữ số ngẫu nhiên
-        String otp = String.format("%06d", new java.security.SecureRandom().nextInt(1_000_000));
+        String otp = String.format("%06d", new SecureRandom().nextInt(1_000_000));
 
         // Lưu vào Redis với TTL 5 phút
         String redisKey = "EMAIL_OTP:" + email;
-        redisTemplate.opsForValue().set(redisKey, otp, 5, java.util.concurrent.TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(redisKey, otp, 5, TimeUnit.MINUTES);
 
         // Gửi email OTP
         emailService.sendOtpEmail(email, otp);

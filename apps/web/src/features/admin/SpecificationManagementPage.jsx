@@ -1,3 +1,4 @@
+import FormInput from "../../shared/components/ui/FormInput";
 import Dialog from "../../shared/ui/Dialog";
 import React, { useState, useEffect } from 'react';
 import {
@@ -248,13 +249,13 @@ export default function SpecificationManagementPage() {
           <div className="p-4 border-b border-gray-100 bg-gray-50/70 flex items-center justify-between gap-3">
             <div className="relative flex-1">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
+              <FormInput
                 type="text"
                 placeholder="Tìm loại đặc tả..."
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
-                className="input input-sm input-bordered w-full pl-9 bg-white"
-              />
+                controlSize="sm" className="w-full pl-9 bg-white"
+ />
             </div>
             <span className="text-xs font-semibold text-gray-500 shrink-0">
               {filteredTypes.length} loại
@@ -390,20 +391,20 @@ export default function SpecificationManagementPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3">
-                  <input
+                  <FormInput
                     type="text"
                     value={specInput}
                     onChange={(e) => setSpecInput(e.target.value)}
                     placeholder="Tên giá trị (Ví dụ: Đỏ, XL, 128GB...)"
-                    className="input input-sm input-bordered bg-white focus:border-blue-500"
-                  />
-                  <input
+                    controlSize="sm" focusColor="blue" className="bg-white"
+ />
+                  <FormInput
                     type="text"
                     value={specDesc}
                     onChange={(e) => setSpecDesc(e.target.value)}
                     placeholder="Mô tả bổ sung (tùy chọn)"
-                    className="input input-sm input-bordered bg-white focus:border-blue-500"
-                  />
+                    controlSize="sm" focusColor="blue" className="bg-white"
+ />
                   <div className="flex gap-2">
                     <button
                       type="submit"
@@ -499,14 +500,14 @@ export default function SpecificationManagementPage() {
               <label className="label font-semibold text-sm">
                 Tên loại đặc tả <span className="text-red-500">*</span>
               </label>
-              <input
+              <FormInput
                 type="text"
                 value={typeForm.name}
                 onChange={(e) => setTypeForm({ ...typeForm, name: e.target.value })}
                 placeholder="Ví dụ: Kích cỡ áo, Kích cỡ giày, Dung lượng RAM, Màu sắc..."
-                className="input input-bordered w-full focus:border-blue-500"
+                focusColor="blue" className="w-full"
                 required
-              />
+ />
             </div>
 
             <div className="form-control">
@@ -533,7 +534,7 @@ export default function SpecificationManagementPage() {
                   checked={typeForm.isVariant}
                   onChange={(e) => setTypeForm({ ...typeForm, isVariant: e.target.checked })}
                   className="toggle toggle-success ml-3 shrink-0"
-                />
+ />
               </label>
             </div>
 
@@ -566,7 +567,7 @@ export default function SpecificationManagementPage() {
                         checked={isChecked}
                         onChange={() => toggleCategorySelection(cat.id)}
                         className="checkbox checkbox-sm checkbox-primary"
-                      />
+ />
                       <span className="font-medium text-gray-700">{cat.name}</span>
                     </label>
                   );

@@ -8,15 +8,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.vlt.ecommerce.common.storage.ImageStorageService;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class CloudinaryService {
+public class CloudinaryService implements ImageStorageService {
 
     private final Cloudinary cloudinary;
 
+    @Override
     public String uploadFile(MultipartFile file, String folder) throws IOException {
         // Upload ảnh trực tiếp bằng mảng byte từ file tải lên
         Map<?,?> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
@@ -27,7 +29,13 @@ public class CloudinaryService {
         return uploadResult.get("secure_url").toString();
     }
 
-    public void deleteFile(String publicId) {
+    @Override
+    public void deleteByUrl(String imageUrl) {
+        String publicId = extractPublicIdFromUrl(imageUrl);
+        if (publicId == null) {
+            return;
+        }
+
         try {
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
         } catch (IOException e) {
@@ -35,7 +43,7 @@ public class CloudinaryService {
         }
     }
 
-    public String extractPublicIdFromUrl(String secureUrl) {
+    private String extractPublicIdFromUrl(String secureUrl) {
         if (secureUrl == null || !secureUrl.contains("/upload/"))
             return null;
         try {

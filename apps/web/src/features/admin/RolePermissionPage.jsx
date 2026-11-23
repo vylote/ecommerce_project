@@ -1,3 +1,4 @@
+import FormInput from "../../shared/components/ui/FormInput";
 import Dialog from "../../shared/ui/Dialog";
 import React, { useState, useEffect } from 'react';
 import {
@@ -433,13 +434,13 @@ export default function RolePermissionPage() {
           <div className="flex items-center justify-between gap-4">
             <div className="relative max-w-md w-full">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
+              <FormInput
                 type="text"
                 placeholder="Tìm kiếm vai trò theo tên hoặc mô tả..."
                 value={roleSearch}
                 onChange={(e) => setRoleSearch(e.target.value)}
-                className="input input-sm input-bordered w-full pl-9 bg-white"
-              />
+                controlSize="sm" className="w-full pl-9 bg-white"
+ />
             </div>
             <span className="text-xs text-gray-500 font-medium">
               Hiển thị {filteredRoles.length} / {roles.length} vai trò
@@ -550,13 +551,13 @@ export default function RolePermissionPage() {
           <div className="flex items-center justify-between gap-4">
             <div className="relative max-w-md w-full">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
+              <FormInput
                 type="text"
                 placeholder="Tìm mã quyền hoặc mô tả..."
                 value={permSearch}
                 onChange={(e) => setPermSearch(e.target.value)}
-                className="input input-sm input-bordered w-full pl-9 bg-white"
-              />
+                controlSize="sm" className="w-full pl-9 bg-white"
+ />
             </div>
             <span className="text-xs text-gray-500 font-medium">
               Hiển thị {filteredPermissions.length} / {permissions.length} quyền
@@ -628,7 +629,7 @@ export default function RolePermissionPage() {
                 setPermPage(1);
               }}
               pageSizeOptions={[10, 20, 50]}
-            />
+ />
           </div>
         </div>
       )}
@@ -639,13 +640,13 @@ export default function RolePermissionPage() {
           <div className="flex items-center justify-between gap-4">
             <div className="relative max-w-md w-full">
               <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
+              <FormInput
                 type="text"
                 placeholder="Tìm người dùng theo Email, Họ tên hoặc Số điện thoại..."
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
-                className="input input-sm input-bordered w-full pl-9 bg-white"
-              />
+                controlSize="sm" className="w-full pl-9 bg-white"
+ />
             </div>
             <span className="text-xs text-gray-500 font-medium">
               {filteredUsers.length} người dùng
@@ -745,7 +746,7 @@ export default function RolePermissionPage() {
                 setUserRolePage(1);
               }}
               pageSizeOptions={[10, 20, 50]}
-            />
+ />
           </div>
         </div>
       )}
@@ -764,27 +765,27 @@ export default function RolePermissionPage() {
                   <span className="bg-gray-100 border border-r-0 border-gray-300 px-3 py-2 text-xs font-mono font-bold text-gray-600 rounded-l-lg">
                     ROLE_
                   </span>
-                  <input
+                  <FormInput
                     type="text"
                     value={roleForm.name}
                     onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value.toUpperCase().replace(/^ROLE_/, '') })}
                     placeholder="MODERATOR, SUPPORT..."
-                    className="input input-sm input-bordered w-full rounded-l-none focus:border-blue-500 font-mono text-xs uppercase"
+                    controlSize="sm" focusColor="blue" className="w-full rounded-l-none font-mono text-xs uppercase"
                     required
-                  />
+ />
                 </div>
                 <span className="text-[11px] text-gray-400 mt-1">Hệ thống sẽ tự động thêm tiền tố ROLE_</span>
               </div>
 
               <div className="form-control">
                 <label className="label font-semibold text-xs text-gray-700">Mô tả vai trò</label>
-                <input
+                <FormInput
                   type="text"
                   value={roleForm.description}
                   onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })}
                   placeholder="Ví dụ: Kiểm duyệt viên nội dung sản phẩm..."
-                  className="input input-sm input-bordered w-full focus:border-blue-500 text-xs"
-                />
+                  controlSize="sm" focusColor="blue" className="w-full text-xs"
+ />
               </div>
             </div>
 
@@ -845,7 +846,7 @@ export default function RolePermissionPage() {
                                 checked={isChecked}
                                 onChange={() => togglePermissionInRole(perm.id)}
                                 className="checkbox checkbox-xs checkbox-primary mt-0.5"
-                              />
+ />
                               <div className="min-w-0">
                                 <div className="font-bold font-mono text-[11px] truncate">{perm.name}</div>
                                 {perm.description && (
@@ -892,14 +893,14 @@ export default function RolePermissionPage() {
               <label className="label font-semibold text-xs text-gray-700">
                 Mã quyền (Permission Code) <span className="text-red-500">*</span>
               </label>
-              <input
+              <FormInput
                 type="text"
                 value={permForm.name}
                 onChange={(e) => setPermForm({ ...permForm, name: e.target.value.toUpperCase().replace(/\s+/g, '_') })}
                 placeholder="Ví dụ: EXPORT_ORDER_REPORT..."
-                className="input input-sm input-bordered w-full focus:border-blue-500 font-mono uppercase text-xs"
+                controlSize="sm" focusColor="blue" className="w-full font-mono uppercase text-xs"
                 required
-              />
+ />
             </div>
 
             <div className="form-control">
@@ -974,7 +975,7 @@ export default function RolePermissionPage() {
                             );
                           }}
                           className="checkbox checkbox-sm checkbox-primary"
-                        />
+ />
                         <div>
                           <span className="font-bold text-xs text-gray-800">{r.name}</span>
                           {r.description && (

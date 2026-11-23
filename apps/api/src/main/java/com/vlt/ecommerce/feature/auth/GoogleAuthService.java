@@ -28,6 +28,8 @@ import com.vlt.ecommerce.feature.user.repository.RoleRepository;
 import com.vlt.ecommerce.feature.user.repository.UserRepository;
 
 import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -194,8 +196,8 @@ public class GoogleAuthService {
         throw new AppException(ErrorCode.UNAUTHENTICATED);
     }
 
-    @lombok.Data
-    @lombok.Builder
+    @Data
+    @Builder
     private static class GoogleUserInfo {
         String email;
         String name;

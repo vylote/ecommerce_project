@@ -1,10 +1,11 @@
 import AnalyticsPeriodFilter from "../../shared/components/analytics/AnalyticsPeriodFilter";
 import AnalyticsTrendChart from "../../shared/components/analytics/AnalyticsTrendChart";
-import { formatAnalyticsCurrency as formatCurrency } from "../../shared/components/analytics/trendSeries";
-import OrderStatusChart, { OrderStatusLegend } from "../order/components/OrderStatusChart";
-import { useEffect, useState, useMemo } from "react";
+import formatCurrency from "../../shared/utils/formatCurrency";
+import useDashboardAnalytics from "../../shared/hooks/useDashboardAnalytics";
+import MetricCard from "../../shared/components/analytics/MetricCard";
+import OrderStatusSummary from "../order/components/OrderStatusSummary";
+import { useEffect, useState } from "react";
 import api from "../../shared/utils/api";
-import toast from "react-hot-toast";
 import {
   TrendingUp,
   DollarSign,
@@ -77,36 +78,15 @@ export default function SellerDashboard() {
     return () => controller.abort();
   }, [statsVersion]);
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function fetchAnalytics() {
-      try {
-        const response = await api.get("/orders/seller/dashboard/analytics", {
-          params: { period: filterPeriod, range: filterRange },
-          signal: controller.signal,
-        });
-        if (!controller.signal.aborted && response.data?.result) {
-          setAnalytics(response.data.result);
-        }
-      } catch (error) {
-        if (!controller.signal.aborted) {
-          console.error("Analytics error:", error);
-          toast.error("Không thể tải dữ liệu phân tích bán hàng");
-        }
-      } finally {
-        if (!controller.signal.aborted) setLoadingAnalytics(false);
-      }
-    }
-
-    fetchAnalytics();
-    return () => controller.abort();
-  }, [filterPeriod, filterRange]);
-
-  const completionRate = useMemo(() => {
-    if (!analytics.totalOrdersAll || analytics.totalOrdersAll === 0) return 0;
-    return Math.round((analytics.totalOrders / analytics.totalOrdersAll) * 100);
-  }, [analytics]);
+  const completionRate = useDashboardAnalytics({
+    endpoint: "/orders/seller/dashboard/analytics",
+    errorMessage: "Không thể tải dữ liệu phân tích bán hàng",
+    period: filterPeriod,
+    range: filterRange,
+    analytics,
+    setAnalytics,
+    setLoading: setLoadingAnalytics,
+  });
 
   return (
     <div className="flex flex-col lg:flex-row gap-5 items-start">
@@ -243,87 +223,52 @@ export default function SellerDashboard() {
           {/* Metric Cards - 4 Thẻ chỉ số kinh doanh */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {/* 1. Doanh số thực nhận */}
-            <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 flex flex-col justify-between">
-              <div className="flex justify-between items-start">
-                <span className="text-xs font-semibold text-emerald-800 uppercase tracking-wider">
-                  Doanh số hoàn tất
-                </span>
-                <span className="p-1.5 bg-emerald-100 text-emerald-700 rounded-lg">
-                  <DollarSign className="w-4 h-4" />
-                </span>
-              </div>
-              <div className="mt-3">
-                <div className="text-xl lg:text-2xl font-black text-emerald-700 truncate">
-                  {formatCurrency(analytics.totalRevenue)}
-                </div>
-                <div className="text-[11px] text-emerald-600 mt-1 flex items-center gap-1 font-medium">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Từ {analytics.totalOrders} đơn giao thành công
-                </div>
-              </div>
-            </div>
+            <MetricCard
+              tone="emerald"
+              compact
+              title="Doanh số hoàn tất"
+              icon={<DollarSign className="w-4 h-4" />}
+              value={formatCurrency(analytics.totalRevenue)}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Từ {analytics.totalOrders} đơn giao thành công
+            </MetricCard>
 
             {/* 2. Doanh thu tạm tính (Đang giao / Chờ xử lý) */}
-            <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-4 flex flex-col justify-between">
-              <div className="flex justify-between items-start">
-                <span className="text-xs font-semibold text-blue-800 uppercase tracking-wider">
-                  Doanh thu tạm tính
-                </span>
-                <span className="p-1.5 bg-blue-100 text-blue-700 rounded-lg">
-                  <Clock className="w-4 h-4" />
-                </span>
-              </div>
-              <div className="mt-3">
-                <div className="text-xl lg:text-2xl font-black text-blue-700 truncate">
-                  {formatCurrency(analytics.pendingRevenue)}
-                </div>
-                <div className="text-[11px] text-blue-600 mt-1 flex items-center gap-1 font-medium">
-                  <Truck className="w-3.5 h-3.5" />
-                  Đơn đang giao hoặc chờ lấy hàng
-                </div>
-              </div>
-            </div>
+            <MetricCard
+              tone="blue"
+              compact
+              title="Doanh thu tạm tính"
+              icon={<Clock className="w-4 h-4" />}
+              value={formatCurrency(analytics.pendingRevenue)}
+            >
+              <Truck className="w-3.5 h-3.5" />
+              Đơn đang giao hoặc chờ lấy hàng
+            </MetricCard>
 
             {/* 3. Giá trị trung bình đơn (AOV) */}
-            <div className="bg-amber-50/50 border border-amber-100 rounded-xl p-4 flex flex-col justify-between">
-              <div className="flex justify-between items-start">
-                <span className="text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                  Giá trị TB / Đơn (AOV)
-                </span>
-                <span className="p-1.5 bg-amber-100 text-amber-700 rounded-lg">
-                  <TrendingUp className="w-4 h-4" />
-                </span>
-              </div>
-              <div className="mt-3">
-                <div className="text-xl lg:text-2xl font-black text-amber-700 truncate">
-                  {formatCurrency(analytics.averageOrderValue)}
-                </div>
-                <div className="text-[11px] text-amber-600 mt-1 flex items-center gap-1 font-medium">
-                  <ShoppingBag className="w-3.5 h-3.5" />
-                  Doanh thu trung bình mỗi đơn hoàn tất
-                </div>
-              </div>
-            </div>
+            <MetricCard
+              tone="amber"
+              compact
+              title="Giá trị TB / Đơn (AOV)"
+              icon={<TrendingUp className="w-4 h-4" />}
+              value={formatCurrency(analytics.averageOrderValue)}
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              Doanh thu trung bình mỗi đơn hoàn tất
+            </MetricCard>
 
             {/* 4. Tổng số đơn hàng & Tỷ lệ thành công */}
-            <div className="bg-purple-50/50 border border-purple-100 rounded-xl p-4 flex flex-col justify-between">
-              <div className="flex justify-between items-start">
-                <span className="text-xs font-semibold text-purple-800 uppercase tracking-wider">
-                  Hiệu suất đơn hàng
-                </span>
-                <span className="p-1.5 bg-purple-100 text-purple-700 rounded-lg">
-                  <PieChart className="w-4 h-4" />
-                </span>
-              </div>
-              <div className="mt-3">
-                <div className="text-xl lg:text-2xl font-black text-purple-700">
-                  {analytics.totalOrdersAll} <span className="text-sm font-medium text-gray-500">đơn phát sinh</span>
-                </div>
-                <div className="text-[11px] text-purple-600 mt-1 flex items-center gap-1 font-medium">
-                  <span>Tỷ lệ hoàn thành: <b>{completionRate}%</b></span>
-                </div>
-              </div>
-            </div>
+            <MetricCard
+              tone="purple"
+              compact
+              wrapValue
+              title="Hiệu suất đơn hàng"
+              icon={<PieChart className="w-4 h-4" />}
+              value={<>{analytics.totalOrdersAll} <span className="text-sm font-medium text-gray-500">đơn phát sinh</span></>}
+            >
+              <span>Tỷ lệ hoàn thành: <b>{completionRate}%</b></span>
+            </MetricCard>
           </div>
 
           {/* VÙNG VẼ BIỂU ĐỒ KẾT HỢP (Main Trend Chart + Status Donut) */}
@@ -374,23 +319,13 @@ export default function SellerDashboard() {
             </div>
 
             {/* Cột phải 1/3: Cơ cấu Trạng thái Đơn hàng (Doughnut Chart) */}
-            <div className="border border-gray-100 bg-gray-50/40 rounded-xl p-4 flex flex-col justify-between">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-bold text-gray-800">
-                  Cơ cấu trạng thái đơn
-                </span>
-                <span className="text-xs text-gray-400">
-                  Tổng {analytics.totalOrdersAll || 0} đơn
-                </span>
-              </div>
-
-              {/* Donut Canvas */}
-              <div className="h-[170px] w-full relative flex items-center justify-center my-1">
-                <OrderStatusChart statusBreakdown={analytics.statusBreakdown} />
-              </div>
-
-              <OrderStatusLegend statusBreakdown={analytics.statusBreakdown} />
-            </div>
+            <OrderStatusSummary
+              title="Cơ cấu trạng thái đơn"
+              totalOrders={analytics.totalOrdersAll}
+              statusBreakdown={analytics.statusBreakdown}
+              className="bg-gray-50/40 rounded-xl p-4"
+              chartClassName="h-[170px] my-1"
+            />
           </div>
         </div>
       </div>

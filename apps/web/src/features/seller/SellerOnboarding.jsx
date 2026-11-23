@@ -1,3 +1,7 @@
+import ImageUploadPreview from "../../shared/ui/ImageUploadPreview";
+import useShopFormFields from "./useShopFormFields";
+import FormInput from "../../shared/components/ui/FormInput";
+import FormSelect from "../../shared/components/ui/FormSelect";
 import Dialog, { DialogActions } from "../../shared/ui/Dialog";
 import ShopCategoryChoices from "./components/ShopCategoryChoices";
 import React, { useState, useEffect } from 'react';
@@ -59,29 +63,7 @@ export default function SellerOnboarding() {
     fetchCategories();
   }, []);
 
-  const toggleCategory = (categoryId) => {
-    setShopData(prev => ({
-      ...prev,
-      categoryIds: prev.categoryIds.includes(categoryId)
-        ? prev.categoryIds.filter(id => id !== categoryId)
-        : [...prev.categoryIds, categoryId],
-    }));
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error('Kích thước ảnh tối đa là 2MB');
-        return;
-      }
-      setShopData(prev => ({
-        ...prev,
-        file,
-        previewUrl: URL.createObjectURL(file)
-      }));
-    }
-  };
+  const { toggleCategory, handleFileChange } = useShopFormFields(setShopData);
 
   // --- STATE CHO MODAL ĐỊA CHỈ ---
   const [showAddressModal, setShowAddressModal] = useState(false);
@@ -242,23 +224,18 @@ export default function SellerOnboarding() {
 
               <div className="flex flex-col items-center mt-4 mb-2">
                 <div className="relative w-24 h-24 rounded-full border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50 overflow-hidden group hover:border-green-600 transition-colors cursor-pointer">
-                  {shopData.previewUrl ? (
-                    <img src={shopData.previewUrl} alt="Logo preview" className="w-full h-full object-cover" />
-                  ) : (
+                  <ImageUploadPreview
+                    src={shopData.previewUrl}
+                    alt="Logo preview"
+                    label="Sửa ảnh"
+                    accept="image/jpeg, image/png, image/jpg"
+                    onChange={handleFileChange}
+                  >
                     <div className="text-center">
                       <Store className="mx-auto text-gray-400 mb-1" size={24} />
                       <span className="text-[10px] text-gray-500">Tải ảnh lên</span>
                     </div>
-                  )}
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span className="text-white text-xs font-medium">Sửa ảnh</span>
-                  </div>
-                  <input
-                    type="file"
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    accept="image/jpeg, image/png, image/jpg"
-                    onChange={handleFileChange}
-                  />
+                  </ImageUploadPreview>
                 </div>
                 <div className="text-xs text-gray-400 mt-2">Dung lượng file tối đa 2MB. Định dạng: JPEG, PNG</div>
               </div>
@@ -266,24 +243,24 @@ export default function SellerOnboarding() {
               <div className="grid grid-cols-2 gap-6">
                 <div className="form-control">
                   <label className="label font-medium text-gray-700">Tên shop *</label>
-                  <input
-                    type="text" className="input input-bordered focus:border-green-600" placeholder="Nhập tên shop"
+                  <FormInput
+                    type="text" focusColor="green" placeholder="Nhập tên shop"
                     value={shopData.shopName} onChange={e => setShopData({...shopData, shopName: e.target.value})}
-                  />
+ />
                 </div>
                 <div className="form-control">
                   <label className="label font-medium text-gray-700">Số điện thoại *</label>
-                  <input
-                    type="text" className="input input-bordered focus:border-green-600" placeholder="09xxxxxxx"
+                  <FormInput
+                    type="text" focusColor="green" placeholder="09xxxxxxx"
                     value={shopData.phone} onChange={e => setShopData({...shopData, phone: e.target.value})}
-                  />
+ />
                 </div>
                 <div className="form-control col-span-2">
                   <label className="label font-medium text-gray-700">Email *</label>
-                  <input
-                    type="email" className="input input-bordered focus:border-green-600 w-full" placeholder="email@domain.com"
+                  <FormInput
+                    type="email" focusColor="green" className="w-full" placeholder="email@domain.com"
                     value={shopData.email} onChange={e => setShopData({...shopData, email: e.target.value})}
-                  />
+ />
                 </div>
               </div>
 
@@ -295,7 +272,7 @@ export default function SellerOnboarding() {
                   selectedIds={shopData.categoryIds}
                   loading={loadingCategories}
                   onToggle={toggleCategory}
-                />
+ />
                 <div className="text-xs text-gray-400 mt-1">Có thể chọn nhiều ngành hàng</div>
               </div>
 
@@ -487,30 +464,30 @@ export default function SellerOnboarding() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="form-control">
                     <label className="label text-sm font-medium">Họ & Tên</label>
-                    <input type="text" className="input input-bordered" value={tempAddress.fullName} onChange={e => setTempAddress({...tempAddress, fullName: e.target.value})} />
+                    <FormInput type="text"  value={tempAddress.fullName} onChange={e => setTempAddress({...tempAddress, fullName: e.target.value})} />
                   </div>
                   <div className="form-control">
                     <label className="label text-sm font-medium">Số điện thoại</label>
-                    <input type="text" className="input input-bordered" value={tempAddress.phone} onChange={e => setTempAddress({...tempAddress, phone: e.target.value})} />
+                    <FormInput type="text"  value={tempAddress.phone} onChange={e => setTempAddress({...tempAddress, phone: e.target.value})} />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="form-control">
                     <label className="label text-sm font-medium">Tỉnh/Thành phố</label>
-                    <select className="select select-bordered" value={tempAddress.province} onChange={e => setTempAddress({...tempAddress, province: e.target.value})}>
+                    <FormSelect  value={tempAddress.province} onChange={e => setTempAddress({...tempAddress, province: e.target.value})}>
                       <option value="">Chọn</option>
                       <option value="Hà Nội">Hà Nội</option>
                       <option value="Hồ Chí Minh">Hồ Chí Minh</option>
                       <option value="Đà Nẵng">Đà Nẵng</option>
-                    </select>
+                    </FormSelect>
                   </div>
                   <div className="form-control">
                     <label className="label text-sm font-medium">Quận/Huyện</label>
-                    <input type="text" className="input input-bordered" value={tempAddress.district} onChange={e => setTempAddress({...tempAddress, district: e.target.value})} />
+                    <FormInput type="text"  value={tempAddress.district} onChange={e => setTempAddress({...tempAddress, district: e.target.value})} />
                   </div>
                   <div className="form-control">
                     <label className="label text-sm font-medium">Phường/Xã</label>
-                    <input type="text" className="input input-bordered" value={tempAddress.ward} onChange={e => setTempAddress({...tempAddress, ward: e.target.value})} />
+                    <FormInput type="text"  value={tempAddress.ward} onChange={e => setTempAddress({...tempAddress, ward: e.target.value})} />
                   </div>
                 </div>
                 <div className="form-control">

@@ -53,3 +53,68 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - Set `durable = true` for exchanges and queues.
 - Use `RabbitAuditAspect` to record queue names and worker processing times in milliseconds. Keep timing logic centralized in the aspect.
+
+---
+
+## 5. Java Imports
+
+- Declare explicit imports at the top of each Java file and use simple names for external types and annotations throughout the Java source. Keep a fully qualified reference only when a name collision or framework syntax requires it.
+- Preserve the nullability contract of framework overrides. When overriding a JSpecify `@NullMarked` method from an unmarked scope, annotate non-null parameters with `org.jspecify.annotations.NonNull` via an explicit import.
+- For Spring AOP pointcuts that match annotations, bind the annotation to an explicitly typed advice parameter. When specifying `argNames`, list every formal parameter by its declared name and in declaration order, including the join point. Preserve single execution of shared advice when pointcuts overlap.
+
+---
+
+## 6. Record Lessons Learned
+
+- After each correction or investigation that yields a reusable project lesson, add or update the relevant rule in this file. Keep the rule actionable and consolidate overlapping guidance.
+
+### Backend service contracts
+
+- For controller-facing services, define an interface for the use cases exposed through API endpoints and implement it in the Spring service bean. Inject the interface into controllers.
+- For standalone services called by other beans, such as application services or integration adapters, define an interface for the operations their callers need and provide a Spring-managed implementation.
+- Keep methods used solely inside an implementation private. Check callers and Spring proxy behavior before narrowing visibility, especially for transaction, security, and async annotations.
+- Name contract operations after what callers need and keep provider-specific identifiers and parsing inside the implementation.
+
+---
+
+## 7. Tests and Builds
+
+- Do not add or run tests, compile source code, or run builds. Use source inspection and Git diff checks for verification.
+
+---
+
+## 8. React Component Architecture
+
+Apply these conventions when creating, extracting, refactoring, or reviewing React components and hooks in `apps/web`. Paths below are relative to `apps/web/src/`.
+
+### Placement and dependencies
+
+- `main.jsx` mounts React and provides the Redux store. `App.jsx` composes application providers and the browser router. Register routes in `routes/AppRoutes.jsx` and keep each route page in its owning `features/<feature>/` directory.
+- Pages compose layouts and feature components, read route state, and handle navigation. Place domain-specific forms, cards, tables, filters, and sections beside the page or in the feature's `components/` directory. Keep specialized controls local when sharing would require page-specific branches.
+- Check both existing shared UI locations before adding a primitive. `shared/components/ui/` contains `FormInput`, `FormSelect`, and their shared styles. `shared/ui/` contains controls such as `Dialog`, `TextField`, and `QuantityStepper`. Extend the closest existing control. Place cross-feature compositions such as `Pagination` and `AuthLayout` in `shared/components/`.
+- Feature code may depend on shared code. Keep shared UI independent of features and pages. When features need the same behavior, extract the reusable part or expose a narrow feature entry point. Avoid deep imports into another feature's internals.
+- Keep domain logic and validation with the feature. Use `shared/hooks/` for cross-feature hooks, `shared/utils/api.js` for the Axios instance, `shared/i18n/` for translations, and `store/slice/` for Redux slices registered in `store/index.js`.
+
+### Designing the component API
+
+- Give each component one responsibility. Pass data down and report interactions through callbacks such as `onChange`, `onSubmit`, and `onClose`. Keep API calls, Redux dispatch, routing, and business copy outside presentational controls.
+- Share repeated design through small controls with sensible defaults. For example, `FormSelect` owns the select styling. The caller supplies its value, options as children, change handler, and width through `className`. Forward native attributes, accessibility attributes, and refs to the underlying element.
+- Prefer composition for content that varies. A dialog can receive a title, body, and actions. A create/edit form can share fields and validation while its caller supplies initial values, the submit callback, and the action label.
+- Look for two or three concrete uses before introducing an abstraction. If an API grows beyond roughly seven custom props or accumulates mode flags, reconsider its responsibilities. Keep Tailwind and daisyUI variants together and reuse the existing class-composition pattern.
+- Associate labels with inputs, connect hints and errors with `aria-describedby`, and set `aria-invalid` for invalid fields. Give icon-only buttons an accessible name. Data views should handle loading, failure, and empty results.
+
+### State, effects, and React 19
+
+- Keep field values and dialog visibility local. Lift state to the nearest common owner when siblings share it. Use React Router search parameters for shareable filters, search terms, and pagination. Use Redux Toolkit for application-wide state or drafts that span routes.
+- Put feature requests and mutations in feature hooks or API functions. Trigger user-initiated work from event handlers or form actions. For route data, use loaders where a data router is available. Reserve effects for external synchronization, including socket subscriptions with cleanup.
+- Calculate derived values during render. Use a key when a different record should start a fresh form. Define components at module scope and use stable record IDs as keys for editable or sortable lists.
+- In React 19, function components can receive `ref` as a prop and provide context with `<SomeContext value={value}>`. Use `use()` to read context or a stable promise with a Suspense boundary. Route pages can supply document metadata with `<title>` and `<meta>`.
+- For action-based forms, use `useActionState` for submission results and pending state, or `useFormStatus` in a child of the submitting form. Use `useOptimistic` when an action benefits from immediate feedback. Add memoization when profiling identifies a cost.
+
+### Naming and review
+
+- Use `PascalCase.jsx` for components, `useXxx.js` for hooks without JSX, and `camelCase.js` for utilities. Keep component-specific styles nearby. Follow the surrounding module's export convention and preserve existing callers when extracting code.
+- Use relative imports with the current Vite configuration. Name new route components with a `Page` suffix where it fits the feature. When lazy-loading a route, provide a Suspense fallback.
+- During review, check ownership, existing primitives, prop defaults, native event and ref forwarding, URL behavior, and accessible states against the actual callers.
+
+- When refactoring web UI, scan across features for repeated markup, utility classes, formatting, event handlers, and request lifecycles. Extract shared markup into a prop-driven component, pure calculations into helpers, and stateful logic into hooks. Migrate matching callers and preserve their defaults, routing, accessibility, and error handling. Check that the duplicated implementation is gone before adding another abstraction.

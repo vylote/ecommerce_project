@@ -1,12 +1,3 @@
-const currencyFormatter = new Intl.NumberFormat("vi-VN", {
-  style: "currency",
-  currency: "VND",
-});
-
-export function formatAnalyticsCurrency(value) {
-  return currencyFormatter.format(value || 0);
-}
-
 export function formatTrendTick(value, currency) {
   if (!currency) return Number.isInteger(value) ? value : "";
   if (value >= 1000000) return `${value / 1000000}tr`;

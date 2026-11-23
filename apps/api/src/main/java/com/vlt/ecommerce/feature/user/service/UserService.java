@@ -16,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
-import com.vlt.ecommerce.feature.product.service.CloudinaryService;
+import com.vlt.ecommerce.common.storage.ImageStorageService;
 import com.vlt.ecommerce.feature.user.User;
 import com.vlt.ecommerce.feature.user.dto.request.UpdateProfileRequest;
 import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
-    CloudinaryService cloudinaryService;
+    ImageStorageService imageStorageService;
 
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
@@ -66,18 +66,13 @@ public class UserService {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
 
-            String avatarUrl = user.getAvatarUrl();
-            String oldPublicId = null;
-        if (avatarUrl != null && !avatarUrl.isEmpty()) {
-            oldPublicId = cloudinaryService.extractPublicIdFromUrl(avatarUrl);
-        }
+        String oldAvatarUrl = user.getAvatarUrl();
 
         userMapper.updateUserProfile(request, user);
         try {
             if (file != null && !file.isEmpty()) {
-                String secureUrl = cloudinaryService.uploadFile(file, "ecommerce/users");
-                if (oldPublicId != null)
-                    cloudinaryService.deleteFile(oldPublicId);
+                String secureUrl = imageStorageService.uploadFile(file, "ecommerce/users");
+                imageStorageService.deleteByUrl(oldAvatarUrl);
                 user.setAvatarUrl(secureUrl);
             }
         } catch (IOException e) {

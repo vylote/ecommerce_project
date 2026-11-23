@@ -1,3 +1,4 @@
+import FormInput from "../../../shared/components/ui/FormInput";
 export default function VariantInventoryTable({
   variants, batchPrice, batchStock, setBatchPrice, setBatchStock,
   handleApplyBatch, handleVariantChange, error,
@@ -11,22 +12,22 @@ export default function VariantInventoryTable({
           Áp dụng nhanh cho tất cả {variants.length} phân loại:
         </span>
         <div className="flex flex-wrap items-center gap-2">
-          <input
+          <FormInput
             type="number"
             value={batchPrice}
             onChange={(e) => setBatchPrice(e.target.value)}
             aria-label="Giá áp dụng hàng loạt"
             placeholder="Giá chung (₫)"
-            className="input input-bordered input-xs w-28 bg-white"
-          />
-          <input
+            controlSize="xs" className="w-28 bg-white"
+ />
+          <FormInput
             type="number"
             value={batchStock}
             onChange={(e) => setBatchStock(e.target.value)}
             aria-label="Tồn kho áp dụng hàng loạt"
             placeholder="Kho chung"
-            className="input input-bordered input-xs w-24 bg-white"
-          />
+            controlSize="xs" className="w-24 bg-white"
+ />
           <button
             type="button"
             onClick={handleApplyBatch}
@@ -54,34 +55,34 @@ export default function VariantInventoryTable({
                   {v.name}
                 </td>
                 <td className="py-2.5 px-4 w-44">
-                  <input
+                  <FormInput
                     type="number"
                     aria-label={`Giá bán - ${v.name}`}
                     value={v.price}
                     onChange={(e) => handleVariantChange(idx, "price", e.target.value)}
                     placeholder="Giá bán"
-                    className="input input-bordered input-sm w-full focus:border-green-600"
-                  />
+                    controlSize="sm" focusColor="green" className="w-full"
+ />
                 </td>
                 <td className="py-2.5 px-4 w-36">
-                  <input
+                  <FormInput
                     type="number"
                     aria-label={`Tồn kho - ${v.name}`}
                     value={v.stock}
                     onChange={(e) => handleVariantChange(idx, "stock", e.target.value)}
                     placeholder="Số lượng"
-                    className="input input-bordered input-sm w-full focus:border-green-600"
-                  />
+                    controlSize="sm" focusColor="green" className="w-full"
+ />
                 </td>
                 <td className="py-2.5 px-4">
-                  <input
+                  <FormInput
                     type="text"
                     aria-label={`SKU - ${v.name}`}
                     value={v.sku}
                     onChange={(e) => handleVariantChange(idx, "sku", e.target.value)}
                     placeholder="SKU tự động"
-                    className="input input-bordered input-sm w-full focus:border-green-600"
-                  />
+                    controlSize="sm" focusColor="green" className="w-full"
+ />
                 </td>
               </tr>
             ))}

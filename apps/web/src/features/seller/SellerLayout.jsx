@@ -1,20 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import useDismissiblePopover from "../../shared/hooks/useDismissiblePopover";
+import usePortalLogout from "../../shared/hooks/usePortalLogout";
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   Package, ShoppingBag, Megaphone, MessageSquare,
   DollarSign, BarChart2, Store, LogOut, Home, Bell
 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import api from '../../shared/utils/api';
-import { logout } from '../../store/slice/authSlice';
 import { useNotification } from '../../shared/hooks/useNotification.jsx';
 import SellerNotificationDropdown from './components/SellerNotificationDropdown';
 
 export default function SellerLayout() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   // Lấy thông tin user từ Redux để hiển thị Avatar thật
   const { user } = useSelector((state) => state.auth);
@@ -23,35 +20,8 @@ export default function SellerLayout() {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotification(user?.id);
 
   // --- STATE QUẢN LÝ DROPDOWN AVATAR ---
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  // Tự động đóng dropdown khi click ra ngoài vùng menu
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  // --- HÀM XỬ LÝ ĐĂNG XUẤT ---
-  const handleLogout = async () => {
-    try {
-      // Gọi API xóa session/cookie dưới Backend (Nếu bạn có API này)
-      await api.post('/auth/logout').catch(() => { });
-
-      // Xóa state trong Redux
-      dispatch(logout());
-
-      toast.success('Đã đăng xuất thành công');
-      navigate('/login');
-    } catch (error) {
-      toast.error('Lỗi khi đăng xuất');
-    }
-  };
+  const { isOpen: isDropdownOpen, setIsOpen: setIsDropdownOpen, containerRef: dropdownRef } = useDismissiblePopover();
+  const handleLogout = usePortalLogout();
 
   const MENU_ITEMS = [
     { path: '/seller/profile', icon: <Store size={18} />, label: 'Hồ sơ Shop', isImplemented: true },

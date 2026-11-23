@@ -1,3 +1,5 @@
+import FormInput from "../../shared/components/ui/FormInput";
+import FormSelect from "../../shared/components/ui/FormSelect";
 import Dialog from "../../shared/ui/Dialog";
 import React, { useState, useEffect, useRef } from 'react';
 import {
@@ -320,19 +322,19 @@ export default function CategoryManagementPage() {
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="relative w-full sm:w-80">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
+            <FormInput
               type="text"
               placeholder="Tìm theo tên danh mục hoặc slug..."
               value={searchKeyword}
               onChange={(e) => setSearchKeyword(e.target.value)}
-              className="input input-sm input-bordered w-full pl-9 bg-white text-xs"
-            />
+              controlSize="sm" className="w-full pl-9 bg-white text-xs"
+ />
           </div>
 
-          <select
+          <FormSelect
             value={filterParentId}
             onChange={(e) => setFilterParentId(e.target.value)}
-            className="select select-sm select-bordered text-xs bg-white"
+            controlSize="sm" className="text-xs bg-white"
           >
             <option value="ALL">-- Tất cả cấp độ --</option>
             <option value="ROOT">Chỉ danh mục gốc (Cấp 1)</option>
@@ -341,7 +343,7 @@ export default function CategoryManagementPage() {
                 Nhánh con của: {p.name}
               </option>
             ))}
-          </select>
+          </FormSelect>
         </div>
 
         <span className="text-xs text-gray-500 font-medium shrink-0">
@@ -396,7 +398,7 @@ export default function CategoryManagementPage() {
                                 onError={(e) => {
                                   e.currentTarget.style.display = 'none';
                                 }}
-                              />
+ />
                             ) : (
                               <Folder size={16} className={isParent ? 'text-blue-500' : 'text-gray-400'} />
                             )}
@@ -505,7 +507,7 @@ export default function CategoryManagementPage() {
               setCurrentPage(1);
             }}
             pageSizeOptions={[10, 15, 25, 50, 100]}
-          />
+ />
         </div>
       </div>
 
@@ -518,28 +520,28 @@ export default function CategoryManagementPage() {
               <label className="label font-semibold text-xs text-gray-700">
                 Tên danh mục <span className="text-red-500">*</span>
               </label>
-              <input
+              <FormInput
                 type="text"
                 value={categoryForm.name}
                 onChange={handleNameChange}
                 placeholder="Ví dụ: Thời trang nam, Thiết bị di động, Đồ gia dụng..."
-                className="input input-sm input-bordered w-full focus:border-blue-500 text-xs"
+                controlSize="sm" focusColor="blue" className="w-full text-xs"
                 required
-              />
+ />
             </div>
 
             <div className="form-control">
               <label className="label font-semibold text-xs text-gray-700">
                 Slug URL <span className="text-red-500">*</span>
               </label>
-              <input
+              <FormInput
                 type="text"
                 value={categoryForm.slug}
                 onChange={(e) => setCategoryForm({ ...categoryForm, slug: e.target.value })}
                 placeholder="thoi-trang-nam"
-                className="input input-sm input-bordered w-full focus:border-blue-500 font-mono text-xs"
+                controlSize="sm" focusColor="blue" className="w-full font-mono text-xs"
                 required
-              />
+ />
               <span className="text-[11px] text-gray-400 mt-1">Đường dẫn thân thiện SEO (không dấu, cách nhau bởi dấu gạch ngang)</span>
             </div>
 
@@ -547,10 +549,10 @@ export default function CategoryManagementPage() {
               <label className="label font-semibold text-xs text-gray-700">
                 Danh mục cha (Cấp độ)
               </label>
-              <select
+              <FormSelect
                 value={categoryForm.parentId}
                 onChange={(e) => setCategoryForm({ ...categoryForm, parentId: e.target.value })}
-                className="select select-sm select-bordered w-full focus:border-blue-500 text-xs"
+                controlSize="sm" focusColor="blue" className="w-full text-xs"
               >
                 <option value="">-- Là danh mục gốc (Cấp 1) --</option>
                 {parentCategories
@@ -560,7 +562,7 @@ export default function CategoryManagementPage() {
                       {p.name}
                     </option>
                   ))}
-              </select>
+              </FormSelect>
             </div>
 
             {/* UPLOAD / NHẬP HÌNH ẢNH DANH MỤC */}
@@ -577,7 +579,7 @@ export default function CategoryManagementPage() {
                         src={getCategoryImageUrl(categoryForm.imageUrl)}
                         alt="Preview"
                         className="w-full h-full object-cover"
-                      />
+ />
                       <button
                         type="button"
                         onClick={() => setCategoryForm((prev) => ({ ...prev, imageUrl: '' }))}
@@ -601,7 +603,7 @@ export default function CategoryManagementPage() {
                       onChange={handleFileUpload}
                       accept="image/*"
                       className="hidden"
-                    />
+ />
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
@@ -622,13 +624,13 @@ export default function CategoryManagementPage() {
 
                     <div className="relative">
                       <LinkIcon size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                      <input
+                      <FormInput
                         type="url"
                         value={categoryForm.imageUrl}
                         onChange={(e) => setCategoryForm({ ...categoryForm, imageUrl: e.target.value })}
                         placeholder="Hoặc dán trực tiếp đường dẫn URL ảnh..."
-                        className="input input-xs input-bordered w-full pl-8 focus:border-blue-500 text-xs"
-                      />
+                        controlSize="xs" focusColor="blue" className="w-full pl-8 text-xs"
+ />
                     </div>
                   </div>
                 </div>
@@ -648,7 +650,7 @@ export default function CategoryManagementPage() {
                   checked={categoryForm.isActive}
                   onChange={(e) => setCategoryForm({ ...categoryForm, isActive: e.target.checked })}
                   className="toggle toggle-success toggle-sm ml-3 shrink-0"
-                />
+ />
               </label>
             </div>
 

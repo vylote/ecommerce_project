@@ -1,3 +1,4 @@
+import FormSelect from "./ui/FormSelect";
 import React from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
@@ -63,17 +64,17 @@ export default function Pagination({
         {onPageSizeChange && (
           <div className="flex items-center gap-1.5 ml-2">
             <span className="text-gray-400">Số lượng:</span>
-            <select
+            <FormSelect
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              className="select select-xs select-bordered focus:border-blue-500 bg-white"
+              controlSize="xs" focusColor="blue" className="bg-white"
             >
               {pageSizeOptions.map((opt) => (
                 <option key={opt} value={opt}>
                   {opt} / trang
                 </option>
               ))}
-            </select>
+            </FormSelect>
           </div>
         )}
       </div>

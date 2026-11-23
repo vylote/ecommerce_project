@@ -1,6 +1,8 @@
 package com.vlt.ecommerce.feature.commission;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,5 +27,5 @@ public interface CommissionRecordRepository extends JpaRepository<CommissionReco
 
     boolean existsByOrderItemId(Long orderItemId);
 
-    java.util.List<CommissionRecord> findByRecordedAtAfter(java.time.LocalDateTime after);
+    List<CommissionRecord> findByRecordedAtAfter(LocalDateTime after);
 }

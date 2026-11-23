@@ -1,11 +1,11 @@
 import AnalyticsPeriodFilter from "../../shared/components/analytics/AnalyticsPeriodFilter";
 import AnalyticsTrendChart from "../../shared/components/analytics/AnalyticsTrendChart";
-import { formatAnalyticsCurrency as formatCurrency } from "../../shared/components/analytics/trendSeries";
-import OrderStatusChart, { OrderStatusLegend } from "../order/components/OrderStatusChart";
-import { useEffect, useState, useMemo } from "react";
+import formatCurrency from "../../shared/utils/formatCurrency";
+import useDashboardAnalytics from "../../shared/hooks/useDashboardAnalytics";
+import MetricCard from "../../shared/components/analytics/MetricCard";
+import OrderStatusSummary from "../order/components/OrderStatusSummary";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import api from "../../shared/utils/api";
-import toast from "react-hot-toast";
 import {
   TrendingUp,
   DollarSign,
@@ -63,36 +63,16 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshVersion, setRefreshVersion] = useState(0);
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function fetchAnalytics() {
-      try {
-        const response = await api.get("/commission/stats/admin/analytics", {
-          params: { period: filterPeriod, range: filterRange },
-          signal: controller.signal,
-        });
-        if (!controller.signal.aborted && response.data?.result) {
-          setAnalytics(response.data.result);
-        }
-      } catch (error) {
-        if (!controller.signal.aborted) {
-          console.error("Analytics error:", error);
-          toast.error("Không thể tải thống kê sàn giao dịch");
-        }
-      } finally {
-        if (!controller.signal.aborted) setLoading(false);
-      }
-    }
-
-    fetchAnalytics();
-    return () => controller.abort();
-  }, [filterPeriod, filterRange, refreshVersion]);
-
-  const completionRate = useMemo(() => {
-    if (!analytics.totalOrdersAll || analytics.totalOrdersAll === 0) return 0;
-    return Math.round((analytics.totalOrders / analytics.totalOrdersAll) * 100);
-  }, [analytics]);
+  const completionRate = useDashboardAnalytics({
+    endpoint: "/commission/stats/admin/analytics",
+    errorMessage: "Không thể tải thống kê sàn giao dịch",
+    period: filterPeriod,
+    range: filterRange,
+    analytics,
+    setAnalytics,
+    setLoading: setLoading,
+    refreshVersion,
+  });
 
   return (
     <div className="w-full animate-fade-in flex flex-col gap-6">
@@ -210,87 +190,47 @@ export default function AdminDashboard() {
         {/* 4 Thẻ Tài Chính Lớn */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Tổng GMV Sàn */}
-          <div className="bg-blue-50/60 border border-blue-100 rounded-xl p-5 flex flex-col justify-between">
-            <div className="flex justify-between items-start">
-              <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">
-                Tổng GMV Toàn Sàn
-              </span>
-              <span className="p-2 bg-blue-100 text-blue-700 rounded-lg">
-                <DollarSign className="w-4 h-4" />
-              </span>
-            </div>
-            <div className="mt-3">
-              <div className="text-2xl font-black text-blue-700 truncate">
-                {formatCurrency(analytics.totalGrossRevenue)}
-              </div>
-              <div className="text-xs text-blue-600 mt-1 flex items-center gap-1 font-medium">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                Từ {analytics.totalOrders || 0} đơn hoàn tất
-              </div>
-            </div>
-          </div>
+          <MetricCard
+            tone="blue"
+            title="Tổng GMV Toàn Sàn"
+            icon={<DollarSign className="w-4 h-4" />}
+            value={formatCurrency(analytics.totalGrossRevenue)}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Từ {analytics.totalOrders || 0} đơn hoàn tất
+          </MetricCard>
 
           {/* Card 2: Tổng Hoa Hồng Thu Được */}
-          <div className="bg-orange-50/60 border border-orange-100 rounded-xl p-5 flex flex-col justify-between">
-            <div className="flex justify-between items-start">
-              <span className="text-xs font-bold text-orange-800 uppercase tracking-wider">
-                Hoa Hồng Sàn Thu Được
-              </span>
-              <span className="p-2 bg-orange-100 text-[#ee4d2d] rounded-lg">
-                <Percent className="w-4 h-4" />
-              </span>
-            </div>
-            <div className="mt-3">
-              <div className="text-2xl font-black text-[#ee4d2d] truncate">
-                {formatCurrency(analytics.totalCommissionRevenue)}
-              </div>
-              <div className="text-xs text-orange-600 mt-1 flex items-center gap-1 font-medium">
-                <TrendingUp className="w-3.5 h-3.5" />
-                Doanh thu thực sàn được hưởng
-              </div>
-            </div>
-          </div>
+          <MetricCard
+            tone="orange"
+            title="Hoa Hồng Sàn Thu Được"
+            icon={<Percent className="w-4 h-4" />}
+            value={formatCurrency(analytics.totalCommissionRevenue)}
+          >
+            <TrendingUp className="w-3.5 h-3.5" />
+            Doanh thu thực sàn được hưởng
+          </MetricCard>
 
           {/* Card 3: Thực Nhận Của Shop (Net) */}
-          <div className="bg-emerald-50/60 border border-emerald-100 rounded-xl p-5 flex flex-col justify-between">
-            <div className="flex justify-between items-start">
-              <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                Thực Nhận Của Các Shop
-              </span>
-              <span className="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
-                <Store className="w-4 h-4" />
-              </span>
-            </div>
-            <div className="mt-3">
-              <div className="text-2xl font-black text-emerald-700 truncate">
-                {formatCurrency(analytics.totalNetRevenue)}
-              </div>
-              <div className="text-xs text-emerald-600 mt-1 flex items-center gap-1 font-medium">
-                <span>GMV trừ đi phần hoa hồng</span>
-              </div>
-            </div>
-          </div>
+          <MetricCard
+            tone="emerald"
+            title="Thực Nhận Của Các Shop"
+            icon={<Store className="w-4 h-4" />}
+            value={formatCurrency(analytics.totalNetRevenue)}
+          >
+            <span>GMV trừ đi phần hoa hồng</span>
+          </MetricCard>
 
           {/* Card 4: Doanh Thu Tạm Tính (Lưu thông) */}
-          <div className="bg-purple-50/60 border border-purple-100 rounded-xl p-5 flex flex-col justify-between">
-            <div className="flex justify-between items-start">
-              <span className="text-xs font-bold text-purple-800 uppercase tracking-wider">
-                Doanh Thu Đang Lưu Thông
-              </span>
-              <span className="p-2 bg-purple-100 text-purple-700 rounded-lg">
-                <Clock className="w-4 h-4" />
-              </span>
-            </div>
-            <div className="mt-3">
-              <div className="text-2xl font-black text-purple-700 truncate">
-                {formatCurrency(analytics.pendingGrossRevenue)}
-              </div>
-              <div className="text-xs text-purple-600 mt-1 flex items-center gap-1 font-medium">
-                <Truck className="w-3.5 h-3.5" />
-                Các đơn đang giao / chờ lấy
-              </div>
-            </div>
-          </div>
+          <MetricCard
+            tone="purple"
+            title="Doanh Thu Đang Lưu Thông"
+            icon={<Clock className="w-4 h-4" />}
+            value={formatCurrency(analytics.pendingGrossRevenue)}
+          >
+            <Truck className="w-3.5 h-3.5" />
+            Các đơn đang giao / chờ lấy
+          </MetricCard>
         </div>
 
         {/* KHU VỰC VẼ BIỂU ĐỒ (Dual Line Chart + Donut Status Breakdown) */}
@@ -346,23 +286,13 @@ export default function AdminDashboard() {
           </div>
 
           {/* Cột Phải 1/3: Biểu đồ Donut Cơ cấu trạng thái đơn toàn sàn */}
-          <div className="border border-gray-100 bg-gray-50/50 rounded-2xl p-5 flex flex-col justify-between">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-bold text-gray-800">
-                Cơ Cấu Trạng Thái Đơn Sàn
-              </span>
-              <span className="text-xs text-gray-400">
-                Tổng {analytics.totalOrdersAll || 0} đơn
-              </span>
-            </div>
-
-            {/* Donut Canvas */}
-            <div className="h-[180px] w-full relative flex items-center justify-center my-2">
-              <OrderStatusChart statusBreakdown={analytics.statusBreakdown} />
-            </div>
-
-            <OrderStatusLegend statusBreakdown={analytics.statusBreakdown} />
-          </div>
+          <OrderStatusSummary
+            title="Cơ Cấu Trạng Thái Đơn Sàn"
+            totalOrders={analytics.totalOrdersAll}
+            statusBreakdown={analytics.statusBreakdown}
+            className="bg-gray-50/50 rounded-2xl p-5"
+            chartClassName="h-[180px] my-2"
+          />
         </div>
       </div>
 

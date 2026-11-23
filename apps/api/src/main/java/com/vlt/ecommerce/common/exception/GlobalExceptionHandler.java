@@ -3,9 +3,11 @@ package com.vlt.ecommerce.common.exception;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
@@ -38,8 +40,8 @@ public class GlobalExceptionHandler {
         }
 
         @SuppressWarnings("rawtypes")
-        @ExceptionHandler(value = org.springframework.web.HttpRequestMethodNotSupportedException.class)
-        ResponseEntity<ApiResponse> handlingMethodNotSupported(org.springframework.web.HttpRequestMethodNotSupportedException e) {
+        @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
+        ResponseEntity<ApiResponse> handlingMethodNotSupported(HttpRequestMethodNotSupportedException e) {
                 return ResponseEntity.status(405).body(
                                 ApiResponse.builder()
                                                 .code(405)
@@ -48,8 +50,8 @@ public class GlobalExceptionHandler {
         }
 
         @SuppressWarnings("rawtypes")
-        @ExceptionHandler(value = org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
-        ResponseEntity<ApiResponse> handlingMethodArgumentTypeMismatch(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException e) {
+        @ExceptionHandler(value = MethodArgumentTypeMismatchException.class)
+        ResponseEntity<ApiResponse> handlingMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
                 return ResponseEntity.status(400).body(
                                 ApiResponse.builder()
                                                 .code(1021)

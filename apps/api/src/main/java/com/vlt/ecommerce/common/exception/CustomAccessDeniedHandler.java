@@ -2,6 +2,7 @@ package com.vlt.ecommerce.common.exception;
 
 import java.io.IOException;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
@@ -20,8 +21,9 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     private final ObjectMapper objectMapper;
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response,
-                       AccessDeniedException accessDeniedException) throws IOException {
+    public void handle(@NonNull HttpServletRequest request,
+                       @NonNull HttpServletResponse response,
+                       @NonNull AccessDeniedException accessDeniedException) throws IOException {
         String origin = request.getHeader("Origin");
         if (origin != null && !origin.isBlank()) {
             response.setHeader("Access-Control-Allow-Origin", origin);
