@@ -5,16 +5,27 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
       - name: Run Stack Analyser
-        id: stack
-        uses: specfy/stack-analyser@v1.27.6
+        run: |
+          cd "$RUNNER_TEMP"
+          npx --yes @specfy/stack-analyser@1.27.6 "$GITHUB_WORKSPACE" --output=stack-report.json
 
       - name: Print Result
-        run: echo '${{ steps.stack.outputs.payload }}'
+        run: cat "$RUNNER_TEMP/stack-report.json"
