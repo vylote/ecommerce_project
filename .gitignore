@@ -52,3 +52,12 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Tài liệu và file local không theo dõi trong Git
+/file1
+/file2
+/file3
+/DacTaYeuCau.md
+/DacTaYeuCau2.pdf
+/ecommerce_group1_apis.postman_collection.json
+/db_schema_spec.md
