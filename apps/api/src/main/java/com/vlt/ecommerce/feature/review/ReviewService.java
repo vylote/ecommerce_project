@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.order.Order;
+import com.vlt.ecommerce.feature.order.OrderItem;
 import com.vlt.ecommerce.feature.order.OrderStatus;
 import com.vlt.ecommerce.feature.order.repository.OrderRepository;
 import com.vlt.ecommerce.feature.product.Product;
@@ -73,7 +74,7 @@ public class ReviewService {
         
         // Lấy managed Product từ OrderItems
         Product product = order.getItems().stream()
-            .map(com.vlt.ecommerce.feature.order.OrderItem::getProduct)
+            .map(OrderItem::getProduct)
             .filter(p -> p.getId().equals(request.getProductId()))
             .findFirst()
             .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));

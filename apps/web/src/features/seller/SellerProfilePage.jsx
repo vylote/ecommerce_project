@@ -1,3 +1,6 @@
+import ImageUploadPreview from "../../shared/ui/ImageUploadPreview";
+import useShopFormFields from "./useShopFormFields";
+import FormInput from "../../shared/components/ui/FormInput";
 import ShopCategoryChoices from "./components/ShopCategoryChoices";
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -57,29 +60,7 @@ export default function SellerProfilePage() {
     fetchData();
   }, []);
 
-  const toggleCategory = (categoryId) => {
-    setShopData(prev => ({
-      ...prev,
-      categoryIds: prev.categoryIds.includes(categoryId)
-        ? prev.categoryIds.filter(id => id !== categoryId)
-        : [...prev.categoryIds, categoryId],
-    }));
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast.error('Kích thước ảnh tối đa là 2MB');
-        return;
-      }
-      setShopData(prev => ({
-        ...prev,
-        file,
-        previewUrl: URL.createObjectURL(file)
-      }));
-    }
-  };
+  const { toggleCategory, handleFileChange } = useShopFormFields(setShopData);
 
   const handleUpdateShop = async () => {
     if (!shopData.shopName) {
@@ -136,12 +117,12 @@ export default function SellerProfilePage() {
         <div className="flex-1 space-y-6">
           <div className="grid grid-cols-[120px_1fr] items-center gap-4">
             <label className="text-sm font-medium text-gray-500 text-right">Tên Shop</label>
-            <input
+            <FormInput
               type="text"
-              className="input input-bordered focus:border-green-600 h-10 w-full"
+              focusColor="green" className="h-10 w-full"
               value={shopData.shopName}
               onChange={e => setShopData({...shopData, shopName: e.target.value})}
-            />
+ />
           </div>
 
           <div className="grid grid-cols-[120px_1fr] items-start gap-4">
@@ -151,7 +132,7 @@ export default function SellerProfilePage() {
               rows={3}
               value={shopData.description}
               onChange={e => setShopData({...shopData, description: e.target.value})}
-            />
+ />
           </div>
 
           <div className="grid grid-cols-[120px_1fr] items-start gap-4">
@@ -161,7 +142,7 @@ export default function SellerProfilePage() {
               selectedIds={shopData.categoryIds}
               loading={loadingCategories}
               onToggle={toggleCategory}
-            />
+ />
 
           </div>
 
@@ -172,7 +153,7 @@ export default function SellerProfilePage() {
               rows={2}
               value={shopData.addressText}
               onChange={e => setShopData({...shopData, addressText: e.target.value})}
-            />
+ />
           </div>
 
           <div className="grid grid-cols-[120px_1fr] gap-4 mt-8">
@@ -190,23 +171,18 @@ export default function SellerProfilePage() {
         {/* Right Side: Avatar */}
         <div className="w-full md:w-[300px] flex flex-col items-center justify-start border-l border-gray-100 pl-0 md:pl-8">
           <div className="relative w-32 h-32 rounded-full border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50 overflow-hidden group hover:border-green-600 transition-colors cursor-pointer mb-4">
-            {shopData.previewUrl ? (
-              <img src={shopData.previewUrl} alt="Logo preview" className="w-full h-full object-cover" />
-            ) : (
+            <ImageUploadPreview
+              src={shopData.previewUrl}
+              alt="Logo preview"
+              label="Chọn ảnh"
+              accept="image/jpeg, image/png, image/jpg"
+              onChange={handleFileChange}
+            >
               <div className="text-center text-gray-400">
                 <Store size={32} className="mx-auto mb-1 opacity-50" />
                 <span className="text-xs">Tải ảnh lên</span>
               </div>
-            )}
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="text-white text-xs font-medium">Chọn ảnh</span>
-            </div>
-            <input
-              type="file"
-              className="absolute inset-0 opacity-0 cursor-pointer"
-              accept="image/jpeg, image/png, image/jpg"
-              onChange={handleFileChange}
-            />
+            </ImageUploadPreview>
           </div>
           
           <div className="text-xs text-gray-500 text-center space-y-1">

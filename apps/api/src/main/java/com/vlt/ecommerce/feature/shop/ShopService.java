@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.feature.shop;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -19,13 +20,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
+import com.vlt.ecommerce.common.storage.ImageStorageService;
 import com.vlt.ecommerce.feature.product.Category;
 import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.product.dto.response.ProductResponse;
 import com.vlt.ecommerce.feature.product.mapper.ProductMapper;
 import com.vlt.ecommerce.feature.product.repository.CategoryRepository;
 import com.vlt.ecommerce.feature.product.repository.ProductRepository;
-import com.vlt.ecommerce.feature.product.service.CloudinaryService;
 import com.vlt.ecommerce.feature.shop.dto.request.ShopRequest;
 import com.vlt.ecommerce.feature.shop.dto.response.ShopResponse;
 import com.vlt.ecommerce.feature.shop.mapper.ShopMapper;
@@ -53,7 +54,7 @@ public class ShopService {
     ShopMapper shopMapper;
     ProductMapper productMapper;
 
-    CloudinaryService cloudinaryService;
+    ImageStorageService imageStorageService;
 
     @Transactional // tối ưu đường truyền, k phải nhằm mục đích lazy loading
     public ShopResponse create(ShopRequest request, MultipartFile file) {
@@ -82,10 +83,10 @@ public class ShopService {
 
         try {
             if (file != null && !file.isEmpty()) {
-                String secureUrl = cloudinaryService.uploadFile(file, "ecommerce/shops");
+                String secureUrl = imageStorageService.uploadFile(file, "ecommerce/shops");
                 newShop.setLogoUrl(secureUrl);
             }
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             log.error("Error uploading shop logo", e);
         }
 
@@ -104,10 +105,6 @@ public class ShopService {
         }
 
         String oldLogoUrl = shop.getLogoUrl();
-        String oldPublicId = null;
-        if (oldLogoUrl != null && !oldLogoUrl.isEmpty()) {
-            oldPublicId = cloudinaryService.extractPublicIdFromUrl(oldLogoUrl);
-        }
 
         shopMapper.updateShopFromRequest(request, shop);
 
@@ -118,13 +115,11 @@ public class ShopService {
 
         try {
             if (file != null && !file.isEmpty()) {
-                String secureUrl = cloudinaryService.uploadFile(file, "ecommerce/shops");
-                if (oldPublicId != null) {
-                    cloudinaryService.deleteFile(oldPublicId);
-                }
+                String secureUrl = imageStorageService.uploadFile(file, "ecommerce/shops");
+                imageStorageService.deleteByUrl(oldLogoUrl);
                 shop.setLogoUrl(secureUrl);
             }
-        } catch (java.io.IOException e) {
+        } catch (IOException e) {
             log.error("Error uploading shop logo", e);
         }
 

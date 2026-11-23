@@ -633,14 +633,6 @@ export default function ProductDetailPage() {
           )}
         </div>
       </div>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-      `,
-        }}
-      />
     </div>
   );
 }

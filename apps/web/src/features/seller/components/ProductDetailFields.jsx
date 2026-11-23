@@ -1,3 +1,5 @@
+import FormInput from "../../../shared/components/ui/FormInput";
+import FormSelect from "../../../shared/components/ui/FormSelect";
 export default function ProductDetailFields({ productForm, handleInputChange, setActiveTab, attributeSpecTypes, selectedSpecs, setSelectedSpecs }) {
   return (
     <>
@@ -21,26 +23,26 @@ export default function ProductDetailFields({ productForm, handleInputChange, se
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="form-control">
               <label className="label font-medium text-sm">Thương hiệu</label>
-              <input
+              <FormInput
                 type="text"
                 name="brand"
                 value={productForm.brand}
                 onChange={handleInputChange}
-                className="input input-bordered focus:border-green-600"
+                focusColor="green"
                 placeholder="Ví dụ: No Brand, OEM, Nike, Apple..."
-              />
+ />
             </div>
 
             <div className="form-control">
               <label className="label font-medium text-sm">Nhà sản xuất / Đơn vị phân phối</label>
-              <input
+              <FormInput
                 type="text"
                 name="manufacturer"
                 value={productForm.manufacturer}
                 onChange={handleInputChange}
-                className="input input-bordered focus:border-green-600"
+                focusColor="green"
                 placeholder="Tên công ty hoặc cơ sở sản xuất"
-              />
+ />
             </div>
           </div>
 
@@ -63,7 +65,7 @@ export default function ProductDetailFields({ productForm, handleInputChange, se
                         )}
                       </label>
                       <div className="space-y-2">
-                        <select
+                        <FormSelect
                           value={currentSpec.specificationId || (currentSpec.isCustom ? "CUSTOM" : "")}
                           onChange={(e) => {
                             const val = e.target.value;
@@ -91,7 +93,7 @@ export default function ProductDetailFields({ productForm, handleInputChange, se
                               }));
                             }
                           }}
-                          className="select select-bordered w-full focus:border-green-600 text-sm"
+                          focusColor="green" className="w-full text-sm"
                         >
                           <option value="">-- Chọn {st.name} (Tùy chọn) --</option>
                           {st.specifications?.map((s) => (
@@ -100,10 +102,10 @@ export default function ProductDetailFields({ productForm, handleInputChange, se
                             </option>
                           ))}
                           <option value="CUSTOM">-- Tự nhập giá trị khác --</option>
-                        </select>
+                        </FormSelect>
 
                         {currentSpec.isCustom && (
-                          <input
+                          <FormInput
                             type="text"
                             value={currentSpec.customValue || ""}
                             onChange={(e) => {
@@ -113,9 +115,9 @@ export default function ProductDetailFields({ productForm, handleInputChange, se
                                 [st.id]: { ...prev[st.id], customValue: customVal },
                               }));
                             }}
-                            className="input input-bordered input-sm w-full focus:border-green-600 text-sm"
+                            controlSize="sm" focusColor="green" className="w-full text-sm"
                             placeholder={`Nhập giá trị tùy chỉnh cho ${st.name}...`}
-                          />
+ />
                         )}
                       </div>
                     </div>

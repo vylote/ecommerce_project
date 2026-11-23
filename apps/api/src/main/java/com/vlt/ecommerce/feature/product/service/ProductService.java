@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.vlt.ecommerce.common.dto.PageResponse;
 import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
+import com.vlt.ecommerce.common.storage.ImageStorageService;
 import com.vlt.ecommerce.feature.product.Category;
 import com.vlt.ecommerce.feature.product.Product;
 import com.vlt.ecommerce.feature.product.ProductImage;
@@ -60,7 +61,7 @@ public class ProductService {
     CategoryRepository categoryRepository;
     SpecificProductRepository specificProductRepository;
 
-    CloudinaryService cloudinaryService;
+    ImageStorageService imageStorageService;
     ShopService shopService;
 
     @PreAuthorize("hasRole('SELLER')")
@@ -116,7 +117,7 @@ public class ProductService {
         }
 
         try {
-            String imageUrl = cloudinaryService.uploadFile(file, "ecommerce/products");
+            String imageUrl = imageStorageService.uploadFile(file, "ecommerce/products");
 
             ProductImage productImage = new ProductImage();
             productImage.setProduct(product);

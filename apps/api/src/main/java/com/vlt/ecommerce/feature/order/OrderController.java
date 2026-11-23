@@ -29,6 +29,7 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 public class OrderController {
     OrderService orderService;
+    OrderAnalyticsService orderAnalyticsService;
 
     @PostMapping
     public ApiResponse<List<OrderResponse>> create(@RequestBody @Valid OrderRequest request) {
@@ -97,7 +98,7 @@ public class OrderController {
     @GetMapping("/seller/dashboard/stats")
     public ApiResponse<Map<OrderStatus, Long>> getSellerDashboardStats() {
         return ApiResponse.<Map<OrderStatus, Long>>builder()
-                .result(orderService.getDashboardStats())
+                .result(orderAnalyticsService.getDashboardStats())
                 .build();
     }
 
@@ -108,7 +109,7 @@ public class OrderController {
             @RequestParam(required = false) Integer days) {
         int finalRange = (days != null) ? days : range;
         return ApiResponse.<SellerAnalyticsResponse>builder()
-                .result(orderService.getSellerAnalytics(period, finalRange))
+                .result(orderAnalyticsService.getSellerAnalytics(period, finalRange))
                 .build();
     }
 }

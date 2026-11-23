@@ -64,3 +64,6 @@ Thumbs.db
 
 # Cấu hình VS Code local
 .vscode/
+
+# Local API tests
+/apps/api/src/test/

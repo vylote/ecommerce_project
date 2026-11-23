@@ -1,12 +1,12 @@
 import TextField from "../../shared/ui/TextField";
 import PasswordField from "./components/PasswordField";
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 import AuthLayout from '../../shared/components/AuthLayout';
 import { useI18n } from '../../shared/i18n';
-import GoogleAuthButton from './GoogleAuthButton';
+import AuthAlternatives from "./components/AuthAlternatives";
 import EmailOtpModal from './EmailOtpModal';
 
 export default function RegisterPage() {
@@ -132,20 +132,7 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <div className="my-5 flex items-center gap-3" aria-hidden="true">
-          <div className="flex-1 h-px bg-base-300" />
-          <span className="text-xs text-base-content/50">{t("auth.or")}</span>
-          <div className="flex-1 h-px bg-base-300" />
-        </div>
-
-        <GoogleAuthButton />
-
-        <p className="mt-7 pt-5 border-t border-base-300 text-center text-sm text-base-content/60">
-          {t("auth.already_have_account")}{' '}
-          <Link to="/login" className="font-semibold text-secondary hover:underline">
-            {t("auth.login_now")}
-          </Link>
-        </p>
+        <AuthAlternatives divider={t("auth.or")} prompt={t("auth.already_have_account")} to="/login" linkLabel={t("auth.login_now")} />
       </div>
 
       {otpModalOpen && (

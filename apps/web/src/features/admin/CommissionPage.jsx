@@ -1,3 +1,6 @@
+import formatMoney from "../../shared/utils/formatCurrency";
+import FormInput from "../../shared/components/ui/FormInput";
+import FormSelect from "../../shared/components/ui/FormSelect";
 import Dialog from "../../shared/ui/Dialog";
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -75,9 +78,6 @@ export default function CommissionPage() {
     }
   };
 
-  const formatMoney = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
-  };
 
   const getCategoryName = (id) => {
     const cat = categories.find(c => c.id === id);
@@ -215,7 +215,7 @@ export default function CommissionPage() {
                 setCurrentPage(1);
               }}
               pageSizeOptions={[5, 10, 20]}
-            />
+ />
           </div>
         )}
       </div>
@@ -228,8 +228,8 @@ export default function CommissionPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Chọn Danh Mục
               </label>
-              <select
-                className="select select-bordered w-full"
+              <FormSelect
+                className="w-full"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 required
@@ -238,7 +238,7 @@ export default function CommissionPage() {
                 {categories.map(c => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
-              </select>
+              </FormSelect>
             </div>
 
             <div className="mb-4">
@@ -246,7 +246,7 @@ export default function CommissionPage() {
                 Mức phí sàn (%)
               </label>
               <div className="relative">
-                <input
+                <FormInput
                   type="number"
                   step="0.1"
                   min="0"
@@ -254,9 +254,9 @@ export default function CommissionPage() {
                   value={newFee}
                   onChange={(e) => setNewFee(e.target.value)}
                   placeholder="Ví dụ: 5.0"
-                  className="input input-bordered w-full pr-8 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  focusColor="blue" className="w-full pr-8 focus:ring-1 focus:ring-blue-500"
                   required
-                />
+ />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">%</span>
               </div>
             </div>
@@ -265,13 +265,13 @@ export default function CommissionPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Ngày áp dụng
               </label>
-              <input
+              <FormInput
                 type="date"
                 value={effectiveDate}
                 onChange={(e) => setEffectiveDate(e.target.value)}
-                className="input input-bordered w-full"
+                className="w-full"
                 required
-              />
+ />
             </div>
 
             <p className="text-xs text-gray-500 mt-2">

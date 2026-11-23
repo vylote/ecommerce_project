@@ -1,3 +1,5 @@
+import FormInput from "../../../shared/components/ui/FormInput";
+import FormSelect from "../../../shared/components/ui/FormSelect";
 export default function VariantGroupFields({
   number, tier, specTypes, excludedTypeId, onEdit, onSelectType, onAddOption, onRemoveOption,
   onToggleOption, onRemoveGroup,
@@ -12,10 +14,10 @@ export default function VariantGroupFields({
         {specTypes.length > 0 && (
           <label className="flex items-center gap-2 text-xs text-gray-600">
             Chuẩn theo ngành hàng
-            <select
+            <FormSelect
               value={tier.typeId || ""}
               onChange={(event) => onSelectType(event.target.value)}
-              className="select select-bordered select-xs bg-white focus:border-green-600"
+              controlSize="xs" focusColor="green" className="bg-white"
             >
               <option value="">Chọn phân loại chuẩn</option>
               {specTypes.filter((type) => type.id !== excludedTypeId).map((type) => (
@@ -23,7 +25,7 @@ export default function VariantGroupFields({
                   {type.name} ({type.specifications?.length || 0} giá trị)
                 </option>
               ))}
-            </select>
+            </FormSelect>
           </label>
         )}
         {onRemoveGroup && (
@@ -33,16 +35,16 @@ export default function VariantGroupFields({
         )}
       </div>
       <div className="grid items-center gap-3 md:grid-cols-[180px_1fr]">
-        <input
+        <FormInput
           type="text"
           aria-label={`Tên nhóm ${number}`}
           placeholder="Tên nhóm"
           value={tier.name}
           onChange={(event) => onEdit("name", event.target.value)}
-          className="input input-bordered input-sm bg-white focus:border-green-600"
-        />
+          controlSize="sm" focusColor="green" className="bg-white"
+ />
         <div className="flex gap-2">
-          <input
+          <FormInput
             type="text"
             aria-label={`Giá trị mới cho nhóm ${number}`}
             placeholder="Nhập giá trị riêng"
@@ -53,8 +55,8 @@ export default function VariantGroupFields({
               event.preventDefault();
               onAddOption();
             }}
-            className="input input-bordered input-sm min-w-0 flex-1 bg-white focus:border-green-600"
-          />
+            controlSize="sm" focusColor="green" className="min-w-0 flex-1 bg-white"
+ />
           <button type="button" onClick={onAddOption} className="btn btn-sm bg-green-600 text-white hover:bg-green-700">
             Thêm
           </button>

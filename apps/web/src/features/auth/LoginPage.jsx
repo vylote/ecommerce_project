@@ -8,7 +8,7 @@ import api from '../../shared/utils/api';
 import { loginSuccess } from '../../store/slice/authSlice';
 import AuthLayout from '../../shared/components/AuthLayout';
 import { useI18n } from '../../shared/i18n';
-import GoogleAuthButton from './GoogleAuthButton';
+import AuthAlternatives from "./components/AuthAlternatives";
 
 export default function LoginPage() {
   const { t } = useI18n();
@@ -133,20 +133,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="my-5 flex items-center gap-3" aria-hidden="true">
-          <div className="flex-1 h-px bg-base-300" />
-          <span className="text-xs text-base-content/50">{t("auth.or")}</span>
-          <div className="flex-1 h-px bg-base-300" />
-        </div>
-
-        <GoogleAuthButton />
-
-        <p className="mt-7 pt-5 border-t border-base-300 text-center text-sm text-base-content/60">
-          {t("auth.new_to_shop")}{' '}
-          <Link to="/register" className="font-semibold text-secondary hover:underline">
-            {t("auth.register_now")}
-          </Link>
-        </p>
+        <AuthAlternatives divider={t("auth.or")} prompt={t("auth.new_to_shop")} to="/register" linkLabel={t("auth.register_now")} />
       </div>
 
       {showLockedModal && (

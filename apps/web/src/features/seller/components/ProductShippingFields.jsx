@@ -1,3 +1,4 @@
+import FormInput from "../../../shared/components/ui/FormInput";
 export default function ProductShippingFields({ productForm, errors, handleInputChange }) {
   return (
     <>
@@ -20,44 +21,44 @@ export default function ProductShippingFields({ productForm, errors, handleInput
             onChange={handleInputChange}
             className={`input input-bordered ${errors.weight ? "border-red-500 focus:border-red-500" : "focus:border-green-600"}`}
             placeholder="Ví dụ: 300"
-          />
+ />
           {errors.weight && <span className="text-xs text-red-500 mt-1">{errors.weight}</span>}
         </div>
 
         <div className="form-control">
           <label className="label font-medium text-sm">Dài (cm)</label>
-          <input
+          <FormInput
             type="number"
             name="length"
             value={productForm.length}
             onChange={handleInputChange}
-            className="input input-bordered focus:border-green-600"
+            focusColor="green"
             placeholder="L"
-          />
+ />
         </div>
 
         <div className="form-control">
           <label className="label font-medium text-sm">Rộng (cm)</label>
-          <input
+          <FormInput
             type="number"
             name="width"
             value={productForm.width}
             onChange={handleInputChange}
-            className="input input-bordered focus:border-green-600"
+            focusColor="green"
             placeholder="W"
-          />
+ />
         </div>
 
         <div className="form-control">
           <label className="label font-medium text-sm">Cao (cm)</label>
-          <input
+          <FormInput
             type="number"
             name="height"
             value={productForm.height}
             onChange={handleInputChange}
-            className="input input-bordered focus:border-green-600"
+            focusColor="green"
             placeholder="H"
-          />
+ />
         </div>
       </div>
 

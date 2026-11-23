@@ -7,8 +7,10 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.stereotype.Component;
 
+import com.vlt.ecommerce.common.annotation.RabbitAudit;
 import com.vlt.ecommerce.feature.notification.dto.NotificationMessage;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,14 +20,24 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class RabbitAuditAspect {
 
-    @Around("@annotation(org.springframework.amqp.rabbit.annotation.RabbitListener) || @annotation(com.vlt.ecommerce.common.annotation.RabbitAudit)")
-    public Object auditRabbitConsumer(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Around(value = "@annotation(listener)", argNames = "joinPoint,listener")
+    public Object auditRabbitListener(ProceedingJoinPoint joinPoint, RabbitListener listener) throws Throwable {
+        return auditRabbitConsumer(joinPoint, listener);
+    }
+
+    @Around(value = "@annotation(audit)", argNames = "joinPoint,audit")
+    public Object auditAnnotatedConsumer(ProceedingJoinPoint joinPoint, RabbitAudit audit) throws Throwable {
+        Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
+        Method targetMethod = AopUtils.getMostSpecificMethod(method, joinPoint.getTarget().getClass());
+        if (targetMethod.isAnnotationPresent(RabbitListener.class) || method.isAnnotationPresent(RabbitListener.class)) {
+            return joinPoint.proceed();
+        }
+        return auditRabbitConsumer(joinPoint, null);
+    }
+
+    private Object auditRabbitConsumer(ProceedingJoinPoint joinPoint, RabbitListener rabbitListener) throws Throwable {
         long startTime = System.currentTimeMillis();
-
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
-        RabbitListener rabbitListener = method.getAnnotation(RabbitListener.class);
-
+        Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         String queueName = "UNKNOWN_QUEUE";
         if (rabbitListener != null && rabbitListener.queues().length > 0) {
             queueName = String.join(", ", rabbitListener.queues());

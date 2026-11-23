@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.vlt.ecommerce.common.dto.ApiResponse;
+import com.vlt.ecommerce.common.storage.ImageStorageService;
 import com.vlt.ecommerce.feature.product.dto.request.CategoryRequest;
 import com.vlt.ecommerce.feature.product.dto.response.CategoryDetailResponse;
 import com.vlt.ecommerce.feature.product.dto.response.CategoryResponse;
 import com.vlt.ecommerce.feature.product.service.CategoryService;
-import com.vlt.ecommerce.feature.product.service.CloudinaryService;
 
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -34,12 +34,12 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 public class CategoryController {
     CategoryService categoryService;
-    CloudinaryService cloudinaryService;
+    ImageStorageService imageStorageService;
 
     @PostMapping(value = "/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<String> uploadCategoryImage(@RequestParam("file") MultipartFile file) throws IOException {
-        String url = cloudinaryService.uploadFile(file, "categories");
+        String url = imageStorageService.uploadFile(file, "categories");
         return ApiResponse.<String>builder()
                 .result(url)
                 .build();

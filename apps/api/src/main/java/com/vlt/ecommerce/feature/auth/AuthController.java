@@ -17,6 +17,7 @@ import com.vlt.ecommerce.common.exception.AppException;
 import com.vlt.ecommerce.common.exception.ErrorCode;
 import com.vlt.ecommerce.feature.auth.dto.request.LoginRequest;
 import com.vlt.ecommerce.feature.auth.dto.request.RegisterRequest;
+import com.vlt.ecommerce.feature.auth.dto.request.SendOtpRequest;
 import com.vlt.ecommerce.feature.auth.dto.response.TokenResponse;
 import com.vlt.ecommerce.feature.user.dto.response.UserResponse;
 
@@ -42,7 +43,7 @@ public class AuthController {
         SessionService sessionService;
 
         @PostMapping("/send-email-otp")
-        public ApiResponse<String> sendEmailOtp(@RequestBody @Valid com.vlt.ecommerce.feature.auth.dto.request.SendOtpRequest request) {
+        public ApiResponse<String> sendEmailOtp(@RequestBody @Valid SendOtpRequest request) {
                 authService.sendEmailOtp(request);
                 return ApiResponse.<String>builder()
                                 .result("Mã xác thực OTP đã được gửi đến email của bạn")

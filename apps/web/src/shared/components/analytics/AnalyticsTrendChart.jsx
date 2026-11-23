@@ -1,6 +1,7 @@
+import formatCurrency from "../../utils/formatCurrency";
 import { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
-import { formatAnalyticsCurrency, formatTrendTick, makeTrendDataset } from "./trendSeries";
+import { formatTrendTick, makeTrendDataset } from "./trendSeries";
 
 export default function AnalyticsTrendChart({ timeline, series, format, tooltipInteraction }) {
   const canvasRef = useRef(null);
@@ -36,7 +37,7 @@ export default function AnalyticsTrendChart({ timeline, series, format, tooltipI
             bodyFont: { size: 12 },
             callbacks: {
               label: ({ dataset, raw }) => {
-                const value = currency ? formatAnalyticsCurrency(raw) : `${raw} đơn`;
+                const value = currency ? formatCurrency(raw) : `${raw} đơn`;
                 return ` ${dataset.tooltipLabel ?? dataset.label}: ${value}`;
               },
             },

@@ -1,43 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import useDismissiblePopover from "../../shared/hooks/useDismissiblePopover";
+import usePortalLogout from "../../shared/hooks/usePortalLogout";
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
   Users, DollarSign, BarChart2, Shield, LogOut, Home, Settings, Layers, FolderTree, KeyRound, Store
 } from 'lucide-react';
-import toast from 'react-hot-toast';
-import api from '../../shared/utils/api';
-import { logout } from '../../store/slice/authSlice';
 
 export default function AdminLayout() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.auth);
 
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleLogout = async () => {
-    try {
-      await api.post('/auth/logout').catch(() => { });
-      dispatch(logout());
-      toast.success('Đã đăng xuất thành công');
-      navigate('/login');
-    } catch (error) {
-      toast.error('Lỗi khi đăng xuất');
-    }
-  };
+  const { isOpen: isDropdownOpen, setIsOpen: setIsDropdownOpen, containerRef: dropdownRef } = useDismissiblePopover();
+  const handleLogout = usePortalLogout();
 
   const MENU_ITEMS = [
     { path: '/admin/dashboard', icon: <BarChart2 size={18} />, label: 'Thống kê tổng quan' },

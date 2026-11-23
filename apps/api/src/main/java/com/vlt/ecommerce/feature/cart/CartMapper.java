@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.feature.cart;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.mapstruct.Mapper;
@@ -22,11 +23,11 @@ public interface CartMapper {
         var product = cartItem.getProduct();
         var variant = cartItem.getSpecificProduct();
 
-        java.math.BigDecimal price = (variant != null && variant.getPrice() != null)
+        BigDecimal price = (variant != null && variant.getPrice() != null)
                 ? variant.getPrice()
-                : (product != null ? product.getPrice() : java.math.BigDecimal.ZERO);
+                : (product != null ? product.getPrice() : BigDecimal.ZERO);
 
-        java.math.BigDecimal totalPrice = price.multiply(java.math.BigDecimal.valueOf(cartItem.getQuantity()));
+        BigDecimal totalPrice = price.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
 
         String imageUrl = null;
         if (variant != null && variant.getImageUrl() != null && !variant.getImageUrl().isEmpty() && !variant.getImageUrl().startsWith("blob:")) {

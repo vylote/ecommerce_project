@@ -27,6 +27,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class CommissionController {
     CommissionService commissionService;
+    CommissionAnalyticsService commissionAnalyticsService;
 
     @PostMapping("/configs")
     public ApiResponse<CommissionConfigResponse> createOrUpdateConfig(@RequestBody @Valid CommissionConfigRequest request) {
@@ -45,14 +46,14 @@ public class CommissionController {
     @GetMapping("/stats/seller")
     public ApiResponse<SellerStatsResponse> getSellerStats() {
         return ApiResponse.<SellerStatsResponse>builder()
-                .result(commissionService.getSellerStats())
+                .result(commissionAnalyticsService.getSellerStats())
                 .build();
     }
 
     @GetMapping("/stats/admin")
     public ApiResponse<AdminStatsResponse> getAdminStats() {
         return ApiResponse.<AdminStatsResponse>builder()
-                .result(commissionService.getAdminStats())
+                .result(commissionAnalyticsService.getAdminStats())
                 .build();
     }
 
@@ -61,7 +62,7 @@ public class CommissionController {
             @RequestParam(defaultValue = "DAY") String period,
             @RequestParam(defaultValue = "7") int range) {
         return ApiResponse.<AdminAnalyticsResponse>builder()
-                .result(commissionService.getAdminAnalytics(period, range))
+                .result(commissionAnalyticsService.getAdminAnalytics(period, range))
                 .build();
     }
 }

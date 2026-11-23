@@ -1,20 +1,14 @@
-import CatalogResults from "./components/CatalogResults";
-import CatalogSortControls from "./components/CatalogSortControls";
-import CatalogPageStepper from "./components/CatalogPageStepper";
-import Pagination from "../../shared/components/Pagination";
-import { updateCatalogSearchParams } from "./catalogSearchParams";
+import CatalogFilters from "./components/CatalogFilters";
+import CatalogProductList from "./components/CatalogProductList";
+import useCatalogQuery from "./useCatalogQuery";
 import getDisplayImage from "./getDisplayImage";
-import PriceRangeFilter from "./components/PriceRangeFilter";
-import RatingFilter from "./components/RatingFilter";
 import ProductImage from "../../shared/components/ProductImage";
 import { useState, useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Navbar from "../../shared/components/Navbar";
 import api from "../../shared/utils/api";
 
 export default function SearchPage() {
-  const [searchParams, setSearchParams] = useSearchParams();
-
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pageInfo, setPageInfo] = useState({ currentPage: 1, totalPages: 1 });
@@ -23,13 +17,8 @@ export default function SearchPage() {
   const [shopProducts, setShopProducts] = useState([]);
 
 
-  const keyword = searchParams.get("keyword") || "";
-  const page = parseInt(searchParams.get("page") || "1", 10);
-  const sortBy = searchParams.get("sortBy") || "relevance";
-  const order = searchParams.get("order") || "desc";
-  const minPrice = searchParams.get("minPrice");
-  const maxPrice = searchParams.get("maxPrice");
-  const minRating = searchParams.get("minRating");
+  const query = useCatalogQuery("relevance");
+  const { keyword, page, sortBy, order, minPrice, maxPrice, minRating } = query;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,23 +78,6 @@ export default function SearchPage() {
     fetchData();
   }, [keyword, page, sortBy, order, minPrice, maxPrice, minRating]);
 
-  const updateParams = (changes) => {
-    setSearchParams(updateCatalogSearchParams(searchParams, changes));
-  };
-
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= pageInfo.totalPages)
-      updateParams({ page: newPage });
-  };
-
-  const handleSort = (type, sortOrder = "desc") => {
-    updateParams({ sortBy: type, order: sortOrder, page: 1 });
-  };
-
-
-  const applyRatingFilter = (rating) => {
-    updateParams({ minRating: rating, page: 1 });
-  };
 
   return (
     <div className="min-h-screen bg-[#fafafa]">
@@ -132,13 +104,7 @@ export default function SearchPage() {
               Bộ Lọc Tìm Kiếm
             </h3>
 
-            <PriceRangeFilter
-              key={JSON.stringify([minPrice, maxPrice])}
-              minPrice={minPrice}
-              maxPrice={maxPrice}
-              onApply={(min, max) => updateParams({ minPrice: min, maxPrice: max, page: 1 })}
-            />
-            <RatingFilter minRating={minRating} onChange={applyRatingFilter} />
+            <CatalogFilters query={query} />
           </div>
         </aside>
 
@@ -241,30 +207,14 @@ export default function SearchPage() {
             </div>
           )}
 
-          <div className="bg-base-200/50 p-3 rounded-sm flex items-center justify-between mb-4">
-            <CatalogSortControls
-              defaultSort="relevance"
-              defaultLabel="Liên Quan"
-              sortBy={sortBy}
-              order={order}
-              onSort={handleSort}
-            />
-            <CatalogPageStepper
-              page={page}
-              currentPage={pageInfo.currentPage}
-              totalPages={pageInfo.totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
-          <CatalogResults loading={loading} products={products} />
-          {!loading && products.length > 0 && pageInfo.totalPages > 1 && (
-            <Pagination
-              currentPage={page}
-              totalPages={pageInfo.totalPages}
-              onPageChange={handlePageChange}
-              className="mt-10 mb-8 !justify-center"
-            />
-          )}
+          <CatalogProductList
+            defaultSort="relevance"
+            defaultLabel="Liên Quan"
+            loading={loading}
+            products={products}
+            pageInfo={pageInfo}
+            query={query}
+          />
         </main>
       </div>
     </div>
