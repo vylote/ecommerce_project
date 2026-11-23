@@ -97,5 +97,5 @@ for (const type of specTypes) {
 
 sql += `SET FOREIGN_KEY_CHECKS = 1;\n`;
 
-fs.writeFileSync('/home/vylote/Projects/ecommerce_project/backend/src/main/resources/db/seed-specifications.sql', sql);
+fs.writeFileSync(require('path').resolve(__dirname, '../apps/api/src/main/resources/db/seed-specifications.sql'), sql);
 console.log(`Đã tạo thành công seed-specifications.sql với ${typeId - 1} loại đặc tả và ${specId - 1} giá trị đặc tả!`);

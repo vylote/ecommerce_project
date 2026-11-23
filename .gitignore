@@ -1,22 +1,54 @@
-# 1. Bỏ qua thư viện của Node.js (Áp dụng cho cả Frontend React và Notification Service)
+# Dependencies Node.js
 node_modules/
-npm-debug.log
-yarn-error.log
-logs/
 
-# 2. Bỏ qua các file build và thư viện của Spring Boot (Backend)
+# Logs và lỗi runtime
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+hs_err_pid*
+replay_pid*
+
+# Build output và cache
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+dist/
+dist-ssr/
+out/
+coverage/
+.cache/
+.vite/
+*.tsbuildinfo
 *.class
 *.jar
 *.war
+!**/.mvn/wrapper/maven-wrapper.jar
 
+# Cấu hình môi trường; chỉ commit file mẫu không chứa secrets
 .env
+.env.*
+!.env.example
+!.env.*.example
 
+# Backup dữ liệu local; giữ các SQL migration và seed trong source
+/backup.sql
+/backups/
+/dumps/
+
+# IntelliJ và Eclipse; giữ .mvn và cấu hình VS Code dùng chung
 .idea/
 *.iml
+*.iws
+*.ipr
 .classpath
 .project
 .settings/
+
+# File hệ điều hành và editor tạm
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
