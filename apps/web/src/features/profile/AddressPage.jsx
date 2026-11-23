@@ -1,3 +1,4 @@
+import AddressFields from "./components/AddressFields";
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
@@ -216,43 +217,7 @@ export default function AddressPage() {
             
             <form onSubmit={handleSubmit}>
               <div className="p-6 space-y-4">
-                <div className="flex gap-4">
-                  <input 
-                    type="text" name="fullName" placeholder={t("address.full_name")} required
-                    value={formData.fullName} onChange={handleInputChange}
-                    className="w-1/2 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  />
-                  <input 
-                    type="text" name="phone" placeholder={t("address.phone")} required
-                    value={formData.phone} onChange={handleInputChange}
-                    className="w-1/2 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  />
-                </div>
-
-                <div className="flex gap-4">
-                  <input 
-                    type="text" name="province" placeholder={t("address.province")} required
-                    value={formData.province} onChange={handleInputChange}
-                    className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  />
-                  <input 
-                    type="text" name="district" placeholder={t("address.district")} required
-                    value={formData.district} onChange={handleInputChange}
-                    className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  />
-                  <input 
-                    type="text" name="ward" placeholder={t("address.ward")} required
-                    value={formData.ward} onChange={handleInputChange}
-                    className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  />
-                </div>
-
-                <input 
-                  type="text" name="detail" placeholder={t("address.detail")} required
-                  value={formData.detail} onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                />
-
+                <AddressFields value={formData} onChange={handleInputChange} />
                 <label className="flex items-center gap-2 cursor-pointer mt-4">
                   <input 
                     type="checkbox" name="isDefault" 

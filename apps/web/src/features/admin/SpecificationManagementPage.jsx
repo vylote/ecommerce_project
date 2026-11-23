@@ -1,6 +1,7 @@
+import Dialog from "../../shared/ui/Dialog";
 import React, { useState, useEffect } from 'react';
 import {
-  Layers, Plus, Edit2, Trash2, Tag, Check, X, FolderTree, AlertCircle, RefreshCw, Search
+  Layers, Plus, Edit2, Trash2, Tag, Check, AlertCircle, RefreshCw, Search
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
@@ -491,119 +492,106 @@ export default function SpecificationManagementPage() {
 
       {/* ================= MODAL THÊM / SỬA LOẠI ĐẶC TẢ ================= */}
       {showTypeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-lg rounded-xl shadow-xl overflow-hidden animate-fade-in-up">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-              <h3 className="font-bold text-gray-800 text-base">
-                {isEditingType ? 'Sửa loại đặc tả' : 'Thêm mới loại đặc tả'}
-              </h3>
-              <button
-                onClick={() => setShowTypeModal(false)}
-                className="btn btn-sm btn-ghost btn-circle"
-              >
-                <X size={18} />
-              </button>
+        <Dialog title={isEditingType ? 'Sửa loại đặc tả' : 'Thêm mới loại đặc tả'} size="lg" onClose={() => setShowTypeModal(false)}>
+
+          <form onSubmit={handleSaveType} className="p-6 space-y-4">
+            <div className="form-control">
+              <label className="label font-semibold text-sm">
+                Tên loại đặc tả <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={typeForm.name}
+                onChange={(e) => setTypeForm({ ...typeForm, name: e.target.value })}
+                placeholder="Ví dụ: Kích cỡ áo, Kích cỡ giày, Dung lượng RAM, Màu sắc..."
+                className="input input-bordered w-full focus:border-blue-500"
+                required
+              />
             </div>
 
-            <form onSubmit={handleSaveType} className="p-6 space-y-4">
-              <div className="form-control">
-                <label className="label font-semibold text-sm">
-                  Tên loại đặc tả <span className="text-red-500">*</span>
-                </label>
+            <div className="form-control">
+              <label className="label font-medium text-sm">Mô tả loại đặc tả</label>
+              <textarea
+                value={typeForm.description}
+                onChange={(e) => setTypeForm({ ...typeForm, description: e.target.value })}
+                placeholder="Mô tả mục đích hoặc hướng dẫn sử dụng..."
+                className="textarea textarea-bordered w-full focus:border-blue-500 h-20"
+              ></textarea>
+            </div>
+
+            {/* Toggle Phân loại Biến thể vs Thuộc tính tĩnh */}
+            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <label className="flex items-center justify-between cursor-pointer">
+                <div>
+                  <span className="font-semibold text-sm text-gray-800">Dùng làm Phân loại Biến thể bán hàng</span>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Bật nếu là phân loại người mua click chọn khi đặt hàng (Màu sắc, Kích cỡ, Dung lượng...). Tắt nếu là thông số chi tiết (Chất liệu, Xuất xứ, Kiểu dáng...).
+                  </p>
+                </div>
                 <input
-                  type="text"
-                  value={typeForm.name}
-                  onChange={(e) => setTypeForm({ ...typeForm, name: e.target.value })}
-                  placeholder="Ví dụ: Kích cỡ áo, Kích cỡ giày, Dung lượng RAM, Màu sắc..."
-                  className="input input-bordered w-full focus:border-blue-500"
-                  required
+                  type="checkbox"
+                  checked={typeForm.isVariant}
+                  onChange={(e) => setTypeForm({ ...typeForm, isVariant: e.target.checked })}
+                  className="toggle toggle-success ml-3 shrink-0"
                 />
-              </div>
+              </label>
+            </div>
 
-              <div className="form-control">
-                <label className="label font-medium text-sm">Mô tả loại đặc tả</label>
-                <textarea
-                  value={typeForm.description}
-                  onChange={(e) => setTypeForm({ ...typeForm, description: e.target.value })}
-                  placeholder="Mô tả mục đích hoặc hướng dẫn sử dụng..."
-                  className="textarea textarea-bordered w-full focus:border-blue-500 h-20"
-                ></textarea>
-              </div>
-
-              {/* Toggle Phân loại Biến thể vs Thuộc tính tĩnh */}
-              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                <label className="flex items-center justify-between cursor-pointer">
-                  <div>
-                    <span className="font-semibold text-sm text-gray-800">Dùng làm Phân loại Biến thể bán hàng</span>
-                    <p className="text-xs text-gray-500 mt-0.5">
-                      Bật nếu là phân loại người mua click chọn khi đặt hàng (Màu sắc, Kích cỡ, Dung lượng...). Tắt nếu là thông số chi tiết (Chất liệu, Xuất xứ, Kiểu dáng...).
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={typeForm.isVariant}
-                    onChange={(e) => setTypeForm({ ...typeForm, isVariant: e.target.checked })}
-                    className="toggle toggle-success ml-3 shrink-0"
-                  />
+            {/* Chọn danh mục áp dụng */}
+            <div className="form-control">
+              <div className="flex items-center justify-between mb-1">
+                <label className="label font-semibold text-sm p-0">
+                  Áp dụng cho các ngành hàng
                 </label>
+                <span className="text-xs text-gray-400">
+                  {typeForm.categoryIds.length === 0
+                    ? 'Áp dụng cho tất cả'
+                    : `Đã chọn ${typeForm.categoryIds.length} ngành hàng`}
+                </span>
               </div>
+              <p className="text-xs text-gray-500 mb-2">
+                Để trống nếu muốn loại biến thể này xuất hiện ở mọi ngành hàng (như Màu sắc).
+              </p>
 
-              {/* Chọn danh mục áp dụng */}
-              <div className="form-control">
-                <div className="flex items-center justify-between mb-1">
-                  <label className="label font-semibold text-sm p-0">
-                    Áp dụng cho các ngành hàng
-                  </label>
-                  <span className="text-xs text-gray-400">
-                    {typeForm.categoryIds.length === 0
-                      ? 'Áp dụng cho tất cả'
-                      : `Đã chọn ${typeForm.categoryIds.length} ngành hàng`}
-                  </span>
-                </div>
-                <p className="text-xs text-gray-500 mb-2">
-                  Để trống nếu muốn loại biến thể này xuất hiện ở mọi ngành hàng (như Màu sắc).
-                </p>
-
-                <div className="border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 bg-gray-50/50">
-                  {categories.map((cat) => {
-                    const isChecked = typeForm.categoryIds.includes(cat.id);
-                    return (
-                      <label
-                        key={cat.id}
-                        className="flex items-center gap-2.5 text-sm cursor-pointer hover:bg-white p-1 rounded transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleCategorySelection(cat.id)}
-                          className="checkbox checkbox-sm checkbox-primary"
-                        />
-                        <span className="font-medium text-gray-700">{cat.name}</span>
-                      </label>
-                    );
-                  })}
-                </div>
+              <div className="border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 bg-gray-50/50">
+                {categories.map((cat) => {
+                  const isChecked = typeForm.categoryIds.includes(cat.id);
+                  return (
+                    <label
+                      key={cat.id}
+                      className="flex items-center gap-2.5 text-sm cursor-pointer hover:bg-white p-1 rounded transition-colors"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => toggleCategorySelection(cat.id)}
+                        className="checkbox checkbox-sm checkbox-primary"
+                      />
+                      <span className="font-medium text-gray-700">{cat.name}</span>
+                    </label>
+                  );
+                })}
               </div>
+            </div>
 
-              <div className="pt-4 border-t flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowTypeModal(false)}
-                  className="btn btn-ghost"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingType}
-                  className="btn bg-[#3b82f6] hover:bg-blue-600 text-white border-none px-6"
-                >
-                  {savingType ? <span className="loading loading-spinner loading-xs"></span> : 'Lưu lại'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            <div className="pt-4 border-t flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowTypeModal(false)}
+                className="btn btn-ghost"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                disabled={savingType}
+                className="btn bg-[#3b82f6] hover:bg-blue-600 text-white border-none px-6"
+              >
+                {savingType ? <span className="loading loading-spinner loading-xs"></span> : 'Lưu lại'}
+              </button>
+            </div>
+          </form>
+        </Dialog>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import getDisplayImage from "./getDisplayImage";
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../shared/components/Navbar';
@@ -43,12 +44,6 @@ export default function DailyDiscovery() {
 
     fetchProducts();
   }, [page]);
-
-  const getDisplayImage = (product) => {
-    if (!product.images || product.images.length === 0) return null;
-    const primaryImg = product.images.find(img => img.isPrimary);
-    return primaryImg ? primaryImg.url : product.images[0].url;
-  };
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pageInfo.totalPages) {

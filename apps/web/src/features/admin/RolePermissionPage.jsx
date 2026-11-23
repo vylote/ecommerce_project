@@ -1,6 +1,7 @@
+import Dialog from "../../shared/ui/Dialog";
 import React, { useState, useEffect } from 'react';
 import {
-  Shield, KeyRound, Plus, Edit2, Trash2, Check, X, Search,
+  Shield, KeyRound, Plus, Edit2, Trash2, Check, Search,
   Users, CheckCircle2, AlertTriangle, RefreshCw, Lock, Unlock,
   SlidersHorizontal, ChevronRight, UserCheck
 } from 'lucide-react';
@@ -751,305 +752,262 @@ export default function RolePermissionPage() {
 
       {/* ================= MODAL THÊM / SỬA VAI TRÒ (ROLE) ================= */}
       {showRoleModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-fade-in-up">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-              <div className="flex items-center gap-2">
-                <Shield size={20} className="text-blue-600" />
-                <h3 className="font-bold text-gray-800 text-base">
-                  {isEditingRole ? `Chỉnh sửa vai trò: ROLE_${roleForm.name}` : 'Tạo vai trò mới'}
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowRoleModal(false)}
-                className="btn btn-sm btn-ghost btn-circle"
-              >
-                <X size={18} />
-              </button>
-            </div>
+        <Dialog title={isEditingRole ? `Chỉnh sửa vai trò: ROLE_${roleForm.name}` : 'Tạo vai trò mới'} size="xl" onClose={() => setShowRoleModal(false)}>
 
-            <form onSubmit={handleSaveRole} className="p-6 overflow-y-auto space-y-5 flex-1">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label font-semibold text-xs text-gray-700">
-                    Mã vai trò (Role Name) <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex items-center">
-                    <span className="bg-gray-100 border border-r-0 border-gray-300 px-3 py-2 text-xs font-mono font-bold text-gray-600 rounded-l-lg">
-                      ROLE_
-                    </span>
-                    <input
-                      type="text"
-                      value={roleForm.name}
-                      onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value.toUpperCase().replace(/^ROLE_/, '') })}
-                      placeholder="MODERATOR, SUPPORT..."
-                      className="input input-sm input-bordered w-full rounded-l-none focus:border-blue-500 font-mono text-xs uppercase"
-                      required
-                    />
-                  </div>
-                  <span className="text-[11px] text-gray-400 mt-1">Hệ thống sẽ tự động thêm tiền tố ROLE_</span>
-                </div>
-
-                <div className="form-control">
-                  <label className="label font-semibold text-xs text-gray-700">Mô tả vai trò</label>
+          <form onSubmit={handleSaveRole} className="p-6 overflow-y-auto space-y-5 flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="form-control">
+                <label className="label font-semibold text-xs text-gray-700">
+                  Mã vai trò (Role Name) <span className="text-red-500">*</span>
+                </label>
+                <div className="flex items-center">
+                  <span className="bg-gray-100 border border-r-0 border-gray-300 px-3 py-2 text-xs font-mono font-bold text-gray-600 rounded-l-lg">
+                    ROLE_
+                  </span>
                   <input
                     type="text"
-                    value={roleForm.description}
-                    onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })}
-                    placeholder="Ví dụ: Kiểm duyệt viên nội dung sản phẩm..."
-                    className="input input-sm input-bordered w-full focus:border-blue-500 text-xs"
+                    value={roleForm.name}
+                    onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value.toUpperCase().replace(/^ROLE_/, '') })}
+                    placeholder="MODERATOR, SUPPORT..."
+                    className="input input-sm input-bordered w-full rounded-l-none focus:border-blue-500 font-mono text-xs uppercase"
+                    required
                   />
                 </div>
+                <span className="text-[11px] text-gray-400 mt-1">Hệ thống sẽ tự động thêm tiền tố ROLE_</span>
               </div>
 
-              {/* PHÂN NHÓM CHỌN QUYỀN HẠN (PERMISSIONS) */}
-              <div className="space-y-3 pt-2 border-t">
-                <div className="flex items-center justify-between">
-                  <label className="font-bold text-sm text-gray-800 flex items-center gap-1.5">
-                    <KeyRound size={16} className="text-blue-500" />
-                    <span>Cấp quyền hạn cho vai trò này</span>
-                  </label>
-                  <span className="text-xs text-blue-600 font-semibold">
-                    Đã chọn {roleForm.permissionIds.length} / {permissions.length} quyền
-                  </span>
-                </div>
+              <div className="form-control">
+                <label className="label font-semibold text-xs text-gray-700">Mô tả vai trò</label>
+                <input
+                  type="text"
+                  value={roleForm.description}
+                  onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })}
+                  placeholder="Ví dụ: Kiểm duyệt viên nội dung sản phẩm..."
+                  className="input input-sm input-bordered w-full focus:border-blue-500 text-xs"
+                />
+              </div>
+            </div>
 
-                {/* Danh sách các nhóm quyền */}
-                <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-                  {PERMISSION_GROUPS.map((group, gIdx) => {
-                    const groupPerms = permissions.filter((p) =>
-                      group.prefixKeywords.some((kw) => p.name?.includes(kw))
-                    );
+            {/* PHÂN NHÓM CHỌN QUYỀN HẠN (PERMISSIONS) */}
+            <div className="space-y-3 pt-2 border-t">
+              <div className="flex items-center justify-between">
+                <label className="font-bold text-sm text-gray-800 flex items-center gap-1.5">
+                  <KeyRound size={16} className="text-blue-500" />
+                  <span>Cấp quyền hạn cho vai trò này</span>
+                </label>
+                <span className="text-xs text-blue-600 font-semibold">
+                  Đã chọn {roleForm.permissionIds.length} / {permissions.length} quyền
+                </span>
+              </div>
 
-                    if (groupPerms.length === 0) return null;
+              {/* Danh sách các nhóm quyền */}
+              <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+                {PERMISSION_GROUPS.map((group, gIdx) => {
+                  const groupPerms = permissions.filter((p) =>
+                    group.prefixKeywords.some((kw) => p.name?.includes(kw))
+                  );
 
-                    const groupPermIds = groupPerms.map((p) => p.id);
-                    const isAllSelected = groupPermIds.every((id) => roleForm.permissionIds.includes(id));
+                  if (groupPerms.length === 0) return null;
 
-                    return (
-                      <div key={gIdx} className="border border-gray-200 rounded-xl p-3 bg-gray-50/50 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-gray-700 flex items-center gap-1.5">
-                            <span>{group.icon}</span>
-                            <span>{group.groupName}</span>
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => toggleSelectGroupPermissions(groupPermIds)}
-                            className="text-[11px] text-blue-600 hover:underline font-semibold"
-                          >
-                            {isAllSelected ? 'Bỏ chọn nhóm' : 'Chọn tất cả nhóm'}
-                          </button>
-                        </div>
+                  const groupPermIds = groupPerms.map((p) => p.id);
+                  const isAllSelected = groupPermIds.every((id) => roleForm.permissionIds.includes(id));
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-                          {groupPerms.map((perm) => {
-                            const isChecked = roleForm.permissionIds.includes(perm.id);
-                            return (
-                              <label
-                                key={perm.id}
-                                className={`flex items-start gap-2 p-2 rounded-lg border text-xs cursor-pointer transition-colors ${
-                                  isChecked
-                                    ? 'bg-blue-50/70 border-blue-300 text-blue-900'
-                                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100/60'
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => togglePermissionInRole(perm.id)}
-                                  className="checkbox checkbox-xs checkbox-primary mt-0.5"
-                                />
-                                <div className="min-w-0">
-                                  <div className="font-bold font-mono text-[11px] truncate">{perm.name}</div>
-                                  {perm.description && (
-                                    <div className="text-[10px] text-gray-500 line-clamp-1">{perm.description}</div>
-                                  )}
-                                </div>
-                              </label>
-                            );
-                          })}
-                        </div>
+                  return (
+                    <div key={gIdx} className="border border-gray-200 rounded-xl p-3 bg-gray-50/50 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-xs text-gray-700 flex items-center gap-1.5">
+                          <span>{group.icon}</span>
+                          <span>{group.groupName}</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => toggleSelectGroupPermissions(groupPermIds)}
+                          className="text-[11px] text-blue-600 hover:underline font-semibold"
+                        >
+                          {isAllSelected ? 'Bỏ chọn nhóm' : 'Chọn tất cả nhóm'}
+                        </button>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
 
-              <div className="pt-4 border-t flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowRoleModal(false)}
-                  className="btn btn-sm btn-ghost"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingRole}
-                  className="btn btn-sm bg-[#3b82f6] hover:bg-blue-600 text-white border-none px-6"
-                >
-                  {savingRole ? <span className="loading loading-spinner loading-xs"></span> : 'Lưu vai trò'}
-                </button>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        {groupPerms.map((perm) => {
+                          const isChecked = roleForm.permissionIds.includes(perm.id);
+                          return (
+                            <label
+                              key={perm.id}
+                              className={`flex items-start gap-2 p-2 rounded-lg border text-xs cursor-pointer transition-colors ${
+                                isChecked
+                                  ? 'bg-blue-50/70 border-blue-300 text-blue-900'
+                                  : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-100/60'
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => togglePermissionInRole(perm.id)}
+                                className="checkbox checkbox-xs checkbox-primary mt-0.5"
+                              />
+                              <div className="min-w-0">
+                                <div className="font-bold font-mono text-[11px] truncate">{perm.name}</div>
+                                {perm.description && (
+                                  <div className="text-[10px] text-gray-500 line-clamp-1">{perm.description}</div>
+                                )}
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </form>
-          </div>
-        </div>
+            </div>
+
+            <div className="pt-4 border-t flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowRoleModal(false)}
+                className="btn btn-sm btn-ghost"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                disabled={savingRole}
+                className="btn btn-sm bg-[#3b82f6] hover:bg-blue-600 text-white border-none px-6"
+              >
+                {savingRole ? <span className="loading loading-spinner loading-xs"></span> : 'Lưu vai trò'}
+              </button>
+            </div>
+          </form>
+        </Dialog>
       )}
 
       {/* ================= MODAL THÊM / SỬA QUYỀN HẠN (PERMISSION) ================= */}
       {showPermModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-fade-in-up">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-              <h3 className="font-bold text-gray-800 text-base">
-                {isEditingPerm ? 'Sửa quyền hạn' : 'Thêm quyền hạn mới'}
-              </h3>
-              <button
-                onClick={() => setShowPermModal(false)}
-                className="btn btn-sm btn-ghost btn-circle"
-              >
-                <X size={18} />
-              </button>
+        <Dialog title={isEditingPerm ? 'Sửa quyền hạn' : 'Thêm quyền hạn mới'} size="md" onClose={() => setShowPermModal(false)}>
+
+          <form onSubmit={handleSavePerm} className="p-6 space-y-4">
+            <div className="form-control">
+              <label className="label font-semibold text-xs text-gray-700">
+                Mã quyền (Permission Code) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={permForm.name}
+                onChange={(e) => setPermForm({ ...permForm, name: e.target.value.toUpperCase().replace(/\s+/g, '_') })}
+                placeholder="Ví dụ: EXPORT_ORDER_REPORT..."
+                className="input input-sm input-bordered w-full focus:border-blue-500 font-mono uppercase text-xs"
+                required
+              />
             </div>
 
-            <form onSubmit={handleSavePerm} className="p-6 space-y-4">
-              <div className="form-control">
-                <label className="label font-semibold text-xs text-gray-700">
-                  Mã quyền (Permission Code) <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={permForm.name}
-                  onChange={(e) => setPermForm({ ...permForm, name: e.target.value.toUpperCase().replace(/\s+/g, '_') })}
-                  placeholder="Ví dụ: EXPORT_ORDER_REPORT..."
-                  className="input input-sm input-bordered w-full focus:border-blue-500 font-mono uppercase text-xs"
-                  required
-                />
-              </div>
+            <div className="form-control">
+              <label className="label font-semibold text-xs text-gray-700">Mô tả quyền hạn</label>
+              <textarea
+                value={permForm.description}
+                onChange={(e) => setPermForm({ ...permForm, description: e.target.value })}
+                placeholder="Mô tả mục đích và phạm vi sử dụng của quyền này..."
+                className="textarea textarea-bordered w-full focus:border-blue-500 text-xs h-20"
+              ></textarea>
+            </div>
 
-              <div className="form-control">
-                <label className="label font-semibold text-xs text-gray-700">Mô tả quyền hạn</label>
-                <textarea
-                  value={permForm.description}
-                  onChange={(e) => setPermForm({ ...permForm, description: e.target.value })}
-                  placeholder="Mô tả mục đích và phạm vi sử dụng của quyền này..."
-                  className="textarea textarea-bordered w-full focus:border-blue-500 text-xs h-20"
-                ></textarea>
-              </div>
-
-              <div className="pt-3 border-t flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowPermModal(false)}
-                  className="btn btn-sm btn-ghost"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingPerm}
-                  className="btn btn-sm bg-[#3b82f6] hover:bg-blue-600 text-white border-none px-6"
-                >
-                  {savingPerm ? <span className="loading loading-spinner loading-xs"></span> : 'Lưu quyền'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            <div className="pt-3 border-t flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowPermModal(false)}
+                className="btn btn-sm btn-ghost"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                disabled={savingPerm}
+                className="btn btn-sm bg-[#3b82f6] hover:bg-blue-600 text-white border-none px-6"
+              >
+                {savingPerm ? <span className="loading loading-spinner loading-xs"></span> : 'Lưu quyền'}
+              </button>
+            </div>
+          </form>
+        </Dialog>
       )}
 
       {/* ================= MODAL PHÂN VAI TRÒ CHO NGƯỜI DÙNG ================= */}
       {showAssignModal && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-fade-in-up">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-              <div className="flex items-center gap-2">
-                <UserCheck size={20} className="text-blue-600" />
-                <h3 className="font-bold text-gray-800 text-base">Phân vai trò người dùng</h3>
+        <Dialog title="Phân vai trò người dùng" size="lg" onClose={() => setShowAssignModal(false)}>
+
+          <div className="p-6 space-y-4">
+            <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm">
+                {selectedUser.fullName ? selectedUser.fullName.charAt(0).toUpperCase() : selectedUser.email.charAt(0).toUpperCase()}
               </div>
+              <div>
+                <div className="font-bold text-gray-800 text-sm">{selectedUser.fullName || 'Người dùng'}</div>
+                <div className="text-xs text-gray-500">{selectedUser.email}</div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="font-semibold text-xs text-gray-700">
+                Chọn các vai trò áp dụng cho người dùng này:
+              </label>
+              <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-gray-50/40">
+                {roles.map((r) => {
+                  const isChecked = assignedRoleIds.includes(r.id);
+                  return (
+                    <label
+                      key={r.id}
+                      className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-colors ${
+                        isChecked
+                          ? 'bg-blue-50/80 border-blue-300'
+                          : 'bg-white border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {
+                            setAssignedRoleIds((prev) =>
+                              isChecked ? prev.filter((id) => id !== r.id) : [...prev, r.id]
+                            );
+                          }}
+                          className="checkbox checkbox-sm checkbox-primary"
+                        />
+                        <div>
+                          <span className="font-bold text-xs text-gray-800">{r.name}</span>
+                          {r.description && (
+                            <p className="text-[11px] text-gray-500 mt-0.5">{r.description}</p>
+                          )}
+                        </div>
+                      </div>
+                      <span className="badge badge-xs badge-ghost text-[10px]">
+                        {r.permissions?.length || 0} quyền
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="pt-3 border-t flex justify-end gap-3">
               <button
+                type="button"
                 onClick={() => setShowAssignModal(false)}
-                className="btn btn-sm btn-ghost btn-circle"
+                className="btn btn-sm btn-ghost"
               >
-                <X size={18} />
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveAssignRoles}
+                disabled={savingAssign}
+                className="btn btn-sm bg-[#3b82f6] hover:bg-blue-600 text-white border-none px-6"
+              >
+                {savingAssign ? <span className="loading loading-spinner loading-xs"></span> : 'Lưu phân quyền'}
               </button>
             </div>
-
-            <div className="p-6 space-y-4">
-              <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-sm">
-                  {selectedUser.fullName ? selectedUser.fullName.charAt(0).toUpperCase() : selectedUser.email.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <div className="font-bold text-gray-800 text-sm">{selectedUser.fullName || 'Người dùng'}</div>
-                  <div className="text-xs text-gray-500">{selectedUser.email}</div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="font-semibold text-xs text-gray-700">
-                  Chọn các vai trò áp dụng cho người dùng này:
-                </label>
-                <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-gray-50/40">
-                  {roles.map((r) => {
-                    const isChecked = assignedRoleIds.includes(r.id);
-                    return (
-                      <label
-                        key={r.id}
-                        className={`flex items-center justify-between p-2.5 rounded-lg border cursor-pointer transition-colors ${
-                          isChecked
-                            ? 'bg-blue-50/80 border-blue-300'
-                            : 'bg-white border-gray-200 hover:bg-gray-50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => {
-                              setAssignedRoleIds((prev) =>
-                                isChecked ? prev.filter((id) => id !== r.id) : [...prev, r.id]
-                              );
-                            }}
-                            className="checkbox checkbox-sm checkbox-primary"
-                          />
-                          <div>
-                            <span className="font-bold text-xs text-gray-800">{r.name}</span>
-                            {r.description && (
-                              <p className="text-[11px] text-gray-500 mt-0.5">{r.description}</p>
-                            )}
-                          </div>
-                        </div>
-                        <span className="badge badge-xs badge-ghost text-[10px]">
-                          {r.permissions?.length || 0} quyền
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="pt-3 border-t flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowAssignModal(false)}
-                  className="btn btn-sm btn-ghost"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveAssignRoles}
-                  disabled={savingAssign}
-                  className="btn btn-sm bg-[#3b82f6] hover:bg-blue-600 text-white border-none px-6"
-                >
-                  {savingAssign ? <span className="loading loading-spinner loading-xs"></span> : 'Lưu phân quyền'}
-                </button>
-              </div>
-            </div>
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );

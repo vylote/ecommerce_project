@@ -1,3 +1,4 @@
+import OrderStatusChart from "../order/components/OrderStatusChart";
 import React, { useEffect, useRef, useState, useMemo } from "react";
 import api from "../../shared/utils/api";
 import toast from "react-hot-toast";
@@ -20,9 +21,7 @@ import {
 
 export default function SellerDashboard() {
   const chartCanvasRef = useRef(null);
-  const donutCanvasRef = useRef(null);
   const chartInstanceRef = useRef(null);
-  const donutInstanceRef = useRef(null);
 
   // Thống kê nhanh toàn bộ từ danh sách cần làm
   const [orderStats, setOrderStats] = useState({
@@ -224,82 +223,7 @@ export default function SellerDashboard() {
   }, [analytics, activeChartMetric]);
 
   // Vẽ biểu đồ Donut: Phân bổ trạng thái đơn hàng
-  useEffect(() => {
-    const canvas = donutCanvasRef.current;
-    if (!canvas) return;
 
-    if (donutInstanceRef.current) {
-      donutInstanceRef.current.destroy();
-    }
-
-    const statusMap = analytics.statusBreakdown || {};
-    const statusLabels = [
-      "Đã Hoàn Tất",
-      "Đang Giao",
-      "Chờ Lấy Hàng",
-      "Chờ Xác Nhận",
-      "Đã Hủy",
-    ];
-    const statusData = [
-      statusMap.COMPLETED || 0,
-      statusMap.SHIPPING || 0,
-      statusMap.CONFIRMED || 0,
-      statusMap.PENDING || 0,
-      statusMap.CANCELLED || 0,
-    ];
-
-    const hasData = statusData.some((v) => v > 0);
-
-    const ctx = canvas.getContext("2d");
-    donutInstanceRef.current = new Chart(ctx, {
-      type: "doughnut",
-      data: {
-        labels: statusLabels,
-        datasets: [
-          {
-            data: hasData ? statusData : [1],
-            backgroundColor: hasData
-              ? [
-                  "#16a34a", // Hoàn tất - Xanh ngọc
-                  "#0284c7", // Đang giao - Xanh biển
-                  "#8b5cf6", // Chờ lấy - Tím
-                  "#f59e0b", // Chờ xác nhận - Vàng
-                  "#ef4444", // Đã hủy - Đỏ
-                ]
-              : ["#e2e8f0"],
-            borderWidth: 2,
-            borderColor: "#ffffff",
-          },
-        ],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: "70%",
-        plugins: {
-          legend: {
-            display: false,
-          },
-          tooltip: {
-            enabled: hasData,
-            callbacks: {
-              label: (context) => {
-                const total = statusData.reduce((a, b) => a + b, 0);
-                const percent = total > 0 ? ((context.raw / total) * 100).toFixed(1) : 0;
-                return ` ${context.label}: ${context.raw} đơn (${percent}%)`;
-              },
-            },
-          },
-        },
-      },
-    });
-
-    return () => {
-      if (donutInstanceRef.current) {
-        donutInstanceRef.current.destroy();
-      }
-    };
-  }, [analytics.statusBreakdown]);
 
   // Danh mục thời gian nhanh
   const quickFilters = [
@@ -603,7 +527,7 @@ export default function SellerDashboard() {
 
               {/* Donut Canvas */}
               <div className="h-[170px] w-full relative flex items-center justify-center my-1">
-                <canvas ref={donutCanvasRef}></canvas>
+                <OrderStatusChart statusBreakdown={analytics.statusBreakdown} />
               </div>
 
               {/* Legend trực quan */}

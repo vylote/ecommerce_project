@@ -1,3 +1,4 @@
+import getDisplayImage from "../../product/getDisplayImage";
 import ProductImage from "../../../shared/components/ProductImage";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -42,17 +43,6 @@ export default function ProductSection() {
 
     fetchProducts();
   }, []);
-
-  // Hàm bóc tách URL ảnh từ mảng images của backend
-  const getDisplayImage = (product) => {
-    if (!product.images || product.images.length === 0) {
-      return null;
-    }
-    // Ưu tiên tìm ảnh có isPrimary = true
-    const primaryImg = product.images.find((img) => img.isPrimary);
-    // Nếu có ảnh primary thì lấy, không thì lấy ảnh đầu tiên trong mảng
-    return primaryImg ? primaryImg.url : product.images[0].url;
-  };
 
   if (loading) {
     return (

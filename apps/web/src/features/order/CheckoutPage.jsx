@@ -1,3 +1,4 @@
+import AddressFields from "../profile/components/AddressFields";
 import ProductImage from "../../shared/components/ProductImage";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -514,72 +515,11 @@ export default function CheckoutPage() {
 
             <form onSubmit={handleAddNewAddress}>
               <div className="p-6 space-y-4">
-                <div className="flex gap-4">
-                  <input
-                    type="text"
-                    placeholder="Họ và tên"
-                    required
-                    value={newAddress.fullName}
-                    onChange={(e) =>
-                      setNewAddress({ ...newAddress, fullName: e.target.value })
-                    }
-                    className="w-1/2 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Số điện thoại"
-                    required
-                    value={newAddress.phone}
-                    onChange={(e) =>
-                      setNewAddress({ ...newAddress, phone: e.target.value })
-                    }
-                    className="w-1/2 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  />
-                </div>
-
-                <div className="flex gap-4">
-                  <input
-                    type="text"
-                    placeholder="Tỉnh/Thành phố"
-                    required
-                    value={newAddress.province}
-                    onChange={(e) =>
-                      setNewAddress({ ...newAddress, province: e.target.value })
-                    }
-                    className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Quận/Huyện"
-                    required
-                    value={newAddress.district}
-                    onChange={(e) =>
-                      setNewAddress({ ...newAddress, district: e.target.value })
-                    }
-                    className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Phường/Xã"
-                    required
-                    value={newAddress.ward}
-                    onChange={(e) =>
-                      setNewAddress({ ...newAddress, ward: e.target.value })
-                    }
-                    className="w-1/3 border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                  />
-                </div>
-
-                <input
-                  type="text"
-                  placeholder="Địa chỉ cụ thể (Số nhà, Tên đường...)"
-                  required
-                  value={newAddress.detail}
-                  onChange={(e) =>
-                    setNewAddress({ ...newAddress, detail: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-sm px-3 py-2 text-sm outline-none focus:border-gray-400"
-                />
+                <AddressFields value={newAddress}
+                  onChange={(event) => {
+                    const { name, value } = event.target;
+                    setNewAddress((address) => ({ ...address, [name]: value }));
+                  }} />
               </div>
 
               <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t">
