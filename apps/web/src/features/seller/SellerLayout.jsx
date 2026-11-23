@@ -4,7 +4,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
   Package, ShoppingBag, Megaphone, MessageSquare,
-  DollarSign, BarChart2, Store, LogOut, Home, Bell
+  DollarSign, BarChart2, Store, LogOut, Home
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useNotification } from '../../shared/hooks/useNotification.jsx';

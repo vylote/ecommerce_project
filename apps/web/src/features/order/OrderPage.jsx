@@ -1,7 +1,7 @@
+import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import ProductImage from "../../shared/components/ProductImage";
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../shared/utils/api";
 import Navbar from "../../shared/components/Navbar";
@@ -13,11 +13,9 @@ import { useI18n } from "../../shared/i18n";
 
 export default function OrdersPage() {
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
   const { t } = useI18n();
 
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [activeTab, setActiveTab] = useState("ALL");
@@ -55,44 +53,33 @@ export default function OrdersPage() {
     }
   };
 
-  useEffect(() => {
-    fetchOrders(page);
+  const loadOrders = useCallback(async (signal) => {
+    const params = { page, size: 10 };
+    if (activeTab !== "ALL") params.status = activeTab;
 
-    const handleRealtimeUpdate = () => {
-      fetchOrders(page);
-    };
+    const response = await api.get("/orders", { params, signal });
+    if (signal.aborted) return;
 
-    window.addEventListener("order_updated", handleRealtimeUpdate);
-    window.addEventListener("new_notification", handleRealtimeUpdate);
-
-    return () => {
-      window.removeEventListener("order_updated", handleRealtimeUpdate);
-      window.removeEventListener("new_notification", handleRealtimeUpdate);
-    };
+    setOrders(response.data.result.data || []);
+    setTotalPages(response.data.result.totalPages || 1);
   }, [page, activeTab]);
+  const { loading, reload: fetchOrders } = useReloadableRequest(
+    loadOrders,
+    () => toast.error(t("order.loading_error") || "Không thể tải danh sách đơn hàng"),
+  );
+
+  useEffect(() => {
+    window.addEventListener("order_updated", fetchOrders);
+    window.addEventListener("new_notification", fetchOrders);
+    return () => {
+      window.removeEventListener("order_updated", fetchOrders);
+      window.removeEventListener("new_notification", fetchOrders);
+    };
+  }, [fetchOrders]);
 
   const handleTabChange = (tabValue) => {
     setActiveTab(tabValue);
-    setPage(1); // Luôn luôn quay về trang 1 khi đổi bộ lọc
-  };
-
-  const fetchOrders = async (pageToLoad) => {
-    try {
-      setLoading(true);
-
-      const params = { page, size: 10 };
-      if (activeTab !== "ALL") {
-        params.status = activeTab; // Chỉ gửi status khi nó KHÔNG phải ALL
-      }
-
-      const res = await api.get("/orders", { params });
-      setOrders(res.data.result.data || []);
-      setTotalPages(res.data.result.totalPages || 1);
-    } catch (error) {
-      toast.error(t("order.loading_error") || "Không thể tải danh sách đơn hàng");
-    } finally {
-      setLoading(false);
-    }
+    setPage(1);
   };
 
   const cancelOrderRequest = async (orderId) => {
@@ -100,7 +87,7 @@ export default function OrdersPage() {
       setProcessingId(orderId);
       await api.patch(`/orders/${orderId}/cancel`);
       toast.success(t("order.cancel_success") || "Đã hủy đơn hàng");
-      fetchOrders(page);
+      fetchOrders();
     } catch (error) {
       toast.error(error.response?.data?.message || "Không thể hủy đơn hàng");
     } finally {
@@ -113,7 +100,7 @@ export default function OrdersPage() {
       setProcessingId(orderId);
       await api.patch(`/orders/${orderId}/complete`);
       toast.success(t("order.complete_success") || "Đã xác nhận hoàn tất đơn hàng");
-      fetchOrders(page);
+      fetchOrders();
     } catch (error) {
       toast.error(
         error.response?.data?.message || "Không thể hoàn tất đơn hàng",
@@ -345,7 +332,7 @@ export default function OrdersPage() {
         isOpen={!!reviewOrder}
         onClose={() => setReviewOrder(null)}
         order={reviewOrder}
-        onSuccess={() => fetchOrders(page)}
+        onSuccess={fetchOrders}
       />
     </div>
   );

@@ -53,7 +53,7 @@ export default function ProductDetailPage() {
           try {
             const varRes = await api.get(`/products/${id}/variants`);
             setVariants(varRes.data.result || []);
-          } catch (err) {
+          } catch {
             setVariants([]);
           }
         }

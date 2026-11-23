@@ -1,7 +1,8 @@
+import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import Pagination from "../../shared/components/Pagination";
 import SearchField from "../../shared/ui/SearchField";
 import getDisplayImage from "../product/getDisplayImage";
-import React, { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Edit, Trash2, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -11,7 +12,6 @@ export default function SellerProductPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [pageInfo, setPageInfo] = useState({ currentPage: 1, totalPages: 1 });
   
   const [searchInput, setSearchInput] = useState(searchParams.get('keyword') || '');
@@ -23,37 +23,22 @@ export default function SellerProductPage() {
   const keyword = searchParams.get('keyword') || '';
   const currentStatus = searchParams.get('status') || 'ALL'; // Mặc định là ALL
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const params = {
-        page: page,
-        size: 10,
-        sortBy: sortBy,
-        order: order
-      };
-      if (keyword) params.keyword = keyword;
-      if (currentStatus !== 'ALL') params.status = currentStatus; // Gắn cờ lọc xuống DB
+  const loadProducts = useCallback(async (signal) => {
+    const params = { page, size: 10, sortBy, order };
+    if (keyword) params.keyword = keyword;
+    if (currentStatus !== 'ALL') params.status = currentStatus;
 
-      const res = await api.get('/products/seller', { params });
-      const pageResponse = res.data.result;
-      
-      setProducts(pageResponse.data);
-      setPageInfo({
-        currentPage: pageResponse.currentPage,
-        totalPages: pageResponse.totalPages,
-      });
-    } catch (error) {
-      toast.error('Không thể tải danh sách sản phẩm');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const response = await api.get('/products/seller', { params, signal });
+    if (signal.aborted) return;
 
-  useEffect(() => {
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, sortBy, order, keyword, currentStatus]); // Re-fetch khi status đổi
+    const result = response.data.result;
+    setProducts(result.data);
+    setPageInfo({ currentPage: result.currentPage, totalPages: result.totalPages });
+  }, [page, sortBy, order, keyword, currentStatus]);
+  const { loading, reload: fetchData } = useReloadableRequest(
+    loadProducts,
+    () => toast.error('Không thể tải danh sách sản phẩm'),
+  );
 
   const updateParams = (newParams) => {
     const current = Object.fromEntries([...searchParams]);
@@ -88,7 +73,7 @@ export default function SellerProductPage() {
       await api.delete(`/products/${id}`);
       toast.success('Xóa sản phẩm thành công');
       fetchData(); 
-    } catch (error) {
+    } catch {
       toast.error('Lỗi khi xóa sản phẩm');
     }
   };

@@ -1,8 +1,8 @@
 import FormInput from "../../shared/components/ui/FormInput";
 import Dialog from "../../shared/ui/Dialog";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Layers, Plus, Edit2, Trash2, Tag, Check, AlertCircle, RefreshCw, Search
+  Layers, Plus, Edit2, Trash2, Tag, RefreshCw, Search
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
@@ -11,6 +11,7 @@ export default function SpecificationManagementPage() {
   const [types, setTypes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reloadVersion, setReloadVersion] = useState(0);
   const [selectedType, setSelectedType] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState('');
 
@@ -31,39 +32,39 @@ export default function SpecificationManagementPage() {
   const [editingSpec, setEditingSpec] = useState(null);
   const [savingSpec, setSavingSpec] = useState(false);
 
-  // Fetch dữ liệu ban đầu
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [typesRes, catsRes] = await Promise.all([
-        api.get('/specification-types'),
-        api.get('/categories'),
-      ]);
-
-      const typeList = typesRes.data.result || [];
-      setTypes(typeList);
-      setCategories(catsRes.data.result || []);
-
-      if (typeList.length > 0) {
-        // Giữ type đang chọn hoặc chọn phần tử đầu tiên
-        setSelectedType((prev) => {
-          if (!prev) return typeList[0];
-          const matched = typeList.find((t) => t.id === prev.id);
-          return matched || typeList[0];
-        });
-      } else {
-        setSelectedType(null);
-      }
-    } catch (error) {
-      toast.error('Không thể tải dữ liệu đặc tả');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
-  }, []);
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    async function loadData() {
+      try {
+        const [typesRes, catsRes] = await Promise.all([
+          api.get('/specification-types', { signal }),
+          api.get('/categories', { signal }),
+        ]);
+        if (signal.aborted) return;
+
+        const typeList = typesRes.data.result || [];
+        setTypes(typeList);
+        setCategories(catsRes.data.result || []);
+        setSelectedType((current) => (
+          typeList.find((type) => type.id === current?.id) ?? typeList[0] ?? null
+        ));
+      } catch {
+        if (!signal.aborted) toast.error('Không thể tải dữ liệu đặc tả');
+      } finally {
+        if (!signal.aborted) setLoading(false);
+      }
+    }
+
+    void loadData();
+    return () => controller.abort();
+  }, [reloadVersion]);
+
+  function reloadData() {
+    setLoading(true);
+    setReloadVersion((version) => version + 1);
+  }
 
   // --- QUẢN LÝ LOẠI ĐẶC TẢ ---
   const handleOpenCreateType = () => {
@@ -112,7 +113,7 @@ export default function SpecificationManagementPage() {
         toast.success('Đã tạo loại đặc tả mới');
       }
       setShowTypeModal(false);
-      fetchData();
+      reloadData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra');
     } finally {
@@ -129,7 +130,7 @@ export default function SpecificationManagementPage() {
     try {
       await api.delete(`/specification-types/${typeId}`);
       toast.success('Đã xóa loại đặc tả');
-      fetchData();
+      reloadData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Không thể xóa loại đặc tả');
     }
@@ -175,7 +176,7 @@ export default function SpecificationManagementPage() {
       }
       setSpecInput('');
       setSpecDesc('');
-      fetchData();
+      reloadData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi lưu giá trị');
     } finally {
@@ -200,7 +201,7 @@ export default function SpecificationManagementPage() {
     try {
       await api.delete(`/specifications/${specId}`);
       toast.success('Đã xóa giá trị đặc tả');
-      fetchData();
+      reloadData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Không thể xóa giá trị đặc tả');
     }
@@ -227,7 +228,7 @@ export default function SpecificationManagementPage() {
 
         <div className="flex items-center gap-3">
           <button
-            onClick={fetchData}
+            onClick={reloadData}
             className="btn btn-sm btn-ghost gap-1.5 text-gray-600 hover:text-[#3b82f6]"
             title="Tải lại dữ liệu"
           >

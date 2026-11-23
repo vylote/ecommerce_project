@@ -32,9 +32,6 @@ import ShopManagementPage from '../features/admin/ShopManagementPage';
 export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
 
-  if (user) {
-    window.currentUser = user; 
-  }
 
   const isSeller = user?.roles?.some(r => r.name === 'ROLE_SELLER');
 

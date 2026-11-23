@@ -1,26 +1,18 @@
 import Pagination from "../../shared/components/Pagination";
 import SearchField from "../../shared/ui/SearchField";
 import Dialog from "../../shared/ui/Dialog";
-import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import api from "../../shared/utils/api";
 import toast from "react-hot-toast";
 import {
   Store,
   CheckCircle2,
   XCircle,
-  ExternalLink,
   Info,
   RefreshCw,
-  ShieldAlert,
   User,
-  Mail,
-  Phone,
-  Calendar,
-  Package,
   Star,
   MapPin,
-  Tag,
   Eye,
   Lock,
   Unlock,
@@ -31,13 +23,14 @@ const pageSize = 10;
 export default function ShopManagementPage() {
   const [shops, setShops] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState({ page: 1, keyword: "", statusFilter: "ALL" });
+  const { page, statusFilter } = query;
+  const [reloadVersion, setReloadVersion] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
 
   // Filters
   const [keyword, setKeyword] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL"); // ALL | ACTIVE | LOCKED
 
   // Summary counts
   const [stats, setStats] = useState({ total: 0, active: 0, locked: 0 });
@@ -50,61 +43,75 @@ export default function ShopManagementPage() {
   const [actionShop, setActionShop] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  // Fetch Stats
-  const fetchStats = async () => {
-    try {
-      const res = await api.get("/shops/admin/stats");
-      if (res.data?.result) {
-        setStats(res.data.result);
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    async function loadStats() {
+      try {
+        const res = await api.get("/shops/admin/stats", { signal });
+        if (!signal.aborted && res.data?.result) setStats(res.data.result);
+      } catch (err) {
+        if (!signal.aborted) console.error("Error fetching shop stats:", err);
       }
-    } catch (err) {
-      console.error("Error fetching shop stats:", err);
     }
-  };
 
-  // Fetch Shops list
-  const fetchShops = async () => {
+    void loadStats();
+    return () => controller.abort();
+  }, [reloadVersion]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    async function loadShops() {
+      const params = {
+        page: query.page,
+        size: pageSize,
+        keyword: query.keyword || undefined,
+        isActive: query.statusFilter === "ALL" ? undefined : query.statusFilter === "ACTIVE",
+      };
+
+      try {
+        const res = await api.get("/shops/admin", { params, signal });
+        if (signal.aborted) return;
+
+        const pageData = res.data?.result;
+        setShops(pageData?.data || []);
+        setTotalPages(pageData?.totalPages || 1);
+        setTotalElements(pageData?.totalElements || 0);
+      } catch (err) {
+        if (!signal.aborted) {
+          console.error("Error fetching admin shops:", err);
+          toast.error("Không thể tải danh sách gian hàng");
+        }
+      } finally {
+        if (!signal.aborted) setLoading(false);
+      }
+    }
+
+    void loadShops();
+    return () => controller.abort();
+  }, [query, reloadVersion]);
+
+  function updateQuery(changes) {
     setLoading(true);
-    try {
-      let isActiveParam = "";
-      if (statusFilter === "ACTIVE") isActiveParam = "&isActive=true";
-      if (statusFilter === "LOCKED") isActiveParam = "&isActive=false";
+    setQuery((current) => ({ ...current, ...changes }));
+  }
 
-      const kwParam = keyword ? `&keyword=${encodeURIComponent(keyword)}` : "";
-      const res = await api.get(
-        `/shops/admin?page=${page}&size=${pageSize}${kwParam}${isActiveParam}`
-      );
-
-      const pageData = res.data?.result;
-      setShops(pageData?.data || []);
-      setTotalPages(pageData?.totalPages || 1);
-      setTotalElements(pageData?.totalElements || 0);
-    } catch (err) {
-      console.error("Error fetching admin shops:", err);
-      toast.error("Không thể tải danh sách gian hàng");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  useEffect(() => {
-    fetchShops();
-  }, [page, statusFilter]);
+  function reloadData() {
+    setLoading(true);
+    setReloadVersion((version) => version + 1);
+  }
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setPage(1);
-    fetchShops();
+    updateQuery({ page: 1, keyword });
   };
 
   const handleResetSearch = () => {
     setKeyword("");
-    setStatusFilter("ALL");
-    setPage(1);
+    updateQuery({ page: 1, keyword: "", statusFilter: "ALL" });
   };
 
   // Toggle Shop Active status
@@ -120,8 +127,7 @@ export default function ShopManagementPage() {
           : `Đã tạm khóa Shop "${actionShop.name}"`
       );
       setActionShop(null);
-      fetchShops();
-      fetchStats();
+      reloadData();
     } catch (err) {
       console.error("Toggle shop status error:", err);
       toast.error("Thao tác thất bại, vui lòng thử lại!");
@@ -148,10 +154,7 @@ export default function ShopManagementPage() {
         </div>
 
         <button
-          onClick={() => {
-            fetchStats();
-            fetchShops();
-          }}
+          onClick={reloadData}
           className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 px-4 py-2 rounded-xl text-sm font-medium transition-all self-start md:self-center"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin text-blue-600" : ""}`} />
@@ -217,10 +220,7 @@ export default function ShopManagementPage() {
             {/* Status Filter */}
             <select
               value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value);
-                setPage(1);
-              }}
+              onChange={(e) => updateQuery({ page: 1, statusFilter: e.target.value })}
               className="px-3.5 py-2 border border-gray-200 rounded-xl text-sm text-gray-700 bg-white focus:outline-none focus:border-blue-500"
             >
               <option value="ALL">Tất cả trạng thái</option>
@@ -438,7 +438,7 @@ export default function ShopManagementPage() {
           totalPages={totalPages}
           totalItems={totalElements}
           pageSize={pageSize}
-          onPageChange={setPage}
+          onPageChange={(nextPage) => updateQuery({ page: nextPage })}
           className="border-t border-gray-100 px-4"
         />
       </div>

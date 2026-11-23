@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -20,8 +20,26 @@ export default function GoogleAuthButton() {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const tokenClientRef = useRef(null);
 
+  // Đăng nhập thành công -> lấy thông tin profile và điều hướng
+  const handleLoginSuccess = useCallback(async () => {
+    try {
+      const userRes = await api.get('/auth/me');
+      const userData = userRes.data.result;
+      dispatch(loginSuccess({ user: userData }));
+
+      if (userData.roles?.some(r => r.name === 'ROLE_ADMIN')) {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    } catch (err) {
+      console.error("Lỗi lấy thông tin user:", err);
+      navigate('/', { replace: true });
+    }
+  }, [dispatch, navigate]);
+
   // Xử lý sau khi lấy được token (access_token) từ Google
-  const handleGoogleTokenResponse = async (token) => {
+  const handleGoogleTokenResponse = useCallback(async (token) => {
     setLoading(true);
     try {
       const res = await api.post('/auth/google', { accessToken: token });
@@ -45,25 +63,7 @@ export default function GoogleAuthButton() {
     } finally {
       setLoading(false);
     }
-  };
-
-  // Đăng nhập thành công -> lấy thông tin profile và điều hướng
-  const handleLoginSuccess = async () => {
-    try {
-      const userRes = await api.get('/auth/me');
-      const userData = userRes.data.result;
-      dispatch(loginSuccess({ user: userData }));
-
-      if (userData.roles?.some(r => r.name === 'ROLE_ADMIN')) {
-        navigate('/admin', { replace: true });
-      } else {
-        navigate('/', { replace: true });
-      }
-    } catch (err) {
-      console.error("Lỗi lấy thông tin user:", err);
-      navigate('/', { replace: true });
-    }
-  };
+  }, [t, handleLoginSuccess]);
 
   // Khởi tạo Google OAuth2 Token Client
   useEffect(() => {
@@ -102,7 +102,7 @@ export default function GoogleAuthButton() {
       }, 200);
       return () => clearInterval(timer);
     }
-  }, [clientId]);
+  }, [clientId, handleGoogleTokenResponse]);
 
   // Click vào nút Custom Google
   const handleClickGoogle = () => {

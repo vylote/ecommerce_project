@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { io } from "socket.io-client";
 import toast from "react-hot-toast";
 import api from "../utils/api";
@@ -237,34 +237,45 @@ if (import.meta.hot) {
   });
 }
 
+async function fetchNotificationHistory(page, signal) {
+  try {
+    const response = await api.get("/notifications", { params: { page, size: 20 }, signal });
+    const items = response.data.result?.data;
+    return items?.map((item) => ({
+      ...item,
+      isRead: item.isRead === true || item.read === true,
+    }));
+  } catch (error) {
+    if (!signal?.aborted) console.error("Lỗi lấy lịch sử thông báo:", error);
+    return undefined;
+  }
+}
+
 export const useNotification = (userId) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // 1. [HÀNH ĐỘNG 1]: Fetch lịch sử từ Backend Spring Boot
-  const fetchHistory = async (page = 1) => {
-    if (!userId) return;
-    try {
-      const response = await api.get(`/notifications?page=${page}&size=20`);
-      const pageResult = response.data.result;
+  const applyHistory = useCallback((history) => {
+    setNotifications(history);
+    setUnreadCount(history.filter((notification) => !notification.isRead).length);
+  }, []);
 
-      if (pageResult && pageResult.data) {
-        const normalized = pageResult.data.map((item) => ({
-          ...item,
-          isRead: item.isRead === true || item.read === true,
-        }));
-        setNotifications(normalized);
-        const unread = normalized.filter((n) => !n.isRead).length;
-        setUnreadCount(unread);
-      }
-    } catch (error) {
-      console.error("Lỗi lấy lịch sử thông báo:", error);
-    }
-  };
+  async function fetchHistory(page = 1) {
+    if (!userId) return;
+    const history = await fetchNotificationHistory(page);
+    if (history) applyHistory(history);
+  }
 
   useEffect(() => {
-    fetchHistory();
-  }, [userId]);
+    if (!userId) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    void fetchNotificationHistory(1, signal).then((history) => {
+      if (!signal.aborted && history) applyHistory(history);
+    });
+    return () => controller.abort();
+  }, [userId, applyHistory]);
 
   // 2. [HÀNH ĐỘNG 2]: Đăng ký lắng nghe từ Singleton Socket
   useEffect(() => {

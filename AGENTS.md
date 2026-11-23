@@ -111,6 +111,8 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 - In React 19, function components can receive `ref` as a prop and provide context with `<SomeContext value={value}>`. Use `use()` to read context or a stable promise with a Suspense boundary. Route pages can supply document metadata with `<title>` and `<meta>`.
 - For action-based forms, use `useActionState` for submission results and pending state, or `useFormStatus` in a child of the submitting form. Use `useOptimistic` when an action benefits from immediate feedback. Add memoization when profiling identifies a cost.
 
+- For reloadable queries with a stable request callback, reuse `shared/hooks/useReloadableRequest.js` to derive loading state and cancel stale requests. Reset dependent pagination in the event handler that changes the filter. Resolve hook dependency warnings in the code.
+
 ### Naming and review
 
 - Use `PascalCase.jsx` for components, `useXxx.js` for hooks without JSX, and `camelCase.js` for utilities. Keep component-specific styles nearby. Follow the surrounding module's export convention and preserve existing callers when extracting code.
