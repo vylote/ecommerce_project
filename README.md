@@ -53,6 +53,8 @@ Cài JDK và Node.js phù hợp với bản phân phối. Cài [Docker Engine v�
    VITE_NOTIFICATION_URL=http://localhost:3000
    ```
 
+   Đặt `JWT_SECRET` trong `.env` bằng khóa ký JWT bí mật có ít nhất 64 byte.
+
    Điền cấu hình Cloudinary qua `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và `CLOUDINARY_API_SECRET`. Cấu hình SMTP nếu cần gửi email xác thực và `VITE_GOOGLE_CLIENT_ID` nếu dùng đăng nhập Google.
 
 3. **Chạy API bằng IntelliJ IDEA 2026.**

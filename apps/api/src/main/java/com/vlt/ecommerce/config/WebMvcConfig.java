@@ -12,17 +12,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Cấu hình chuẩn Classpath như bạn yêu cầu
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/static/images/");
     }
 
-    // Hàm này sẽ tự động chạy 1 lần duy nhất khi khởi động Server
     @PostConstruct
     public void diagnosticCheck() {
         System.out.println("\n========== BẮT ĐẦU DÒ TÌM ẢNH BẰNG CLASSPATH ==========");
         try {
-            // Yêu cầu Java tìm thử đúng file bạn đang bị lỗi
             ClassPathResource resource = new ClassPathResource("static/images/categories/quanao.png");
             
             if (resource.exists()) {

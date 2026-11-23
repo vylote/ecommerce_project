@@ -52,7 +52,7 @@ server:
     context-path: /api/v1
 
 jwt:
-  secret: WH1q@d,Qfc2NWF#ki#X}$pc4(z2Kte+*]![n/q6}fYWRVcJ{Ku?uqX#_lB_!&/f/^J7-0/u3:1QwUP(wUH;@&q
+  secret: ${JWT_SECRET:}
   expiration: 86400000
   refresh-expiration: 604800000
 
@@ -84,6 +84,6 @@ logging:
       max-history: 30 #
 
 cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME}
-  api-key: ${CLOUDINARY_API_KEY}
-  api-secret: ${CLOUDINARY_API_SECRET}
+  cloud-name: ${CLOUDINARY_CLOUD_NAME:}
+  api-key: ${CLOUDINARY_API_KEY:}
+  api-secret: ${CLOUDINARY_API_SECRET:}

@@ -47,12 +47,16 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 - Keep environment configuration out of subdirectory files such as `apps/api/.env` and `apps/web/.env`.
 - Use environment variable placeholders such as `${ENV_VAR:default_value}` in `application.yaml`. Keep SMTP credentials, Cloudinary credentials, database passwords, and JWT secrets in environment variables.
 
+- Bind related Spring settings with `@ConfigurationProperties` in `config.properties` and inject the typed bean into consumers. Reuse Spring Boot property beans for framework settings. Keep the same YAML keys and environment mappings when migrating existing settings.
+
 ---
 
 ## 4. RabbitMQ and Audit Logging
 
 - Set `durable = true` for exchanges and queues.
 - Use `RabbitAuditAspect` to record queue names and worker processing times in milliseconds. Keep timing logic centralized in the aspect.
+- Preserve serialized RabbitMQ type IDs when moving message classes between packages. Map existing wire IDs to the relocated classes.
+- Use the Jackson 3 converter and type mapper for Spring AMQP. Preserve wire names and the JSON shape when replacing the converter.
 
 ---
 
@@ -68,9 +72,31 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - After each correction or investigation that yields a reusable project lesson, add or update the relevant rule in this file. Keep the rule actionable and consolidate overlapping guidance.
 
+### Constants and comments
+
+- Keep values used by one class private and close to their usage. Put shared constants in the backend `config/Constants.java` or the web `shared/constants.js`. Use descriptive names to identify their purpose. Reuse standard constants for protocol headers and encodings.
+- Put deployment-dependent values in the established environment configuration. Preserve serialized names and values when replacing literals with constants.
+
+### Readability and control flow
+
+- Use clear names and straightforward code so readers can see what it does. Keep comments for non-obvious business rules, constraints, ordering dependencies, or compatibility decisions. Remove comments that restate the code or describe past edits.
+- Minimize branching and nesting. Use guard clauses for invalid inputs or cases that need no work, and keep the main path easy to follow. Review nested `if`, `for`, and `while` blocks for duplicate checks or conditions that can be evaluated once.
+- Keep loops and branches when they clearly express the behavior. Prefer a simple loop over a dense collection pipeline or a chain of ternaries. Extract a helper only when it names a meaningful operation or removes duplication. Preserve evaluation order, short-circuiting, and side effects when simplifying control flow.
+
+### Dependency injection and logging
+
+- Inject Spring dependencies through the constructor. Represent an optional dependency explicitly with `Optional<T>` when the service can operate without that bean.
+- Log each operation's outcome once with relevant context. Omit decorative separators, repeated messages, and sensitive data such as OTPs or email contents.
+
+### Backend package layout
+
+- Place REST controllers and HTTP exception handlers in `web.rest` and `web.rest.errors`. Place JPA entities in `domain`, enums in `domain.enumeration`, and application events in `domain.event`.
+- Keep repositories and their query projections in `repository` and `repository.projection`. Put service contracts in `service`, implementations in `service.impl`, and mappers, request and response DTOs, exceptions, and internal event listeners under the matching `service` subpackages.
+- Keep bean configuration in `config`, JWT and authorization code in `security`, localization in `i18n`, and external adapters in the matching `integration` subpackages.
+
 ### Backend service contracts
 
-- For controller-facing services, define an interface for the use cases exposed through API endpoints and implement it in the Spring service bean. Inject the interface into controllers.
+- Keep one interface for the related use cases of a service, including operations called by controllers and other beans. Use a separate interface when it defines a distinct responsibility or integration boundary.
 - For standalone services called by other beans, such as application services or integration adapters, define an interface for the operations their callers need and provide a Spring-managed implementation.
 - Keep methods used solely inside an implementation private. Check callers and Spring proxy behavior before narrowing visibility, especially for transaction, security, and async annotations.
 - Name contract operations after what callers need and keep provider-specific identifiers and parsing inside the implementation.
@@ -89,11 +115,12 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 
 ### Placement and dependencies
 
-- `main.jsx` mounts React and provides the Redux store. `App.jsx` composes application providers and the browser router. Register routes in `routes/AppRoutes.jsx` and keep each route page in its owning `features/<feature>/` directory.
-- Pages compose layouts and feature components, read route state, and handle navigation. Place domain-specific forms, cards, tables, filters, and sections beside the page or in the feature's `components/` directory. Keep specialized controls local when sharing would require page-specific branches.
-- Check both existing shared UI locations before adding a primitive. `shared/components/ui/` contains `FormInput`, `FormSelect`, and their shared styles. `shared/ui/` contains controls such as `Dialog`, `TextField`, and `QuantityStepper`. Extend the closest existing control. Place cross-feature compositions such as `Pagination` and `AuthLayout` in `shared/components/`.
-- Feature code may depend on shared code. Keep shared UI independent of features and pages. When features need the same behavior, extract the reusable part or expose a narrow feature entry point. Avoid deep imports into another feature's internals.
-- Keep domain logic and validation with the feature. Use `shared/hooks/` for cross-feature hooks, `shared/utils/api.js` for the Axios instance, `shared/i18n/` for translations, and `store/slice/` for Redux slices registered in `store/index.js`.
+- Organize the React source using the JHipster React layout under `apps/web/src/app/`. The Vite entry point is `app/main.jsx`. `app/App.jsx` composes app providers and the browser router. Register routes in `app/routes/AppRoutes.jsx`.
+- Keep Redux configuration and slices in `app/config/store/` and the Axios client in `app/config/api.js`. Place translations, their provider, and the language hook in `i18n/`.
+- Keep route pages and user workflows in `app/modules/`. The account module owns authentication and profile pages, and the storefront module owns the home page and catalog. Keep workflow-specific forms, tables, and filters beside their owning pages.
+- Put reusable entity-specific code in `app/entities/`, such as product cards and image selection or order status charts. Pages and modules compose this code. Keep entity code independent of page-specific workflows.
+- Put shared UI primitives in `app/shared/ui/`. Look for existing controls, including `FormInput`, `FormSelect`, `Dialog`, `TextField`, and `QuantityStepper`, before creating another. Put cross-module compositions in `app/shared/components/` and hooks in `app/shared/hooks/`.
+- Keep domain logic and validation with their owner. Use shared code for behavior and presentation that multiple modules reuse.
 
 ### Designing the component API
 
@@ -111,7 +138,7 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 - In React 19, function components can receive `ref` as a prop and provide context with `<SomeContext value={value}>`. Use `use()` to read context or a stable promise with a Suspense boundary. Route pages can supply document metadata with `<title>` and `<meta>`.
 - For action-based forms, use `useActionState` for submission results and pending state, or `useFormStatus` in a child of the submitting form. Use `useOptimistic` when an action benefits from immediate feedback. Add memoization when profiling identifies a cost.
 
-- For reloadable queries with a stable request callback, reuse `shared/hooks/useReloadableRequest.js` to derive loading state and cancel stale requests. Reset dependent pagination in the event handler that changes the filter. Resolve hook dependency warnings in the code.
+- For reloadable queries with a stable request callback, reuse `app/shared/hooks/useReloadableRequest.js` to derive loading state and cancel stale requests. Reset dependent pagination in the event handler that changes the filter. Resolve hook dependency warnings in the code.
 
 ### Naming and review
 
@@ -120,3 +147,13 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 - During review, check ownership, existing primitives, prop defaults, native event and ref forwarding, URL behavior, and accessible states against the actual callers.
 
 - When refactoring web UI, scan across features for repeated markup, utility classes, formatting, event handlers, and request lifecycles. Extract shared markup into a prop-driven component, pure calculations into helpers, and stateful logic into hooks. Migrate matching callers and preserve their defaults, routing, accessibility, and error handling. Check that the duplicated implementation is gone before adding another abstraction.
+
+## Backend validation and localization
+
+- Write all new agent rules and skills in English. Before changing validation, trace the controller or service entry point to `@Valid` or `validator.validate(...)` and follow the error handler to the returned response.
+- Check existing constraints, their `ConstraintValidator` implementations, and regexes in `Constants`. Where available, look in `handler/annotation` and `handler/validator` for `@NotNullWithArgs`, `@PatternWithArgs`, and `@MaxWithArgs`. Use standard Jakarta constraints when they express the rule directly.
+- Use bundle keys for user-facing validation messages. Keep the default Vietnamese bundle and both VI/EN bundles under `i18n/` in sync. For standard constraints use named attributes such as `{value}` and `{max}`. For argument-aware validators, pass a localizable field name via `args` and match the validator's argument order in both translations. For example, if supported, `@MaxWithArgs(args = "description", value = 500)` supplies the field at `{0}` and the limit at `{1}`.
+- Check omitted fields, explicit nulls, empty strings, whitespace, and both sides of a boundary. Pair optional format or range constraints with a required constraint where appropriate. Use `@GroupSequence` when the returned error depends on validation order.
+- Check existing string utilities before adding helpers. Use Spring's `StringUtils.hasText()` for non-whitespace text. Keep format checks on DTOs and data-dependent checks in the owning service, such as matching an identity number to a customer and session.
+- For business errors reuse this project's `AppException` and `ErrorCode` (the equivalents of `ApplicationException` and `ApplicationExceptionCode`). Resolve localized business messages through `MessageSource` and supply translations for new codes.
+- Report the entry point, reused constraints or helpers, and input cases reviewed. Distinguish source inspection from runtime verification.

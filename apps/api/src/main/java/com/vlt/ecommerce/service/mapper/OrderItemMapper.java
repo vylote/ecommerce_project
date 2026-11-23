@@ -1,0 +1,21 @@
+package com.vlt.ecommerce.service.mapper;
+
+import java.util.List;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
+import com.vlt.ecommerce.domain.OrderItem;
+import com.vlt.ecommerce.service.dto.response.OrderItemResponse;
+
+@Mapper(componentModel = "spring")
+public interface OrderItemMapper {
+    @Mapping(target = "productId", source = "product.id")
+    @Mapping(target = "specificProductId", source = "specificProduct.id")
+    @Mapping(target = "variantName", source = "specificProduct.name")
+    @Mapping(target = "shopId", source = "shop.id")
+    @Mapping(target = "productImageUrl", source = "productImageUrl")
+    OrderItemResponse toOrderItemResponse(OrderItem orderItem);
+
+    List<OrderItemResponse> toOrderItemResponses(List<OrderItem> orderItems);
+}
