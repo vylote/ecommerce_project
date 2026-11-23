@@ -11,14 +11,17 @@ Sàn mua sắm trực tuyến kết nối người mua với các gian hàng đ�
 
 ## 3. Ảnh demo
 
-Ảnh demo sẽ được bổ sung. Các màn dự kiến gồm trang chủ, giỏ hàng và dashboard người bán.
+**Trang chủ**
 
-<!--
-Sau khi chụp, đặt ảnh vào docs/images/ rồi hiển thị các dòng sau:
 ![Trang chủ](docs/images/home.png)
-![Giỏ hàng](docs/images/cart.png)
-![Dashboard người bán](docs/images/seller-dashboard.png)
--->
+
+**Chi tiết sản phẩm**
+
+![Chi tiết sản phẩm](docs/images/product-detail.png)
+
+**Dashboard người bán**
+
+![Dashboard người bán](docs/images/seller_dashboard.png)
 
 ## 4. Hướng dẫn cài đặt
 
