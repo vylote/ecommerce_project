@@ -1,3 +1,4 @@
+import { CART_UPDATED_EVENT } from "../../shared/constants";
 import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import Dialog, { DialogActions } from "../../shared/ui/Dialog";
 import AddressFields from "../profile/components/AddressFields";
@@ -181,7 +182,7 @@ export default function CheckoutPage() {
         }
       }
 
-      window.dispatchEvent(new Event("cart_updated"));
+      window.dispatchEvent(new Event(CART_UPDATED_EVENT));
       toast.success("Đặt hàng thành công!");
       navigate("/orders", { replace: true });
     } catch (error) {

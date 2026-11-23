@@ -1,0 +1,24 @@
+package com.vlt.ecommerce.service.dto.response;
+
+import java.math.BigDecimal;
+
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+public class OrderItemResponse {
+    Long id;
+    String productName;
+    BigDecimal productPrice;
+    Integer quantity;
+    BigDecimal totalPrice;
+    Long productId;
+    Long specificProductId;
+    String variantName;
+    Long shopId;
+    String productImageUrl; 
+}

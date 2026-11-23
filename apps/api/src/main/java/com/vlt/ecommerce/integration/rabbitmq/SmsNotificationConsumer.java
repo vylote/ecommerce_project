@@ -1,0 +1,60 @@
+package com.vlt.ecommerce.integration.rabbitmq;
+
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
+
+import com.vlt.ecommerce.integration.sms.SmsService;
+import com.vlt.ecommerce.config.RabbitMQConfig;
+import com.vlt.ecommerce.integration.rabbitmq.dto.NotificationMessage;
+import com.vlt.ecommerce.domain.User;
+import com.vlt.ecommerce.repository.UserRepository;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class SmsNotificationConsumer {
+
+    SmsService smsService;
+    UserRepository userRepository;
+
+    @RabbitListener(queues = RabbitMQConfig.NOTIFICATION_SMS_QUEUE)
+    public void consumeSmsNotification(NotificationMessage message) {
+        log.info("[RABBITMQ FANOUT -> SMS QUEUE] Nhan thong bao ID #{} cho User ID {}", 
+                message.getId(), message.getUserId());
+
+        if (message.getUserId() == null) {
+            log.warn("[SMS CONSUMER] Bo qua vi khong co userId trong message");
+            return;
+        }
+
+        try {
+            User user = userRepository.findById(message.getUserId()).orElse(null);
+            if (user == null) {
+                log.warn("[SMS CONSUMER] Khong tim thay user voi id: {}", message.getUserId());
+                return;
+            }
+
+            String phone = user.getPhone();
+            if (phone == null || phone.isBlank()) {
+                phone = "09" + String.format("%08d", user.getId());
+                log.info("[SMS CONSUMER] User #{} ({}) chua cap nhat so dien thoai, mo phong gui toi SDT: {}", 
+                        user.getId(), user.getFullName(), phone);
+            }
+
+            smsService.sendNotificationSms(
+                    phone,
+                    message.getTitle(),
+                    message.getMessage(),
+                    message.getRefId()
+            );
+        } catch (Exception e) {
+            log.error("[SMS CONSUMER] Loi xu ly gui SMS cho thong bao #{}: {}", message.getId(), e.getMessage(), e);
+        }
+    }
+}

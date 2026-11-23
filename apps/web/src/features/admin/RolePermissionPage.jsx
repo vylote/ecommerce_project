@@ -1,3 +1,4 @@
+import { ROLE_ADMIN, ROLE_BUYER, ROLE_SELLER } from "../../shared/constants";
 import FormInput from "../../shared/components/ui/FormInput";
 import Dialog from "../../shared/ui/Dialog";
 import { useState, useEffect } from 'react';
@@ -37,6 +38,8 @@ const PERMISSION_GROUPS = [
     prefixKeywords: ['VIP'],
   },
 ];
+
+const SYSTEM_ROLES = new Set([ROLE_ADMIN, ROLE_SELLER, ROLE_BUYER]);
 
 export default function RolePermissionPage() {
   const [activeTab, setActiveTab] = useState('roles'); // 'roles' | 'permissions' | 'user-roles'
@@ -178,7 +181,7 @@ export default function RolePermissionPage() {
   };
 
   const handleDeleteRole = async (role) => {
-    const isSystemRole = ['ROLE_ADMIN', 'ROLE_SELLER', 'ROLE_BUYER'].includes(role.name);
+    const isSystemRole = SYSTEM_ROLES.has(role.name);
     if (isSystemRole) {
       toast.error(`Không thể xóa vai trò mặc định của hệ thống (${role.name})`);
       return;
@@ -456,7 +459,7 @@ export default function RolePermissionPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredRoles.map((role) => {
-                const isSystem = ['ROLE_ADMIN', 'ROLE_SELLER', 'ROLE_BUYER'].includes(role.name);
+                const isSystem = SYSTEM_ROLES.has(role.name);
                 const permList = role.permissions || [];
 
                 return (
@@ -701,9 +704,9 @@ export default function RolePermissionPage() {
                                 <span
                                   key={i}
                                   className={`badge badge-xs text-[10px] font-semibold ${
-                                    r.name === 'ROLE_ADMIN'
+                                    r.name === ROLE_ADMIN
                                       ? 'bg-red-100 text-red-700 border-red-300'
-                                      : r.name === 'ROLE_SELLER'
+                                      : r.name === ROLE_SELLER
                                       ? 'bg-emerald-100 text-emerald-700 border-emerald-300'
                                       : 'bg-blue-100 text-blue-700 border-blue-300'
                                   }`}

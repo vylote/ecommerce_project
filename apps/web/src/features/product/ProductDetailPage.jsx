@@ -1,3 +1,4 @@
+import { CART_UPDATED_EVENT } from "../../shared/constants";
 import ProductGallery from "./components/ProductGallery";
 import QuantityStepper from "../../shared/ui/QuantityStepper";
 import { useState, useEffect } from "react";
@@ -184,7 +185,7 @@ export default function ProductDetailPage() {
       );
 
       // Bắn pháo hiệu (Event) để Navbar biết đường tải lại số lượng
-      window.dispatchEvent(new Event("cart_updated"));
+      window.dispatchEvent(new Event(CART_UPDATED_EVENT));
       return true;
     } catch (error) {
       toast.error(error.response?.data?.message || "Lỗi khi thêm vào giỏ hàng");

@@ -1,3 +1,4 @@
+import { ROLE_ADMIN } from "../../shared/constants";
 import Dialog from "../../shared/ui/Dialog";
 import TextField from "../../shared/ui/TextField";
 import PasswordField from "./components/PasswordField";
@@ -48,7 +49,7 @@ export default function LoginPage() {
       const userData = userRes.data.result;
       dispatch(loginSuccess({ user: userData }));
       
-      if (userData.roles?.some(r => r.name === 'ROLE_ADMIN')) {
+      if (userData.roles?.some(r => r.name === ROLE_ADMIN)) {
         navigate('/admin', { replace: true });
       } else {
         navigate('/', { replace: true });

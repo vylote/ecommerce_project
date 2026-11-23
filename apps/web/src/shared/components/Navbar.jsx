@@ -1,3 +1,4 @@
+import { CART_UPDATED_EVENT, ROLE_ADMIN, ROLE_SELLER } from "../constants";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -30,11 +31,11 @@ export default function Navbar() {
 
     fetchCartCount();
 
-    window.addEventListener("cart_updated", fetchCartCount);
+    window.addEventListener(CART_UPDATED_EVENT, fetchCartCount);
 
     return () => {
       ignore = true;
-      window.removeEventListener("cart_updated", fetchCartCount);
+      window.removeEventListener(CART_UPDATED_EVENT, fetchCartCount);
     };
   }, [user]);
 
@@ -47,13 +48,13 @@ export default function Navbar() {
       <StorefrontTopBar
         user={user}
         sellerHref={
-          user?.roles?.some((role) => role.name === "ROLE_SELLER")
+          user?.roles?.some((role) => role.name === ROLE_SELLER)
             ? "/seller/dashboard"
             : "/seller/onboarding"
         }
         className="py-1.5 px-4 md:px-12 border-b border-white/10"
       >
-        {user?.roles?.some((r) => r.name === "ROLE_ADMIN") && (
+        {user?.roles?.some((r) => r.name === ROLE_ADMIN) && (
           <>
             <Link to="/admin" className="hover:opacity-80 font-bold text-yellow-300">
               Trang Admin

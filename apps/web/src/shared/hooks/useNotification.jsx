@@ -1,3 +1,4 @@
+import { NEW_NOTIFICATION_EVENT, ORDER_UPDATED_EVENT } from "../constants";
 import { useEffect, useState, useCallback } from "react";
 import { io } from "socket.io-client";
 import toast from "react-hot-toast";
@@ -166,13 +167,13 @@ const attachSocketEvents = (socket, userId) => {
     socketListeners.forEach((callback) => callback(payload));
 
     // Bắn CustomEvent toàn cục cho các trang tự động reload danh sách
-    window.dispatchEvent(new CustomEvent("new_notification", { detail: payload }));
+    window.dispatchEvent(new CustomEvent(NEW_NOTIFICATION_EVENT, { detail: payload }));
     if (
       payload.type === "NEW_ORDER" ||
       payload.type === "ORDER_CANCELLED" ||
       payload.type === "PAYMENT_SUCCESS"
     ) {
-      window.dispatchEvent(new Event("order_updated"));
+      window.dispatchEvent(new Event(ORDER_UPDATED_EVENT));
     }
   });
 

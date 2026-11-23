@@ -10,12 +10,14 @@ import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vlt.ecommerce.integration.rabbitmq.dto.NotificationMessage;
 
 @Configuration
 public class RabbitMQConfig {
@@ -44,7 +46,15 @@ public class RabbitMQConfig {
     @Bean
     public MessageConverter jsonMessageConverter(ObjectMapper objectMapper) {
         objectMapper.findAndRegisterModules();
-        return new Jackson2JsonMessageConverter(objectMapper);
+        // Preserve the wire type ID for messages queued before the package move.
+        DefaultJackson2JavaTypeMapper typeMapper = new DefaultJackson2JavaTypeMapper();
+        typeMapper.setIdClassMapping(Map.of(
+                "com.vlt.ecommerce.feature.notification.dto.NotificationMessage", NotificationMessage.class
+        ));
+
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter(objectMapper);
+        converter.setJavaTypeMapper(typeMapper);
+        return converter;
     }
 
     @Bean

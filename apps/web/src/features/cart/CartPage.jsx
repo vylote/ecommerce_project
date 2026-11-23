@@ -1,3 +1,4 @@
+import { CART_UPDATED_EVENT } from "../../shared/constants";
 import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import QuantityStepper from "../../shared/ui/QuantityStepper";
 import ProductImage from "../../shared/components/ProductImage";
@@ -69,7 +70,7 @@ const CartPage = () => {
       await api.delete(`/cart/items/${cartItemId}`);
       setCartItems(items => items.filter(item => item.id !== cartItemId));
       setSelectedItems(selected => selected.filter(id => id !== cartItemId));
-      window.dispatchEvent(new Event('cart_updated'));
+      window.dispatchEvent(new Event(CART_UPDATED_EVENT));
       toast.success(t("cart.delete_success"));
     } catch {
       toast.error(t("cart.delete_failed"));
@@ -242,7 +243,7 @@ const CartPage = () => {
                     await api.delete('/cart');
                     setCartItems([]);
                     setSelectedItems([]);
-                    window.dispatchEvent(new Event('cart_updated'));
+                    window.dispatchEvent(new Event(CART_UPDATED_EVENT));
                     toast.success(t("cart.delete_all_success"));
                   } catch {
                     toast.error(t("cart.delete_all_failed"));

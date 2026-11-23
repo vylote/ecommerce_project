@@ -1,3 +1,4 @@
+import { NEW_NOTIFICATION_EVENT, ORDER_UPDATED_EVENT } from "../../shared/constants";
 import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import Pagination from "../../shared/components/Pagination";
 import SearchField from "../../shared/ui/SearchField";
@@ -55,11 +56,11 @@ export default function SellerOrderPage() {
   );
 
   useEffect(() => {
-    window.addEventListener('order_updated', fetchOrders);
-    window.addEventListener('new_notification', fetchOrders);
+    window.addEventListener(ORDER_UPDATED_EVENT, fetchOrders);
+    window.addEventListener(NEW_NOTIFICATION_EVENT, fetchOrders);
     return () => {
-      window.removeEventListener('order_updated', fetchOrders);
-      window.removeEventListener('new_notification', fetchOrders);
+      window.removeEventListener(ORDER_UPDATED_EVENT, fetchOrders);
+      window.removeEventListener(NEW_NOTIFICATION_EVENT, fetchOrders);
     };
   }, [fetchOrders]);
 

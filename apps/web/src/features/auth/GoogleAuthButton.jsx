@@ -1,3 +1,4 @@
+import { ROLE_ADMIN } from "../../shared/constants";
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -27,7 +28,7 @@ export default function GoogleAuthButton() {
       const userData = userRes.data.result;
       dispatch(loginSuccess({ user: userData }));
 
-      if (userData.roles?.some(r => r.name === 'ROLE_ADMIN')) {
+      if (userData.roles?.some(r => r.name === ROLE_ADMIN)) {
         navigate('/admin', { replace: true });
       } else {
         navigate('/', { replace: true });

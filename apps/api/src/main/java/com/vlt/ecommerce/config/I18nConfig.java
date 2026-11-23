@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.config;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
 
@@ -13,8 +14,8 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 @Configuration
 public class I18nConfig {
 
-    public static final Locale LOCALE_VI = Locale.of("vi");
-    public static final Locale LOCALE_EN = Locale.ENGLISH;
+    private static final Locale LOCALE_VI = Locale.of("vi");
+    private static final Locale LOCALE_EN = Locale.ENGLISH;
 
     @Bean
     public LocaleResolver localeResolver() {
@@ -28,7 +29,7 @@ public class I18nConfig {
     public MessageSource messageSource() {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
         messageSource.setBasename("i18n/messages");
-        messageSource.setDefaultEncoding("UTF-8");
+        messageSource.setDefaultEncoding(StandardCharsets.UTF_8.name());
         messageSource.setFallbackToSystemLocale(false);
         return messageSource;
     }

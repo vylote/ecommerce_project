@@ -16,7 +16,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.vlt.ecommerce.common.exception.CustomAccessDeniedHandler;
+import com.vlt.ecommerce.security.JwtAuthenticationEntryPoint;
+import com.vlt.ecommerce.security.JwtAuthenticationFilter;
+import com.vlt.ecommerce.security.CustomAccessDeniedHandler;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

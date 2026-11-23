@@ -1,3 +1,4 @@
+import { ROLE_ADMIN, ROLE_SELLER } from "../shared/constants";
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import LoginPage from '../features/auth/LoginPage';
@@ -33,7 +34,7 @@ export const AppRoutes = () => {
   const { user } = useSelector((state) => state.auth);
 
 
-  const isSeller = user?.roles?.some(r => r.name === 'ROLE_SELLER');
+  const isSeller = user?.roles?.some(r => r.name === ROLE_SELLER);
 
   return (
     <Routes>
@@ -78,7 +79,7 @@ export const AppRoutes = () => {
         path="/admin" 
         element={
           !user ? <Navigate to="/login" /> :
-          user.roles?.some(r => r.name === 'ROLE_ADMIN') ? <AdminLayout /> : 
+          user.roles?.some(r => r.name === ROLE_ADMIN) ? <AdminLayout /> :
           <Navigate to="/" />
         }
       >

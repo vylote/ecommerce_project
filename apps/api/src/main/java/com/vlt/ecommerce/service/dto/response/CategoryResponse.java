@@ -1,0 +1,18 @@
+package com.vlt.ecommerce.service.dto.response;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
+public class CategoryResponse {
+    Long id;
+    String name;
+    String slug;
+    Long parentId;
+    String parentName;
+    String imageUrl;
+    Boolean isActive;
+    Integer productCount;
+}

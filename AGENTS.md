@@ -53,6 +53,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - Set `durable = true` for exchanges and queues.
 - Use `RabbitAuditAspect` to record queue names and worker processing times in milliseconds. Keep timing logic centralized in the aspect.
+- Preserve serialized RabbitMQ type IDs when moving message classes between packages. Map existing wire IDs to the relocated classes.
 
 ---
 
@@ -68,9 +69,21 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - After each correction or investigation that yields a reusable project lesson, add or update the relevant rule in this file. Keep the rule actionable and consolidate overlapping guidance.
 
+### Constants and comments
+
+- Keep values used by one class private and close to their usage. Put shared constants in the backend `config/Constants.java` or the web `shared/constants.js`. Use descriptive names to identify their purpose. Reuse standard constants for protocol headers and encodings.
+- Put deployment-dependent values in the established environment configuration. Preserve serialized names and values when replacing literals with constants.
+- Keep comments that explain constraints, ordering, compatibility, or business intent. Remove comments that repeat the code or describe an old edit.
+
+### Backend package layout
+
+- Place REST controllers and HTTP exception handlers in `web.rest` and `web.rest.errors`. Place JPA entities in `domain`, enums in `domain.enumeration`, and application events in `domain.event`.
+- Keep repositories and their query projections in `repository` and `repository.projection`. Put service contracts in `service`, implementations in `service.impl`, and mappers, request and response DTOs, exceptions, and internal event listeners under the matching `service` subpackages.
+- Keep bean configuration in `config`, JWT and authorization code in `security`, localization in `i18n`, and external adapters in the matching `integration` subpackages.
+
 ### Backend service contracts
 
-- For controller-facing services, define an interface for the use cases exposed through API endpoints and implement it in the Spring service bean. Inject the interface into controllers.
+- Keep one interface for the related use cases of a service, including operations called by controllers and other beans. Use a separate interface when it defines a distinct responsibility or integration boundary.
 - For standalone services called by other beans, such as application services or integration adapters, define an interface for the operations their callers need and provide a Spring-managed implementation.
 - Keep methods used solely inside an implementation private. Check callers and Spring proxy behavior before narrowing visibility, especially for transaction, security, and async annotations.
 - Name contract operations after what callers need and keep provider-specific identifiers and parsing inside the implementation.
