@@ -1,3 +1,4 @@
+import PasswordField from "./components/PasswordField";
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -15,7 +16,6 @@ export default function RegisterPage() {
     fullName: '',
     phone: ''
   });
-  const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -123,31 +123,13 @@ export default function RegisterPage() {
             <label htmlFor="register-password" className="block text-sm font-medium mb-2">
               {t("auth.password")}
             </label>
-            <div className="relative">
-              <input
-                id="register-password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="new-password"
-                placeholder={t("auth.password_placeholder")}
-                className={`${inputClassName} pr-20`}
-                value={formData.password}
-                onChange={handleChange}
-                aria-describedby={errorMsg ? "register-error" : undefined}
-                required
-                minLength={6}
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 px-3 text-xs font-medium text-secondary hover:underline rounded-r-lg focus-visible:outline-primary"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-controls="register-password"
-                aria-pressed={showPassword}
-                aria-label={t(showPassword ? "auth.hide_password" : "auth.show_password")}
-              >
-                {t(showPassword ? "auth.hide" : "auth.show")}
-              </button>
-            </div>
+            <PasswordField
+              id="register-password"
+              value={formData.password}
+              onChange={handleChange}
+              autoComplete="new-password"
+              describedBy={errorMsg ? "register-error" : undefined}
+            />
           </div>
 
           <button

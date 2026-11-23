@@ -1,3 +1,4 @@
+import Dialog from "../../shared/ui/Dialog";
 import React, { useState, useEffect, useRef } from 'react';
 import {
   FolderTree, Plus, Edit2, Trash2, Search, RefreshCw, Folder,
@@ -510,181 +511,165 @@ export default function CategoryManagementPage() {
 
       {/* ================= MODAL THÊM / SỬA DANH MỤC ================= */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden animate-fade-in-up">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50">
-              <div className="flex items-center gap-2">
-                <FolderTree size={20} className="text-blue-600" />
-                <h3 className="font-bold text-gray-800 text-base">
-                  {isEditing ? 'Cập nhật danh mục' : 'Thêm mới danh mục'}
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="btn btn-sm btn-ghost btn-circle text-gray-500 hover:text-gray-800"
-              >
-                <X size={18} />
-              </button>
+        <Dialog title={isEditing ? 'Cập nhật danh mục' : 'Thêm mới danh mục'} size="lg" onClose={() => setShowModal(false)}>
+
+          <form onSubmit={handleSaveCategory} className="p-6 space-y-4">
+            <div className="form-control">
+              <label className="label font-semibold text-xs text-gray-700">
+                Tên danh mục <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={categoryForm.name}
+                onChange={handleNameChange}
+                placeholder="Ví dụ: Thời trang nam, Thiết bị di động, Đồ gia dụng..."
+                className="input input-sm input-bordered w-full focus:border-blue-500 text-xs"
+                required
+              />
             </div>
 
-            <form onSubmit={handleSaveCategory} className="p-6 space-y-4">
-              <div className="form-control">
-                <label className="label font-semibold text-xs text-gray-700">
-                  Tên danh mục <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={categoryForm.name}
-                  onChange={handleNameChange}
-                  placeholder="Ví dụ: Thời trang nam, Thiết bị di động, Đồ gia dụng..."
-                  className="input input-sm input-bordered w-full focus:border-blue-500 text-xs"
-                  required
-                />
-              </div>
+            <div className="form-control">
+              <label className="label font-semibold text-xs text-gray-700">
+                Slug URL <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={categoryForm.slug}
+                onChange={(e) => setCategoryForm({ ...categoryForm, slug: e.target.value })}
+                placeholder="thoi-trang-nam"
+                className="input input-sm input-bordered w-full focus:border-blue-500 font-mono text-xs"
+                required
+              />
+              <span className="text-[11px] text-gray-400 mt-1">Đường dẫn thân thiện SEO (không dấu, cách nhau bởi dấu gạch ngang)</span>
+            </div>
 
-              <div className="form-control">
-                <label className="label font-semibold text-xs text-gray-700">
-                  Slug URL <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={categoryForm.slug}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, slug: e.target.value })}
-                  placeholder="thoi-trang-nam"
-                  className="input input-sm input-bordered w-full focus:border-blue-500 font-mono text-xs"
-                  required
-                />
-                <span className="text-[11px] text-gray-400 mt-1">Đường dẫn thân thiện SEO (không dấu, cách nhau bởi dấu gạch ngang)</span>
-              </div>
+            <div className="form-control">
+              <label className="label font-semibold text-xs text-gray-700">
+                Danh mục cha (Cấp độ)
+              </label>
+              <select
+                value={categoryForm.parentId}
+                onChange={(e) => setCategoryForm({ ...categoryForm, parentId: e.target.value })}
+                className="select select-sm select-bordered w-full focus:border-blue-500 text-xs"
+              >
+                <option value="">-- Là danh mục gốc (Cấp 1) --</option>
+                {parentCategories
+                  .filter((p) => p.id !== categoryForm.id) // Không thể làm con của chính mình
+                  .map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
 
-              <div className="form-control">
-                <label className="label font-semibold text-xs text-gray-700">
-                  Danh mục cha (Cấp độ)
-                </label>
-                <select
-                  value={categoryForm.parentId}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, parentId: e.target.value })}
-                  className="select select-sm select-bordered w-full focus:border-blue-500 text-xs"
-                >
-                  <option value="">-- Là danh mục gốc (Cấp 1) --</option>
-                  {parentCategories
-                    .filter((p) => p.id !== categoryForm.id) // Không thể làm con của chính mình
-                    .map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
+            {/* UPLOAD / NHẬP HÌNH ẢNH DANH MỤC */}
+            <div className="form-control">
+              <label className="label font-semibold text-xs text-gray-700">
+                Hình ảnh / Icon biểu tượng danh mục
+              </label>
 
-              {/* UPLOAD / NHẬP HÌNH ẢNH DANH MỤC */}
-              <div className="form-control">
-                <label className="label font-semibold text-xs text-gray-700">
-                  Hình ảnh / Icon biểu tượng danh mục
-                </label>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    {categoryForm.imageUrl ? (
-                      <div className="relative w-16 h-16 rounded-xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center shrink-0 shadow-xs">
-                        <img
-                          src={getCategoryImageUrl(categoryForm.imageUrl)}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setCategoryForm((prev) => ({ ...prev, imageUrl: '' }))}
-                          className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white p-0.5 rounded-full transition-colors"
-                          title="Xóa ảnh"
-                        >
-                          <X size={12} />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 shrink-0 bg-gray-50/50">
-                        <ImageIcon size={20} />
-                        <span className="text-[9px] mt-0.5">Chưa có</span>
-                      </div>
-                    )}
-
-                    <div className="flex-1 space-y-2">
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileUpload}
-                        accept="image/*"
-                        className="hidden"
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  {categoryForm.imageUrl ? (
+                    <div className="relative w-16 h-16 rounded-xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center shrink-0 shadow-xs">
+                      <img
+                        src={getCategoryImageUrl(categoryForm.imageUrl)}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
                       />
                       <button
                         type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={uploadingImage}
-                        className="btn btn-sm btn-outline border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 w-full gap-2 text-xs"
+                        onClick={() => setCategoryForm((prev) => ({ ...prev, imageUrl: '' }))}
+                        className="absolute top-1 right-1 bg-black/60 hover:bg-red-600 text-white p-0.5 rounded-full transition-colors"
+                        title="Xóa ảnh"
                       >
-                        {uploadingImage ? (
-                          <>
-                            <span className="loading loading-spinner loading-xs"></span>
-                            Đang tải ảnh lên...
-                          </>
-                        ) : (
-                          <>
-                            <UploadCloud size={15} /> Tải ảnh từ máy tính
-                          </>
-                        )}
+                        <X size={12} />
                       </button>
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 shrink-0 bg-gray-50/50">
+                      <ImageIcon size={20} />
+                      <span className="text-[9px] mt-0.5">Chưa có</span>
+                    </div>
+                  )}
 
-                      <div className="relative">
-                        <LinkIcon size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="url"
-                          value={categoryForm.imageUrl}
-                          onChange={(e) => setCategoryForm({ ...categoryForm, imageUrl: e.target.value })}
-                          placeholder="Hoặc dán trực tiếp đường dẫn URL ảnh..."
-                          className="input input-xs input-bordered w-full pl-8 focus:border-blue-500 text-xs"
-                        />
-                      </div>
+                  <div className="flex-1 space-y-2">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingImage}
+                      className="btn btn-sm btn-outline border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300 w-full gap-2 text-xs"
+                    >
+                      {uploadingImage ? (
+                        <>
+                          <span className="loading loading-spinner loading-xs"></span>
+                          Đang tải ảnh lên...
+                        </>
+                      ) : (
+                        <>
+                          <UploadCloud size={15} /> Tải ảnh từ máy tính
+                        </>
+                      )}
+                    </button>
+
+                    <div className="relative">
+                      <LinkIcon size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="url"
+                        value={categoryForm.imageUrl}
+                        onChange={(e) => setCategoryForm({ ...categoryForm, imageUrl: e.target.value })}
+                        placeholder="Hoặc dán trực tiếp đường dẫn URL ảnh..."
+                        className="input input-xs input-bordered w-full pl-8 focus:border-blue-500 text-xs"
+                      />
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-                <label className="flex items-center justify-between cursor-pointer">
-                  <div>
-                    <span className="font-semibold text-xs text-gray-800">Trạng thái hoạt động</span>
-                    <p className="text-[11px] text-gray-500 mt-0.5">
-                      Cho phép người bán chọn và hiển thị sản phẩm thuộc ngành hàng này trên sàn.
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={categoryForm.isActive}
-                    onChange={(e) => setCategoryForm({ ...categoryForm, isActive: e.target.checked })}
-                    className="toggle toggle-success toggle-sm ml-3 shrink-0"
-                  />
-                </label>
-              </div>
+            <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
+              <label className="flex items-center justify-between cursor-pointer">
+                <div>
+                  <span className="font-semibold text-xs text-gray-800">Trạng thái hoạt động</span>
+                  <p className="text-[11px] text-gray-500 mt-0.5">
+                    Cho phép người bán chọn và hiển thị sản phẩm thuộc ngành hàng này trên sàn.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={categoryForm.isActive}
+                  onChange={(e) => setCategoryForm({ ...categoryForm, isActive: e.target.checked })}
+                  className="toggle toggle-success toggle-sm ml-3 shrink-0"
+                />
+              </label>
+            </div>
 
-              <div className="pt-3 border-t flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="btn btn-sm btn-ghost"
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving || uploadingImage}
-                  className="btn btn-sm bg-[#3b82f6] hover:bg-blue-600 text-white border-none px-6"
-                >
-                  {saving ? <span className="loading loading-spinner loading-xs"></span> : 'Lưu danh mục'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            <div className="pt-3 border-t flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="btn btn-sm btn-ghost"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                disabled={saving || uploadingImage}
+                className="btn btn-sm bg-[#3b82f6] hover:bg-blue-600 text-white border-none px-6"
+              >
+                {saving ? <span className="loading loading-spinner loading-xs"></span> : 'Lưu danh mục'}
+              </button>
+            </div>
+          </form>
+        </Dialog>
       )}
     </div>
   );

@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import LanguageMenu from "../../shared/components/LanguageMenu";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../../shared/utils/api";
@@ -11,21 +12,9 @@ export default function CartHeader() {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { lang, changeLanguage, t } = useI18n();
+  const { t } = useI18n();
 
   const [keyword, setKeyword] = useState("");
-  const [isLangOpen, setIsLangOpen] = useState(false);
-  const langDropdownRef = useRef(null);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target)) {
-        setIsLangOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const handleLogout = async () => {
     try {
@@ -90,60 +79,7 @@ export default function CartHeader() {
             <span className="w-px h-3 bg-white/30" />
 
             {/* DROPDOWN CHUYỂN ĐỔI NGÔN NGỮ */}
-            <div className="relative" ref={langDropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsLangOpen(!isLangOpen)}
-                className="flex items-center gap-1 hover:opacity-80 py-1 cursor-pointer focus:outline-none"
-              >
-                <span>{lang === "vi" ? "Tiếng Việt" : "English"}</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-3 w-3 transition-transform ${isLangOpen ? "rotate-180" : ""}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-
-              {isLangOpen && (
-                <div className="absolute right-0 mt-2 w-36 bg-white text-gray-800 rounded-lg shadow-xl border border-gray-100 py-1.5 z-50 text-xs animate-fade-in">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      changeLanguage("vi");
-                      setIsLangOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-gray-50 cursor-pointer ${
-                      lang === "vi" ? "font-bold text-green-600 bg-green-50/50" : "text-gray-700"
-                    }`}
-                  >
-                    <span>🇻🇳 Tiếng Việt</span>
-                    {lang === "vi" && <span className="font-bold">✓</span>}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      changeLanguage("en");
-                      setIsLangOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 flex items-center justify-between hover:bg-gray-50 cursor-pointer ${
-                      lang === "en" ? "font-bold text-green-600 bg-green-50/50" : "text-gray-700"
-                    }`}
-                  >
-                    <span>🇬🇧 English</span>
-                    {lang === "en" && <span className="font-bold">✓</span>}
-                  </button>
-                </div>
-              )}
-            </div>
+            <LanguageMenu />
 
             {user && (
               <>

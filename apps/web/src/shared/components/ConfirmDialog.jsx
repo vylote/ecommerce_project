@@ -1,4 +1,4 @@
-import React from 'react';
+import Dialog from '../ui/Dialog';
 
 /**
  * Dialog xác nhận dùng chung, thay cho window.confirm.
@@ -38,24 +38,19 @@ export default function ConfirmDialog({ state, onClose }) {
       : 'bg-[#ee4d2d] hover:bg-[#d73211]';
 
   return (
-    <div
-      className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center px-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-sm shadow-lg w-full max-w-sm p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="text-base font-semibold text-gray-800 mb-2">{title}</h3>
+    <Dialog title={title} size="sm" onClose={onClose} closeOnBackdrop>
+      <div className="p-6">
         {message && <p className="text-sm text-gray-600 mb-6">{message}</p>}
         <div className="flex justify-end gap-3">
           <button
+            type="button"
             onClick={onClose}
             className="px-4 py-2 text-sm border border-gray-300 rounded-sm text-gray-700 hover:bg-gray-50"
           >
             {cancelText}
           </button>
           <button
+            type="button"
             onClick={handleConfirm}
             className={`px-4 py-2 text-sm text-white rounded-sm ${confirmBtnClass}`}
           >
@@ -63,6 +58,6 @@ export default function ConfirmDialog({ state, onClose }) {
           </button>
         </div>
       </div>
-    </div>
+    </Dialog>
   );
 }

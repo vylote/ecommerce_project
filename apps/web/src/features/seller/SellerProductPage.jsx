@@ -1,3 +1,4 @@
+import getDisplayImage from "../product/getDisplayImage";
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Search, Edit, Trash2, Plus } from 'lucide-react';
@@ -88,12 +89,6 @@ export default function SellerProductPage() {
     } catch (error) {
       toast.error('Lỗi khi xóa sản phẩm');
     }
-  };
-
-  const getDisplayImage = (prod) => {
-    if (!prod.images || prod.images.length === 0) return null;
-    const primaryImg = prod.images.find(img => img.isPrimary);
-    return primaryImg ? primaryImg.url : prod.images[0].url;
   };
 
   // --- MẢNG CẤU HÌNH TABS ---

@@ -1,6 +1,9 @@
-import ProductImage from "../../shared/components/ProductImage";
+import CatalogProductCard from "./components/CatalogProductCard";
+import PriceRangeFilter from "./components/PriceRangeFilter";
+import RatingFilter from "./components/RatingFilter";
+import PriceSortSelect from "./components/PriceSortSelect";
 import { useState, useEffect } from 'react';
-import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../shared/components/Navbar';
 import api from '../../shared/utils/api';
 
@@ -18,8 +21,6 @@ export default function CategoryPage() {
   const [showMoreCategories, setShowMoreCategories] = useState(false);
   const [showMoreBrands, setShowMoreBrands] = useState(false);
 
-  const [minPriceInput, setMinPriceInput] = useState('');
-  const [maxPriceInput, setMaxPriceInput] = useState('');
 
   const page = parseInt(searchParams.get('page') || '1', 10);
   const sortBy = searchParams.get('sortBy') || 'soldCount';
@@ -106,22 +107,9 @@ export default function CategoryPage() {
     updateParams({ sortBy: type, order: sortOrder, page: 1 });
   };
 
-  const applyPriceFilter = () => {
-    updateParams({
-      minPrice: minPriceInput,
-      maxPrice: maxPriceInput,
-      page: 1
-    });
-  };
 
   const applyRatingFilter = (rating) => {
     updateParams({ minRating: rating, page: 1 });
-  };
-
-  const getDisplayImage = (product) => {
-    if (!product.images || product.images.length === 0) return null;
-    const primaryImg = product.images.find(img => img.isPrimary);
-    return primaryImg ? primaryImg.url : product.images[0].url;
   };
 
   const displayedCategories = showMoreCategories ? childCategories : childCategories.slice(0, 4);
@@ -209,55 +197,13 @@ export default function CategoryPage() {
               </div>
             </div>
 
-            <div className="mb-5">
-              <h4 className="text-sm font-medium mb-2">Khoảng Giá</h4>
-              <div className="flex items-center gap-2 mb-2">
-                <input 
-                  type="number" 
-                  placeholder="₫ TỪ" 
-                  className="input input-bordered input-sm w-full max-w-[90px] px-2"
-                  value={minPriceInput}
-                  onChange={(e) => setMinPriceInput(e.target.value)}
-                />
-                <span className="text-base-300">-</span>
-                <input 
-                  type="number" 
-                  placeholder="₫ ĐẾN" 
-                  className="input input-bordered input-sm w-full max-w-[90px] px-2"
-                  value={maxPriceInput}
-                  onChange={(e) => setMaxPriceInput(e.target.value)}
-                />
-              </div>
-              <button 
-                className="btn btn-primary btn-sm w-full text-white"
-                onClick={applyPriceFilter}
-              >
-                Áp dụng
-              </button>
-            </div>
-
-            <div className="mb-5">
-              <h4 className="text-sm font-medium mb-2">Đánh Giá</h4>
-              <div className="space-y-2 text-sm">
-                {[5, 4, 3].map((star) => (
-                  <label key={star} className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                      type="radio" 
-                      name="rating" 
-                      className="radio radio-xs radio-primary" 
-                      checked={Number(minRating) === star}
-                      onChange={() => applyRatingFilter(star)}
-                    /> 
-                    <div className="flex text-warning text-xs">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <span key={i} className={i < star ? "text-warning" : "text-base-300"}>★</span>
-                      ))}
-                      {star < 5 && <span className="text-base-content ml-1">trở lên</span>}
-                    </div>
-                  </label>
-                ))}
-              </div>
-            </div>
+            <PriceRangeFilter
+              key={JSON.stringify([minPrice, maxPrice])}
+              minPrice={minPrice}
+              maxPrice={maxPrice}
+              onApply={(min, max) => updateParams({ minPrice: min, maxPrice: max, page: 1 })}
+            />
+            <RatingFilter minRating={minRating} onChange={applyRatingFilter} />
           </div>
         </aside>
 
@@ -287,15 +233,7 @@ export default function CategoryPage() {
                 Bán Chạy
               </button>
 
-              <select 
-                className={`select select-sm outline-none focus:outline-none min-w-[160px] font-normal ${sortBy === 'price' ? 'bg-primary text-white border-primary' : 'bg-base-100 border-transparent'}`}
-                value={sortBy === 'price' ? order : 'default'}
-                onChange={(e) => handleSort('price', e.target.value)}
-              >
-                <option value="default" disabled className="bg-base-100 text-base-content">Giá</option>
-                <option value="asc" className="bg-base-100 text-base-content">Giá: Thấp đến Cao</option>
-                <option value="desc" className="bg-base-100 text-base-content">Giá: Cao đến Thấp</option>
-              </select>
+              <PriceSortSelect active={sortBy === "price"} order={order} onChange={(value) => handleSort("price", value)} />
             </div>
 
             <div className="flex items-center gap-4 text-sm">
@@ -339,48 +277,9 @@ export default function CategoryPage() {
           ) : (
             <>
               <div className="grid grid-cols-5 gap-2.5">
-                {products.map((product) => {
-                  const displayImageUrl = getDisplayImage(product);
-                  return (
-                    <Link 
-                      to={`/product/${product.id}`}
-                      key={product.id} 
-                      className="bg-base-100 border border-transparent hover:border-primary shadow-[0_1px_1px_0_rgba(0,0,0,0.05)] hover:shadow-md hover:-translate-y-[1px] transition-all flex flex-col group relative pb-2"
-                    >
-                      <figure className="relative aspect-square bg-base-200 w-full overflow-hidden shrink-0">
-                        <ProductImage
-                            src={displayImageUrl} 
-                            alt={product.name} 
-                            className="w-full h-full object-cover"
-                          />
-                      </figure>
-                      
-                      <div className="p-2 flex flex-col flex-1">
-                        <h4 className="text-xs text-base-content line-clamp-2 min-h-[2.5rem] leading-[1.25rem]">
-                          {product.name}
-                        </h4>
-                        
-                        <div className="mt-auto pt-2">
-                          <div className="text-primary font-medium text-sm mb-1">
-                            ₫{product.price ? product.price.toLocaleString('vi-VN') : 0}
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center text-warning text-[10px]">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-0.5 fill-current" viewBox="0 0 20 20">
-                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                              </svg>
-                              <span>{product.averageRating || product.rating || "0.0"}</span>
-                            </div>
-                            <span className="text-[10px] text-base-content/60">
-                              Đã bán {product.soldCount >= 1000 ? (product.soldCount / 1000).toFixed(1) + 'k' : product.soldCount}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
+                {products.map((product) => (
+                  <CatalogProductCard key={product.id} product={product} />
+                ))}
               </div>
 
               {pageInfo.totalPages > 1 && (

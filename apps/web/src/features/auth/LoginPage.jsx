@@ -1,3 +1,4 @@
+import PasswordField from "./components/PasswordField";
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
@@ -15,8 +16,6 @@ export default function LoginPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // State quản lý việc ẩn/hiện mật khẩu
-  const [showPassword, setShowPassword] = useState(false);
   
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -111,31 +110,13 @@ export default function LoginPage() {
                 {t("auth.forgot_password")}
               </Link>
             </div>
-            <div className="relative">
-              <input
-                id="login-password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                placeholder={t("auth.password_placeholder")}
-                className="w-full pl-3 pr-20 py-3 bg-base-100 border border-secondary/25 hover:border-secondary/40 focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-lg text-sm placeholder:text-base-content/40 outline-none transition-colors"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                aria-describedby={errorMsg ? "login-error" : undefined}
-                required
-                minLength={6}
-              />
-              <button
-                type="button"
-                className="absolute inset-y-0 right-0 px-3 text-xs font-medium text-secondary hover:underline rounded-r-lg focus-visible:outline-primary"
-                onClick={() => setShowPassword(!showPassword)}
-                aria-controls="login-password"
-                aria-pressed={showPassword}
-                aria-label={t(showPassword ? "auth.hide_password" : "auth.show_password")}
-              >
-                {t(showPassword ? "auth.hide" : "auth.show")}
-              </button>
-            </div>
+            <PasswordField
+              id="login-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              describedBy={errorMsg ? "login-error" : undefined}
+            />
           </div>
 
           <label className="flex items-center gap-2 cursor-pointer text-sm text-base-content/70">

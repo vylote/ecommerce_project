@@ -37,7 +37,7 @@ coverage/
 /backups/
 /dumps/
 
-# IntelliJ và Eclipse; giữ .mvn và cấu hình VS Code dùng chung
+# Cấu hình IDE local; giữ Maven Wrapper trong .mvn
 .idea/
 *.iml
 *.iws
@@ -61,3 +61,6 @@ Thumbs.db
 /DacTaYeuCau2.pdf
 /ecommerce_group1_apis.postman_collection.json
 /db_schema_spec.md
+
+# Cấu hình VS Code local
+.vscode/
