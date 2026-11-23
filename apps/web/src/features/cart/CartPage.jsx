@@ -1,6 +1,7 @@
+import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import QuantityStepper from "../../shared/ui/QuantityStepper";
 import ProductImage from "../../shared/components/ProductImage";
-import React, { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Store, Trash2, ShoppingCart } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -13,24 +14,15 @@ const CartPage = () => {
   const { t } = useI18n();
   const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  // 1. LẤY DỮ LIỆU TỪ BACKEND
-  useEffect(() => {
-    fetchCart();
+  const loadCart = useCallback(async (signal) => {
+    const response = await api.get('/cart', { signal });
+    if (!signal.aborted) setCartItems(response.data.result || []);
   }, []);
-
-  const fetchCart = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get('/cart');
-      setCartItems(res.data.result || []);
-    } catch (error) {
-      toast.error(t("cart.load_failed"));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { loading, reload: fetchCart } = useReloadableRequest(
+    loadCart,
+    () => toast.error(t("cart.load_failed")),
+  );
 
   // 2. GỘP NHÓM SẢN PHẨM THEO SHOP (Group by Shop)
   const groupedCart = (cartItems || []).reduce((acc, item) => {
@@ -79,7 +71,7 @@ const CartPage = () => {
       setSelectedItems(selected => selected.filter(id => id !== cartItemId));
       window.dispatchEvent(new Event('cart_updated'));
       toast.success(t("cart.delete_success"));
-    } catch (error) {
+    } catch {
       toast.error(t("cart.delete_failed"));
     }
   };
@@ -252,7 +244,7 @@ const CartPage = () => {
                     setSelectedItems([]);
                     window.dispatchEvent(new Event('cart_updated'));
                     toast.success(t("cart.delete_all_success"));
-                  } catch (error) {
+                  } catch {
                     toast.error(t("cart.delete_all_failed"));
                   }
                 }}

@@ -2,9 +2,9 @@ import formatMoney from "../../shared/utils/formatCurrency";
 import FormInput from "../../shared/components/ui/FormInput";
 import FormSelect from "../../shared/components/ui/FormSelect";
 import Dialog from "../../shared/ui/Dialog";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { DollarSign, TrendingUp, ShoppingCart, Percent, Settings2, BarChart2 } from 'lucide-react';
+import { DollarSign, TrendingUp, Percent, Settings2, BarChart2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 import Pagination from '../../shared/components/Pagination';
@@ -14,6 +14,7 @@ export default function CommissionPage() {
   const [configs, setConfigs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reloadVersion, setReloadVersion] = useState(0);
 
   // Phân trang
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,27 +29,33 @@ export default function CommissionPage() {
     return today.toISOString().split('T')[0];
   });
 
-  const fetchCommissionData = async () => {
-    setLoading(true);
-    try {
-      const [statsRes, configsRes, catRes] = await Promise.all([
-        api.get('/commission/stats/admin'),
-        api.get('/commission/configs'),
-        api.get('/categories') // Giả sử có API lấy category
-      ]);
-      setStats(statsRes.data.result);
-      setConfigs(configsRes.data.result);
-      setCategories(catRes.data.result.data || catRes.data.result || []);
-    } catch (error) {
-      toast.error('Không thể tải dữ liệu hoa hồng');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchCommissionData();
-  }, []);
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    async function loadCommissionData() {
+      try {
+        const [statsRes, configsRes, catRes] = await Promise.all([
+          api.get('/commission/stats/admin', { signal }),
+          api.get('/commission/configs', { signal }),
+          api.get('/categories', { signal }),
+        ]);
+        if (signal.aborted) return;
+
+        const categoryResult = catRes.data?.result;
+        setStats(statsRes.data.result);
+        setConfigs(configsRes.data.result);
+        setCategories(Array.isArray(categoryResult) ? categoryResult : (categoryResult?.data ?? []));
+      } catch {
+        if (!signal.aborted) toast.error('Không thể tải dữ liệu hoa hồng');
+      } finally {
+        if (!signal.aborted) setLoading(false);
+      }
+    }
+
+    void loadCommissionData();
+    return () => controller.abort();
+  }, [reloadVersion]);
 
   const handleUpdateConfig = async (e) => {
     e.preventDefault();
@@ -70,7 +77,8 @@ export default function CommissionPage() {
       toast.success('Cập nhật cấu hình hoa hồng thành công!');
       setShowConfigModal(false);
       setNewFee('');
-      fetchCommissionData();
+      setLoading(true);
+      setReloadVersion((version) => version + 1);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Lỗi khi cập nhật cấu hình');
     } finally {
@@ -78,11 +86,14 @@ export default function CommissionPage() {
     }
   };
 
-
   const getCategoryName = (id) => {
     const cat = categories.find(c => c.id === id);
     return cat ? cat.name : `Danh mục ${id}`;
   };
+
+  const totalPages = Math.ceil(configs.length / pageSize) || 1;
+  const page = Math.min(currentPage, totalPages);
+  const paginatedConfigs = configs.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="w-full animate-fade-in flex flex-col gap-6">
@@ -171,31 +182,22 @@ export default function CommissionPage() {
               ) : configs.length === 0 ? (
                 <tr><td colSpan="4" className="text-center py-10 text-gray-500">Chưa có cấu hình hoa hồng nào</td></tr>
               ) : (
-                (() => {
-                  const totalItems = configs.length;
-                  const totalPages = Math.ceil(totalItems / pageSize) || 1;
-                  const paginatedConfigs = configs.slice(
-                    (currentPage - 1) * pageSize,
-                    currentPage * pageSize
-                  );
-
-                  return paginatedConfigs.map((c, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50">
-                      <td className="px-5 py-4 font-semibold text-gray-800">
-                        {getCategoryName(c.categoryId)}
-                      </td>
-                      <td className="px-5 py-4 font-bold text-blue-600">
-                        {(c.rate * 100).toFixed(1)}%
-                      </td>
-                      <td className="px-5 py-4 text-gray-600">
-                        {c.effectiveFrom}
-                      </td>
-                      <td className="px-5 py-4 text-gray-500 text-xs">
-                        ID: {c.createdById}
-                      </td>
-                    </tr>
-                  ));
-                })()
+                paginatedConfigs.map((c) => (
+                  <tr key={c.categoryId} className="hover:bg-gray-50">
+                    <td className="px-5 py-4 font-semibold text-gray-800">
+                      {getCategoryName(c.categoryId)}
+                    </td>
+                    <td className="px-5 py-4 font-bold text-blue-600">
+                      {(c.rate * 100).toFixed(1)}%
+                    </td>
+                    <td className="px-5 py-4 text-gray-600">
+                      {c.effectiveFrom}
+                    </td>
+                    <td className="px-5 py-4 text-gray-500 text-xs">
+                      ID: {c.createdById}
+                    </td>
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
@@ -205,8 +207,8 @@ export default function CommissionPage() {
         {!loading && configs.length > 0 && (
           <div className="border-t border-gray-100 pt-3">
             <Pagination
-              currentPage={currentPage}
-              totalPages={Math.ceil(configs.length / pageSize) || 1}
+              currentPage={page}
+              totalPages={totalPages}
               totalItems={configs.length}
               pageSize={pageSize}
               onPageChange={setCurrentPage}

@@ -2,9 +2,9 @@ import ImageUploadPreview from "../../shared/ui/ImageUploadPreview";
 import useShopFormFields from "./useShopFormFields";
 import FormInput from "../../shared/components/ui/FormInput";
 import ShopCategoryChoices from "./components/ShopCategoryChoices";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { Store, MapPin, Loader2 } from 'lucide-react';
+import { Store, Loader2 } from 'lucide-react';
 import api from '../../shared/utils/api';
 
 export default function SellerProfilePage() {
@@ -50,7 +50,7 @@ export default function SellerProfilePage() {
             file: null
           });
         }
-      } catch (error) {
+      } catch {
         toast.error('Không thể tải thông tin Shop');
       } finally {
         setLoadingCategories(false);

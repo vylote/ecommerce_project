@@ -1,11 +1,12 @@
+import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import Pagination from "../../shared/components/Pagination";
 import SearchField from "../../shared/ui/SearchField";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
-  Eye, CheckCircle, Truck, XCircle, FileText,
+  CheckCircle, Truck, XCircle, FileText,
   Printer, ExternalLink, Clock, CreditCard, MapPin,
-  Package, Calendar, X, AlertCircle, ShoppingBag, ArrowRight
+  Package, Calendar, X, ShoppingBag
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
@@ -23,7 +24,6 @@ export default function SellerOrderPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [pageInfo, setPageInfo] = useState({ currentPage: 1, totalPages: 1 });
   const [searchInput, setSearchInput] = useState('');
 
@@ -33,52 +33,35 @@ export default function SellerOrderPage() {
   const page = parseInt(searchParams.get('page') || '1', 10);
   const currentStatus = searchParams.get('status') || 'ALL';
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const params = { page, size: 10 };
-      if (currentStatus !== 'ALL') {
-        params.status = currentStatus;
-      }
+  const loadOrders = useCallback(async (signal) => {
+    const params = { page, size: 10 };
+    if (currentStatus !== 'ALL') params.status = currentStatus;
 
-      const res = await api.get('/orders/seller', { params });
-      const pageResponse = res.data.result;
+    const response = await api.get('/orders/seller', { params, signal });
+    if (signal.aborted) return;
 
-      setOrders(pageResponse.data || []);
-      setPageInfo({
-        currentPage: pageResponse.currentPage || 1,
-        totalPages: pageResponse.totalPages || 1,
-      });
-
-      // Nếu đang mở modal đơn hàng nào đó, cập nhật lại dữ liệu đơn đó
-      if (selectedOrder) {
-        const updated = pageResponse.data?.find((o) => o.id === selectedOrder.id);
-        if (updated) setSelectedOrder(updated);
-      }
-    } catch (error) {
-      toast.error('Lỗi khi tải danh sách đơn hàng');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const result = response.data.result;
+    const list = result.data || [];
+    setOrders(list);
+    setPageInfo({
+      currentPage: result.currentPage || 1,
+      totalPages: result.totalPages || 1,
+    });
+    setSelectedOrder((current) => current && (list.find((order) => order.id === current.id) ?? current));
+  }, [page, currentStatus]);
+  const { loading, reload: fetchOrders } = useReloadableRequest(
+    loadOrders,
+    () => toast.error('Lỗi khi tải danh sách đơn hàng'),
+  );
 
   useEffect(() => {
-    fetchOrders();
-
-    const handleRealtimeUpdate = () => {
-      console.log('[🔔] Nhận sự kiện đơn hàng mới -> Tự động nạp lại danh sách!');
-      fetchOrders();
-    };
-
-    window.addEventListener('order_updated', handleRealtimeUpdate);
-    window.addEventListener('new_notification', handleRealtimeUpdate);
-
+    window.addEventListener('order_updated', fetchOrders);
+    window.addEventListener('new_notification', fetchOrders);
     return () => {
-      window.removeEventListener('order_updated', handleRealtimeUpdate);
-      window.removeEventListener('new_notification', handleRealtimeUpdate);
+      window.removeEventListener('order_updated', fetchOrders);
+      window.removeEventListener('new_notification', fetchOrders);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, currentStatus]);
+  }, [fetchOrders]);
 
   const updateParams = (newParams) => {
     const current = Object.fromEntries([...searchParams]);
@@ -107,7 +90,7 @@ export default function SellerOrderPage() {
       if (addressSnapshot) {
         return JSON.parse(addressSnapshot);
       }
-    } catch (e) {
+    } catch {
       console.error('Lỗi parse địa chỉ');
     }
     return null;

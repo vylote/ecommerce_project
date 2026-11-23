@@ -1,18 +1,16 @@
 import FormInput from "../../shared/components/ui/FormInput";
 import FormSelect from "../../shared/components/ui/FormSelect";
 import Dialog from "../../shared/ui/Dialog";
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   FolderTree, Plus, Edit2, Trash2, Search, RefreshCw, Folder,
-  Image as ImageIcon, CheckCircle, XCircle, ArrowRight, ExternalLink,
+  Image as ImageIcon,
   ChevronRight, Layers, X, UploadCloud, Link as LinkIcon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 import Pagination from '../../shared/components/Pagination';
-
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
 
 // Helper lấy URL ảnh hoàn chỉnh cho danh mục (hỗ trợ cả ảnh Cloudinary và ảnh nội bộ backend như automotive.png)
 const getCategoryImageUrl = (url) => {
@@ -21,7 +19,7 @@ const getCategoryImageUrl = (url) => {
     return url;
   }
   const cleanName = url.startsWith('/') ? url.substring(1) : url;
-  return `${BASE_URL}/images/categories/${cleanName}`;
+  return `${api.defaults.baseURL}/images/categories/${cleanName}`;
 };
 
 // Hàm helper tạo slug từ tên tiếng Việt
@@ -40,6 +38,7 @@ const generateSlug = (str) => {
 export default function CategoryManagementPage() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reloadVersion, setReloadVersion] = useState(0);
   const [searchKeyword, setSearchKeyword] = useState('');
   const [filterParentId, setFilterParentId] = useState('ALL');
 
@@ -53,33 +52,48 @@ export default function CategoryManagementPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
 
-  const [categoryForm, setCategoryForm] = useState({
+  const [categoryForm, setCategoryForm] = useState(/** @type {{
+    id: number | null,
+    name: string,
+    slug: string,
+    parentId: string,
+    imageUrl: string,
+    isActive: boolean,
+  }} */ ({
     id: null,
     name: '',
     slug: '',
     parentId: '',
     imageUrl: '',
     isActive: true,
-  });
+  }));
   const [saving, setSaving] = useState(false);
 
-  // Tải danh mục
-  const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get('/categories');
-      const list = Array.isArray(res.data?.result) ? res.data.result : (res.data?.result?.data || []);
-      setCategories(list);
-    } catch (error) {
-      toast.error('Không thể tải danh sách ngành hàng');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    const controller = new AbortController();
+
+    async function loadCategories() {
+      try {
+        const res = await api.get('/categories', { signal: controller.signal });
+        if (controller.signal.aborted) return;
+        const result = res.data?.result;
+        const list = Array.isArray(result) ? result : (result?.data || []);
+        setCategories(list);
+      } catch {
+        if (!controller.signal.aborted) toast.error('Không thể tải danh sách ngành hàng');
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
+
+    void loadCategories();
+    return () => controller.abort();
+  }, [reloadVersion]);
+
+  function reloadCategories() {
+    setLoading(true);
+    setReloadVersion((version) => version + 1);
+  }
 
   const handleOpenCreate = () => {
     setIsEditing(false);
@@ -189,7 +203,7 @@ export default function CategoryManagementPage() {
       }
 
       setShowModal(false);
-      fetchCategories();
+      reloadCategories();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi lưu danh mục');
     } finally {
@@ -211,7 +225,7 @@ export default function CategoryManagementPage() {
     try {
       await api.delete(`/categories/${cat.id}`);
       toast.success('Đã xóa danh mục thành công');
-      fetchCategories();
+      reloadCategories();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Không thể xóa danh mục này');
     }
@@ -236,11 +250,6 @@ export default function CategoryManagementPage() {
 
     return matchSearch && matchParent;
   });
-
-  // Tự động về trang 1 khi lọc hoặc tìm kiếm
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchKeyword, filterParentId]);
 
   const totalItems = filteredCategories.length;
   const totalPages = Math.ceil(totalItems / pageSize) || 1;
@@ -267,7 +276,7 @@ export default function CategoryManagementPage() {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={fetchCategories}
+            onClick={reloadCategories}
             className="btn btn-sm btn-outline border-gray-300 gap-1.5"
             title="Tải lại danh sách"
           >
@@ -326,14 +335,20 @@ export default function CategoryManagementPage() {
               type="text"
               placeholder="Tìm theo tên danh mục hoặc slug..."
               value={searchKeyword}
-              onChange={(e) => setSearchKeyword(e.target.value)}
+              onChange={(e) => {
+                setSearchKeyword(e.target.value);
+                setCurrentPage(1);
+              }}
               controlSize="sm" className="w-full pl-9 bg-white text-xs"
  />
           </div>
 
           <FormSelect
             value={filterParentId}
-            onChange={(e) => setFilterParentId(e.target.value)}
+            onChange={(e) => {
+              setFilterParentId(e.target.value);
+              setCurrentPage(1);
+            }}
             controlSize="sm" className="text-xs bg-white"
           >
             <option value="ALL">-- Tất cả cấp độ --</option>

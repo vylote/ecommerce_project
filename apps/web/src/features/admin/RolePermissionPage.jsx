@@ -1,10 +1,9 @@
 import FormInput from "../../shared/components/ui/FormInput";
 import Dialog from "../../shared/ui/Dialog";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Shield, KeyRound, Plus, Edit2, Trash2, Check, Search,
-  Users, CheckCircle2, AlertTriangle, RefreshCw, Lock, Unlock,
-  SlidersHorizontal, ChevronRight, UserCheck
+  Shield, KeyRound, Plus, Edit2, Trash2, Search,
+  Users, RefreshCw, Lock, UserCheck
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
@@ -42,6 +41,7 @@ const PERMISSION_GROUPS = [
 export default function RolePermissionPage() {
   const [activeTab, setActiveTab] = useState('roles'); // 'roles' | 'permissions' | 'user-roles'
   const [loading, setLoading] = useState(true);
+  const [reloadVersion, setReloadVersion] = useState(0);
 
   // Dữ liệu Roles & Permissions
   const [roles, setRoles] = useState([]);
@@ -88,38 +88,43 @@ export default function RolePermissionPage() {
   const [userRolePage, setUserRolePage] = useState(1);
   const [userRolePageSize, setUserRolePageSize] = useState(10);
 
-  // Tải dữ liệu từ backend
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [rolesRes, permsRes, usersRes] = await Promise.all([
-        api.get('/admin/roles').catch(() => ({ data: { result: [] } })),
-        api.get('/admin/permissions').catch(() => ({ data: { result: [] } })),
-        api.get('/users').catch(() => ({ data: { result: [] } })),
-      ]);
-
-      const rawRoles = rolesRes.data?.result;
-      const roleList = Array.isArray(rawRoles) ? rawRoles : (rawRoles?.data || []);
-
-      const rawPerms = permsRes.data?.result;
-      const permList = Array.isArray(rawPerms) ? rawPerms : (rawPerms?.data || []);
-
-      const rawUsers = usersRes.data?.result;
-      const userList = Array.isArray(rawUsers) ? rawUsers : (rawUsers?.data || []);
-
-      setRoles(roleList);
-      setPermissions(permList);
-      setUsers(userList);
-    } catch (error) {
-      toast.error('Không thể tải dữ liệu phân quyền');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
-  }, []);
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    async function loadList(url) {
+      const response = await api.get(url, { signal }).catch(() => null);
+      const result = response?.data?.result;
+      return Array.isArray(result) ? result : (result?.data || []);
+    }
+
+    async function loadData() {
+      try {
+        const [roleList, permissionList, userList] = await Promise.all([
+          loadList('/admin/roles'),
+          loadList('/admin/permissions'),
+          loadList('/users'),
+        ]);
+        if (signal.aborted) return;
+
+        setRoles(roleList);
+        setPermissions(permissionList);
+        setUsers(userList);
+      } catch {
+        if (!signal.aborted) toast.error('Không thể tải dữ liệu phân quyền');
+      } finally {
+        if (!signal.aborted) setLoading(false);
+      }
+    }
+
+    void loadData();
+    return () => controller.abort();
+  }, [reloadVersion]);
+
+  function reloadData() {
+    setLoading(true);
+    setReloadVersion((version) => version + 1);
+  }
 
   // --- HÀNH ĐỘNG CHO ROLE ---
   const handleOpenCreateRole = () => {
@@ -164,7 +169,7 @@ export default function RolePermissionPage() {
         toast.success('Đã tạo vai trò mới thành công');
       }
       setShowRoleModal(false);
-      fetchData();
+      reloadData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi lưu vai trò');
     } finally {
@@ -186,7 +191,7 @@ export default function RolePermissionPage() {
     try {
       await api.delete(`/admin/roles/${role.id}`);
       toast.success('Đã xóa vai trò thành công');
-      fetchData();
+      reloadData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Không thể xóa vai trò này');
     }
@@ -254,7 +259,7 @@ export default function RolePermissionPage() {
         toast.success('Đã thêm quyền hạn mới');
       }
       setShowPermModal(false);
-      fetchData();
+      reloadData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Lỗi lưu quyền hạn');
     } finally {
@@ -267,7 +272,7 @@ export default function RolePermissionPage() {
     try {
       await api.delete(`/admin/permissions/${permId}`);
       toast.success('Đã xóa quyền hạn');
-      fetchData();
+      reloadData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Không thể xóa quyền');
     }
@@ -289,7 +294,7 @@ export default function RolePermissionPage() {
       });
       toast.success(`Đã cập nhật vai trò cho người dùng ${selectedUser.fullName || selectedUser.email}`);
       setShowAssignModal(false);
-      fetchData();
+      reloadData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Lỗi phân quyền cho người dùng');
     } finally {
@@ -321,29 +326,22 @@ export default function RolePermissionPage() {
       u.phone?.toLowerCase().includes(userSearch.toLowerCase())
   );
 
-  // Reset trang khi tìm kiếm
-  useEffect(() => {
-    setPermPage(1);
-  }, [permSearch]);
-
-  useEffect(() => {
-    setUserRolePage(1);
-  }, [userSearch]);
-
   // Phân trang Permissions
   const totalPermItems = filteredPermissions.length;
   const totalPermPages = Math.ceil(totalPermItems / permPageSize) || 1;
+  const visiblePermPage = Math.min(permPage, totalPermPages);
   const paginatedPermissions = filteredPermissions.slice(
-    (permPage - 1) * permPageSize,
-    permPage * permPageSize
+    (visiblePermPage - 1) * permPageSize,
+    visiblePermPage * permPageSize
   );
 
   // Phân trang User-Roles
   const totalUserRoleItems = filteredUsers.length;
   const totalUserRolePages = Math.ceil(totalUserRoleItems / userRolePageSize) || 1;
+  const visibleUserRolePage = Math.min(userRolePage, totalUserRolePages);
   const paginatedUsers = filteredUsers.slice(
-    (userRolePage - 1) * userRolePageSize,
-    userRolePage * userRolePageSize
+    (visibleUserRolePage - 1) * userRolePageSize,
+    visibleUserRolePage * userRolePageSize
   );
 
   return (
@@ -366,7 +364,7 @@ export default function RolePermissionPage() {
 
         <div className="flex items-center gap-2">
           <button
-            onClick={fetchData}
+            onClick={reloadData}
             className="btn btn-sm btn-outline border-gray-300 gap-1.5"
             title="Tải lại dữ liệu"
           >
@@ -555,7 +553,10 @@ export default function RolePermissionPage() {
                 type="text"
                 placeholder="Tìm mã quyền hoặc mô tả..."
                 value={permSearch}
-                onChange={(e) => setPermSearch(e.target.value)}
+                onChange={(e) => {
+                  setPermSearch(e.target.value);
+                  setPermPage(1);
+                }}
                 controlSize="sm" className="w-full pl-9 bg-white"
  />
             </div>
@@ -584,7 +585,7 @@ export default function RolePermissionPage() {
                 ) : (
                   paginatedPermissions.map((perm, idx) => (
                     <tr key={perm.id} className="hover:bg-gray-50/70">
-                      <td className="font-semibold text-gray-400">{(permPage - 1) * permPageSize + idx + 1}</td>
+                      <td className="font-semibold text-gray-400">{(visiblePermPage - 1) * permPageSize + idx + 1}</td>
                       <td>
                         <span className="font-bold text-gray-800 font-mono text-xs bg-gray-100 px-2 py-0.5 rounded border border-gray-200">
                           {perm.name}
@@ -619,7 +620,7 @@ export default function RolePermissionPage() {
           {/* Phân trang Permissions */}
           <div className="border-t border-gray-100 pt-2">
             <Pagination
-              currentPage={permPage}
+              currentPage={visiblePermPage}
               totalPages={totalPermPages}
               totalItems={totalPermItems}
               pageSize={permPageSize}
@@ -644,7 +645,10 @@ export default function RolePermissionPage() {
                 type="text"
                 placeholder="Tìm người dùng theo Email, Họ tên hoặc Số điện thoại..."
                 value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
+                onChange={(e) => {
+                  setUserSearch(e.target.value);
+                  setUserRolePage(1);
+                }}
                 controlSize="sm" className="w-full pl-9 bg-white"
  />
             </div>
@@ -736,7 +740,7 @@ export default function RolePermissionPage() {
           {/* Phân trang User-Roles */}
           <div className="border-t border-gray-100 pt-2">
             <Pagination
-              currentPage={userRolePage}
+              currentPage={visibleUserRolePage}
               totalPages={totalUserRolePages}
               totalItems={totalUserRoleItems}
               pageSize={userRolePageSize}

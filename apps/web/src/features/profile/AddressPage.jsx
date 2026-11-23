@@ -1,17 +1,13 @@
+import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import Dialog, { DialogActions } from "../../shared/ui/Dialog";
 import AddressFields from "./components/AddressFields";
-import React, { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 import Navbar from '../../shared/components/Navbar';
 import ProfileSidebar from './ProfileSidebar';
 import { Plus } from 'lucide-react';
 import { useI18n } from '../../shared/i18n';
-
-const formatAddress = (addr) => {
-  if (!addr) return '';
-  return [addr.detail, addr.ward, addr.district, addr.province].filter(Boolean).join(', ');
-};
 
 const INITIAL_FORM_STATE = {
   fullName: '',
@@ -26,7 +22,6 @@ const INITIAL_FORM_STATE = {
 export default function AddressPage() {
   const { t } = useI18n();
   const [addresses, setAddresses] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   // Modal & Form States
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,24 +29,17 @@ export default function AddressPage() {
   const [formData, setFormData] = useState(INITIAL_FORM_STATE);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    fetchAddresses();
-  }, []);
+  const loadAddresses = useCallback(async (signal) => {
+    const response = await api.get('/addresses', { signal });
+    if (signal.aborted) return;
 
-  const fetchAddresses = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get('/addresses');
-      // Backend tự sắp xếp, nhưng ta có thể ép địa chỉ mặc định lên đầu mảng
-      const list = res.data.result || [];
-      list.sort((a, b) => (b.isDefault === true ? 1 : 0) - (a.isDefault === true ? 1 : 0));
-      setAddresses(list);
-    } catch (error) {
-      toast.error('Không thể tải danh sách địa chỉ');
-    } finally {
-      setLoading(false);
-    }
-  };
+    const list = response.data.result || [];
+    setAddresses([...list].sort((a, b) => Number(b.isDefault === true) - Number(a.isDefault === true)));
+  }, []);
+  const { loading, reload: fetchAddresses } = useReloadableRequest(
+    loadAddresses,
+    () => toast.error('Không thể tải danh sách địa chỉ'),
+  );
 
   // --- HANDLERS MỞ MODAL ---
   const handleOpenAddModal = () => {
@@ -128,7 +116,7 @@ export default function AddressPage() {
       await api.put(`/addresses/${addr.id}`, { ...addr, isDefault: true });
       toast.success(t('address.set_default_success'));
       fetchAddresses();
-    } catch (error) {
+    } catch {
       toast.error('Không thể thiết lập mặc định');
     }
   };

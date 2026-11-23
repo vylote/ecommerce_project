@@ -4,7 +4,7 @@ import FormInput from "../../shared/components/ui/FormInput";
 import FormSelect from "../../shared/components/ui/FormSelect";
 import Dialog, { DialogActions } from "../../shared/ui/Dialog";
 import ShopCategoryChoices from "./components/ShopCategoryChoices";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
@@ -54,7 +54,7 @@ export default function SellerOnboarding() {
         setLoadingCategories(true);
         const res = await api.get('/categories/parents');
         setCategories(res.data.result || []);
-      } catch (error) {
+      } catch {
         toast.error('Không thể tải danh mục ngành hàng');
       } finally {
         setLoadingCategories(false);
@@ -83,7 +83,7 @@ export default function SellerOnboarding() {
       const list = res.data.result || [];
       setSavedAddresses(list);
       setAddressMode(list.length > 0 ? 'pick' : 'create');
-    } catch (error) {
+    } catch {
       toast.error('Không thể tải danh sách địa chỉ đã lưu');
       setAddressMode('create');
     } finally {

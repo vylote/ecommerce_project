@@ -1,7 +1,8 @@
+import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import Dialog, { DialogActions } from "../../shared/ui/Dialog";
 import AddressFields from "../profile/components/AddressFields";
 import ProductImage from "../../shared/components/ProductImage";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../shared/utils/api";
@@ -10,10 +11,11 @@ import {
   MapPin,
   Ticket,
   Coins,
-  CreditCard,
   CheckCircle2,
   Plus,
 } from "lucide-react";
+
+const EMPTY_CART_ITEMS = [];
 
 const PAYMENT_METHODS = [
   { value: "COD", label: "Thanh toán khi nhận hàng" },
@@ -42,11 +44,10 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const selectedCartItems = location.state?.selectedItems || [];
+  const selectedCartItems = location.state?.selectedItems ?? EMPTY_CART_ITEMS;
 
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
-  const [addressLoading, setAddressLoading] = useState(true);
 
   // States quản lý việc chọn/thêm địa chỉ
   const [showAddressPicker, setShowAddressPicker] = useState(false);
@@ -72,29 +73,18 @@ export default function CheckoutPage() {
     }
   }, [selectedCartItems, navigate]);
 
-  const fetchAddresses = async () => {
-    try {
-      setAddressLoading(true);
-      const res = await api.get("/addresses");
-      const list = res.data.result || [];
-      setAddresses(list);
+  const loadAddresses = useCallback(async (signal) => {
+    const response = await api.get("/addresses", { signal });
+    if (signal.aborted) return;
 
-      // Nếu chưa chọn địa chỉ nào, tự động pick cái mặc định hoặc cái đầu tiên
-      if (!selectedAddressId) {
-        const defaultAddr = list.find((a) => a.isDefault) || list[0];
-        if (defaultAddr) setSelectedAddressId(defaultAddr.id);
-      }
-    } catch (error) {
-      toast.error("Không thể tải danh sách địa chỉ!");
-    } finally {
-      setAddressLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAddresses();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const list = response.data.result || [];
+    setAddresses(list);
+    setSelectedAddressId((current) => current ?? (list.find((address) => address.isDefault) || list[0])?.id ?? null);
   }, []);
+  const { loading: addressLoading } = useReloadableRequest(
+    loadAddresses,
+    () => toast.error("Không thể tải danh sách địa chỉ!"),
+  );
 
   // HÀM XỬ LÝ THÊM ĐỊA CHỈ MỚI TẠI CHỖ
   const handleAddNewAddress = async (e) => {

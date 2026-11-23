@@ -1,6 +1,6 @@
 import SearchField from "../../shared/ui/SearchField";
 import Dialog from "../../shared/ui/Dialog";
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Lock, Unlock, ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
@@ -9,42 +9,52 @@ import Pagination from '../../shared/components/Pagination';
 export default function UserManagementPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [query, setQuery] = useState({ page: 1, pageSize: 10, email: '' });
+  const { page, pageSize } = query;
   const [totalPages, setTotalPages] = useState(1);
   const [totalUsers, setTotalUsers] = useState(0);
   const [searchInput, setSearchInput] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
 
   // Modal xác nhận khóa/mở khóa
   const [confirmUser, setConfirmUser] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get('/users', {
-        params: {
-          page: page,
-          size: pageSize,
-          email: searchQuery || undefined
-        }
-      });
-      const data = res.data.result;
-      setUsers(data.data || []);
-      setTotalPages(data.totalPages || 1);
-      setTotalUsers(data.totalElements || (data.data || []).length);
-    } catch (error) {
-      toast.error('Không thể tải danh sách người dùng');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, pageSize, searchQuery]);
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    async function loadUsers() {
+      try {
+        const res = await api.get('/users', {
+          params: {
+            page: query.page,
+            size: query.pageSize,
+            email: query.email || undefined,
+          },
+          signal,
+        });
+        if (signal.aborted) return;
+
+        const data = res.data.result;
+        const list = data.data || [];
+        setUsers(list);
+        setTotalPages(data.totalPages || 1);
+        setTotalUsers(data.totalElements ?? list.length);
+      } catch {
+        if (!signal.aborted) toast.error('Không thể tải danh sách người dùng');
+      } finally {
+        if (!signal.aborted) setLoading(false);
+      }
+    }
+
+    void loadUsers();
+    return () => controller.abort();
+  }, [query]);
+
+  function updateQuery(changes) {
+    setLoading(true);
+    setQuery((current) => ({ ...current, ...changes }));
+  }
 
   // Đóng modal bằng phím Esc
   useEffect(() => {
@@ -58,8 +68,7 @@ export default function UserManagementPage() {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    setSearchQuery(searchInput);
-    setPage(1);
+    updateQuery({ page: 1, email: searchInput });
   };
 
   const closeConfirm = () => {
@@ -76,8 +85,8 @@ export default function UserManagementPage() {
       await api.patch(`/users/${confirmUser.id}/status`);
       toast.success(`${action} tài khoản thành công!`);
       setConfirmUser(null);
-      fetchUsers();
-    } catch (error) {
+      updateQuery({});
+    } catch {
       toast.error(`Lỗi khi ${action.toLowerCase()} tài khoản`);
     } finally {
       setActionLoading(false);
@@ -172,11 +181,8 @@ export default function UserManagementPage() {
             totalPages={totalPages}
             totalItems={totalUsers}
             pageSize={pageSize}
-            onPageChange={setPage}
-            onPageSizeChange={(newSize) => {
-              setPageSize(newSize);
-              setPage(1);
-            }}
+            onPageChange={(nextPage) => updateQuery({ page: nextPage })}
+            onPageSizeChange={(newSize) => updateQuery({ page: 1, pageSize: newSize })}
             pageSizeOptions={[10, 20, 50]}
           />
         </div>

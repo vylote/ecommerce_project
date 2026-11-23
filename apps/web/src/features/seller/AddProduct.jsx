@@ -5,7 +5,7 @@ import ProductShippingFields from "./components/ProductShippingFields";
 import ProductDetailFields from "./components/ProductDetailFields";
 import ProductBasicFields from "./components/ProductBasicFields";
 import ProductImageFields from "./components/ProductImageFields";
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Info, ArrowRight, ArrowLeft, Check, Layers } from "lucide-react";
 import toast from "react-hot-toast";
@@ -18,6 +18,28 @@ const TABS = [
   { id: "shipping", label: "Vận chuyển" },
   { id: "other", label: "Thông tin khác" },
 ];
+
+function buildVariants(firstOptions, secondOptions, previousVariants, { price, stock }) {
+  const previousByKey = new Map(previousVariants.map((variant) => [variant.key, variant]));
+  const validSecondOptions = secondOptions.filter((option) => option.trim() !== "");
+  const secondValues = validSecondOptions.length ? validSecondOptions : [""];
+
+  return firstOptions.filter((option) => option.trim() !== "").flatMap((first) =>
+    secondValues.map((second) => {
+      const key = second ? `${first}-${second}` : first;
+      const previous = previousByKey.get(key);
+      return {
+        key,
+        name: second ? `${first}, ${second}` : first,
+        tier1Val: first,
+        tier2Val: second,
+        price: previous ? previous.price : price || "",
+        stock: previous ? previous.stock : stock || "0",
+        sku: previous ? previous.sku : "",
+      };
+    })
+  );
+}
 
 export default function AddProduct() {
   const navigate = useNavigate();
@@ -57,6 +79,7 @@ export default function AddProduct() {
   // State quản lý ảnh
   const [imageFiles, setImageFiles] = useState([]);
   const fileInputRef = useRef(null);
+  const previewUrls = useRef(new Set());
 
   // ================= 2. STATE QUẢN LÝ ĐẶC TẢ CHI TIẾT & BIẾN THỂ =================
   const [hasVariants, setHasVariants] = useState(false);
@@ -97,7 +120,7 @@ export default function AddProduct() {
       try {
         const res = await api.get("/categories");
         setCategories(res.data.result || []);
-      } catch (error) {
+      } catch {
         toast.error("Không thể tải danh sách ngành hàng");
       }
     };
@@ -106,18 +129,14 @@ export default function AddProduct() {
 
   // Fetch các loại đặc tả chuẩn khi người bán chọn ngành hàng
   useEffect(() => {
-    const fetchSpecTypes = async () => {
-      if (!productForm.categoryId) {
-        setAvailableSpecTypes([]);
-        setSelectedSpecs({});
-        setTier1((prev) => ({ ...prev, typeId: null, options: [] }));
-        setTier2((prev) => ({ ...prev, typeId: null, options: [] }));
-        setVariants([]);
-        return;
-      }
+    const categoryId = productForm.categoryId;
+    if (!categoryId) return;
+    const controller = new AbortController();
 
+    const fetchSpecTypes = async () => {
       try {
-        const res = await api.get(`/categories/${productForm.categoryId}/specification-types`);
+        const res = await api.get(`/categories/${categoryId}/specification-types`, { signal: controller.signal });
+        if (controller.signal.aborted) return;
         const list = res.data.result || [];
         setAvailableSpecTypes(list);
 
@@ -149,64 +168,22 @@ export default function AddProduct() {
           setTier2((prev) => ({ ...prev, typeId: null, name: "Phân loại 2", options: [] }));
         }
       } catch (err) {
-        console.error("Lỗi tải đặc tả theo ngành hàng:", err);
+        if (!controller.signal.aborted) console.error("Lỗi tải đặc tả theo ngành hàng:", err);
       }
     };
-    fetchSpecTypes();
+    void fetchSpecTypes();
+    return () => controller.abort();
   }, [productForm.categoryId]);
 
-  // Tự động tái tạo danh sách biến thể khi tier1 / tier2 thay đổi
-  useEffect(() => {
-    if (!hasVariants) return;
+  const variantInputs = [hasVariants, tier1.options, tier2.active, tier2.options, productForm.price, productForm.stock];
+  const [previousVariantInputs, setPreviousVariantInputs] = useState(variantInputs);
 
-    const opt1 = tier1.options.filter((o) => o.trim() !== "");
-    const opt2 = tier2.active ? tier2.options.filter((o) => o.trim() !== "") : [];
-
-    if (opt1.length === 0) {
-      setVariants([]);
-      return;
+  if (variantInputs.some((value, index) => value !== previousVariantInputs[index])) {
+    setPreviousVariantInputs(variantInputs);
+    if (hasVariants) {
+      setVariants(buildVariants(tier1.options, tier2.active ? tier2.options : [], variants, productForm));
     }
-
-    setVariants((prevVariants) => {
-      const newVariants = [];
-
-      if (!tier2.active || opt2.length === 0) {
-        // Chỉ có 1 cấp biến thể
-        opt1.forEach((val1) => {
-          const key = val1;
-          const existing = prevVariants.find((v) => v.key === key);
-          newVariants.push({
-            key,
-            name: val1,
-            tier1Val: val1,
-            tier2Val: "",
-            price: existing ? existing.price : productForm.price || "",
-            stock: existing ? existing.stock : productForm.stock || "0",
-            sku: existing ? existing.sku : "",
-          });
-        });
-      } else {
-        // Có 2 cấp biến thể
-        opt1.forEach((val1) => {
-          opt2.forEach((val2) => {
-            const key = `${val1}-${val2}`;
-            const existing = prevVariants.find((v) => v.key === key);
-            newVariants.push({
-              key,
-              name: `${val1}, ${val2}`,
-              tier1Val: val1,
-              tier2Val: val2,
-              price: existing ? existing.price : productForm.price || "",
-              stock: existing ? existing.stock : productForm.stock || "0",
-              sku: existing ? existing.sku : "",
-            });
-          });
-        });
-      }
-
-      return newVariants;
-    });
-  }, [hasVariants, tier1.options, tier2.active, tier2.options]);
+  }
 
   // Cập nhật input cơ bản
   const handleInputChange = (e) => {
@@ -215,6 +192,13 @@ export default function AddProduct() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    if (name === "categoryId" && value !== productForm.categoryId) {
+      setAvailableSpecTypes([]);
+      setSelectedSpecs({});
+      setTier1((tier) => ({ ...tier, typeId: null, options: [] }));
+      setTier2((tier) => ({ ...tier, typeId: null, options: [] }));
+      setVariants([]);
+    }
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));
     }
@@ -228,10 +212,11 @@ export default function AddProduct() {
       return;
     }
 
-    const newImages = files.map((file) => ({
-      file: file,
-      previewUrl: URL.createObjectURL(file),
-    }));
+    const newImages = files.map((file) => {
+      const previewUrl = URL.createObjectURL(file);
+      previewUrls.current.add(previewUrl);
+      return { file, previewUrl };
+    });
 
     setImageFiles((prev) => [...prev, ...newImages]);
     if (errors.imageFiles) {
@@ -241,12 +226,19 @@ export default function AddProduct() {
   };
 
   const removeImage = (indexToRemove) => {
+    const image = imageFiles[indexToRemove];
+    if (!image) return;
+
+    URL.revokeObjectURL(image.previewUrl);
+    previewUrls.current.delete(image.previewUrl);
     setImageFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
   };
 
   useEffect(() => {
+    const urls = previewUrls.current;
     return () => {
-      imageFiles.forEach((img) => URL.revokeObjectURL(img.previewUrl));
+      urls.forEach((url) => URL.revokeObjectURL(url));
+      urls.clear();
     };
   }, []);
 
