@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import useDismissiblePopover from "../../../shared/hooks/useDismissiblePopover";
+import MarkNotificationRead from "../../../shared/components/MarkNotificationRead";
+import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Bell,
-  BellRing,
   CheckCheck,
-  Check,
   ShoppingBag,
   CreditCard,
   AlertTriangle,
@@ -21,20 +21,9 @@ export default function SellerNotificationDropdown({
   markAllAsRead,
 }) {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, setIsOpen, containerRef, triggerRef, panelId, onKeyDown } = useDismissiblePopover();
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'unread' | 'order'
-  const dropdownRef = useRef(null);
 
-  // Đóng dropdown khi bấm ra ngoài
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   // Lọc thông báo theo tab
   const filteredNotifications = useMemo(() => {
@@ -113,9 +102,13 @@ export default function SellerNotificationDropdown({
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative" ref={containerRef} onKeyDown={onKeyDown}>
       {/* Nút Chuông Thông Báo */}
       <button
+        ref={triggerRef}
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? panelId : undefined}
+        type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className="relative flex items-center justify-center w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all focus:outline-none text-white cursor-pointer"
         title="Thông báo người bán"
@@ -132,7 +125,7 @@ export default function SellerNotificationDropdown({
 
       {/* Dropdown Popup */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2.5 w-88 sm:w-[420px] bg-white text-gray-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 z-50 overflow-hidden origin-top-right transition-all animate-in fade-in duration-200">
+        <div id={panelId} className="absolute top-full right-0 mt-2.5 w-88 sm:w-[420px] bg-white text-gray-800 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] border border-gray-100 z-50 overflow-hidden origin-top-right transition-all animate-in fade-in duration-200">
           {/* Header Panel */}
           <div className="p-4 bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 text-white flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -213,13 +206,13 @@ export default function SellerNotificationDropdown({
                 </p>
               </div>
             ) : (
-              filteredNotifications.map((notif) => {
+              filteredNotifications.map((notif, index) => {
                 const config = getTypeConfig(notif.type);
                 const isRead = notif.isRead;
 
                 return (
                   <div
-                    key={notif.id || `${notif.createdAt}-${Math.random()}`}
+                    key={notif.id ?? `local-${notif.createdAt}-${index}`}
                     onClick={() => {
                       if (!isRead && notif.id) {
                         markAsRead(notif.id);
@@ -241,7 +234,7 @@ export default function SellerNotificationDropdown({
                     </div>
 
                     {/* Nội dung thông báo */}
-                    <div className="flex-1 min-w-0 pr-6">
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${config.badgeClass}`}
@@ -279,20 +272,11 @@ export default function SellerNotificationDropdown({
                     </div>
 
                     {/* Cột hành động: Nút đánh dấu đã đọc hoặc chấm xanh chưa đọc */}
-                    <div className="absolute right-3.5 top-4 flex items-center">
+                    <div className="flex shrink-0 items-center">
                       {!isRead ? (
                         <div className="flex items-center gap-1.5">
                           {/* Nút Đã Đọc riêng cho item */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (notif.id) markAsRead(notif.id);
-                            }}
-                            className="w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-emerald-600 hover:border-emerald-500 hover:bg-emerald-50 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer shadow-2xs"
-                            title="Đánh dấu đã đọc"
-                          >
-                            <Check size={12} strokeWidth={2.5} />
-                          </button>
+                          {notif.id && <MarkNotificationRead onRead={() => markAsRead(notif.id)} />}
                           {/* Chấm tròn trạng thái chưa đọc */}
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100 shadow-2xs" />
                         </div>

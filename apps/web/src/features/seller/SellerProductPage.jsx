@@ -1,7 +1,9 @@
+import Pagination from "../../shared/components/Pagination";
+import SearchField from "../../shared/ui/SearchField";
 import getDisplayImage from "../product/getDisplayImage";
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { Search, Edit, Trash2, Plus } from 'lucide-react';
+import { Edit, Trash2, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 
@@ -106,14 +108,7 @@ export default function SellerProductPage() {
         
         <div className="flex items-center gap-3 w-full md:w-auto">
           <form onSubmit={handleSearch} className="relative flex-1 md:w-[300px]">
-            <input 
-              type="text" 
-              placeholder="Tìm tên sản phẩm..." 
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="input input-bordered input-sm w-full pl-9 focus:border-green-600"
-            />
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <SearchField value={searchInput} onChange={setSearchInput} placeholder="Tìm tên sản phẩm..." />
           </form>
           <Link to="/seller/product/add" className="btn btn-sm bg-green-600 hover:bg-green-700 text-white border-none flex items-center gap-1">
             <Plus size={16} /> Thêm mới
@@ -237,42 +232,12 @@ export default function SellerProductPage() {
         </div>
 
         {!loading && pageInfo.totalPages > 1 && (
-          <div className="px-5 py-4 border-t border-gray-200 flex items-center justify-end">
-            <div className="join gap-1">
-              <button 
-                disabled={page === 1}
-                onClick={() => handlePageChange(page - 1)}
-                className="join-item btn btn-sm bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
-              >
-                «
-              </button>
-              
-              {Array.from({ length: pageInfo.totalPages }).map((_, idx) => {
-                const pageNum = idx + 1;
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => handlePageChange(pageNum)}
-                    className={`join-item btn btn-sm border-gray-300 w-8 h-8 rounded-sm font-medium text-sm ${
-                      page === pageNum 
-                        ? 'bg-green-600 text-white border-green-600 hover:bg-green-700' 
-                        : 'bg-white text-gray-600 hover:bg-gray-50'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-
-              <button 
-                disabled={page === pageInfo.totalPages}
-                onClick={() => handlePageChange(page + 1)}
-                className="join-item btn btn-sm bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
-              >
-                »
-              </button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={page}
+            totalPages={pageInfo.totalPages}
+            onPageChange={handlePageChange}
+            className="border-t border-gray-100 !justify-center"
+          />
         )}
       </div>
     </div>

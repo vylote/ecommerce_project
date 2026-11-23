@@ -1,7 +1,9 @@
+import Pagination from "../../shared/components/Pagination";
+import SearchField from "../../shared/ui/SearchField";
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
-  Search, Eye, CheckCircle, Truck, XCircle, FileText,
+  Eye, CheckCircle, Truck, XCircle, FileText,
   Printer, ExternalLink, Clock, CreditCard, MapPin,
   Package, Calendar, X, AlertCircle, ShoppingBag, ArrowRight
 } from 'lucide-react';
@@ -224,24 +226,10 @@ export default function SellerOrderPage() {
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="relative flex-1 md:w-[280px]">
-            <input
-              type="text"
-              placeholder="Tìm mã đơn, tên khách, SĐT..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full text-xs py-2 pl-9 pr-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white shadow-xs transition-all"
-            />
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            {searchInput && (
-              <button
-                onClick={() => setSearchInput('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <X size={14} />
-              </button>
-            )}
-          </div>
+          <SearchField value={searchInput} onChange={setSearchInput} placeholder="Tìm mã đơn, tên khách, SĐT..."
+            onClear={() => setSearchInput("")}
+            className="flex-1 md:w-[280px]"
+          />
         </div>
       </div>
 
@@ -446,40 +434,12 @@ export default function SellerOrderPage() {
 
         {/* --- PHÂN TRANG --- */}
         {!loading && pageInfo.totalPages > 1 && (
-          <div className="px-5 py-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/40">
-            <div className="text-xs text-gray-500">
-              Trang <span className="font-bold text-gray-700">{pageInfo.currentPage}</span> / {pageInfo.totalPages}
-            </div>
-            <div className="join gap-1">
-              <button
-                disabled={page === 1}
-                onClick={() => updateParams({ page: page - 1 })}
-                className="join-item btn btn-xs bg-white border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
-              >
-                « Trước
-              </button>
-              {Array.from({ length: pageInfo.totalPages }).map((_, idx) => (
-                <button
-                  key={idx + 1}
-                  onClick={() => updateParams({ page: idx + 1 })}
-                  className={`join-item btn btn-xs border-gray-300 min-w-7 font-medium ${
-                    page === idx + 1
-                      ? 'bg-green-600 text-white border-green-600 hover:bg-green-700'
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  {idx + 1}
-                </button>
-              ))}
-              <button
-                disabled={page === pageInfo.totalPages}
-                onClick={() => updateParams({ page: page + 1 })}
-                className="join-item btn btn-xs bg-white border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-40"
-              >
-                Sau »
-              </button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={page}
+            totalPages={pageInfo.totalPages}
+            onPageChange={(nextPage) => updateParams({ page: nextPage })}
+            className="border-t border-gray-100 !justify-center"
+          />
         )}
       </div>
 

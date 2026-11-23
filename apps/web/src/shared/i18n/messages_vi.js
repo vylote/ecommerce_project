@@ -39,6 +39,8 @@ export default {
   // ================= 4. KHU VỰC THÔNG BÁO =================
   "notif.title": "Thông báo mới nhận",
   "notif.empty": "Chưa có thông báo nào",
+  "notif.mark_read": "Đánh dấu đã đọc",
+  "notif.read_action": "Đã đọc",
   "notif.mark_all_read": "Đọc tất cả",
   "notif.view_all_orders": "Xem tất cả đơn mua →",
   "notif.unread": "chưa đọc",
@@ -130,6 +132,8 @@ export default {
   "cart.buy_now": "Mua Ngay",
   "cart.product": "Sản Phẩm",
   "cart.unit_price": "Đơn Giá",
+  "cart.decrease_quantity": "Giảm số lượng",
+  "cart.increase_quantity": "Tăng số lượng",
   "cart.quantity": "Số Lượng",
   "cart.total_price": "Số Tiền",
   "cart.action": "Thao Tác",

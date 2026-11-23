@@ -1,5 +1,7 @@
+import SearchField from "../../shared/ui/SearchField";
+import Dialog from "../../shared/ui/Dialog";
 import React, { useState, useEffect } from 'react';
-import { Search, Lock, Unlock, ShieldAlert } from 'lucide-react';
+import { Lock, Unlock, ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 import Pagination from '../../shared/components/Pagination';
@@ -91,14 +93,7 @@ export default function UserManagementPage() {
         </h2>
 
         <form onSubmit={handleSearch} className="relative w-full md:w-[300px]">
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo email..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="input input-bordered input-sm w-full pl-9 focus:border-blue-500"
-          />
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <SearchField value={searchInput} onChange={setSearchInput} placeholder="Tìm kiếm theo email..." />
         </form>
       </div>
 
@@ -189,36 +184,33 @@ export default function UserManagementPage() {
 
       {/* Modal xác nhận khóa / mở khóa */}
       {confirmUser && (
-        <div className="modal modal-open" onClick={closeConfirm}>
-          <div className="modal-box max-w-sm" onClick={(e) => e.stopPropagation()}>
-            <h3 className="font-bold text-lg text-gray-800">
-              {confirmUser.isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
-            </h3>
-            <p className="py-4 text-sm text-gray-600">
-              Bạn có chắc chắn muốn {confirmUser.isActive ? 'khóa' : 'mở khóa'} tài khoản{' '}
-              <span className="font-semibold text-gray-800">{confirmUser.email}</span>?
-            </p>
-            <div className="modal-action">
-              <button
-                className="btn btn-sm btn-ghost"
-                onClick={closeConfirm}
-                disabled={actionLoading}
-              >
-                Hủy
-              </button>
-              <button
-                className={`btn btn-sm text-white border-0 ${
-                  confirmUser.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
-                }`}
-                onClick={handleConfirmToggle}
-                disabled={actionLoading}
-              >
-                {actionLoading && <span className="loading loading-spinner loading-xs"></span>}
-                {confirmUser.isActive ? 'Khóa' : 'Mở khóa'}
-              </button>
-            </div>
+        <Dialog title={confirmUser.isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản'} onClose={closeConfirm} size="sm" busy={actionLoading} closeOnBackdrop>
+          <div className="p-6">
+          <p className="py-4 text-sm text-gray-600">
+            Bạn có chắc chắn muốn {confirmUser.isActive ? 'khóa' : 'mở khóa'} tài khoản{' '}
+            <span className="font-semibold text-gray-800">{confirmUser.email}</span>?
+          </p>
+          <div className="modal-action">
+            <button
+              className="btn btn-sm btn-ghost"
+              onClick={closeConfirm}
+              disabled={actionLoading}
+            >
+              Hủy
+            </button>
+            <button
+              className={`btn btn-sm text-white border-0 ${
+                confirmUser.isActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+              }`}
+              onClick={handleConfirmToggle}
+              disabled={actionLoading}
+            >
+              {actionLoading && <span className="loading loading-spinner loading-xs"></span>}
+              {confirmUser.isActive ? 'Khóa' : 'Mở khóa'}
+            </button>
           </div>
-        </div>
+          </div>
+        </Dialog>
       )}
     </div>
   );

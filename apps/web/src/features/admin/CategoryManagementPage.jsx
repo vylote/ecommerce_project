@@ -511,7 +511,7 @@ export default function CategoryManagementPage() {
 
       {/* ================= MODAL THÊM / SỬA DANH MỤC ================= */}
       {showModal && (
-        <Dialog title={isEditing ? 'Cập nhật danh mục' : 'Thêm mới danh mục'} size="lg" onClose={() => setShowModal(false)}>
+        <Dialog title={isEditing ? 'Cập nhật danh mục' : 'Thêm mới danh mục'} size="lg" onClose={() => setShowModal(false)} busy={saving || uploadingImage}>
 
           <form onSubmit={handleSaveCategory} className="p-6 space-y-4">
             <div className="form-control">
@@ -656,6 +656,7 @@ export default function CategoryManagementPage() {
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
+                disabled={saving || uploadingImage}
                 className="btn btn-sm btn-ghost"
               >
                 Hủy

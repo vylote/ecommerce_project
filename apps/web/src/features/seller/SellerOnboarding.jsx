@@ -1,3 +1,5 @@
+import Dialog, { DialogActions } from "../../shared/ui/Dialog";
+import ShopCategoryChoices from "./components/ShopCategoryChoices";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -288,29 +290,12 @@ export default function SellerOnboarding() {
               {/* Ngành hàng - N-N nên chọn nhiều bằng chip, không dùng select đơn nữa */}
               <div className="form-control">
                 <label className="label font-medium text-gray-700">Ngành hàng kinh doanh</label>
-                {loadingCategories ? (
-                  <div className="text-sm text-gray-500">Đang tải...</div>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map(cat => {
-                      const selected = shopData.categoryIds.includes(cat.id);
-                      return (
-                        <button
-                          key={cat.id}
-                          type="button"
-                          onClick={() => toggleCategory(cat.id)}
-                          className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                            selected
-                              ? 'bg-green-600 border-green-600 text-white'
-                              : 'bg-white border-gray-300 text-gray-700 hover:border-green-600 hover:text-green-600'
-                          }`}
-                        >
-                          {cat.name}{selected ? ' ✓' : ''}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                <ShopCategoryChoices
+                  categories={categories}
+                  selectedIds={shopData.categoryIds}
+                  loading={loadingCategories}
+                  onToggle={toggleCategory}
+                />
                 <div className="text-xs text-gray-400 mt-1">Có thể chọn nhiều ngành hàng</div>
               </div>
 
@@ -445,111 +430,110 @@ export default function SellerOnboarding() {
 
       {/* ====== MODAL ĐỊA CHỈ (chọn có sẵn hoặc thêm mới) ====== */}
       {showAddressModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white w-full max-w-lg rounded-lg shadow-xl overflow-hidden animate-fade-in-up max-h-[85vh] flex flex-col">
-            <div className="px-6 py-4 border-b flex items-center justify-between">
-              <h3 className="font-bold text-lg">Địa chỉ lấy hàng</h3>
-              <div className="flex gap-2 text-sm">
-                <button
-                  onClick={() => setAddressMode('pick')}
-                  className={`px-3 py-1 rounded ${addressMode === 'pick' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}
-                >
-                  Đã lưu
-                </button>
-                <button
-                  onClick={() => setAddressMode('create')}
-                  className={`px-3 py-1 rounded ${addressMode === 'create' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}
-                >
-                  Thêm mới
-                </button>
-              </div>
-            </div>
+        <Dialog title="Địa chỉ lấy hàng" onClose={() => setShowAddressModal(false)} busy={savingAddress}>
+          <div className="flex gap-2 border-b border-base-300 px-6 py-3 text-sm">
+            <button
+              type="button"
+              disabled={savingAddress}
+              onClick={() => setAddressMode('pick')}
+              className={`px-3 py-1 rounded ${addressMode === 'pick' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+            >
+              Đã lưu
+            </button>
+            <button
+              type="button"
+              disabled={savingAddress}
+              onClick={() => setAddressMode('create')}
+              className={`px-3 py-1 rounded ${addressMode === 'create' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-600'}`}
+            >
+              Thêm mới
+            </button>
+          </div>
 
-            <div className="p-6 overflow-y-auto">
-              {addressMode === 'pick' ? (
-                loadingAddresses ? (
-                  <div className="text-sm text-gray-500 text-center py-8">Đang tải...</div>
-                ) : savedAddresses.length === 0 ? (
-                  <div className="text-sm text-gray-500 text-center py-8">
-                    Chưa có địa chỉ nào đã lưu.{' '}
-                    <button onClick={() => setAddressMode('create')} className="text-blue-600 hover:underline">
-                      Thêm mới
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {savedAddresses.map(addr => (
-                      <button
-                        key={addr.id}
-                        onClick={() => handlePickAddress(addr)}
-                        className="w-full text-left p-3 border rounded-md hover:border-green-600 hover:bg-green-50 transition-colors"
-                      >
-                        <div className="font-medium text-sm">
-                          {addr.fullName} <span className="text-gray-500 font-normal">| {addr.phone}</span>
-                          {addr.isDefault && (
-                            <span className="ml-2 text-xs border border-green-600 text-green-600 px-1.5 py-0.5 rounded">Mặc định</span>
-                          )}
-                        </div>
-                        <div className="text-gray-600 text-sm mt-1">
-                          {[addr.detail, addr.ward, addr.district, addr.province].filter(Boolean).join(', ')}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )
+          <div className="p-6">
+            {addressMode === 'pick' ? (
+              loadingAddresses ? (
+                <div className="text-sm text-gray-500 text-center py-8">Đang tải...</div>
+              ) : savedAddresses.length === 0 ? (
+                <div className="text-sm text-gray-500 text-center py-8">
+                  Chưa có địa chỉ nào đã lưu.{' '}
+                  <button onClick={() => setAddressMode('create')} className="text-blue-600 hover:underline">
+                    Thêm mới
+                  </button>
+                </div>
               ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="form-control">
-                      <label className="label text-sm font-medium">Họ & Tên</label>
-                      <input type="text" className="input input-bordered" value={tempAddress.fullName} onChange={e => setTempAddress({...tempAddress, fullName: e.target.value})} />
-                    </div>
-                    <div className="form-control">
-                      <label className="label text-sm font-medium">Số điện thoại</label>
-                      <input type="text" className="input input-bordered" value={tempAddress.phone} onChange={e => setTempAddress({...tempAddress, phone: e.target.value})} />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="form-control">
-                      <label className="label text-sm font-medium">Tỉnh/Thành phố</label>
-                      <select className="select select-bordered" value={tempAddress.province} onChange={e => setTempAddress({...tempAddress, province: e.target.value})}>
-                        <option value="">Chọn</option>
-                        <option value="Hà Nội">Hà Nội</option>
-                        <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-                        <option value="Đà Nẵng">Đà Nẵng</option>
-                      </select>
-                    </div>
-                    <div className="form-control">
-                      <label className="label text-sm font-medium">Quận/Huyện</label>
-                      <input type="text" className="input input-bordered" value={tempAddress.district} onChange={e => setTempAddress({...tempAddress, district: e.target.value})} />
-                    </div>
-                    <div className="form-control">
-                      <label className="label text-sm font-medium">Phường/Xã</label>
-                      <input type="text" className="input input-bordered" value={tempAddress.ward} onChange={e => setTempAddress({...tempAddress, ward: e.target.value})} />
-                    </div>
+                <div className="space-y-2">
+                  {savedAddresses.map(addr => (
+                    <button
+                      key={addr.id}
+                      onClick={() => handlePickAddress(addr)}
+                      className="w-full text-left p-3 border rounded-md hover:border-green-600 hover:bg-green-50 transition-colors"
+                    >
+                      <div className="font-medium text-sm">
+                        {addr.fullName} <span className="text-gray-500 font-normal">| {addr.phone}</span>
+                        {addr.isDefault && (
+                          <span className="ml-2 text-xs border border-green-600 text-green-600 px-1.5 py-0.5 rounded">Mặc định</span>
+                        )}
+                      </div>
+                      <div className="text-gray-600 text-sm mt-1">
+                        {[addr.detail, addr.ward, addr.district, addr.province].filter(Boolean).join(', ')}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="form-control">
+                    <label className="label text-sm font-medium">Họ & Tên</label>
+                    <input type="text" className="input input-bordered" value={tempAddress.fullName} onChange={e => setTempAddress({...tempAddress, fullName: e.target.value})} />
                   </div>
                   <div className="form-control">
-                    <label className="label text-sm font-medium">Địa chỉ cụ thể</label>
-                    <textarea className="textarea textarea-bordered h-20" placeholder="Số nhà, tên đường..." value={tempAddress.detail} onChange={e => setTempAddress({...tempAddress, detail: e.target.value})}></textarea>
+                    <label className="label text-sm font-medium">Số điện thoại</label>
+                    <input type="text" className="input input-bordered" value={tempAddress.phone} onChange={e => setTempAddress({...tempAddress, phone: e.target.value})} />
                   </div>
                 </div>
-              )}
-            </div>
-
-            <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t shrink-0">
-              <button onClick={() => setShowAddressModal(false)} className="btn btn-ghost">Hủy</button>
-              {addressMode === 'create' && (
-                <button
-                  onClick={handleSaveNewAddress}
-                  disabled={savingAddress}
-                  className="btn border-none bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
-                >
-                  {savingAddress ? 'Đang lưu...' : 'Lưu địa chỉ'}
-                </button>
-              )}
-            </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="form-control">
+                    <label className="label text-sm font-medium">Tỉnh/Thành phố</label>
+                    <select className="select select-bordered" value={tempAddress.province} onChange={e => setTempAddress({...tempAddress, province: e.target.value})}>
+                      <option value="">Chọn</option>
+                      <option value="Hà Nội">Hà Nội</option>
+                      <option value="Hồ Chí Minh">Hồ Chí Minh</option>
+                      <option value="Đà Nẵng">Đà Nẵng</option>
+                    </select>
+                  </div>
+                  <div className="form-control">
+                    <label className="label text-sm font-medium">Quận/Huyện</label>
+                    <input type="text" className="input input-bordered" value={tempAddress.district} onChange={e => setTempAddress({...tempAddress, district: e.target.value})} />
+                  </div>
+                  <div className="form-control">
+                    <label className="label text-sm font-medium">Phường/Xã</label>
+                    <input type="text" className="input input-bordered" value={tempAddress.ward} onChange={e => setTempAddress({...tempAddress, ward: e.target.value})} />
+                  </div>
+                </div>
+                <div className="form-control">
+                  <label className="label text-sm font-medium">Địa chỉ cụ thể</label>
+                  <textarea className="textarea textarea-bordered h-20" placeholder="Số nhà, tên đường..." value={tempAddress.detail} onChange={e => setTempAddress({...tempAddress, detail: e.target.value})}></textarea>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+
+          <DialogActions>
+            <button type="button" disabled={savingAddress} onClick={() => setShowAddressModal(false)} className="btn btn-ghost">Hủy</button>
+            {addressMode === 'create' && (
+              <button
+                onClick={handleSaveNewAddress}
+                disabled={savingAddress}
+                className="btn border-none bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
+              >
+                {savingAddress ? 'Đang lưu...' : 'Lưu địa chỉ'}
+              </button>
+            )}
+          </DialogActions>
+        </Dialog>
       )}
     </div>
   );

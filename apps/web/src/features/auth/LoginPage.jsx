@@ -1,5 +1,7 @@
+import Dialog from "../../shared/ui/Dialog";
+import TextField from "../../shared/ui/TextField";
 import PasswordField from "./components/PasswordField";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../shared/utils/api';
@@ -20,6 +22,7 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const lockedActionRef = useRef(null);
   const [showLockedModal, setShowLockedModal] = useState(
     () => localStorage.getItem('account_locked_alert') === 'true'
   );
@@ -81,16 +84,13 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-5" aria-busy={isSubmitting}>
           <div>
-            <label htmlFor="login-email" className="block text-sm font-medium mb-2">
-              {t("auth.email_or_phone")}
-            </label>
-            <input
+            <TextField
               id="login-email"
+              label={t("auth.email_or_phone")}
               name="username"
               type="text"
               autoComplete="username"
               placeholder={t("auth.email_or_phone_placeholder")}
-              className="w-full px-3 py-3 bg-base-100 border border-secondary/25 hover:border-secondary/40 focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-lg text-sm placeholder:text-base-content/40 outline-none transition-colors"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               aria-describedby={errorMsg ? "login-email-help login-error" : "login-email-help"}
@@ -101,23 +101,18 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between gap-3 mb-2">
-              <label htmlFor="login-password" className="block text-sm font-medium">
-                {t("auth.password")}
-              </label>
+          <PasswordField
+            id="login-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            describedBy={errorMsg ? "login-error" : undefined}
+            labelAction={
               <Link to="/forgot-password" className="text-xs font-medium text-secondary hover:underline">
                 {t("auth.forgot_password")}
               </Link>
-            </div>
-            <PasswordField
-              id="login-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-              describedBy={errorMsg ? "login-error" : undefined}
-            />
-          </div>
+            }
+          />
 
           <label className="flex items-center gap-2 cursor-pointer text-sm text-base-content/70">
             <input
@@ -155,26 +150,23 @@ export default function LoginPage() {
       </div>
 
       {showLockedModal && (
-        <div className="modal modal-open bg-black/40" role="dialog" aria-modal="true" aria-labelledby="locked-account-title">
-          <div className="modal-box p-7 bg-base-100 shadow-lg rounded-xl border border-base-300">
-            <h2 id="locked-account-title" className="font-bold text-xl mb-2">
-              {t("auth.account_locked_title")}
-            </h2>
-            <p className="text-sm text-base-content/70 leading-relaxed py-2">
-              {t("auth.account_locked_desc")}
-            </p>
-            <div className="modal-action mt-6">
-              <button
-                type="button"
-                className="w-full py-3 rounded-lg font-semibold bg-primary hover:bg-secondary text-primary-content transition-colors"
-                onClick={() => setShowLockedModal(false)}
-                autoFocus
-              >
-                {t("auth.understand_btn")}
-              </button>
-            </div>
+        <Dialog title={t("auth.account_locked_title")} onClose={() => setShowLockedModal(false)} size="md" initialFocusRef={lockedActionRef}>
+          <div className="p-6">
+          <p className="text-sm text-base-content/70 leading-relaxed py-2">
+            {t("auth.account_locked_desc")}
+          </p>
+          <div className="modal-action mt-6">
+            <button
+              type="button"
+              className="w-full py-3 rounded-lg font-semibold bg-primary hover:bg-secondary text-primary-content transition-colors"
+              onClick={() => setShowLockedModal(false)}
+              ref={lockedActionRef}
+            >
+              {t("auth.understand_btn")}
+            </button>
           </div>
-        </div>
+          </div>
+        </Dialog>
       )}
     </AuthLayout>
   );

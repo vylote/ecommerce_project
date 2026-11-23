@@ -1,13 +1,14 @@
+import Pagination from "../../shared/components/Pagination";
+import SearchField from "../../shared/ui/SearchField";
+import Dialog from "../../shared/ui/Dialog";
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../shared/utils/api";
 import toast from "react-hot-toast";
 import {
   Store,
-  Search,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   ExternalLink,
   Info,
   RefreshCw,
@@ -24,6 +25,8 @@ import {
   Lock,
   Unlock,
 } from "lucide-react";
+
+const pageSize = 10;
 
 export default function ShopManagementPage() {
   const [shops, setShops] = useState([]);
@@ -69,7 +72,7 @@ export default function ShopManagementPage() {
 
       const kwParam = keyword ? `&keyword=${encodeURIComponent(keyword)}` : "";
       const res = await api.get(
-        `/shops/admin?page=${page}&size=10${kwParam}${isActiveParam}`
+        `/shops/admin?page=${page}&size=${pageSize}${kwParam}${isActiveParam}`
       );
 
       const pageData = res.data?.result;
@@ -209,17 +212,7 @@ export default function ShopManagementPage() {
       <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
         <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-3 items-center justify-between">
           <div className="flex-1 flex flex-col sm:flex-row gap-3 w-full">
-            {/* Search Input */}
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Tìm theo tên Shop, tên chủ shop, email..."
-                value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-blue-500 transition-colors"
-              />
-            </div>
+            <SearchField value={keyword} onChange={setKeyword} placeholder="Tìm theo tên Shop, tên chủ shop, email..." className="flex-1" />
 
             {/* Status Filter */}
             <select
@@ -440,216 +433,164 @@ export default function ShopManagementPage() {
           </table>
         </div>
 
-        {/* Phân trang (Pagination) */}
-        <div className="p-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-          <div>
-            Hiển thị <b>{shops.length}</b> trên tổng số <b>{totalElements}</b> gian hàng
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(p - 1, 1))}
-              disabled={page <= 1}
-              className="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Trang trước
-            </button>
-            <span className="font-semibold text-gray-700">
-              Trang {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
-              disabled={page >= totalPages}
-              className="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Trang sau
-            </button>
-          </div>
-        </div>
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          totalItems={totalElements}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          className="border-t border-gray-100 px-4"
+        />
       </div>
 
       {/* MODAL 1: XEM CHI TIẾT HỒ SƠ GIAN HÀNG */}
       {showDetailModal && selectedShop && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-100">
-            {/* Modal Header */}
-            <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
-                  {selectedShop.logoUrl ? (
-                    <img
-                      src={selectedShop.logoUrl}
-                      alt={selectedShop.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <Store className="w-6 h-6 text-gray-400" />
-                  )}
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 text-base">
-                    {selectedShop.name}
-                  </h3>
-                  <div className="text-xs text-gray-400 flex items-center gap-2 mt-0.5">
-                    <span>Mã Shop: #{selectedShop.id}</span>
-                    <span>•</span>
-                    <span className={selectedShop.isActive ? "text-emerald-600 font-semibold" : "text-rose-600 font-semibold"}>
-                      {selectedShop.isActive ? "Đang hoạt động" : "Đang bị khóa"}
-                    </span>
-                  </div>
-                </div>
+        <Dialog title={selectedShop.name} onClose={() => setShowDetailModal(false)}>
+          {/* Modal Header */}
+          <div className="p-5 border-b border-gray-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center">
+                {selectedShop.logoUrl ? (
+                  <img
+                    src={selectedShop.logoUrl}
+                    alt={selectedShop.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <Store className="w-6 h-6 text-gray-400" />
+                )}
               </div>
-              <button
-                onClick={() => setShowDetailModal(false)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-5 space-y-4 text-xs text-gray-600 max-h-[75vh] overflow-y-auto">
-              {/* Mô tả Shop */}
               <div>
-                <label className="font-semibold text-gray-700 block mb-1">
-                  Mô tả gian hàng
-                </label>
-                <div className="p-3 bg-gray-50 rounded-xl text-gray-600 leading-relaxed">
-                  {selectedShop.description || "Chưa có mô tả gian hàng."}
-                </div>
-              </div>
-
-              {/* Thông tin chủ sở hữu (Seller) */}
-              <div className="border border-gray-100 rounded-xl p-3.5 bg-gray-50/50 space-y-2">
-                <div className="font-bold text-gray-800 text-xs flex items-center gap-1.5 mb-2">
-                  <User className="w-4 h-4 text-blue-600" />
-                  Thông tin chủ gian hàng (Seller)
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="text-gray-400 block">Họ & tên:</span>
-                    <span className="font-semibold text-gray-800">
-                      {selectedShop.sellerName || "Chưa có"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">ID tài khoản:</span>
-                    <span className="font-semibold text-gray-800">
-                      #{selectedShop.sellerId}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">Email liên hệ:</span>
-                    <span className="font-semibold text-gray-800 truncate block">
-                      {selectedShop.sellerEmail || "—"}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400 block">Số điện thoại:</span>
-                    <span className="font-semibold text-gray-800">
-                      {selectedShop.sellerPhone || "Chưa có"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Địa chỉ & Danh mục */}
-              <div className="space-y-2">
-                <div>
-                  <span className="text-gray-400 block mb-0.5">Địa chỉ kho / Shop:</span>
-                  <div className="flex items-start gap-1.5 text-gray-700 font-medium">
-                    <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
-                    <span>{selectedShop.address || "Chưa cập nhật địa chỉ"}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-gray-400 block mb-1">Ngành hàng đăng ký:</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedShop.categories && selectedShop.categories.length > 0 ? (
-                      selectedShop.categories.map((c) => (
-                        <span
-                          key={c.id}
-                          className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-medium text-[11px]"
-                        >
-                          {c.name}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-gray-400">Chưa gắn danh mục ngành hàng cụ thể</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Thông tin vận hành */}
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-100 text-center">
-                <div className="p-2.5 bg-gray-50 rounded-xl">
-                  <span className="text-gray-400 block text-[11px]">Đánh giá</span>
-                  <span className="font-black text-amber-600 text-sm">
-                    {selectedShop.rating ? selectedShop.rating.toFixed(1) : "0.0"} ★
-                  </span>
-                </div>
-                <div className="p-2.5 bg-gray-50 rounded-xl">
-                  <span className="text-gray-400 block text-[11px]">Sản phẩm</span>
-                  <span className="font-black text-gray-800 text-sm">
-                    {selectedShop.productCount || 0}
-                  </span>
-                </div>
-                <div className="p-2.5 bg-gray-50 rounded-xl">
-                  <span className="text-gray-400 block text-[11px]">Ngày gia nhập</span>
-                  <span className="font-bold text-gray-800 text-[11px] block mt-0.5">
-                    {selectedShop.createdAt
-                      ? new Date(selectedShop.createdAt).toLocaleDateString("vi-VN")
-                      : "—"}
+                <div className="text-xs text-gray-400 flex items-center gap-2 mt-0.5">
+                  <span>Mã Shop: #{selectedShop.id}</span>
+                  <span>•</span>
+                  <span className={selectedShop.isActive ? "text-emerald-600 font-semibold" : "text-rose-600 font-semibold"}>
+                    {selectedShop.isActive ? "Đang hoạt động" : "Đang bị khóa"}
                   </span>
                 </div>
               </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end">
-              <button
-                onClick={() => setShowDetailModal(false)}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl text-xs font-semibold transition-colors"
-              >
-                Đóng
-              </button>
             </div>
           </div>
-        </div>
+
+          {/* Modal Body */}
+          <div className="p-5 space-y-4 text-xs text-gray-600">
+            {/* Mô tả Shop */}
+            <div>
+              <label className="font-semibold text-gray-700 block mb-1">
+                Mô tả gian hàng
+              </label>
+              <div className="p-3 bg-gray-50 rounded-xl text-gray-600 leading-relaxed">
+                {selectedShop.description || "Chưa có mô tả gian hàng."}
+              </div>
+            </div>
+
+            {/* Thông tin chủ sở hữu (Seller) */}
+            <div className="border border-gray-100 rounded-xl p-3.5 bg-gray-50/50 space-y-2">
+              <div className="font-bold text-gray-800 text-xs flex items-center gap-1.5 mb-2">
+                <User className="w-4 h-4 text-blue-600" />
+                Thông tin chủ gian hàng (Seller)
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <span className="text-gray-400 block">Họ & tên:</span>
+                  <span className="font-semibold text-gray-800">
+                    {selectedShop.sellerName || "Chưa có"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400 block">ID tài khoản:</span>
+                  <span className="font-semibold text-gray-800">
+                    #{selectedShop.sellerId}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400 block">Email liên hệ:</span>
+                  <span className="font-semibold text-gray-800 truncate block">
+                    {selectedShop.sellerEmail || "—"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-400 block">Số điện thoại:</span>
+                  <span className="font-semibold text-gray-800">
+                    {selectedShop.sellerPhone || "Chưa có"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Địa chỉ & Danh mục */}
+            <div className="space-y-2">
+              <div>
+                <span className="text-gray-400 block mb-0.5">Địa chỉ kho / Shop:</span>
+                <div className="flex items-start gap-1.5 text-gray-700 font-medium">
+                  <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0 mt-0.5" />
+                  <span>{selectedShop.address || "Chưa cập nhật địa chỉ"}</span>
+                </div>
+              </div>
+
+              <div>
+                <span className="text-gray-400 block mb-1">Ngành hàng đăng ký:</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {selectedShop.categories && selectedShop.categories.length > 0 ? (
+                    selectedShop.categories.map((c) => (
+                      <span
+                        key={c.id}
+                        className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg font-medium text-[11px]"
+                      >
+                        {c.name}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-gray-400">Chưa gắn danh mục ngành hàng cụ thể</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Thông tin vận hành */}
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-100 text-center">
+              <div className="p-2.5 bg-gray-50 rounded-xl">
+                <span className="text-gray-400 block text-[11px]">Đánh giá</span>
+                <span className="font-black text-amber-600 text-sm">
+                  {selectedShop.rating ? selectedShop.rating.toFixed(1) : "0.0"} ★
+                </span>
+              </div>
+              <div className="p-2.5 bg-gray-50 rounded-xl">
+                <span className="text-gray-400 block text-[11px]">Sản phẩm</span>
+                <span className="font-black text-gray-800 text-sm">
+                  {selectedShop.productCount || 0}
+                </span>
+              </div>
+              <div className="p-2.5 bg-gray-50 rounded-xl">
+                <span className="text-gray-400 block text-[11px]">Ngày gia nhập</span>
+                <span className="font-bold text-gray-800 text-[11px] block mt-0.5">
+                  {selectedShop.createdAt
+                    ? new Date(selectedShop.createdAt).toLocaleDateString("vi-VN")
+                    : "—"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Modal Footer */}
+          <div className="p-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end">
+            <button
+              onClick={() => setShowDetailModal(false)}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl text-xs font-semibold transition-colors"
+            >
+              Đóng
+            </button>
+          </div>
+        </Dialog>
       )}
 
       {/* MODAL 2: XÁC NHẬN KHÓA / MỞ KHÓA GIAN HÀNG */}
       {actionShop && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-gray-100 p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div
-                className={`p-3 rounded-xl shrink-0 ${
-                  actionShop.isActive
-                    ? "bg-rose-100 text-rose-600"
-                    : "bg-emerald-100 text-emerald-600"
-                }`}
-              >
-                {actionShop.isActive ? (
-                  <AlertTriangle className="w-6 h-6" />
-                ) : (
-                  <CheckCircle2 className="w-6 h-6" />
-                )}
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900 text-base">
-                  {actionShop.isActive
-                    ? `Tạm khóa Shop "${actionShop.name}"?`
-                    : `Mở khóa Shop "${actionShop.name}"?`}
-                </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  Mã Shop: #{actionShop.id} • Chủ sở hữu: {actionShop.sellerName || actionShop.sellerEmail}
-                </p>
-              </div>
-            </div>
-
+        <Dialog title={actionShop.isActive ? `Tạm khóa Shop "${actionShop.name}"?` : `Mở khóa Shop "${actionShop.name}"?`} onClose={() => setActionShop(null)} size="md" busy={actionLoading}>
+          <div className="space-y-4 p-6">
+            <p className="text-xs text-gray-500">
+              Mã Shop: #{actionShop.id}. Chủ sở hữu: {actionShop.sellerName || actionShop.sellerEmail}
+            </p>
             <p className="text-xs text-gray-600 leading-relaxed bg-gray-50 p-3 rounded-xl border border-gray-100">
               {actionShop.isActive
                 ? "Khi bị tạm khóa, gian hàng và các sản phẩm của shop này sẽ tạm thời không hiển thị đối với người mua trên sàn cho đến khi được Admin mở khóa lại."
@@ -681,7 +622,7 @@ export default function ShopManagementPage() {
               </button>
             </div>
           </div>
-        </div>
+        </Dialog>
       )}
     </div>
   );

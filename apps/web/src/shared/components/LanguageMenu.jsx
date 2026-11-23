@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import useDismissiblePopover from "../hooks/useDismissiblePopover";
 import { useI18n } from "../i18n";
 
 const languages = [
@@ -8,53 +8,35 @@ const languages = [
 
 export default function LanguageMenu() {
   const { lang, changeLanguage } = useI18n();
-  const [open, setOpen] = useState(false);
-  const container = useRef(null);
-  const trigger = useRef(null);
-  const optionsId = useId();
+  const { isOpen, setIsOpen, containerRef, triggerRef, panelId, onKeyDown } = useDismissiblePopover();
   const current = languages.find(({ code }) => code === lang) ?? languages[0];
 
-  useEffect(() => {
-    if (!open) return;
-
-    const closeOutside = (event) => {
-      if (!container.current?.contains(event.target)) setOpen(false);
-    };
-    document.addEventListener("pointerdown", closeOutside);
-    return () => document.removeEventListener("pointerdown", closeOutside);
-  }, [open]);
-
   function closeAndFocus() {
-    setOpen(false);
-    trigger.current?.focus();
+    setIsOpen(false);
+    triggerRef.current?.focus();
   }
 
   return (
     <div
       className="relative"
-      ref={container}
+      ref={containerRef}
       onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+        if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false);
       }}
-      onKeyDown={(event) => {
-        if (open && event.key === "Escape") {
-          event.stopPropagation();
-          closeAndFocus();
-        }
-      }}
+      onKeyDown={onKeyDown}
     >
       <button
-        ref={trigger}
+        ref={triggerRef}
         type="button"
-        aria-expanded={open}
-        aria-controls={open ? optionsId : undefined}
-        onClick={() => setOpen((value) => !value)}
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? panelId : undefined}
+        onClick={() => setIsOpen((value) => !value)}
         className="rounded py-1 hover:opacity-80 focus-visible:outline focus-visible:outline-2"
       >
         {current.label}
       </button>
-      {open && (
-        <div id={optionsId} className="absolute right-0 z-50 mt-2 w-36 rounded-lg border border-base-300 bg-base-100 py-1.5 text-xs text-base-content shadow-xl">
+      {isOpen && (
+        <div id={panelId} className="absolute right-0 z-50 mt-2 w-36 rounded-lg border border-base-300 bg-base-100 py-1.5 text-xs text-base-content shadow-xl">
           {languages.map(({ code, label }) => (
             <button
               key={code}

@@ -1,3 +1,4 @@
+import QuantityStepper from "../../shared/ui/QuantityStepper";
 import ProductImage from "../../shared/components/ProductImage";
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -215,11 +216,11 @@ const CartPage = () => {
                   </div>
 
                   <div className="col-span-2 flex justify-center">
-                    <div className="flex items-center border rounded">
-                      <button onClick={() => handleUpdateQuantity(item.id, item.quantity, -1, item)} className="px-3 py-1 bg-gray-100 hover:bg-gray-200 transition-colors">-</button>
-                      <input type="text" value={item.quantity} readOnly className="w-10 text-center text-sm border-x outline-none font-medium text-gray-700" />
-                      <button onClick={() => handleUpdateQuantity(item.id, item.quantity, 1, item)} className="px-3 py-1 bg-gray-100 hover:bg-gray-200 transition-colors">+</button>
-                    </div>
+                    <QuantityStepper
+                      value={item.quantity}
+                      onDecrease={() => handleUpdateQuantity(item.id, item.quantity, -1, item)}
+                      onIncrease={() => handleUpdateQuantity(item.id, item.quantity, 1, item)}
+                    />
                   </div>
 
                   <div className="col-span-2 text-center text-sm font-semibold text-[#ee4d2d]">

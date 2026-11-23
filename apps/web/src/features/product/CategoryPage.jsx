@@ -1,7 +1,10 @@
-import CatalogProductCard from "./components/CatalogProductCard";
+import CatalogResults from "./components/CatalogResults";
+import CatalogSortControls from "./components/CatalogSortControls";
+import CatalogPageStepper from "./components/CatalogPageStepper";
+import Pagination from "../../shared/components/Pagination";
+import { updateCatalogSearchParams } from "./catalogSearchParams";
 import PriceRangeFilter from "./components/PriceRangeFilter";
 import RatingFilter from "./components/RatingFilter";
-import PriceSortSelect from "./components/PriceSortSelect";
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../shared/components/Navbar';
@@ -19,7 +22,6 @@ export default function CategoryPage() {
   const [currentCategory, setCurrentCategory] = useState(null);
   const [childCategories, setChildCategories] = useState([]);
   const [showMoreCategories, setShowMoreCategories] = useState(false);
-  const [showMoreBrands, setShowMoreBrands] = useState(false);
 
 
   const page = parseInt(searchParams.get('page') || '1', 10);
@@ -88,15 +90,8 @@ export default function CategoryPage() {
     fetchData();
   }, [id, page, sortBy, order, minPrice, maxPrice, minRating]);
 
-  const updateParams = (newParams) => {
-    const current = Object.fromEntries([...searchParams]);
-    const updated = { ...current, ...newParams };
-    Object.keys(updated).forEach(key => {
-      if (updated[key] === null || updated[key] === undefined || updated[key] === '') {
-        delete updated[key];
-      }
-    });
-    setSearchParams(updated);
+  const updateParams = (changes) => {
+    setSearchParams(updateCatalogSearchParams(searchParams, changes));
   };
 
   const handlePageChange = (newPage) => {
@@ -209,114 +204,28 @@ export default function CategoryPage() {
 
         <main className="flex-1 min-w-0">
           <div className="bg-base-200/50 p-3 rounded-sm flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2.5 text-sm">
-              <span className="text-base-content/70 mr-2">Sắp xếp theo</span>
-              
-              <button 
-                className={`btn btn-sm ${sortBy === 'id' ? 'btn-primary text-white' : 'bg-base-100 border-transparent font-normal'}`}
-                onClick={() => handleSort('id', 'desc')}
-              >
-                Phổ Biến
-              </button>
-
-              <button 
-                className={`btn btn-sm ${sortBy === 'createdAt' ? 'btn-primary text-white' : 'bg-base-100 border-transparent font-normal'}`}
-                onClick={() => handleSort('createdAt', 'desc')}
-              >
-                Mới Nhất
-              </button>
-
-              <button 
-                className={`btn btn-sm ${sortBy === 'soldCount' ? 'btn-primary text-white' : 'bg-base-100 border-transparent font-normal'}`}
-                onClick={() => handleSort('soldCount', 'desc')}
-              >
-                Bán Chạy
-              </button>
-
-              <PriceSortSelect active={sortBy === "price"} order={order} onChange={(value) => handleSort("price", value)} />
-            </div>
-
-            <div className="flex items-center gap-4 text-sm">
-              <div>
-                <span className="text-primary">{pageInfo.currentPage}</span> / {pageInfo.totalPages}
-              </div>
-              <div className="join">
-                <button 
-                  className="join-item btn btn-sm btn-outline bg-base-100 border-base-300 px-3"
-                  disabled={page === 1}
-                  onClick={() => handlePageChange(page - 1)}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <button 
-                  className="join-item btn btn-sm btn-outline bg-base-100 border-base-300 px-3"
-                  disabled={page === pageInfo.totalPages}
-                  onClick={() => handlePageChange(page + 1)}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                </button>
-              </div>
-            </div>
+            <CatalogSortControls
+              defaultSort="id"
+              defaultLabel="Phổ Biến"
+              sortBy={sortBy}
+              order={order}
+              onSort={handleSort}
+            />
+            <CatalogPageStepper
+              page={page}
+              currentPage={pageInfo.currentPage}
+              totalPages={pageInfo.totalPages}
+              onPageChange={handlePageChange}
+            />
           </div>
-
-          {loading ? (
-            <div className="grid grid-cols-5 gap-2.5">
-              {Array.from({ length: 25 }).map((_, idx) => (
-                <div key={idx} className="bg-base-100 p-2 border border-base-200">
-                  <div className="skeleton aspect-square w-full mb-2 rounded-sm"></div>
-                  <div className="skeleton h-3 w-full mb-2"></div>
-                  <div className="skeleton h-4 w-1/2"></div>
-                </div>
-              ))}
-            </div>
-          ) : products.length === 0 ? (
-            <div className="bg-base-100 py-16 text-center text-base-content/50 shadow-sm border border-base-200">
-              <div className="text-4xl mb-4">🔍</div>
-              <p>Không tìm thấy sản phẩm nào phù hợp với bộ lọc.</p>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-5 gap-2.5">
-                {products.map((product) => (
-                  <CatalogProductCard key={product.id} product={product} />
-                ))}
-              </div>
-
-              {pageInfo.totalPages > 1 && (
-                <div className="flex justify-center mt-10 mb-8">
-                  <div className="join gap-2">
-                    <button 
-                      className="join-item btn btn-sm bg-transparent border-none text-base-content/60 hover:text-primary hover:bg-transparent"
-                      disabled={page === 1}
-                      onClick={() => handlePageChange(page - 1)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                    </button>
-                    
-                    {Array.from({ length: pageInfo.totalPages }).map((_, idx) => {
-                      const pageNum = idx + 1;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => handlePageChange(pageNum)}
-                          className={`join-item btn btn-sm border-none w-8 h-8 rounded-sm font-medium text-sm ${page === pageNum ? 'bg-primary text-white hover:bg-primary' : 'bg-transparent text-base-content/70 hover:text-primary hover:bg-transparent'}`}
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    })}
-
-                    <button 
-                      className="join-item btn btn-sm bg-transparent border-none text-base-content/60 hover:text-primary hover:bg-transparent"
-                      disabled={page === pageInfo.totalPages}
-                      onClick={() => handlePageChange(page + 1)}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </>
+          <CatalogResults loading={loading} products={products} />
+          {!loading && products.length > 0 && pageInfo.totalPages > 1 && (
+            <Pagination
+              currentPage={page}
+              totalPages={pageInfo.totalPages}
+              onPageChange={handlePageChange}
+              className="mt-10 mb-8 !justify-center"
+            />
           )}
         </main>
       </div>

@@ -1,3 +1,4 @@
+import ShopCategoryChoices from "./components/ShopCategoryChoices";
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { Store, MapPin, Loader2 } from 'lucide-react';
@@ -155,29 +156,13 @@ export default function SellerProfilePage() {
 
           <div className="grid grid-cols-[120px_1fr] items-start gap-4">
             <label className="text-sm font-medium text-gray-500 text-right mt-3">Ngành hàng</label>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {loadingCategories ? (
-                <div className="text-sm text-gray-500">Đang tải...</div>
-              ) : (
-                categories.map(cat => {
-                  const selected = shopData.categoryIds.includes(cat.id);
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => toggleCategory(cat.id)}
-                      className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                        selected
-                          ? 'bg-green-600 border-green-600 text-white'
-                          : 'bg-white border-gray-300 text-gray-700 hover:border-green-600 hover:text-green-600'
-                      }`}
-                    >
-                      {cat.name}{selected ? ' ✓' : ''}
-                    </button>
-                  );
-                })
-              )}
-            </div>
+            <ShopCategoryChoices
+              categories={categories}
+              selectedIds={shopData.categoryIds}
+              loading={loadingCategories}
+              onToggle={toggleCategory}
+            />
+
           </div>
 
           <div className="grid grid-cols-[120px_1fr] items-start gap-4">

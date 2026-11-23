@@ -1,3 +1,4 @@
+import Dialog, { DialogActions } from "../../shared/ui/Dialog";
 import AddressFields from "../profile/components/AddressFields";
 import ProductImage from "../../shared/components/ProductImage";
 import React, { useState, useEffect } from "react";
@@ -12,7 +13,6 @@ import {
   CreditCard,
   CheckCircle2,
   Plus,
-  X,
 } from "lucide-react";
 
 const PAYMENT_METHODS = [
@@ -499,48 +499,36 @@ export default function CheckoutPage() {
       {/* POPUP MODAL THÊM ĐỊA CHỈ NGAY TẠI CHECKOUT */}
       {/* ========================================== */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-sm w-[500px] shadow-lg overflow-hidden">
-            <div className="px-6 py-4 border-b flex justify-between items-center">
-              <h2 className="text-lg font-medium text-gray-800">
-                Thêm địa chỉ mới
-              </h2>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X size={20} />
-              </button>
+        <Dialog title="Thêm địa chỉ mới" onClose={() => setShowAddModal(false)} busy={addingAddress}>
+          <form onSubmit={handleAddNewAddress}>
+            <div className="p-6 space-y-4">
+              <AddressFields
+                value={newAddress}
+                onChange={(event) => {
+                  const { name, value } = event.target;
+                  setNewAddress((address) => ({ ...address, [name]: value }));
+                }}
+              />
             </div>
 
-            <form onSubmit={handleAddNewAddress}>
-              <div className="p-6 space-y-4">
-                <AddressFields value={newAddress}
-                  onChange={(event) => {
-                    const { name, value } = event.target;
-                    setNewAddress((address) => ({ ...address, [name]: value }));
-                  }} />
-              </div>
-
-              <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="px-6 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-100 transition-colors"
-                >
-                  Trở lại
-                </button>
-                <button
-                  type="submit"
-                  disabled={addingAddress}
-                  className="px-6 py-2 text-sm text-white bg-[#ee4d2d] rounded-sm hover:bg-[#d73211] transition-colors disabled:opacity-70"
-                >
-                  {addingAddress ? "Đang lưu..." : "Hoàn thành"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            <DialogActions>
+              <button
+                type="button" disabled={addingAddress}
+                onClick={() => setShowAddModal(false)}
+                className="px-6 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-100 transition-colors"
+              >
+                Trở lại
+              </button>
+              <button
+                type="submit"
+                disabled={addingAddress}
+                className="px-6 py-2 text-sm text-white bg-[#ee4d2d] rounded-sm hover:bg-[#d73211] transition-colors disabled:opacity-70"
+              >
+                {addingAddress ? "Đang lưu..." : "Hoàn thành"}
+              </button>
+            </DialogActions>
+          </form>
+        </Dialog>
       )}
     </div>
   );

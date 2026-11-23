@@ -1,6 +1,35 @@
 import { useEffect, useRef } from "react";
 import Chart from "chart.js/auto";
 
+
+const orderStatuses = [
+  { key: "COMPLETED", label: "Đã Hoàn Tất", color: "#16a34a" },
+  { key: "SHIPPING", label: "Đang Giao", color: "#0284c7" },
+  { key: "CONFIRMED", label: "Chờ Lấy Hàng", color: "#8b5cf6" },
+  { key: "PENDING", label: "Chờ Xác Nhận", color: "#f59e0b" },
+  { key: "CANCELLED", label: "Đã Hủy", color: "#ef4444" },
+];
+
+function getStatusCount(statusBreakdown, key) {
+  return Number(statusBreakdown?.[key] || 0);
+}
+
+export function OrderStatusLegend({ statusBreakdown }) {
+  return (
+    <dl className="space-y-2 border-t border-gray-200 pt-3 text-xs">
+      {orderStatuses.map(({ key, label, color }) => (
+        <div key={key} className="flex items-center justify-between gap-2">
+          <dt className="flex items-center gap-2 font-medium text-gray-600">
+            <span aria-hidden="true" className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+            {label}
+          </dt>
+          <dd className="font-bold text-gray-800">{getStatusCount(statusBreakdown, key)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export default function OrderStatusChart({ statusBreakdown }) {
   const canvasRef = useRef(null);
 
@@ -8,41 +37,18 @@ export default function OrderStatusChart({ statusBreakdown }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const statusMap = statusBreakdown || {};
-    const statusLabels = [
-      "Đã Hoàn Tất",
-      "Đang Giao",
-      "Chờ Lấy Hàng",
-      "Chờ Xác Nhận",
-      "Đã Hủy",
-    ];
-    const statusData = [
-      statusMap.COMPLETED || 0,
-      statusMap.SHIPPING || 0,
-      statusMap.CONFIRMED || 0,
-      statusMap.PENDING || 0,
-      statusMap.CANCELLED || 0,
-    ];
-
+    const statusData = orderStatuses.map(({ key }) => getStatusCount(statusBreakdown, key));
     const hasData = statusData.some((v) => v > 0);
 
     const ctx = canvas.getContext("2d");
     const chart = new Chart(ctx, {
       type: "doughnut",
       data: {
-        labels: statusLabels,
+        labels: hasData ? orderStatuses.map(({ label }) => label) : ["Chưa có đơn hàng"],
         datasets: [
           {
             data: hasData ? statusData : [1],
-            backgroundColor: hasData
-              ? [
-                  "#16a34a", // Hoàn tất - Xanh lá
-                  "#0284c7", // Đang giao - Xanh biển
-                  "#8b5cf6", // Chờ lấy - Tím
-                  "#f59e0b", // Chờ xác nhận - Vàng
-                  "#ef4444", // Đã hủy - Đỏ
-                ]
-              : ["#e2e8f0"],
+            backgroundColor: hasData ? orderStatuses.map(({ color }) => color) : ["#e2e8f0"],
             borderWidth: 2,
             borderColor: "#ffffff",
           },
@@ -71,5 +77,5 @@ export default function OrderStatusChart({ statusBreakdown }) {
     return () => chart.destroy();
   }, [statusBreakdown]);
 
-  return <canvas ref={canvasRef} />;
+  return <canvas ref={canvasRef} role="img" aria-label="Cơ cấu trạng thái đơn hàng" />;
 }

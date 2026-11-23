@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import Dialog from "../../shared/ui/Dialog";
+import { useState, useEffect, useRef } from 'react';
 import { useI18n } from '../../shared/i18n';
 
 export default function EmailOtpModal({
@@ -11,6 +12,7 @@ export default function EmailOtpModal({
   errorMsg,
 }) {
   const { t } = useI18n();
+  const otpInputRef = useRef(null);
   const [otp, setOtp] = useState('');
   const [countdown, setCountdown] = useState(60);
   const [isResending, setIsResending] = useState(false);
@@ -29,7 +31,7 @@ export default function EmailOtpModal({
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (otp.trim().length === 6) onConfirm(otp.trim());
+    if (!loading && !isResending && otp.trim().length === 6) onConfirm(otp.trim());
   };
 
   const handleResend = async () => {
@@ -44,14 +46,8 @@ export default function EmailOtpModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" role="dialog" aria-modal="true" aria-labelledby="otp-title">
-      <div className="w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto bg-base-100 rounded-xl shadow-lg border border-base-300 p-6 sm:p-8">
-        <div className="flex items-start justify-between gap-4 mb-3">
-          <h2 id="otp-title" className="text-xl font-bold">{t("auth.otp_title")}</h2>
-          <button type="button" onClick={onClose} disabled={loading} className="text-sm text-secondary hover:underline focus-visible:outline-primary">
-            {t("auth.close")}
-          </button>
-        </div>
+    <Dialog title={t("auth.otp_title")} onClose={onClose} size="md" busy={loading || isResending} initialFocusRef={otpInputRef}>
+      <div className="p-6 sm:p-8">
         <p className="text-sm text-base-content/60">{t("auth.otp_subtitle")}</p>
         <p className="text-sm font-medium mt-2 mb-6 break-all">{email}</p>
 
@@ -61,7 +57,7 @@ export default function EmailOtpModal({
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5" aria-busy={loading}>
+        <form onSubmit={handleSubmit} className="space-y-5" aria-busy={loading || isResending}>
           <div>
             <label htmlFor="register-otp" className="block text-sm font-medium mb-2">{t("auth.otp_placeholder")}</label>
             <input
@@ -75,7 +71,7 @@ export default function EmailOtpModal({
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
               placeholder="------"
-              autoFocus
+              ref={otpInputRef}
               className="w-full text-center text-2xl tracking-[0.4em] font-semibold py-3 px-4 bg-base-100 border border-secondary/25 hover:border-secondary/40 focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-lg outline-none transition-colors"
               aria-describedby={errorMsg ? "otp-error" : undefined}
               required
@@ -94,13 +90,13 @@ export default function EmailOtpModal({
 
           <button
             type="submit"
-            disabled={loading || otp.length !== 6}
+            disabled={loading || isResending || otp.length !== 6}
             className="w-full py-3 px-4 rounded-lg text-sm font-semibold text-primary-content bg-primary hover:bg-secondary focus-visible:outline-secondary focus-visible:outline-offset-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {t(loading ? "auth.verifying_otp" : "auth.confirm_register_btn")}
           </button>
         </form>
       </div>
-    </div>
+    </Dialog>
   );
 }

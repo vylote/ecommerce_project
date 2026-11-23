@@ -1,6 +1,5 @@
-import getDisplayImage from "./getDisplayImage";
+import DiscoveryProductGrid from "./components/DiscoveryProductGrid";
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import Navbar from '../../shared/components/Navbar';
 import api from '../../shared/utils/api';
 import { useI18n } from '../../shared/i18n';
@@ -63,76 +62,10 @@ export default function DailyDiscovery() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            {Array.from({ length: 48 }).map((_, idx) => (
-              <div key={idx} className="card bg-base-100 rounded-xl border border-base-300 shadow-sm p-3">
-                <div className="skeleton aspect-square w-full mb-3 rounded-lg"></div>
-                <div className="skeleton h-4 w-full mb-2"></div>
-                <div className="skeleton h-4 w-2/3 mb-4"></div>
-                <div className="skeleton h-5 w-1/2"></div>
-              </div>
-            ))}
-          </div>
+          <DiscoveryProductGrid loading placeholderCount={48} />
         ) : (
           <>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {products.map((product) => {
-                const displayImageUrl = getDisplayImage(product);
-                
-                return (
-                  <Link 
-                    to={`/product/${product.id}`}
-                    key={product.id} 
-                    className="card bg-base-100 rounded-xl border border-base-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all overflow-hidden group cursor-pointer flex flex-col"
-                  >
-                    <figure className="relative aspect-square bg-base-200 overflow-hidden shrink-0">
-                      {displayImageUrl ? (
-                        <img 
-                          src={displayImageUrl} 
-                          alt={product.name} 
-                          referrerPolicy="no-referrer"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='36'%3E📦%3C/text%3E%3C/svg%3E";
-                          }}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-base-content/20 bg-base-200">
-                          <span className="text-4xl opacity-50">📦</span>
-                        </div>
-                      )}
-                    </figure>
-                    
-                    <div className="card-body p-3 flex flex-col justify-between flex-1 gap-2">
-                      <h4 className="text-sm font-medium text-base-content line-clamp-2 leading-tight">
-                        {product.name}
-                      </h4>
-                      
-                      <div className="space-y-1.5 mt-auto">
-                        <div className="text-primary font-bold text-base">
-                          {product.minPrice && product.maxPrice && product.minPrice !== product.maxPrice
-                            ? `${Number(product.minPrice).toLocaleString('vi-VN')} ₫ - ${Number(product.maxPrice).toLocaleString('vi-VN')} ₫`
-                            : `${Number(product.price || 0).toLocaleString('vi-VN')} ₫`}
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center text-warning text-xs">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-0.5 fill-current" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            <span>{product.averageRating ? Number(product.averageRating).toFixed(1) : "0.0"}</span>
-                          </div>
-                          <div className="text-xs text-base-content/50">
-                            {t("home.sold")} {product.soldCount || 0}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-
+            <DiscoveryProductGrid products={products} showPriceRange />
             {pageInfo.totalPages > 1 && (
               <div className="flex justify-center mt-10">
                 <div className="join border border-base-300 shadow-sm">

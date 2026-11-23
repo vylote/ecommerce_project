@@ -1,9 +1,11 @@
-import OrderStatusChart from "../order/components/OrderStatusChart";
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import AnalyticsPeriodFilter from "../../shared/components/analytics/AnalyticsPeriodFilter";
+import AnalyticsTrendChart from "../../shared/components/analytics/AnalyticsTrendChart";
+import { formatAnalyticsCurrency as formatCurrency } from "../../shared/components/analytics/trendSeries";
+import OrderStatusChart, { OrderStatusLegend } from "../order/components/OrderStatusChart";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import api from "../../shared/utils/api";
 import toast from "react-hot-toast";
-import Chart from "chart.js/auto";
 import {
   TrendingUp,
   DollarSign,
@@ -11,13 +13,10 @@ import {
   Users,
   Store,
   Package,
-  ShoppingBag,
   BarChart3,
-  PieChart,
   RefreshCw,
   FolderTree,
   KeyRound,
-  Settings2,
   CheckCircle2,
   Clock,
   ArrowUpRight,
@@ -25,9 +24,20 @@ import {
   Truck,
 } from "lucide-react";
 
+const trendSeries = {
+  financial: [
+    { type: "line", key: "grossRevenue", label: "Tổng GMV Sàn (₫)", color: "#2563eb" },
+    { type: "line", key: "commissionRevenue", label: "Hoa Hồng Thu Được (₫)", color: "#ee4d2d" },
+  ],
+  orders: [
+    { type: "bar", key: "orderCount", label: "Đơn hoàn thành", color: "rgba(37, 99, 235, 0.85)" },
+    { type: "bar", key: "totalCount", label: "Tổng đơn phát sinh", color: "rgba(148, 163, 184, 0.5)" },
+  ],
+};
+
+const trendInteraction = { mode: "index", intersect: false };
+
 export default function AdminDashboard() {
-  const chartCanvasRef = useRef(null);
-  const chartInstanceRef = useRef(null);
 
   // Bộ lọc thời gian: DAY, WEEK, MONTH, YEAR
   const [filterPeriod, setFilterPeriod] = useState("DAY");
@@ -50,202 +60,34 @@ export default function AdminDashboard() {
     statusBreakdown: {},
     timeline: [],
   });
-  const [loading, setLoading] = useState(false);
-
-  // Format tiền tệ VNĐ
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(val || 0);
-  };
-
-  const fetchAnalytics = async (period = filterPeriod, range = filterRange) => {
-    setLoading(true);
-    try {
-      const response = await api.get(
-        `/commission/stats/admin/analytics?period=${period}&range=${range}`
-      );
-      if (response.data?.result) {
-        setAnalytics(response.data.result);
-      }
-    } catch (error) {
-      console.error("Admin Analytics Error:", error);
-      toast.error("Không thể tải thống kê sàn giao dịch");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [loading, setLoading] = useState(true);
+  const [refreshVersion, setRefreshVersion] = useState(0);
 
   useEffect(() => {
-    fetchAnalytics(filterPeriod, filterRange);
-  }, [filterPeriod, filterRange]);
+    const controller = new AbortController();
 
-  // Vẽ biểu đồ chính (Line / Area kép hoặc Bar)
-  useEffect(() => {
-    const canvas = chartCanvasRef.current;
-    if (!canvas) return;
-
-    if (chartInstanceRef.current) {
-      chartInstanceRef.current.destroy();
-    }
-
-    const labels = (analytics.timeline || []).map((t) => t.label || t.date);
-    const grossData = (analytics.timeline || []).map((t) => Number(t.grossRevenue || 0));
-    const commData = (analytics.timeline || []).map((t) => Number(t.commissionRevenue || 0));
-    const completedOrders = (analytics.timeline || []).map((t) => Number(t.orderCount || 0));
-    const totalOrders = (analytics.timeline || []).map((t) => Number(t.totalCount || 0));
-
-    const ctx = canvas.getContext("2d");
-
-    let datasets = [];
-
-    if (activeChartMetric === "financial") {
-      // Gradient cho GMV Sàn (Xanh dương)
-      const gradGMV = ctx.createLinearGradient(0, 0, 0, 300);
-      gradGMV.addColorStop(0, "rgba(37, 99, 235, 0.25)");
-      gradGMV.addColorStop(1, "rgba(37, 99, 235, 0.0)");
-
-      // Gradient cho Hoa hồng sàn (Cam Shopee)
-      const gradComm = ctx.createLinearGradient(0, 0, 0, 300);
-      gradComm.addColorStop(0, "rgba(238, 77, 45, 0.25)");
-      gradComm.addColorStop(1, "rgba(238, 77, 45, 0.0)");
-
-      datasets = [
-        {
-          type: "line",
-          label: "Tổng GMV Sàn (₫)",
-          data: grossData,
-          borderColor: "#2563eb",
-          backgroundColor: gradGMV,
-          borderWidth: 2.5,
-          tension: 0.35,
-          fill: true,
-          pointBackgroundColor: "#2563eb",
-          pointBorderColor: "#ffffff",
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          yAxisID: "y",
-        },
-        {
-          type: "line",
-          label: "Hoa Hồng Thu Được (₫)",
-          data: commData,
-          borderColor: "#ee4d2d",
-          backgroundColor: gradComm,
-          borderWidth: 2.5,
-          tension: 0.35,
-          fill: true,
-          pointBackgroundColor: "#ee4d2d",
-          pointBorderColor: "#ffffff",
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          yAxisID: "y",
-        },
-      ];
-    } else {
-      // Biểu đồ cột: Số đơn hàng toàn sàn
-      datasets = [
-        {
-          type: "bar",
-          label: "Đơn hoàn thành",
-          data: completedOrders,
-          backgroundColor: "rgba(37, 99, 235, 0.85)",
-          borderRadius: 6,
-        },
-        {
-          type: "bar",
-          label: "Tổng đơn phát sinh",
-          data: totalOrders,
-          backgroundColor: "rgba(148, 163, 184, 0.5)",
-          borderRadius: 6,
-        },
-      ];
-    }
-
-    chartInstanceRef.current = new Chart(ctx, {
-      data: {
-        labels,
-        datasets,
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-          mode: "index",
-          intersect: false,
-        },
-        plugins: {
-          legend: {
-            position: "top",
-            labels: {
-              font: { size: 12, family: "inherit", weight: "500" },
-              usePointStyle: true,
-              pointStyle: "circle",
-            },
-          },
-          tooltip: {
-            padding: 12,
-            backgroundColor: "rgba(15, 23, 42, 0.9)",
-            titleFont: { size: 13, weight: "bold" },
-            bodyFont: { size: 12 },
-            callbacks: {
-              label: (context) => {
-                if (activeChartMetric === "financial") {
-                  return ` ${context.dataset.label}: ${formatCurrency(context.raw)}`;
-                }
-                return ` ${context.dataset.label}: ${context.raw} đơn`;
-              },
-            },
-          },
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: {
-              font: { size: 11 },
-              maxRotation: 45,
-            },
-          },
-          y: {
-            beginAtZero: true,
-            grid: { color: "rgba(241, 245, 249, 1)" },
-            ticks: {
-              font: { size: 11 },
-              callback: (val) => {
-                if (activeChartMetric === "financial") {
-                  if (val >= 1000000) return `${val / 1000000}tr`;
-                  if (val >= 1000) return `${val / 1000}k`;
-                  return val;
-                }
-                return Number.isInteger(val) ? val : "";
-              },
-            },
-          },
-        },
-      },
-    });
-
-    return () => {
-      if (chartInstanceRef.current) {
-        chartInstanceRef.current.destroy();
+    async function fetchAnalytics() {
+      try {
+        const response = await api.get("/commission/stats/admin/analytics", {
+          params: { period: filterPeriod, range: filterRange },
+          signal: controller.signal,
+        });
+        if (!controller.signal.aborted && response.data?.result) {
+          setAnalytics(response.data.result);
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error("Analytics error:", error);
+          toast.error("Không thể tải thống kê sàn giao dịch");
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
-    };
-  }, [analytics, activeChartMetric]);
+    }
 
-  // Vẽ biểu đồ Donut trạng thái đơn hàng toàn sàn
-
-
-  // Bộ lọc nhanh theo chu kỳ
-  const quickFilters = [
-    { label: "7 ngày qua", period: "DAY", range: 7 },
-    { label: "30 ngày qua", period: "DAY", range: 30 },
-    { label: "Theo Tuần (8 tuần)", period: "WEEK", range: 8 },
-    { label: "Theo Tháng (12 tháng)", period: "MONTH", range: 12 },
-    { label: "Theo Năm (3 năm)", period: "YEAR", range: 3 },
-  ];
+    fetchAnalytics();
+    return () => controller.abort();
+  }, [filterPeriod, filterRange, refreshVersion]);
 
   const completionRate = useMemo(() => {
     if (!analytics.totalOrdersAll || analytics.totalOrdersAll === 0) return 0;
@@ -270,7 +112,10 @@ export default function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2 self-start md:self-center">
           <button
-            onClick={() => fetchAnalytics()}
+            onClick={() => {
+              setLoading(true);
+              setRefreshVersion((version) => version + 1);
+            }}
             className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-3.5 py-2 rounded-xl text-sm font-medium backdrop-blur-sm transition-all"
             title="Làm mới dữ liệu"
           >
@@ -350,28 +195,16 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          {/* Quick Filter Buttons */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-gray-50 p-1.5 rounded-xl border border-gray-200">
-            {quickFilters.map((qf) => {
-              const isActive = filterPeriod === qf.period && filterRange === qf.range;
-              return (
-                <button
-                  key={qf.label}
-                  onClick={() => {
-                    setFilterPeriod(qf.period);
-                    setFilterRange(qf.range);
-                  }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    isActive
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "text-gray-600 hover:text-gray-900 hover:bg-white"
-                  }`}
-                >
-                  {qf.label}
-                </button>
-              );
-            })}
-          </div>
+          <AnalyticsPeriodFilter
+            period={filterPeriod}
+            range={filterRange}
+            onChange={(period, range) => {
+              setLoading(true);
+              setFilterPeriod(period);
+              setFilterRange(range);
+            }}
+            tone="blue"
+          />
         </div>
 
         {/* 4 Thẻ Tài Chính Lớn */}
@@ -503,7 +336,12 @@ export default function AdminDashboard() {
 
             {/* Canvas Chart */}
             <div className="h-[290px] w-full relative">
-              <canvas ref={chartCanvasRef}></canvas>
+              <AnalyticsTrendChart
+                timeline={analytics.timeline}
+                series={trendSeries[activeChartMetric]}
+                format={activeChartMetric === "financial" ? "currency" : "orders"}
+                tooltipInteraction={trendInteraction}
+              />
             </div>
           </div>
 
@@ -523,54 +361,7 @@ export default function AdminDashboard() {
               <OrderStatusChart statusBreakdown={analytics.statusBreakdown} />
             </div>
 
-            {/* Status Legend */}
-            <div className="space-y-2 pt-3 border-t border-gray-200 text-xs">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-                  <span className="text-gray-600 font-medium">Đã Hoàn Tất</span>
-                </div>
-                <span className="font-bold text-gray-800">
-                  {analytics.statusBreakdown?.COMPLETED || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-sky-600"></span>
-                  <span className="text-gray-600 font-medium">Đang Giao</span>
-                </div>
-                <span className="font-bold text-gray-800">
-                  {analytics.statusBreakdown?.SHIPPING || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                  <span className="text-gray-600 font-medium">Chờ Lấy Hàng</span>
-                </div>
-                <span className="font-bold text-gray-800">
-                  {analytics.statusBreakdown?.CONFIRMED || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                  <span className="text-gray-600 font-medium">Chờ Xác Nhận</span>
-                </div>
-                <span className="font-bold text-gray-800">
-                  {analytics.statusBreakdown?.PENDING || 0}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                  <span className="text-gray-600 font-medium">Đã Hủy</span>
-                </div>
-                <span className="font-bold text-gray-800">
-                  {analytics.statusBreakdown?.CANCELLED || 0}
-                </span>
-              </div>
-            </div>
+            <OrderStatusLegend statusBreakdown={analytics.statusBreakdown} />
           </div>
         </div>
       </div>

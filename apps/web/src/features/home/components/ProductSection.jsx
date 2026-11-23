@@ -1,5 +1,4 @@
-import getDisplayImage from "../../product/getDisplayImage";
-import ProductImage from "../../../shared/components/ProductImage";
+import DiscoveryProductGrid from "../../product/components/DiscoveryProductGrid";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../../../shared/utils/api";
@@ -44,30 +43,6 @@ export default function ProductSection() {
     fetchProducts();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <div className="bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm flex items-center justify-between">
-          <h3 className="text-lg font-bold text-neutral uppercase tracking-wider">
-            {t("home.daily_discovery")}
-          </h3>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          {Array.from({ length: 12 }).map((_, idx) => (
-            <div
-              key={idx}
-              className="card bg-base-100 rounded-xl border border-base-300 shadow-sm p-3"
-            >
-              <div className="skeleton aspect-square w-full mb-3 rounded-lg"></div>
-              <div className="skeleton h-4 w-full mb-2"></div>
-              <div className="skeleton h-4 w-2/3 mb-4"></div>
-              <div className="skeleton h-5 w-1/2"></div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-4">
@@ -77,61 +52,7 @@ export default function ProductSection() {
         </h3>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-        {products.map((product) => {
-          const displayImageUrl = getDisplayImage(product); // Lấy URL ảnh ra đây
-
-          return (
-            <Link
-              to={`/product/${product.id}`}
-              key={product.id}
-              className="card bg-base-100 rounded-xl border border-base-300 shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all overflow-hidden group cursor-pointer flex flex-col"
-            >
-              <figure className="relative aspect-square bg-base-200 overflow-hidden shrink-0">
-                <ProductImage
-                    src={displayImageUrl}
-                    alt={product.name}
-                    referrerPolicy="no-referrer"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-              </figure>
-
-              <div className="card-body p-3 flex flex-col justify-between flex-1 gap-2">
-                <h4 className="text-sm font-medium text-base-content line-clamp-2 leading-tight">
-                  {product.name}
-                </h4>
-
-                <div className="space-y-1.5 mt-auto">
-                  <div className="text-primary font-bold text-base">
-                    {product.price ? product.price.toLocaleString("vi-VN") : 0}{" "}
-                    ₫
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center text-warning text-xs">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-3 w-3 mr-0.5 fill-current"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                      <span>
-                        {product.averageRating
-                          ? Number(product.averageRating).toFixed(1)
-                          : "0.0"}
-                      </span>
-                    </div>
-                    <div className="text-xs text-base-content/50">
-                      {t("home.sold")} {product.soldCount || 0}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
-
+      <DiscoveryProductGrid products={products} loading={loading} />
       {pageInfo.currentPage < pageInfo.totalPages && (
         <div className="flex justify-center pt-4">
           <Link
