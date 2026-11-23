@@ -1,3 +1,4 @@
+import TextField from "../../shared/ui/TextField";
 import PasswordField from "./components/PasswordField";
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -74,7 +75,6 @@ export default function RegisterPage() {
     }
   };
 
-  const inputClassName = "w-full px-3 py-3 bg-base-100 border border-secondary/25 hover:border-secondary/40 focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-lg text-sm placeholder:text-base-content/40 outline-none transition-colors";
 
   return (
     <AuthLayout>
@@ -100,37 +100,28 @@ export default function RegisterPage() {
             { name: "phone", label: "phone", type: "tel", autoComplete: "tel" },
             { name: "email", label: "email", type: "email", autoComplete: "email" },
           ].map(({ name, label, type, autoComplete }) => (
-            <div key={name}>
-              <label htmlFor={`register-${name}`} className="block text-sm font-medium mb-2">
-                {t(`auth.${label}`)}
-              </label>
-              <input
-                id={`register-${name}`}
-                name={name}
-                type={type}
-                autoComplete={autoComplete}
-                placeholder={t(`auth.${label}_placeholder`)}
-                className={inputClassName}
-                value={formData[name]}
-                onChange={handleChange}
-                aria-describedby={errorMsg ? "register-error" : undefined}
-                required
-              />
-            </div>
+            <TextField
+              key={name}
+              id={`register-${name}`}
+              label={t(`auth.${label}`)}
+              name={name}
+              type={type}
+              autoComplete={autoComplete}
+              placeholder={t(`auth.${label}_placeholder`)}
+              value={formData[name]}
+              onChange={handleChange}
+              aria-describedby={errorMsg ? "register-error" : undefined}
+              required
+            />
           ))}
 
-          <div>
-            <label htmlFor="register-password" className="block text-sm font-medium mb-2">
-              {t("auth.password")}
-            </label>
-            <PasswordField
-              id="register-password"
-              value={formData.password}
-              onChange={handleChange}
-              autoComplete="new-password"
-              describedBy={errorMsg ? "register-error" : undefined}
-            />
-          </div>
+          <PasswordField
+            id="register-password"
+            value={formData.password}
+            onChange={handleChange}
+            autoComplete="new-password"
+            describedBy={errorMsg ? "register-error" : undefined}
+          />
 
           <button
             type="submit"

@@ -1,7 +1,13 @@
+import VariantInventoryTable from "./components/VariantInventoryTable";
+import VariantGroupFields from "./components/VariantGroupFields";
+import ProductInventoryFields from "./components/ProductInventoryFields";
+import ProductShippingFields from "./components/ProductShippingFields";
+import ProductDetailFields from "./components/ProductDetailFields";
+import ProductBasicFields from "./components/ProductBasicFields";
 import ProductImageFields from "./components/ProductImageFields";
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { UploadCloud, Plus, Info, X, Trash2, ArrowRight, ArrowLeft, Check, Layers } from "lucide-react";
+import { Info, ArrowRight, ArrowLeft, Check, Layers } from "lucide-react";
 import toast from "react-hot-toast";
 import api from "../../shared/utils/api";
 
@@ -654,61 +660,12 @@ export default function AddProduct() {
                 onRemoveImage={removeImage}
               />
 
-              {/* Tên sản phẩm */}
-              <div className="form-control">
-                <label className="label font-semibold text-sm">
-                  Tên sản phẩm <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={productForm.name}
-                  onChange={handleInputChange}
-                  className={`input input-bordered ${errors.name ? "border-red-500 focus:border-red-500" : "focus:border-green-600"}`}
-                  placeholder="Nhập tên sản phẩm (Ví dụ: Áo thun Polo Nam thoáng khí...)"
-                />
-                {errors.name && <span className="text-xs text-red-500 mt-1">{errors.name}</span>}
-              </div>
-
-              {/* Ngành hàng */}
-              <div className="form-control">
-                <label className="label font-semibold text-sm">
-                  Ngành hàng <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="categoryId"
-                  value={productForm.categoryId}
-                  onChange={handleInputChange}
-                  className={`select select-bordered ${errors.categoryId ? "border-red-500 focus:border-red-500" : "focus:border-green-600"}`}
-                >
-                  <option value="">-- Chọn ngành hàng phù hợp --</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                </select>
-                {errors.categoryId && (
-                  <span className="text-xs text-red-500 mt-1">{errors.categoryId}</span>
-                )}
-              </div>
-
-              {/* Mô tả */}
-              <div className="form-control">
-                <label className="label font-semibold text-sm">
-                  Mô tả sản phẩm <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  name="description"
-                  value={productForm.description}
-                  onChange={handleInputChange}
-                  className={`textarea textarea-bordered h-36 ${errors.description ? "border-red-500 focus:border-red-500" : "focus:border-green-600"}`}
-                  placeholder="Nhập mô tả sản phẩm chi tiết về chất liệu, tính năng, cách bảo quản..."
-                ></textarea>
-                {errors.description && (
-                  <span className="text-xs text-red-500 mt-1">{errors.description}</span>
-                )}
-              </div>
+              <ProductBasicFields
+                productForm={productForm}
+                categories={categories}
+                errors={errors}
+                handleInputChange={handleInputChange}
+              />
 
               {/* Nút Next */}
               <div className="pt-4 border-t flex justify-end">
@@ -735,131 +692,14 @@ export default function AddProduct() {
                 </div>
               </div>
 
-              {!productForm.categoryId ? (
-                <div className="p-6 text-center bg-amber-50 border border-amber-200 rounded-lg text-amber-800">
-                  <p className="font-semibold text-sm">⚠️ Chưa chọn ngành hàng</p>
-                  <p className="text-xs text-amber-600 mt-1">
-                    Vui lòng quay lại <strong>Tab 1: Thông tin cơ bản</strong> và chọn ngành hàng để tải các thông số chi tiết phù hợp.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("basic")}
-                    className="btn btn-sm bg-amber-600 hover:bg-amber-700 text-white mt-3"
-                  >
-                    Quay lại chọn ngành hàng
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Các trường cơ bản chung */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div className="form-control">
-                      <label className="label font-medium text-sm">Thương hiệu</label>
-                      <input
-                        type="text"
-                        name="brand"
-                        value={productForm.brand}
-                        onChange={handleInputChange}
-                        className="input input-bordered focus:border-green-600"
-                        placeholder="Ví dụ: No Brand, OEM, Nike, Apple..."
-                      />
-                    </div>
-
-                    <div className="form-control">
-                      <label className="label font-medium text-sm">Nhà sản xuất / Đơn vị phân phối</label>
-                      <input
-                        type="text"
-                        name="manufacturer"
-                        value={productForm.manufacturer}
-                        onChange={handleInputChange}
-                        className="input input-bordered focus:border-green-600"
-                        placeholder="Tên công ty hoặc cơ sở sản xuất"
-                      />
-                    </div>
-                  </div>
-
-                  {/* CÁC THUỘC TÍNH ĐẶC TẢ ĐỘNG THEO NGÀNH HÀNG */}
-                  {attributeSpecTypes.length > 0 && (
-                    <div className="border-t pt-4">
-                      <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                        <span>Đặc tả thông số chuẩn theo ngành hàng ({attributeSpecTypes.length} thuộc tính):</span>
-                      </h3>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        {attributeSpecTypes.map((st) => {
-                          const currentSpec = selectedSpecs[st.id] || {};
-                          return (
-                            <div key={st.id} className="form-control">
-                              <label className="label font-medium text-sm">
-                                <span>{st.name}</span>
-                                {st.description && (
-                                  <span className="text-[11px] text-gray-400 font-normal ml-1">({st.description})</span>
-                                )}
-                              </label>
-                              <div className="space-y-2">
-                                <select
-                                  value={currentSpec.specificationId || (currentSpec.isCustom ? "CUSTOM" : "")}
-                                  onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (val === "CUSTOM") {
-                                      setSelectedSpecs((prev) => ({
-                                        ...prev,
-                                        [st.id]: { specificationId: null, isCustom: true, customValue: "" },
-                                      }));
-                                    } else if (!val) {
-                                      setSelectedSpecs((prev) => {
-                                        const next = { ...prev };
-                                        delete next[st.id];
-                                        return next;
-                                      });
-                                    } else {
-                                      const specObj = st.specifications?.find((s) => s.id === Number(val));
-                                      setSelectedSpecs((prev) => ({
-                                        ...prev,
-                                        [st.id]: {
-                                          specificationId: Number(val),
-                                          specificationName: specObj?.name,
-                                          isCustom: false,
-                                          customValue: "",
-                                        },
-                                      }));
-                                    }
-                                  }}
-                                  className="select select-bordered w-full focus:border-green-600 text-sm"
-                                >
-                                  <option value="">-- Chọn {st.name} (Tùy chọn) --</option>
-                                  {st.specifications?.map((s) => (
-                                    <option key={s.id} value={s.id}>
-                                      {s.name} {s.description ? `(${s.description})` : ""}
-                                    </option>
-                                  ))}
-                                  <option value="CUSTOM">-- Tự nhập giá trị khác --</option>
-                                </select>
-
-                                {currentSpec.isCustom && (
-                                  <input
-                                    type="text"
-                                    value={currentSpec.customValue || ""}
-                                    onChange={(e) => {
-                                      const customVal = e.target.value;
-                                      setSelectedSpecs((prev) => ({
-                                        ...prev,
-                                        [st.id]: { ...prev[st.id], customValue: customVal },
-                                      }));
-                                    }}
-                                    className="input input-bordered input-sm w-full focus:border-green-600 text-sm"
-                                    placeholder={`Nhập giá trị tùy chỉnh cho ${st.name}...`}
-                                  />
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+              <ProductDetailFields
+                productForm={productForm}
+                handleInputChange={handleInputChange}
+                setActiveTab={setActiveTab}
+                attributeSpecTypes={attributeSpecTypes}
+                selectedSpecs={selectedSpecs}
+                setSelectedSpecs={setSelectedSpecs}
+              />
 
               {/* Nút điều hướng */}
               <div className="pt-4 border-t flex justify-between">
@@ -913,354 +753,60 @@ export default function AddProduct() {
                 </div>
               )}
 
-              {/* TRƯỜNG HỢP 1: KHÔNG DÙNG BIẾN THỂ */}
               {!hasVariants && (
-                <div className="grid grid-cols-2 gap-5 pt-2">
-                  <div className="form-control">
-                    <label className="label font-semibold text-sm">
-                      Giá bán (₫) <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="price"
-                      value={productForm.price}
-                      onChange={handleInputChange}
-                      className={`input input-bordered ${errors.price ? "border-red-500 focus:border-red-500" : "focus:border-green-600"}`}
-                      placeholder="Ví dụ: 150000"
-                    />
-                    {errors.price && <span className="text-xs text-red-500 mt-1">{errors.price}</span>}
-                  </div>
-
-                  <div className="form-control">
-                    <label className="label font-semibold text-sm">
-                      Số lượng hàng sẵn có tại kho <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="stock"
-                      value={productForm.stock}
-                      onChange={handleInputChange}
-                      className={`input input-bordered ${errors.stock ? "border-red-500 focus:border-red-500" : "focus:border-green-600"}`}
-                      placeholder="Ví dụ: 50"
-                    />
-                    {errors.stock && <span className="text-xs text-red-500 mt-1">{errors.stock}</span>}
-                  </div>
-                </div>
+                <ProductInventoryFields
+                  productForm={productForm}
+                  errors={errors}
+                  onChange={handleInputChange}
+                />
               )}
 
               {/* TRƯỜNG HỢP 2: BẬT BIẾN THỂ (VARIANTS) */}
               {hasVariants && (
                 <div className="space-y-6 pt-2">
-                  {/* Nhóm phân loại 1 */}
-                  <div className="p-4 border border-gray-200 rounded-lg bg-gray-50/60 space-y-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                      <label className="text-sm font-bold text-gray-800">Nhóm phân loại 1</label>
-                      {variantSpecTypes.length > 0 && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs text-gray-500">Chuẩn theo ngành hàng:</span>
-                          <select
-                            value={tier1.typeId || ""}
-                            onChange={(e) => handleSelectSpecType(1, e.target.value)}
-                            className="select select-bordered select-xs bg-white text-xs font-semibold focus:border-green-600"
-                          >
-                            <option value="">-- Chọn phân loại chuẩn --</option>
-                            {variantSpecTypes.map((st) => (
-                              <option key={st.id} value={st.id}>
-                                {st.name} ({st.specifications?.length || 0} giá trị)
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3 items-center">
-                      <input
-                        type="text"
-                        value={tier1.name}
-                        onChange={(e) => setTier1({ ...tier1, name: e.target.value })}
-                        className="input input-bordered input-sm bg-white focus:border-green-600 font-medium"
-                        placeholder="Tên nhóm (Màu sắc...)"
-                      />
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={tier1.inputVal}
-                          onChange={(e) => setTier1({ ...tier1, inputVal: e.target.value })}
-                          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTier1Option())}
-                          className="input input-bordered input-sm bg-white flex-1 focus:border-green-600"
-                          placeholder="Hoặc gõ thêm giá trị riêng (Đỏ, Xanh...) rồi bấm Thêm"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAddTier1Option}
-                          className="btn btn-sm bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          <Plus size={16} /> Thêm
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* GỢI Ý GIÁ TRỊ CHUẨN TỪ SÀN CHO NHÓM 1 */}
-                    {(() => {
-                      const currentType = variantSpecTypes.find((t) => t.id === tier1.typeId || t.name === tier1.name);
-                      if (!currentType || !currentType.specifications || currentType.specifications.length === 0) return null;
-                      return (
-                        <div className="pt-1.5 pb-1 border-t border-gray-200/60">
-                          <div className="text-[11px] font-semibold text-gray-500 mb-1.5 flex items-center gap-1.5">
-                            <span>✨ Gợi ý chuẩn từ sàn ({currentType.name}) - Click để chọn nhanh:</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {currentType.specifications.map((s) => {
-                              const isSelected = tier1.options.includes(s.name);
-                              return (
-                                <button
-                                  key={s.id}
-                                  type="button"
-                                  onClick={() => handleToggleSuggestedOption(1, s.name)}
-                                  className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all border ${
-                                    isSelected
-                                      ? "bg-green-600 border-green-600 text-white shadow-xs"
-                                      : "bg-white border-gray-300 text-gray-700 hover:border-green-600 hover:text-green-600"
-                                  }`}
-                                >
-                                  {s.name} {isSelected ? "✓" : "+"}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    {/* Danh sách chip giá trị đã chọn */}
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {tier1.options.map((opt, idx) => (
-                        <span
-                          key={idx}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-300 rounded-full text-xs font-semibold text-gray-700 shadow-sm"
-                        >
-                          {opt}
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveTier1Option(idx)}
-                            className="text-gray-400 hover:text-red-500"
-                          >
-                            <X size={14} />
-                          </button>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Nhóm phân loại 2 (Tùy chọn) */}
+                  <VariantGroupFields
+                    number={1}
+                    tier={tier1}
+                    specTypes={variantSpecTypes}
+                    onEdit={(key, value) => setTier1((tier) => ({ ...tier, [key]: value }))}
+                    onSelectType={(id) => handleSelectSpecType(1, id)}
+                    onAddOption={handleAddTier1Option}
+                    onRemoveOption={handleRemoveTier1Option}
+                    onToggleOption={(name) => handleToggleSuggestedOption(1, name)}
+                  />
                   {tier2.active ? (
-                    <div className="p-4 border border-gray-200 rounded-lg bg-gray-50/60 space-y-3 relative">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                        <label className="text-sm font-bold text-gray-800">Nhóm phân loại 2</label>
-                        <div className="flex items-center gap-3">
-                          {variantSpecTypes.length > 0 && (
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-gray-500">Chuẩn theo ngành hàng:</span>
-                              <select
-                                value={tier2.typeId || ""}
-                                onChange={(e) => handleSelectSpecType(2, e.target.value)}
-                                className="select select-bordered select-xs bg-white text-xs font-semibold focus:border-green-600"
-                              >
-                                <option value="">-- Chọn phân loại chuẩn --</option>
-                                {variantSpecTypes
-                                  .filter((st) => st.id !== tier1.typeId)
-                                  .map((st) => (
-                                    <option key={st.id} value={st.id}>
-                                      {st.name} ({st.specifications?.length || 0} giá trị)
-                                    </option>
-                                  ))}
-                              </select>
-                            </div>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => setTier2({ ...tier2, active: false })}
-                            className="text-xs text-red-500 hover:underline flex items-center gap-1"
-                          >
-                            <Trash2 size={14} /> Xóa nhóm 2
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] gap-3 items-center">
-                        <input
-                          type="text"
-                          value={tier2.name}
-                          onChange={(e) => setTier2({ ...tier2, name: e.target.value })}
-                          className="input input-bordered input-sm bg-white focus:border-green-600 font-medium"
-                          placeholder="Tên nhóm (Kích cỡ...)"
-                        />
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            value={tier2.inputVal}
-                            onChange={(e) => setTier2({ ...tier2, inputVal: e.target.value })}
-                            onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTier2Option())}
-                            className="input input-bordered input-sm bg-white flex-1 focus:border-green-600"
-                            placeholder="Hoặc gõ thêm giá trị (S, M, L, XL...) rồi bấm Thêm"
-                          />
-                          <button
-                            type="button"
-                            onClick={handleAddTier2Option}
-                            className="btn btn-sm bg-green-600 hover:bg-green-700 text-white"
-                          >
-                            <Plus size={16} /> Thêm
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* GỢI Ý GIÁ TRỊ CHUẨN TỪ SÀN CHO NHÓM 2 */}
-                      {(() => {
-                        const currentType = variantSpecTypes.find((t) => t.id === tier2.typeId || t.name === tier2.name);
-                        if (!currentType || !currentType.specifications || currentType.specifications.length === 0) return null;
-                        return (
-                          <div className="pt-1.5 pb-1 border-t border-gray-200/60">
-                            <div className="text-[11px] font-semibold text-gray-500 mb-1.5 flex items-center gap-1.5">
-                              <span>✨ Gợi ý chuẩn từ sàn ({currentType.name}) - Click để chọn nhanh:</span>
-                            </div>
-                            <div className="flex flex-wrap gap-1.5">
-                              {currentType.specifications.map((s) => {
-                                const isSelected = tier2.options.includes(s.name);
-                                return (
-                                  <button
-                                    key={s.id}
-                                    type="button"
-                                    onClick={() => handleToggleSuggestedOption(2, s.name)}
-                                    className={`px-2.5 py-1 rounded-full text-xs font-semibold transition-all border ${
-                                      isSelected
-                                        ? "bg-green-600 border-green-600 text-white shadow-xs"
-                                        : "bg-white border-gray-300 text-gray-700 hover:border-green-600 hover:text-green-600"
-                                    }`}
-                                  >
-                                    {s.name} {isSelected ? "✓" : "+"}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })()}
-
-                      {/* Danh sách chip nhóm 2 */}
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        {tier2.options.map((opt, idx) => (
-                          <span
-                            key={idx}
-                            className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-gray-300 rounded-full text-xs font-semibold text-gray-700 shadow-sm"
-                          >
-                            {opt}
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveTier2Option(idx)}
-                              className="text-gray-400 hover:text-red-500"
-                            >
-                              <X size={14} />
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
+                    <VariantGroupFields
+                      number={2}
+                      tier={tier2}
+                      specTypes={variantSpecTypes}
+                      excludedTypeId={tier1.typeId}
+                      onEdit={(key, value) => setTier2((tier) => ({ ...tier, [key]: value }))}
+                      onSelectType={(id) => handleSelectSpecType(2, id)}
+                      onAddOption={handleAddTier2Option}
+                      onRemoveOption={handleRemoveTier2Option}
+                      onToggleOption={(name) => handleToggleSuggestedOption(2, name)}
+                      onRemoveGroup={() => setTier2((tier) => ({ ...tier, active: false }))}
+                    />
                   ) : (
                     <button
                       type="button"
-                      onClick={() => setTier2({ ...tier2, active: true })}
-                      className="btn btn-sm btn-outline border-dashed border-green-600 text-green-700 hover:bg-green-50 w-full"
+                      onClick={() => setTier2((tier) => ({ ...tier, active: true }))}
+                      className="btn btn-sm btn-outline border-gray-300"
                     >
-                      <Plus size={16} /> Thêm nhóm phân loại 2 (Ví dụ: Kích cỡ, Size)
+                      Thêm nhóm phân loại 2 (ví dụ: Kích cỡ)
                     </button>
                   )}
 
-                  {/* BẢNG MA TRẬN BIẾN THỂ */}
-                  {variants.length > 0 && (
-                    <div className="space-y-3 pt-2">
-                      <div className="flex flex-wrap items-center justify-between gap-3 bg-green-50 border border-green-200 p-3 rounded-lg">
-                        <span className="text-xs font-bold text-green-900">
-                          Áp dụng nhanh cho tất cả {variants.length} phân loại:
-                        </span>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <input
-                            type="number"
-                            value={batchPrice}
-                            onChange={(e) => setBatchPrice(e.target.value)}
-                            placeholder="Giá chung (₫)"
-                            className="input input-bordered input-xs w-28 bg-white"
-                          />
-                          <input
-                            type="number"
-                            value={batchStock}
-                            onChange={(e) => setBatchStock(e.target.value)}
-                            placeholder="Kho chung"
-                            className="input input-bordered input-xs w-24 bg-white"
-                          />
-                          <button
-                            type="button"
-                            onClick={handleApplyBatch}
-                            className="btn btn-xs bg-green-600 hover:bg-green-700 text-white font-medium"
-                          >
-                            Áp dụng
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="overflow-x-auto border border-gray-200 rounded-lg">
-                        <table className="table table-compact w-full text-sm">
-                          <thead className="bg-gray-100 text-gray-700 font-semibold">
-                            <tr>
-                              <th className="py-3 px-4">Tên phân loại hàng</th>
-                              <th className="py-3 px-4">Giá bán (₫) *</th>
-                              <th className="py-3 px-4">Kho ban đầu *</th>
-                              <th className="py-3 px-4">Mã SKU (Tùy chọn)</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-gray-100">
-                            {variants.map((v, idx) => (
-                              <tr key={v.key} className="hover:bg-gray-50/60">
-                                <td className="py-2.5 px-4 font-semibold text-gray-800">
-                                  {v.name}
-                                </td>
-                                <td className="py-2.5 px-4 w-44">
-                                  <input
-                                    type="number"
-                                    value={v.price}
-                                    onChange={(e) => handleVariantChange(idx, "price", e.target.value)}
-                                    placeholder="Giá bán"
-                                    className="input input-bordered input-sm w-full focus:border-green-600"
-                                  />
-                                </td>
-                                <td className="py-2.5 px-4 w-36">
-                                  <input
-                                    type="number"
-                                    value={v.stock}
-                                    onChange={(e) => handleVariantChange(idx, "stock", e.target.value)}
-                                    placeholder="Số lượng"
-                                    className="input input-bordered input-sm w-full focus:border-green-600"
-                                  />
-                                </td>
-                                <td className="py-2.5 px-4">
-                                  <input
-                                    type="text"
-                                    value={v.sku}
-                                    onChange={(e) => handleVariantChange(idx, "sku", e.target.value)}
-                                    placeholder="SKU tự động"
-                                    className="input input-bordered input-sm w-full focus:border-green-600"
-                                  />
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                      {errors.variants && (
-                        <p className="text-xs text-red-500 font-medium">{errors.variants}</p>
-                      )}
-                    </div>
-                  )}
+                  <VariantInventoryTable
+                    variants={variants}
+                    batchPrice={batchPrice}
+                    batchStock={batchStock}
+                    setBatchPrice={setBatchPrice}
+                    setBatchStock={setBatchStock}
+                    handleApplyBatch={handleApplyBatch}
+                    handleVariantChange={handleVariantChange}
+                    error={errors.variants}
+                  />
                 </div>
               )}
 
@@ -1287,84 +833,11 @@ export default function AddProduct() {
           {/* ================= TAB 4: VẬN CHUYỂN ================= */}
           {activeTab === "shipping" && (
             <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm animate-fade-in space-y-6">
-              <div className="border-b pb-3">
-                <h2 className="text-lg font-bold text-gray-800">Kích thước & Trọng lượng</h2>
-                <p className="text-xs text-gray-500">
-                  Cung cấp trọng lượng sau khi đóng gói để sàn tính phí vận chuyển chính xác cho khách hàng.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-4 gap-4">
-                <div className="form-control">
-                  <label className="label font-semibold text-sm">
-                    Trọng lượng (gr) <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="number"
-                    name="weight"
-                    value={productForm.weight}
-                    onChange={handleInputChange}
-                    className={`input input-bordered ${errors.weight ? "border-red-500 focus:border-red-500" : "focus:border-green-600"}`}
-                    placeholder="Ví dụ: 300"
-                  />
-                  {errors.weight && <span className="text-xs text-red-500 mt-1">{errors.weight}</span>}
-                </div>
-
-                <div className="form-control">
-                  <label className="label font-medium text-sm">Dài (cm)</label>
-                  <input
-                    type="number"
-                    name="length"
-                    value={productForm.length}
-                    onChange={handleInputChange}
-                    className="input input-bordered focus:border-green-600"
-                    placeholder="L"
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label font-medium text-sm">Rộng (cm)</label>
-                  <input
-                    type="number"
-                    name="width"
-                    value={productForm.width}
-                    onChange={handleInputChange}
-                    className="input input-bordered focus:border-green-600"
-                    placeholder="W"
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label font-medium text-sm">Cao (cm)</label>
-                  <input
-                    type="number"
-                    name="height"
-                    value={productForm.height}
-                    onChange={handleInputChange}
-                    className="input input-bordered focus:border-green-600"
-                    placeholder="H"
-                  />
-                </div>
-              </div>
-
-              {/* Đối tác vận chuyển */}
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50/50 space-y-3">
-                <h3 className="font-semibold text-sm text-gray-800">Đơn vị vận chuyển hỗ trợ</h3>
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="checkbox checkbox-sm accent-green-600" />
-                    <span>Giao hàng nhanh (GHN)</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="checkbox checkbox-sm accent-green-600" />
-                    <span>Giao hàng tiết kiệm (GHTK)</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" defaultChecked className="checkbox checkbox-sm accent-green-600" />
-                    <span>Viettel Post</span>
-                  </label>
-                </div>
-              </div>
+              <ProductShippingFields
+                productForm={productForm}
+                errors={errors}
+                handleInputChange={handleInputChange}
+              />
 
               {/* Nút điều hướng */}
               <div className="pt-4 border-t flex justify-between">

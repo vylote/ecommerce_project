@@ -1,10 +1,11 @@
+import Dialog, { DialogActions } from "../../shared/ui/Dialog";
 import AddressFields from "./components/AddressFields";
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import api from '../../shared/utils/api';
 import Navbar from '../../shared/components/Navbar';
 import ProfileSidebar from './ProfileSidebar';
-import { Plus, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useI18n } from '../../shared/i18n';
 
 const formatAddress = (addr) => {
@@ -204,47 +205,36 @@ export default function AddressPage() {
 
       {/* POPUP MODAL THÊM/SỬA ĐỊA CHỈ */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-sm w-[500px] shadow-lg overflow-hidden">
-            <div className="px-6 py-4 border-b flex justify-between items-center">
-              <h2 className="text-lg font-medium text-gray-800">
-                {editingId ? t("address.modal_edit_title") : t("address.modal_add_title")}
-              </h2>
-              <button onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600 cursor-pointer">
-                <X size={20} />
-              </button>
+        <Dialog title={editingId ? t("address.modal_edit_title") : t("address.modal_add_title")} onClose={handleCloseModal} busy={submitting}>
+          <form onSubmit={handleSubmit}>
+            <div className="p-6 space-y-4">
+              <AddressFields value={formData} onChange={handleInputChange} />
+              <label className="flex items-center gap-2 cursor-pointer mt-4">
+                <input
+                  type="checkbox" name="isDefault"
+                  checked={formData.isDefault} onChange={handleInputChange}
+                  className="w-4 h-4 accent-[#ee4d2d]"
+                />
+                <span className="text-sm text-gray-700">{t("address.set_as_default")}</span>
+              </label>
             </div>
-            
-            <form onSubmit={handleSubmit}>
-              <div className="p-6 space-y-4">
-                <AddressFields value={formData} onChange={handleInputChange} />
-                <label className="flex items-center gap-2 cursor-pointer mt-4">
-                  <input 
-                    type="checkbox" name="isDefault" 
-                    checked={formData.isDefault} onChange={handleInputChange}
-                    className="w-4 h-4 accent-[#ee4d2d]"
-                  />
-                  <span className="text-sm text-gray-700">{t("address.set_as_default")}</span>
-                </label>
-              </div>
 
-              <div className="px-6 py-4 bg-gray-50 flex justify-end gap-3 border-t">
-                <button 
-                  type="button" onClick={handleCloseModal}
-                  className="px-6 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-100 transition-colors cursor-pointer"
-                >
-                  {t("address.back")}
-                </button>
-                <button 
-                  type="submit" disabled={submitting}
-                  className="px-6 py-2 text-sm text-white bg-[#ee4d2d] rounded-sm hover:bg-[#d73211] transition-colors disabled:opacity-70 cursor-pointer"
-                >
-                  {submitting ? t("address.submitting") : t("address.submit")}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            <DialogActions>
+              <button
+                type="button" disabled={submitting} onClick={handleCloseModal}
+                className="px-6 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-100 transition-colors cursor-pointer"
+              >
+                {t("address.back")}
+              </button>
+              <button
+                type="submit" disabled={submitting}
+                className="px-6 py-2 text-sm text-white bg-[#ee4d2d] rounded-sm hover:bg-[#d73211] transition-colors disabled:opacity-70 cursor-pointer"
+              >
+                {submitting ? t("address.submitting") : t("address.submit")}
+              </button>
+            </DialogActions>
+          </form>
+        </Dialog>
       )}
 
     </div>

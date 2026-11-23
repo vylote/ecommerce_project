@@ -492,7 +492,7 @@ export default function SpecificationManagementPage() {
 
       {/* ================= MODAL THÊM / SỬA LOẠI ĐẶC TẢ ================= */}
       {showTypeModal && (
-        <Dialog title={isEditingType ? 'Sửa loại đặc tả' : 'Thêm mới loại đặc tả'} size="lg" onClose={() => setShowTypeModal(false)}>
+        <Dialog title={isEditingType ? 'Sửa loại đặc tả' : 'Thêm mới loại đặc tả'} size="lg" onClose={() => setShowTypeModal(false)} busy={savingType}>
 
           <form onSubmit={handleSaveType} className="p-6 space-y-4">
             <div className="form-control">
@@ -578,6 +578,7 @@ export default function SpecificationManagementPage() {
               <button
                 type="button"
                 onClick={() => setShowTypeModal(false)}
+                disabled={savingType}
                 className="btn btn-ghost"
               >
                 Hủy

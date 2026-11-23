@@ -752,7 +752,7 @@ export default function RolePermissionPage() {
 
       {/* ================= MODAL THÊM / SỬA VAI TRÒ (ROLE) ================= */}
       {showRoleModal && (
-        <Dialog title={isEditingRole ? `Chỉnh sửa vai trò: ROLE_${roleForm.name}` : 'Tạo vai trò mới'} size="xl" onClose={() => setShowRoleModal(false)}>
+        <Dialog title={isEditingRole ? `Chỉnh sửa vai trò: ROLE_${roleForm.name}` : 'Tạo vai trò mới'} size="xl" onClose={() => setShowRoleModal(false)} busy={savingRole}>
 
           <form onSubmit={handleSaveRole} className="p-6 overflow-y-auto space-y-5 flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -866,6 +866,7 @@ export default function RolePermissionPage() {
               <button
                 type="button"
                 onClick={() => setShowRoleModal(false)}
+                disabled={savingRole}
                 className="btn btn-sm btn-ghost"
               >
                 Hủy
@@ -884,7 +885,7 @@ export default function RolePermissionPage() {
 
       {/* ================= MODAL THÊM / SỬA QUYỀN HẠN (PERMISSION) ================= */}
       {showPermModal && (
-        <Dialog title={isEditingPerm ? 'Sửa quyền hạn' : 'Thêm quyền hạn mới'} size="md" onClose={() => setShowPermModal(false)}>
+        <Dialog title={isEditingPerm ? 'Sửa quyền hạn' : 'Thêm quyền hạn mới'} size="md" onClose={() => setShowPermModal(false)} busy={savingPerm}>
 
           <form onSubmit={handleSavePerm} className="p-6 space-y-4">
             <div className="form-control">
@@ -915,6 +916,7 @@ export default function RolePermissionPage() {
               <button
                 type="button"
                 onClick={() => setShowPermModal(false)}
+                disabled={savingPerm}
                 className="btn btn-sm btn-ghost"
               >
                 Hủy
@@ -933,7 +935,7 @@ export default function RolePermissionPage() {
 
       {/* ================= MODAL PHÂN VAI TRÒ CHO NGƯỜI DÙNG ================= */}
       {showAssignModal && selectedUser && (
-        <Dialog title="Phân vai trò người dùng" size="lg" onClose={() => setShowAssignModal(false)}>
+        <Dialog title="Phân vai trò người dùng" size="lg" onClose={() => setShowAssignModal(false)} busy={savingAssign}>
 
           <div className="p-6 space-y-4">
             <div className="p-3 bg-blue-50/70 border border-blue-200 rounded-xl flex items-center gap-3">
@@ -993,6 +995,7 @@ export default function RolePermissionPage() {
               <button
                 type="button"
                 onClick={() => setShowAssignModal(false)}
+                disabled={savingAssign}
                 className="btn btn-sm btn-ghost"
               >
                 Hủy

@@ -1,3 +1,4 @@
+import Dialog from "../../shared/ui/Dialog";
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { DollarSign, TrendingUp, ShoppingCart, Percent, Settings2, BarChart2 } from 'lucide-react';
@@ -15,6 +16,7 @@ export default function CommissionPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   
+  const [savingConfig, setSavingConfig] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [newFee, setNewFee] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -54,6 +56,8 @@ export default function CommissionPage() {
       return toast.error('Vui lòng chọn danh mục áp dụng');
     }
 
+    if (savingConfig) return;
+    setSavingConfig(true);
     try {
       await api.post('/commission/configs', {
         rate: Number(newFee) / 100, // API nhận rate dưới dạng số thập phân (5% = 0.05)
@@ -66,6 +70,8 @@ export default function CommissionPage() {
       fetchCommissionData();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Lỗi khi cập nhật cấu hình');
+    } finally {
+      setSavingConfig(false);
     }
   };
 
@@ -216,85 +222,79 @@ export default function CommissionPage() {
 
       {/* Modal Cập Nhật Hoa Hồng */}
       {showConfigModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 animate-fade-in">
-          <div className="bg-white rounded-xl shadow-xl w-[450px] overflow-hidden">
-            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-              <h3 className="font-bold text-lg text-gray-800">Cập Nhật Phí Hoa Hồng</h3>
-              <button onClick={() => setShowConfigModal(false)} className="text-gray-400 hover:text-gray-600 font-bold">✕</button>
+        <Dialog title="Cập Nhật Phí Hoa Hồng" onClose={() => setShowConfigModal(false)} size="md" busy={savingConfig}>
+          <form onSubmit={handleUpdateConfig} className="p-5">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Chọn Danh Mục
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                required
+              >
+                <option value="" disabled>-- Chọn danh mục --</option>
+                {categories.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
             </div>
-            <form onSubmit={handleUpdateConfig} className="p-5">
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Chọn Danh Mục
-                </label>
-                <select 
-                  className="select select-bordered w-full"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  required
-                >
-                  <option value="" disabled>-- Chọn danh mục --</option>
-                  {categories.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mức phí sàn (%)
-                </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                    value={newFee}
-                    onChange={(e) => setNewFee(e.target.value)}
-                    placeholder="Ví dụ: 5.0"
-                    className="input input-bordered w-full pr-8 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">%</span>
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Ngày áp dụng
-                </label>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mức phí sàn (%)
+              </label>
+              <div className="relative">
                 <input
-                  type="date"
-                  value={effectiveDate}
-                  onChange={(e) => setEffectiveDate(e.target.value)}
-                  className="input input-bordered w-full"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={newFee}
+                  onChange={(e) => setNewFee(e.target.value)}
+                  placeholder="Ví dụ: 5.0"
+                  className="input input-bordered w-full pr-8 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                   required
                 />
+                <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">%</span>
               </div>
+            </div>
 
-              <p className="text-xs text-gray-500 mt-2">
-                Lưu ý: Mức phí này sẽ được áp dụng cho danh mục được chọn kể từ ngày thiết lập.
-              </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Ngày áp dụng
+              </label>
+              <input
+                type="date"
+                value={effectiveDate}
+                onChange={(e) => setEffectiveDate(e.target.value)}
+                className="input input-bordered w-full"
+                required
+              />
+            </div>
 
-              <div className="flex gap-3 justify-end mt-6">
-                <button 
-                  type="button" 
-                  onClick={() => setShowConfigModal(false)} 
-                  className="btn btn-sm btn-ghost"
-                >
-                  Hủy
-                </button>
-                <button 
-                  type="submit" 
-                  className="btn btn-sm bg-blue-500 hover:bg-blue-600 text-white border-none"
-                >
-                  Lưu cấu hình
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Lưu ý: Mức phí này sẽ được áp dụng cho danh mục được chọn kể từ ngày thiết lập.
+            </p>
+
+            <div className="flex gap-3 justify-end mt-6">
+              <button
+                type="button" disabled={savingConfig}
+                onClick={() => setShowConfigModal(false)}
+                className="btn btn-sm btn-ghost"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit" disabled={savingConfig}
+                className="btn btn-sm bg-blue-500 hover:bg-blue-600 text-white border-none"
+              >
+                Lưu cấu hình
+              </button>
+            </div>
+          </form>
+        </Dialog>
       )}
 
     </div>

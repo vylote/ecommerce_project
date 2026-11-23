@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import useDismissiblePopover from "../hooks/useDismissiblePopover";
+import MarkNotificationRead from "./MarkNotificationRead";
 import { useNavigate, Link } from 'react-router-dom';
 import { Bell, CheckCheck, Package, Truck, CheckCircle, XCircle, ShoppingBag } from 'lucide-react';
 import { useNotification } from '../hooks/useNotification.jsx';
@@ -6,21 +7,11 @@ import { useI18n } from '../i18n';
 
 export default function NotificationDropdown({ user }) {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const { isOpen, setIsOpen, containerRef, triggerRef, panelId, onKeyDown } = useDismissiblePopover();
 
   const { t } = useI18n();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotification(user?.id);
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const handleClickButton = () => {
     if (!user) {
@@ -49,9 +40,12 @@ export default function NotificationDropdown({ user }) {
   };
 
   return (
-    <div className="relative inline-block text-left" ref={dropdownRef}>
+    <div className="relative inline-block text-left" ref={containerRef} onKeyDown={onKeyDown}>
       <button
         type="button"
+        ref={triggerRef}
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? panelId : undefined}
         onClick={handleClickButton}
         className="flex items-center gap-1.5 hover:opacity-80 relative py-1 focus:outline-none transition-opacity cursor-pointer"
         title={t('nav.notifications')}
@@ -79,7 +73,7 @@ export default function NotificationDropdown({ user }) {
       </button>
 
       {isOpen && (
-        <div className="absolute left-1/2 -translate-x-[35%] sm:-translate-x-[38%] mt-2.5 w-84 sm:w-[400px] bg-white text-gray-800 border border-gray-100 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] z-50 text-left animate-in fade-in duration-200">
+        <div id={panelId} className="absolute left-1/2 -translate-x-[35%] sm:-translate-x-[38%] mt-2.5 w-84 sm:w-[400px] bg-white text-gray-800 border border-gray-100 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.18)] z-50 text-left animate-in fade-in duration-200">
           {/* Mũi tên chỉ hướng tam giác trỏ thẳng vào nút Thông báo */}
           <div className="absolute -top-2 left-[35%] sm:left-[38%] -translate-x-1/2 w-3.5 h-3.5 bg-gray-50 border-t border-l border-gray-200 rotate-45 z-20 pointer-events-none" />
 
@@ -115,9 +109,9 @@ export default function NotificationDropdown({ user }) {
                 {t('notif.empty')}
               </div>
             ) : (
-              notifications.slice(0, 15).map((notif) => (
+              notifications.slice(0, 15).map((notif, index) => (
                 <div
-                  key={notif.id || Math.random()}
+                  key={notif.id ?? `local-${notif.createdAt}-${index}`}
                   onClick={() => {
                     if (!notif.isRead && notif.id) markAsRead(notif.id);
                     setIsOpen(false);
@@ -130,7 +124,7 @@ export default function NotificationDropdown({ user }) {
                   <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
                     {getIcon(notif.type)}
                   </div>
-                  <div className="flex-1 min-w-0 pr-6">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
                       <p className="text-xs font-bold text-gray-900 line-clamp-1">{notif.title}</p>
                     </div>
@@ -156,18 +150,8 @@ export default function NotificationDropdown({ user }) {
                     </div>
                   </div>
                   {!notif.isRead && (
-                    <div className="absolute right-3 top-3.5 flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (notif.id) markAsRead(notif.id);
-                        }}
-                        className="w-5 h-5 rounded-full bg-white border border-gray-200 text-gray-400 hover:text-green-600 hover:border-green-500 hover:bg-green-50 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer shadow-2xs"
-                        title="Đánh dấu đã đọc"
-                      >
-                        <CheckCheck size={11} />
-                      </button>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      {notif.id && <MarkNotificationRead onRead={() => markAsRead(notif.id)} />}
                       <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
                     </div>
                   )}

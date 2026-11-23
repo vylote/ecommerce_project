@@ -1,5 +1,6 @@
-import ProductImage from "../../shared/components/ProductImage";
-import { useState, useEffect, useRef } from "react";
+import ProductGallery from "./components/ProductGallery";
+import QuantityStepper from "../../shared/ui/QuantityStepper";
+import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux"; // THÊM IMPORT NÀY
 import toast from "react-hot-toast"; // THÊM IMPORT NÀY
@@ -30,9 +31,6 @@ export default function ProductDetailPage() {
   const [variantError, setVariantError] = useState(false);
 
   // STATE & REF CAROUSEL ẢNH
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const thumbRefs = useRef([]);
-  const autoPlayRef = useRef(null);
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -47,7 +45,6 @@ export default function ProductDetailPage() {
         setProduct(prodData); // Thông tin Shop đã nằm sẵn trong prodData.shop
         setReviews(reviewRes.data.result.data);
         setReviewTotalPages(reviewRes.data.result.totalPages);
-        setCurrentImageIndex(0);
 
         // Nạp danh sách biến thể (từ prodData.variants hoặc gọi API variants)
         if (prodData.variants && prodData.variants.length > 0) {
@@ -212,42 +209,6 @@ export default function ProductDetailPage() {
     }
   };
 
-  // LOGIC ĐIỀU KHIỂN CAROUSEL
-  const sortedImages = product?.images
-    ? [...product.images].sort(
-        (a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0),
-      )
-    : [];
-  const totalImages = sortedImages.length;
-
-  const handlePrevImage = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
-  };
-
-  const handleNextImage = () => {
-    setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
-  };
-
-  useEffect(() => {
-    if (totalImages <= 1) return;
-
-    autoPlayRef.current = setInterval(() => {
-      setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
-    }, 3500);
-
-    return () => clearInterval(autoPlayRef.current);
-  }, [totalImages, currentImageIndex]);
-
-  useEffect(() => {
-    if (thumbRefs.current[currentImageIndex]) {
-      thumbRefs.current[currentImageIndex].scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "nearest",
-      });
-    }
-  }, [currentImageIndex]);
-
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f5f5f5]">
@@ -270,75 +231,8 @@ export default function ProductDetailPage() {
 
       <div className="max-w-[1200px] mx-auto mt-5">
         {/* KHỐI 1: KHUNG ẢNH VÀ THÔNG TIN CƠ BẢN */}
-        <div className="bg-white p-4 rounded-sm shadow-[0_1px_1px_0_rgba(0,0,0,0.05)] mb-4 flex gap-6">
-          <div className="w-[400px] shrink-0">
-            <div className="w-[400px] h-[400px] bg-base-200 relative overflow-hidden mb-3">
-              {totalImages > 0 ? (
-                <>
-                  <img
-                    src={sortedImages[currentImageIndex]?.url}
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-all duration-300"
-                  />
-
-                  {totalImages > 1 && (
-                    <>
-                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
-                        {sortedImages.map((_, idx) => (
-                          <span
-                            key={idx}
-                            className={`w-1.5 h-1.5 rounded-full transition-colors ${idx === currentImageIndex ? "bg-primary" : "bg-white/70"}`}
-                          />
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </>
-              ) : (
-                <ProductImage alt={product.name} />
-              )}
-            </div>
-
-            {totalImages > 0 && (
-              <div className="relative w-full">
-                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 scroll-smooth">
-                  {sortedImages.map((img, idx) => (
-                    <div
-                      key={img.id}
-                      ref={el => thumbRefs.current[idx] = el}
-                      onMouseEnter={() => setCurrentImageIndex(idx)}
-                      onClick={() => setCurrentImageIndex(idx)}
-                      className={`w-[73.6px] h-[73.6px] shrink-0 cursor-pointer border-2 transition-all ${currentImageIndex === idx ? 'border-primary opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
-                    >
-                      <img src={img.url} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
-                    </div>
-                  ))}
-                </div>
-
-                {totalImages > 1 && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handlePrevImage}
-                      aria-label="Ảnh trước"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-white/80 hover:bg-white text-base-content rounded-full opacity-70 hover:opacity-100 transition-opacity shadow-[0_1px_4px_rgba(0,0,0,0.25)] z-10"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleNextImage}
-                      aria-label="Ảnh tiếp theo"
-                      className="absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center bg-white/80 hover:bg-white text-base-content rounded-full opacity-70 hover:opacity-100 transition-opacity shadow-[0_1px_4px_rgba(0,0,0,0.25)] z-10"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-
+        <div className="bg-white p-4 rounded-sm shadow-[0_1px_1px_0_rgba(0,0,0,0.05)] mb-4 flex flex-col gap-6 md:flex-row">
+          <ProductGallery key={product.id} images={product.images} name={product.name} />
           <div className="flex-1 py-2">
             <h1 className="text-xl font-medium mb-3">{product.name}</h1>
             <div className="flex items-center text-sm gap-4 mb-4 text-base-content/70">
@@ -464,30 +358,13 @@ export default function ProductDetailPage() {
             {/* BỘ CHỌN SỐ LƯỢNG */}
             <div className="flex items-center gap-4 text-sm text-base-content/70 mb-8">
               <span className="w-24 shrink-0">Số lượng</span>
-              <div className="flex items-center border border-base-300 rounded-sm">
-                <button
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="px-4 py-1.5 hover:bg-base-200 border-r border-base-300 transition-colors"
-                >
-                  -
-                </button>
-                <input
-                  type="text"
-                  value={quantity}
-                  readOnly
-                  className="w-14 text-center outline-none text-base-content font-medium bg-transparent"
-                />
-                <button
-                  onClick={() =>
-                    setQuantity((q) =>
-                      Math.min(Math.max(1, getAvailableStock()), q + 1)
-                    )
-                  }
-                  className="px-4 py-1.5 hover:bg-base-200 border-l border-base-300 transition-colors"
-                >
-                  +
-                </button>
-              </div>
+              <QuantityStepper
+                value={quantity}
+                decreaseDisabled={quantity <= 1}
+                increaseDisabled={quantity >= getAvailableStock()}
+                onDecrease={() => setQuantity((q) => Math.max(1, q - 1))}
+                onIncrease={() => setQuantity((q) => Math.min(Math.max(1, getAvailableStock()), q + 1))}
+              />
               <span>{getAvailableStock()} sản phẩm có sẵn</span>
             </div>
 

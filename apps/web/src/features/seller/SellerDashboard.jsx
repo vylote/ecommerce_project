@@ -1,27 +1,34 @@
-import OrderStatusChart from "../order/components/OrderStatusChart";
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import AnalyticsPeriodFilter from "../../shared/components/analytics/AnalyticsPeriodFilter";
+import AnalyticsTrendChart from "../../shared/components/analytics/AnalyticsTrendChart";
+import { formatAnalyticsCurrency as formatCurrency } from "../../shared/components/analytics/trendSeries";
+import OrderStatusChart, { OrderStatusLegend } from "../order/components/OrderStatusChart";
+import { useEffect, useState, useMemo } from "react";
 import api from "../../shared/utils/api";
 import toast from "react-hot-toast";
-import Chart from "chart.js/auto";
 import {
   TrendingUp,
   DollarSign,
   ShoppingBag,
-  Calendar,
   BarChart3,
   PieChart,
   RefreshCw,
   Clock,
   CheckCircle2,
-  AlertCircle,
-  XCircle,
   Truck,
   Layers,
 } from "lucide-react";
 
+const trendSeries = {
+  revenue: [
+    { type: "line", key: "revenue", label: "Doanh số thực nhận (₫)", tooltipLabel: "Doanh số", color: "#16a34a", opacity: "59" },
+  ],
+  orders: [
+    { type: "bar", key: "orderCount", label: "Đơn hoàn thành", color: "rgba(22, 163, 74, 0.85)" },
+    { type: "bar", key: "totalCount", label: "Tổng số đơn", color: "rgba(148, 163, 184, 0.5)" },
+  ],
+};
+
 export default function SellerDashboard() {
-  const chartCanvasRef = useRef(null);
-  const chartInstanceRef = useRef(null);
 
   // Thống kê nhanh toàn bộ từ danh sách cần làm
   const [orderStats, setOrderStats] = useState({
@@ -48,193 +55,54 @@ export default function SellerDashboard() {
     statusBreakdown: {},
     timeline: [],
   });
-  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
 
-  // Format tiền tệ VNĐ
-  const formatCurrency = (val) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(val || 0);
-  };
-
-  // Fetch dữ liệu danh sách cần làm
-  const fetchStats = async () => {
-    try {
-      const response = await api.get("/orders/seller/dashboard/stats");
-      if (response.data?.result) {
-        setOrderStats(response.data.result);
-      }
-    } catch (error) {
-      console.error("Dashboard Stats Error:", error);
-    }
-  };
-
-  // Fetch dữ liệu phân tích bán hàng theo kỳ
-  const fetchAnalytics = async (period = filterPeriod, range = filterRange) => {
-    setLoadingAnalytics(true);
-    try {
-      const response = await api.get(
-        `/orders/seller/dashboard/analytics?period=${period}&range=${range}`
-      );
-      if (response.data?.result) {
-        setAnalytics(response.data.result);
-      }
-    } catch (error) {
-      toast.error("Không thể tải dữ liệu phân tích bán hàng");
-      console.error("Dashboard Analytics Error:", error);
-    } finally {
-      setLoadingAnalytics(false);
-    }
-  };
+  const [statsVersion, setStatsVersion] = useState(0);
 
   useEffect(() => {
+    const controller = new AbortController();
+
+    async function fetchStats() {
+      try {
+        const response = await api.get("/orders/seller/dashboard/stats", { signal: controller.signal });
+        if (!controller.signal.aborted && response.data?.result) {
+          setOrderStats(response.data.result);
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) console.error("Dashboard Stats Error:", error);
+      }
+    }
+
     fetchStats();
-  }, []);
+    return () => controller.abort();
+  }, [statsVersion]);
 
   useEffect(() => {
-    fetchAnalytics(filterPeriod, filterRange);
+    const controller = new AbortController();
+
+    async function fetchAnalytics() {
+      try {
+        const response = await api.get("/orders/seller/dashboard/analytics", {
+          params: { period: filterPeriod, range: filterRange },
+          signal: controller.signal,
+        });
+        if (!controller.signal.aborted && response.data?.result) {
+          setAnalytics(response.data.result);
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error("Analytics error:", error);
+          toast.error("Không thể tải dữ liệu phân tích bán hàng");
+        }
+      } finally {
+        if (!controller.signal.aborted) setLoadingAnalytics(false);
+      }
+    }
+
+    fetchAnalytics();
+    return () => controller.abort();
   }, [filterPeriod, filterRange]);
 
-  // Vẽ biểu đồ chính (Line / Area hoặc Bar)
-  useEffect(() => {
-    const canvas = chartCanvasRef.current;
-    if (!canvas) return;
-
-    if (chartInstanceRef.current) {
-      chartInstanceRef.current.destroy();
-    }
-
-    const labels = (analytics.timeline || []).map((t) => t.label || t.date);
-    const revenues = (analytics.timeline || []).map((t) => Number(t.revenue || 0));
-    const completedOrders = (analytics.timeline || []).map((t) => Number(t.orderCount || 0));
-    const totalOrders = (analytics.timeline || []).map((t) => Number(t.totalCount || 0));
-
-    const ctx = canvas.getContext("2d");
-
-    let dataset = [];
-    if (activeChartMetric === "revenue") {
-      // Gradient cho biểu đồ doanh thu
-      const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-      gradient.addColorStop(0, "rgba(22, 163, 74, 0.35)");
-      gradient.addColorStop(1, "rgba(22, 163, 74, 0.0)");
-
-      dataset = [
-        {
-          type: "line",
-          label: "Doanh số thực nhận (₫)",
-          data: revenues,
-          borderColor: "#16a34a",
-          backgroundColor: gradient,
-          borderWidth: 2.5,
-          tension: 0.35,
-          fill: true,
-          pointBackgroundColor: "#16a34a",
-          pointBorderColor: "#ffffff",
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-        },
-      ];
-    } else {
-      // Biểu đồ cột: Số đơn thành công vs Tổng số đơn
-      dataset = [
-        {
-          type: "bar",
-          label: "Đơn hoàn thành",
-          data: completedOrders,
-          backgroundColor: "rgba(22, 163, 74, 0.85)",
-          borderRadius: 6,
-        },
-        {
-          type: "bar",
-          label: "Tổng số đơn",
-          data: totalOrders,
-          backgroundColor: "rgba(148, 163, 184, 0.5)",
-          borderRadius: 6,
-        },
-      ];
-    }
-
-    chartInstanceRef.current = new Chart(ctx, {
-      data: {
-        labels,
-        datasets: dataset,
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: "top",
-            labels: {
-              font: { size: 12, family: "inherit", weight: "500" },
-              usePointStyle: true,
-              pointStyle: "circle",
-            },
-          },
-          tooltip: {
-            padding: 12,
-            backgroundColor: "rgba(15, 23, 42, 0.9)",
-            titleFont: { size: 13, weight: "bold" },
-            bodyFont: { size: 12 },
-            callbacks: {
-              label: (context) => {
-                if (activeChartMetric === "revenue") {
-                  return ` Doanh số: ${formatCurrency(context.raw)}`;
-                }
-                return ` ${context.dataset.label}: ${context.raw} đơn`;
-              },
-            },
-          },
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: {
-              font: { size: 11 },
-              maxRotation: 45,
-            },
-          },
-          y: {
-            beginAtZero: true,
-            grid: { color: "rgba(241, 245, 249, 1)" },
-            ticks: {
-              font: { size: 11 },
-              callback: (val) => {
-                if (activeChartMetric === "revenue") {
-                  if (val >= 1000000) return `${val / 1000000}tr`;
-                  if (val >= 1000) return `${val / 1000}k`;
-                  return val;
-                }
-                return Number.isInteger(val) ? val : "";
-              },
-            },
-          },
-        },
-      },
-    });
-
-    return () => {
-      if (chartInstanceRef.current) {
-        chartInstanceRef.current.destroy();
-      }
-    };
-  }, [analytics, activeChartMetric]);
-
-  // Vẽ biểu đồ Donut: Phân bổ trạng thái đơn hàng
-
-
-  // Danh mục thời gian nhanh
-  const quickFilters = [
-    { label: "7 ngày qua", period: "DAY", range: 7 },
-    { label: "30 ngày qua", period: "DAY", range: 30 },
-    { label: "Theo Tuần (8 tuần)", period: "WEEK", range: 8 },
-    { label: "Theo Tháng (12 tháng)", period: "MONTH", range: 12 },
-    { label: "Theo Năm (3 năm)", period: "YEAR", range: 3 },
-  ];
-
-  // Tính tỷ lệ đơn hoàn thành
   const completionRate = useMemo(() => {
     if (!analytics.totalOrdersAll || analytics.totalOrdersAll === 0) return 0;
     return Math.round((analytics.totalOrders / analytics.totalOrdersAll) * 100);
@@ -268,7 +136,7 @@ export default function SellerDashboard() {
               Danh sách cần làm
             </h3>
             <button
-              onClick={fetchStats}
+              onClick={() => setStatsVersion((version) => version + 1)}
               title="Làm mới trạng thái"
               className="text-gray-400 hover:text-emerald-600 transition-colors"
             >
@@ -360,29 +228,16 @@ export default function SellerDashboard() {
               </p>
             </div>
 
-            {/* Quick Filter Buttons */}
-            <div className="flex flex-wrap items-center gap-1.5 bg-gray-50 p-1 rounded-lg border border-gray-200">
-              {quickFilters.map((qf) => {
-                const isActive =
-                  filterPeriod === qf.period && filterRange === qf.range;
-                return (
-                  <button
-                    key={qf.label}
-                    onClick={() => {
-                      setFilterPeriod(qf.period);
-                      setFilterRange(qf.range);
-                    }}
-                    className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                      isActive
-                        ? "bg-emerald-600 text-white shadow-sm"
-                        : "text-gray-600 hover:text-gray-900 hover:bg-white"
-                    }`}
-                  >
-                    {qf.label}
-                  </button>
-                );
-              })}
-            </div>
+            <AnalyticsPeriodFilter
+              period={filterPeriod}
+              range={filterRange}
+              onChange={(period, range) => {
+                setLoadingAnalytics(true);
+                setFilterPeriod(period);
+                setFilterRange(range);
+              }}
+              tone="emerald"
+            />
           </div>
 
           {/* Metric Cards - 4 Thẻ chỉ số kinh doanh */}
@@ -510,7 +365,11 @@ export default function SellerDashboard() {
 
               {/* Canvas Chart */}
               <div className="h-[260px] w-full relative">
-                <canvas ref={chartCanvasRef}></canvas>
+                <AnalyticsTrendChart
+                  timeline={analytics.timeline}
+                  series={trendSeries[activeChartMetric]}
+                  format={activeChartMetric === "revenue" ? "currency" : "orders"}
+                />
               </div>
             </div>
 
@@ -530,54 +389,7 @@ export default function SellerDashboard() {
                 <OrderStatusChart statusBreakdown={analytics.statusBreakdown} />
               </div>
 
-              {/* Legend trực quan */}
-              <div className="space-y-1.5 pt-2 border-t border-gray-100 text-xs">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
-                    <span className="text-gray-600">Đã Hoàn Tất</span>
-                  </div>
-                  <span className="font-bold text-gray-800">
-                    {analytics.statusBreakdown?.COMPLETED || 0}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-sky-600"></span>
-                    <span className="text-gray-600">Đang Giao</span>
-                  </div>
-                  <span className="font-bold text-gray-800">
-                    {analytics.statusBreakdown?.SHIPPING || 0}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                    <span className="text-gray-600">Chờ Lấy Hàng</span>
-                  </div>
-                  <span className="font-bold text-gray-800">
-                    {analytics.statusBreakdown?.CONFIRMED || 0}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                    <span className="text-gray-600">Chờ Xác Nhận</span>
-                  </div>
-                  <span className="font-bold text-gray-800">
-                    {analytics.statusBreakdown?.PENDING || 0}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                    <span className="text-gray-600">Đơn Đã Hủy</span>
-                  </div>
-                  <span className="font-bold text-gray-800">
-                    {analytics.statusBreakdown?.CANCELLED || 0}
-                  </span>
-                </div>
-              </div>
+              <OrderStatusLegend statusBreakdown={analytics.statusBreakdown} />
             </div>
           </div>
         </div>

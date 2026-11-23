@@ -1,4 +1,5 @@
-import Dialog from '../ui/Dialog';
+import { useState } from 'react';
+import Dialog, { DialogActions } from '../ui/Dialog';
 
 /**
  * Dialog xác nhận dùng chung, thay cho window.confirm.
@@ -16,6 +17,7 @@ import Dialog from '../ui/Dialog';
  *   <ConfirmDialog state={confirmState} onClose={() => setConfirmState(null)} />
  */
 export default function ConfirmDialog({ state, onClose }) {
+  const [busy, setBusy] = useState(false);
   if (!state) return null;
 
   const {
@@ -28,8 +30,14 @@ export default function ConfirmDialog({ state, onClose }) {
   } = state;
 
   const handleConfirm = async () => {
-    await onConfirm?.();
-    onClose();
+    if (busy) return;
+    setBusy(true);
+    try {
+      await onConfirm?.();
+      onClose();
+    } finally {
+      setBusy(false);
+    }
   };
 
   const confirmBtnClass =
@@ -38,26 +46,26 @@ export default function ConfirmDialog({ state, onClose }) {
       : 'bg-[#ee4d2d] hover:bg-[#d73211]';
 
   return (
-    <Dialog title={title} size="sm" onClose={onClose} closeOnBackdrop>
-      <div className="p-6">
-        {message && <p className="text-sm text-gray-600 mb-6">{message}</p>}
-        <div className="flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-sm border border-gray-300 rounded-sm text-gray-700 hover:bg-gray-50"
-          >
-            {cancelText}
-          </button>
-          <button
-            type="button"
-            onClick={handleConfirm}
-            className={`px-4 py-2 text-sm text-white rounded-sm ${confirmBtnClass}`}
-          >
-            {confirmText}
-          </button>
-        </div>
-      </div>
+    <Dialog title={title} size="sm" onClose={onClose} busy={busy} closeOnBackdrop>
+      {message && <p className="p-6 text-sm text-gray-600">{message}</p>}
+      <DialogActions>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onClose}
+          className="px-4 py-2 text-sm border border-gray-300 rounded-sm text-gray-700 hover:bg-gray-50"
+        >
+          {cancelText}
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={handleConfirm}
+          className={`px-4 py-2 text-sm text-white rounded-sm ${confirmBtnClass}`}
+        >
+          {confirmText}
+        </button>
+      </DialogActions>
     </Dialog>
   );
 }

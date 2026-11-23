@@ -39,6 +39,8 @@ export default {
   // ================= 4. NOTIFICATIONS =================
   "notif.title": "Recent Notifications",
   "notif.empty": "No notifications yet",
+  "notif.mark_read": "Mark as read",
+  "notif.read_action": "Read",
   "notif.mark_all_read": "Mark all as read",
   "notif.view_all_orders": "View all purchases →",
   "notif.unread": "unread",
@@ -130,6 +132,8 @@ export default {
   "cart.buy_now": "Shop Now",
   "cart.product": "Product",
   "cart.unit_price": "Unit Price",
+  "cart.decrease_quantity": "Decrease quantity",
+  "cart.increase_quantity": "Increase quantity",
   "cart.quantity": "Quantity",
   "cart.total_price": "Total Price",
   "cart.action": "Actions",
