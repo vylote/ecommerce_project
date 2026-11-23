@@ -1,0 +1,20 @@
+name: Analyse Stack
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Stack Analyser
+        id: stack
+        uses: specfy/stack-analyser@v1.27.6
+
+      - name: Print Result
+        run: echo '${{ steps.stack.outputs.payload }}'
