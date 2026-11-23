@@ -49,17 +49,14 @@ public class ImportReceipt {
     @Column(name = "receipt_code", nullable = false, unique = true, length = 50)
     String receiptCode;
 
-    // Quan hệ N-1 với User: một user/tài khoản có nhiều phiếu nhập kho
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
-    // Quan hệ N-1 với Sản phẩm: mỗi phiếu nhập kho cho 1 sản phẩm
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     Product product;
 
-    // Thuộc cửa hàng nào
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)
     Shop shop;
@@ -80,7 +77,6 @@ public class ImportReceipt {
     @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
 
-    // Quan hệ 1-N với Chi tiết phiếu nhập kho
     @OneToMany(mappedBy = "importReceipt", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude

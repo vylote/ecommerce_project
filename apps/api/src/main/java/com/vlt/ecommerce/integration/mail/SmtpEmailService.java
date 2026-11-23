@@ -1,39 +1,36 @@
 package com.vlt.ecommerce.integration.mail;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.mail.autoconfigure.MailProperties;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SmtpEmailService implements EmailService {
 
-    @Autowired(required = false)
-    private JavaMailSender mailSender;
-
-    @Value("${spring.mail.username:}")
-    private String fromEmail;
+    private final Optional<JavaMailSender> mailSender;
+    private final MailProperties mailProperties;
 
     @Override
     public void sendOtpEmail(String toEmail, String otp) {
-        log.info("==========================================================");
-        log.info("[EMAIL OTP] Ma xac thuc gui den {}: [{}] (Han 5 phut)", toEmail, otp);
-        log.info("==========================================================");
-
-        if (mailSender == null || fromEmail == null || fromEmail.isBlank()) {
-            log.warn("[EMAIL OTP] Chua cau hinh SMTP Gmail (spring.mail.username). Su dung ma OTP tren log console de kiem thu.");
+        JavaMailSender sender = mailSender.orElse(null);
+        String fromEmail = mailProperties.getUsername();
+        if (sender == null || fromEmail == null || fromEmail.isBlank()) {
+            log.warn("Skipped OTP email because SMTP is not configured");
             return;
         }
 
         try {
-            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessage message = sender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
 
             helper.setFrom(fromEmail, "Ecommerce Marketplace");
@@ -56,31 +53,24 @@ public class SmtpEmailService implements EmailService {
                     + "</div>";
 
             helper.setText(htmlContent, true);
-            mailSender.send(message);
-            log.info("[EMAIL OTP] Da gui email thanh cong den {}", toEmail);
+            sender.send(message);
+            log.info("Sent OTP email via SMTP");
         } catch (Exception e) {
-            log.error("[EMAIL OTP] Khong the gui email qua SMTP: {}", e.getMessage());
+            log.error("Failed to send OTP email via SMTP (errorType={})", e.getClass().getSimpleName());
         }
     }
 
     @Override
     public void sendNotificationEmail(String toEmail, String fullName, String title, String content, Long refId) {
-        log.info("==========================================================");
-        log.info("[EMAIL NOTIFICATION] Gui thong bao toi: {} ({})", toEmail, fullName != null ? fullName : "Quy khach");
-        log.info("[TIEU DE] {}", title);
-        log.info("[NOI DUNG] {}", content);
-        if (refId != null) {
-            log.info("[MA THAM CHIEU] #{}", refId);
-        }
-        log.info("==========================================================");
-
-        if (mailSender == null || fromEmail == null || fromEmail.isBlank()) {
-            log.info("[EMAIL NOTIFICATION] Chua cau hinh SMTP Gmail. Mo phong gui email thong bao thanh cong toi {}", toEmail);
+        JavaMailSender sender = mailSender.orElse(null);
+        String fromEmail = mailProperties.getUsername();
+        if (sender == null || fromEmail == null || fromEmail.isBlank()) {
+            log.warn("Skipped notification email because SMTP is not configured (refId={})", refId);
             return;
         }
 
         try {
-            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessage message = sender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
 
             helper.setFrom(fromEmail, "Ecommerce Marketplace");
@@ -107,10 +97,11 @@ public class SmtpEmailService implements EmailService {
                     + "</div>";
 
             helper.setText(htmlContent, true);
-            mailSender.send(message);
-            log.info("[EMAIL NOTIFICATION] Da gui email thanh cong qua SMTP toi {}", toEmail);
+            sender.send(message);
+            log.info("Sent notification email via SMTP (refId={})", refId);
         } catch (Exception e) {
-            log.error("[EMAIL NOTIFICATION] Gap loi khi gui email qua SMTP toi {}: {}", toEmail, e.getMessage());
+            log.error("Failed to send notification email via SMTP (refId={}, errorType={})",
+                    refId, e.getClass().getSimpleName());
         }
     }
 }

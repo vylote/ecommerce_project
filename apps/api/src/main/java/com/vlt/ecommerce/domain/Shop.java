@@ -70,8 +70,8 @@ public class Shop {
         inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     @Builder.Default
-    @ToString.Exclude          // <--- THÊM DÒNG NÀY
-    @EqualsAndHashCode.Exclude // <--- THÊM DÒNG NÀY
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     Set<Category> categories = new HashSet<>();
 
     @OneToMany(mappedBy = "shop", fetch = FetchType.LAZY)
@@ -79,18 +79,3 @@ public class Shop {
     @EqualsAndHashCode.Exclude
     List<ImportReceipt> importReceipts;
 }
-
-/* ==============================================================================
-     * BẢN CHẤT CỦA FETCHTYPE.LAZY & @TRANSACTIONAL
-     * ==============================================================================
-     * 1. Kẻ đóng thế (Proxy): 
-     * Khi SELECT Shop, Hibernate tuyệt đối KHÔNG JOIN với bảng users. 
-     * Nó tạo ra một Object User giả (Proxy) chỉ chứa duy nhất cái 'seller_id' (lấy từ cột khóa ngoại của bảng shops).
-     * * 2. Kích hoạt truy vấn ngầm (Lazy Loading): 
-     * Kẻ đóng thế chỉ thực sự chạy lệnh SQL thứ 2 (SELECT * FROM users) 
-     * khi ta chạm vào dữ liệu thật của nó (Ví dụ: gọi shop.getSeller().getEmail()).
-     * * 3. Vai trò của @Transactional (Tránh lỗi LazyInitializationException):
-     * Bình thường sau lệnh Find, kết nối CSDL (Session) sẽ bị đóng ngay. 
-     * @Transactional giúp giữ kết nối mở xuyên suốt hàm, để Kẻ đóng thế 
-     * có đường truyền chạy lệnh SQL thứ 2 lấy email về so khớp.
-     * ============================================================================== */

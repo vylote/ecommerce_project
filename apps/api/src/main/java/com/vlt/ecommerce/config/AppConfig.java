@@ -18,14 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AppConfig {
-    // PasswordEncoder passwordEncoder;
 
     @Bean
     public ObjectMapper objectMapper() {
-        return new ObjectMapper();
+        return new ObjectMapper().findAndRegisterModules();
     }
 
-    //resttemplate như kiểu là postman được nhúng trong java, khi gọi api từ fe dùng axios hoặc fetch
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

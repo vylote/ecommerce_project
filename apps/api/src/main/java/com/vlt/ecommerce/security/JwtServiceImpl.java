@@ -8,10 +8,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.vlt.ecommerce.config.Constants;
+import com.vlt.ecommerce.config.properties.JwtProperties;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -29,13 +29,14 @@ import com.vlt.ecommerce.domain.Role;
 import com.vlt.ecommerce.domain.User;
 
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Service
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class JwtServiceImpl implements JwtService {
-    @Value("${jwt.secret}")
-    private String signerKey;
+    private final JwtProperties jwtProperties;
 
     @Override
     public String generateAccessToken(User user, String sessionId) {
@@ -68,7 +69,7 @@ public class JwtServiceImpl implements JwtService {
 
             Payload payload = new Payload(jwtClaimsSet.toJSONObject());
             JWSObject jwsObject = new JWSObject(header, payload);
-            jwsObject.sign(new MACSigner(signerKey.getBytes()));
+            jwsObject.sign(new MACSigner(jwtProperties.secret().getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
             throw new RuntimeException(e);
@@ -91,7 +92,7 @@ public class JwtServiceImpl implements JwtService {
 
             Payload payload = new Payload(jwtClaimsSet.toJSONObject());
             JWSObject jwsObject = new JWSObject(header, payload);
-            jwsObject.sign(new MACSigner(signerKey.getBytes()));
+            jwsObject.sign(new MACSigner(jwtProperties.secret().getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException e) {
             throw new RuntimeException(e);
@@ -101,7 +102,7 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public SignedJWT verifyToken(String token) {
         try {
-            JWSVerifier verifier = new MACVerifier(signerKey.getBytes());
+            JWSVerifier verifier = new MACVerifier(jwtProperties.secret().getBytes());
             SignedJWT signedJWT = SignedJWT.parse(token);
 
             boolean verified = signedJWT.verify(verifier);

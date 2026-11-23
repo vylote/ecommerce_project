@@ -48,7 +48,7 @@ public class Category {
     Category parent;
 
     @OneToMany(mappedBy = "parent")
-    List<Category> children; //
+    List<Category> children;
     @Column(name = "image_url", length = 500)
     String imageUrl;
     @Builder.Default

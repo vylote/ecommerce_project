@@ -14,7 +14,6 @@ import com.vlt.ecommerce.service.OrderService;
 import com.vlt.ecommerce.config.Constants;
 import com.vlt.ecommerce.domain.ProductImage;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +31,7 @@ import com.vlt.ecommerce.domain.event.OrderStatusChangedEvent;
 import com.vlt.ecommerce.service.exception.AppException;
 import com.vlt.ecommerce.service.exception.ErrorCode;
 import com.vlt.ecommerce.config.RabbitMQConfig;
+import com.vlt.ecommerce.config.properties.OrderProperties;
 import com.vlt.ecommerce.domain.CartItem;
 import com.vlt.ecommerce.repository.CartItemRepository;
 import com.vlt.ecommerce.service.CommissionCalculator;
@@ -59,7 +59,6 @@ import com.vlt.ecommerce.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -81,9 +80,7 @@ public class OrderServiceImpl implements OrderService {
     ObjectMapper objectMapper;
     ApplicationEventPublisher eventPublisher;
     RabbitTemplate rabbitTemplate;
-    @NonFinal
-    @Value("${app.order.expiration-ttl-ms:900000}")
-    int orderExpirationTtlMs;
+    OrderProperties orderProperties;
 
     @Override
     @PreAuthorize("hasRole('BUYER')")
@@ -204,6 +201,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private void sendOrderExpirationSchedule(Long orderId) {
+        int orderExpirationTtlMs = orderProperties.expirationTtlMs();
         try {
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.ORDER_DELAY_EXCHANGE,

@@ -4,6 +4,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Locale;
 
+import jakarta.validation.ValidatorFactory;
+import org.springframework.boot.hibernate.autoconfigure.HibernatePropertiesCustomizer;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +25,11 @@ public class I18nConfig {
         resolver.setDefaultLocale(LOCALE_VI);
         resolver.setSupportedLocales(Arrays.asList(LOCALE_VI, LOCALE_EN));
         return resolver;
+    }
+
+    @Bean
+    HibernatePropertiesCustomizer persistenceValidation(ValidatorFactory validatorFactory) {
+        return properties -> properties.put("jakarta.persistence.validation.factory", validatorFactory);
     }
 
     @Bean

@@ -1,5 +1,5 @@
 notification:
-  service-url: ${NOTIFICATION_SERVICE_URL}
+  service-url: ${NOTIFICATION_SERVICE_URL:}
 
 app:
   order:

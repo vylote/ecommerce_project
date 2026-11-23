@@ -19,9 +19,8 @@ public class CloudinaryService implements ImageStorageService {
 
     @Override
     public String uploadFile(MultipartFile file, String folder) throws IOException {
-        // Upload ảnh trực tiếp bằng mảng byte từ file tải lên
         Map<?,?> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
-                "folder", folder, // Tổ chức thư mục lưu trữ trên Cloudinary (vd: 'products')
+                "folder", folder,
                 "resource_type", "auto" // Tự động nhận diện định dạng (jpg, png, webp...)
         ));
 
@@ -50,7 +49,6 @@ public class CloudinaryService implements ImageStorageService {
             if (parts.length < 2)
                 return null;
             String remaining = parts[1];
-            // 2. Bỏ phần số phiên bản (ví dụ: "v1783092233/") nếu có xuất hiện
             if (remaining.startsWith("v")) {
                 int firstSlashIndex = remaining.indexOf("/");
                 if (firstSlashIndex != -1) {

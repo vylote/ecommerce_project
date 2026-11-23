@@ -28,7 +28,7 @@ public class Permission {
     Long id;
 
     @Column(nullable = false, unique = true, length = 100)
-    String name; // Ví dụ: "VIEW_PRODUCT", "CREATE_PRODUCT", "VIP_EXCLUSIVE_VOUCHER"
+    String name;
 
     @Column(length = 255)
     String description;

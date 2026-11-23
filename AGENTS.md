@@ -47,6 +47,8 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 - Keep environment configuration out of subdirectory files such as `apps/api/.env` and `apps/web/.env`.
 - Use environment variable placeholders such as `${ENV_VAR:default_value}` in `application.yaml`. Keep SMTP credentials, Cloudinary credentials, database passwords, and JWT secrets in environment variables.
 
+- Bind related Spring settings with `@ConfigurationProperties` in `config.properties` and inject the typed bean into consumers. Reuse Spring Boot property beans for framework settings. Keep the same YAML keys and environment mappings when migrating existing settings.
+
 ---
 
 ## 4. RabbitMQ and Audit Logging
@@ -54,6 +56,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 - Set `durable = true` for exchanges and queues.
 - Use `RabbitAuditAspect` to record queue names and worker processing times in milliseconds. Keep timing logic centralized in the aspect.
 - Preserve serialized RabbitMQ type IDs when moving message classes between packages. Map existing wire IDs to the relocated classes.
+- Use the Jackson 3 converter and type mapper for Spring AMQP. Preserve wire names and the JSON shape when replacing the converter.
 
 ---
 
@@ -73,7 +76,17 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - Keep values used by one class private and close to their usage. Put shared constants in the backend `config/Constants.java` or the web `shared/constants.js`. Use descriptive names to identify their purpose. Reuse standard constants for protocol headers and encodings.
 - Put deployment-dependent values in the established environment configuration. Preserve serialized names and values when replacing literals with constants.
-- Keep comments that explain constraints, ordering, compatibility, or business intent. Remove comments that repeat the code or describe an old edit.
+
+### Readability and control flow
+
+- Use clear names and straightforward code so readers can see what it does. Keep comments for non-obvious business rules, constraints, ordering dependencies, or compatibility decisions. Remove comments that restate the code or describe past edits.
+- Minimize branching and nesting. Use guard clauses for invalid inputs or cases that need no work, and keep the main path easy to follow. Review nested `if`, `for`, and `while` blocks for duplicate checks or conditions that can be evaluated once.
+- Keep loops and branches when they clearly express the behavior. Prefer a simple loop over a dense collection pipeline or a chain of ternaries. Extract a helper only when it names a meaningful operation or removes duplication. Preserve evaluation order, short-circuiting, and side effects when simplifying control flow.
+
+### Dependency injection and logging
+
+- Inject Spring dependencies through the constructor. Represent an optional dependency explicitly with `Optional<T>` when the service can operate without that bean.
+- Log each operation's outcome once with relevant context. Omit decorative separators, repeated messages, and sensitive data such as OTPs or email contents.
 
 ### Backend package layout
 
@@ -134,3 +147,13 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 - During review, check ownership, existing primitives, prop defaults, native event and ref forwarding, URL behavior, and accessible states against the actual callers.
 
 - When refactoring web UI, scan across features for repeated markup, utility classes, formatting, event handlers, and request lifecycles. Extract shared markup into a prop-driven component, pure calculations into helpers, and stateful logic into hooks. Migrate matching callers and preserve their defaults, routing, accessibility, and error handling. Check that the duplicated implementation is gone before adding another abstraction.
+
+## Backend validation and localization
+
+- Write all new agent rules and skills in English. Before changing validation, trace the controller or service entry point to `@Valid` or `validator.validate(...)` and follow the error handler to the returned response.
+- Check existing constraints, their `ConstraintValidator` implementations, and regexes in `Constants`. Where available, look in `handler/annotation` and `handler/validator` for `@NotNullWithArgs`, `@PatternWithArgs`, and `@MaxWithArgs`. Use standard Jakarta constraints when they express the rule directly.
+- Use bundle keys for user-facing validation messages. Keep the default Vietnamese bundle and both VI/EN bundles under `i18n/` in sync. For standard constraints use named attributes such as `{value}` and `{max}`. For argument-aware validators, pass a localizable field name via `args` and match the validator's argument order in both translations. For example, if supported, `@MaxWithArgs(args = "description", value = 500)` supplies the field at `{0}` and the limit at `{1}`.
+- Check omitted fields, explicit nulls, empty strings, whitespace, and both sides of a boundary. Pair optional format or range constraints with a required constraint where appropriate. Use `@GroupSequence` when the returned error depends on validation order.
+- Check existing string utilities before adding helpers. Use Spring's `StringUtils.hasText()` for non-whitespace text. Keep format checks on DTOs and data-dependent checks in the owning service, such as matching an identity number to a customer and session.
+- For business errors reuse this project's `AppException` and `ErrorCode` (the equivalents of `ApplicationException` and `ApplicationExceptionCode`). Resolve localized business messages through `MessageSource` and supply translations for new codes.
+- Report the entry point, reused constraints or helpers, and input cases reviewed. Distinguish source inspection from runtime verification.

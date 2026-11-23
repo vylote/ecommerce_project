@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CreationTimestamp;
 
-import com.vlt.ecommerce.domain.Product;
+import com.vlt.ecommerce.config.Constants;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,8 +41,8 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Min(value = 1, message = "Đánh giá thấp nhất là 1 sao")
-    @Max(value = 5, message = "Đánh giá cao nhất là 5 sao")
+    @Min(value = Constants.MIN_REVIEW_STARS, message = "{validation.review.rating.min}")
+    @Max(value = Constants.MAX_REVIEW_STARS, message = "{validation.review.rating.max}")
     @Column(nullable = false)
     int rating; 
     

@@ -35,16 +35,12 @@ public class CommissionRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    // Tỉ lệ phí tại thời điểm mua (Tránh Admin đổi phí thì lịch sử bị sai)
     @Column(name = "commission_rate", nullable = false, precision = 5, scale = 4)
     BigDecimal commissionRate;
-    // Doanh thu gộp của món hàng (Bằng OrderItem.totalPrice)
     @Column(name = "item_revenue", nullable = false, precision = 15, scale = 2)
     BigDecimal itemRevenue;
-    // Số tiền hoa hồng sàn thu (Bằng itemRevenue * commissionRate)
     @Column(name = "commission_amount", nullable = false, precision = 15, scale = 2)
     BigDecimal commissionAmount;
-    // Doanh thu thực nhận của Seller (Bằng itemRevenue - commissionAmount)
     @Column(name = "net_revenue", nullable = false, precision = 15, scale = 2)
     BigDecimal netRevenue;
     @Column(name = "recorded_at", nullable = false, updatable = false)

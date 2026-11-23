@@ -37,7 +37,7 @@ public class Notification {
     Long id;
 
     @Column(nullable = false, length = 50)
-    String type; // Ví dụ: "ORDER_CONFIRMED", "ORDER_SHIPPING", "NEW_ORDER"
+    String type;
 
     @Column(nullable = false, length = 200)
     String title;
@@ -53,7 +53,7 @@ public class Notification {
     LocalDateTime readAt;
 
     @Column(name = "ref_id")
-    Long refId; // ID của Order hoặc tài nguyên liên quan để Frontend làm link bấm vào
+    Long refId;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp

@@ -2,16 +2,15 @@ package com.vlt.ecommerce.integration.rabbitmq;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.experimental.NonFinal;
 
 import com.vlt.ecommerce.domain.OrderItem;
 import com.vlt.ecommerce.domain.enumeration.OrderStatus;
 import com.vlt.ecommerce.domain.event.OrderStatusChangedEvent;
 import com.vlt.ecommerce.config.RabbitMQConfig;
+import com.vlt.ecommerce.config.properties.OrderProperties;
 import com.vlt.ecommerce.repository.OrderRepository;
 import com.vlt.ecommerce.repository.ProductRepository;
 import com.vlt.ecommerce.repository.SpecificProductRepository;
@@ -31,9 +30,7 @@ public class OrderExpirationConsumer {
     SpecificProductRepository specificProductRepository;
     ApplicationEventPublisher eventPublisher;
 
-    @NonFinal
-    @Value("${app.order.expiration-ttl-ms:900000}")
-    int orderExpirationTtlMs;
+    OrderProperties orderProperties;
 
     @Transactional
     @RabbitListener(queues = RabbitMQConfig.ORDER_CANCEL_QUEUE)
@@ -43,7 +40,7 @@ public class OrderExpirationConsumer {
         orderRepository.findByIdForUpdate(orderId).ifPresent(order -> {
             // Chỉ tự động hủy nếu đơn hàng vẫn đang ở trạng thái PENDING (chưa được thanh toán hoặc xác nhận)
             if (order.getStatus() == OrderStatus.PENDING) {
-                int ttlMs = orderExpirationTtlMs;
+                int ttlMs = orderProperties.expirationTtlMs();
                 String durationStr = (ttlMs < 60000)
                         ? (ttlMs / 1000) + " giây"
                         : (ttlMs < 3600000)

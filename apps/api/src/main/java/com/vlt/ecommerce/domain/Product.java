@@ -42,8 +42,6 @@ public class Product {
     String name;
     @Column(columnDefinition = "TEXT")
     String description;
-    // Dùng BigDecimal cho tiền tệ (rất quan trọng khi phỏng vấn)
-    //lấy 15 chữ số, 2 số sau dấu phẩy 
     @Column(nullable = false, precision = 15, scale = 2)
     BigDecimal price;
     @Column(name = "stock_quantity", nullable = false)

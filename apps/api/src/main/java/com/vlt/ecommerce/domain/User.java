@@ -88,20 +88,3 @@ public class User {
     @EqualsAndHashCode.Exclude
     List<ImportReceipt> importReceipts;
 }
-
-/* ==============================================================================
-     * CHỐNG VÒNG LẶP VÔ TẬN (STACKOVERFLOW) VÀ QUẢN LÝ VÒNG ĐỜI TỰ ĐỘNG
-     * ==============================================================================
-     * 1. @ToString.Exclude & @EqualsAndHashCode.Exclude:
-     * - BẮT BUỘC phải có khi dùng @Data của Lombok trong các mối quan hệ 2 chiều.
-     * - Nếu không có, khi in log User -> gọi toString() của List<Address> -> List này 
-     * lại gọi ngược toString() của User -> Tạo thành vòng lặp vô tận gây sập ứng dụng 
-     * lập tức với lỗi StackOverflowError.
-     * * 2. cascade = CascadeType.ALL:
-     * - Tạo hiệu ứng Domino dữ liệu: Khi xóa tài khoản User, Hibernate sẽ tự động 
-     * kích hoạt lệnh xóa sạch toàn bộ Địa chỉ và Giỏ hàng của người đó, tránh để lại 
-     * rác dữ liệu mồ côi trong DB.
-     * * 3. fetch = FetchType.LAZY:
-     * - Viết tường minh (Explicit) để khẳng định: Chỉ khi nào gọi .getAddresses() hoặc 
-     * .getCartItems() thì Hibernate mới truy vấn xuống DB lấy dữ liệu.
-     */

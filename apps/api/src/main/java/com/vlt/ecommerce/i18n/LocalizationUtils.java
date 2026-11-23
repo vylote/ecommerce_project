@@ -25,9 +25,6 @@ public class LocalizationUtils {
 
     private static final String DEFAULT_LANG = "vi";
 
-    /**
-     * Lấy mã ngôn ngữ hiện tại ("vi" hoặc "en") từ Request Header: Accept-Language hoặc X-Lang
-     */
     public String getLanguage() {
         HttpServletRequest request = getCurrentHttpRequest();
         if (request != null) {
@@ -48,31 +45,22 @@ public class LocalizationUtils {
         }
 
         Locale currentLocale = LocaleContextHolder.getLocale();
-        if (currentLocale != null && "en".equalsIgnoreCase(currentLocale.getLanguage())) {
+        if ("en".equalsIgnoreCase(currentLocale.getLanguage())) {
             return "en";
         }
         return DEFAULT_LANG;
     }
 
-    /**
-     * Lấy Locale tương ứng ("vi" hoặc "en")
-     */
     public Locale getCurrentLocale() {
         String lang = getLanguage();
         return "en".equalsIgnoreCase(lang) ? Locale.ENGLISH : Locale.of(DEFAULT_LANG);
     }
 
-    /**
-     * Dịch message theo messageKey với Locale hiện tại
-     */
     public String getMessage(String messageKey, Object... params) {
         Locale locale = getCurrentLocale();
         return getMessage(messageKey, locale, params);
     }
 
-    /**
-     * Dịch message theo messageKey với Locale chỉ định
-     */
     public String getMessage(String messageKey, Locale locale, Object... params) {
         try {
             return messageSource.getMessage(messageKey, params, locale);

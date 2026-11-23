@@ -45,7 +45,6 @@ public class CommissionConfig {
     @JoinColumn(name = "category_id", nullable = false)
     Category category;
 
-    // Admin nào là người tạo ra cấu hình này
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     @ToString.Exclude

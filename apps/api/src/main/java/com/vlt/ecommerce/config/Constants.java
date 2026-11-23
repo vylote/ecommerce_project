@@ -15,6 +15,9 @@ public final class Constants {
     public static final String ANALYTICS_PERIOD_WEEK = "WEEK";
     public static final String ANALYTICS_PERIOD_MONTH = "MONTH";
 
+    public static final int MIN_REVIEW_STARS = 1;
+    public static final int MAX_REVIEW_STARS = 5;
+
     private Constants() {
     }
 }

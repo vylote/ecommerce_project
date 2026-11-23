@@ -35,7 +35,7 @@ public class Role {
     Long id;
 
     @Column(nullable = false, unique = true, length = 50)
-    String name; // Ví dụ: "ROLE_BUYER", "ROLE_SELLER", "ROLE_BUYER_VIP"
+    String name;
 
     @Column(length = 255)
     String description;

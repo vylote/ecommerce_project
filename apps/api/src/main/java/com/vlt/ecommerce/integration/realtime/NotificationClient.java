@@ -4,9 +4,10 @@ import com.vlt.ecommerce.domain.Notification;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+
+import com.vlt.ecommerce.config.properties.NotificationProperties;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,7 @@ public class NotificationClient {
 
     final RestTemplate restTemplate;
 
-    @Value("${notification.service-url}")
-    String nodeServerUrl;
+    final NotificationProperties notificationProperties;
 
     public void pushNotification(Long userId, Notification notification) {
         try {
@@ -35,7 +35,7 @@ public class NotificationClient {
             payload.put("refId", notification.getRefId());
 
             // Giao tiếp ngoại vi: Bắn tín hiệu sang Node.js
-            restTemplate.postForObject(nodeServerUrl + "/notify", payload, Void.class);
+            restTemplate.postForObject(notificationProperties.serviceUrl() + "/notify", payload, Void.class);
             log.info("Successfully pushed notification to Node.js for user {}", userId);
         } catch (Exception e) {
             log.error("Failed to push notification to Node.js for user {}", userId, e);

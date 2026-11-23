@@ -1,5 +1,7 @@
 package com.vlt.ecommerce.service.dto.request;
 
+import com.vlt.ecommerce.config.Constants;
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -11,16 +13,17 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreateReviewRequest {
-    @NotNull(message = "Product ID không được để trống")
+    @NotNull(message = "{validation.review.productId.required}")
     Long productId;
 
-    @NotNull(message = "Order ID không được để trống")
+    @NotNull(message = "{validation.review.orderId.required}")
     Long orderId;
 
-    @Min(value = 1, message = "Đánh giá tối thiểu là 1 sao")
-    @Max(value = 5, message = "Đánh giá tối đa là 5 sao")
-    int rating;
+    @NotNull(message = "{validation.review.rating.required}")
+    @Min(value = Constants.MIN_REVIEW_STARS, message = "{validation.review.rating.min}")
+    @Max(value = Constants.MAX_REVIEW_STARS, message = "{validation.review.rating.max}")
+    Integer rating;
 
-    @NotBlank(message = "Nội dung bình luận không được để trống")
+    @NotBlank(message = "{validation.review.comment.required}")
     String comment;
 }
