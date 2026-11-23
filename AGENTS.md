@@ -102,11 +102,12 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 
 ### Placement and dependencies
 
-- `main.jsx` mounts React and provides the Redux store. `App.jsx` composes application providers and the browser router. Register routes in `routes/AppRoutes.jsx` and keep each route page in its owning `features/<feature>/` directory.
-- Pages compose layouts and feature components, read route state, and handle navigation. Place domain-specific forms, cards, tables, filters, and sections beside the page or in the feature's `components/` directory. Keep specialized controls local when sharing would require page-specific branches.
-- Check both existing shared UI locations before adding a primitive. `shared/components/ui/` contains `FormInput`, `FormSelect`, and their shared styles. `shared/ui/` contains controls such as `Dialog`, `TextField`, and `QuantityStepper`. Extend the closest existing control. Place cross-feature compositions such as `Pagination` and `AuthLayout` in `shared/components/`.
-- Feature code may depend on shared code. Keep shared UI independent of features and pages. When features need the same behavior, extract the reusable part or expose a narrow feature entry point. Avoid deep imports into another feature's internals.
-- Keep domain logic and validation with the feature. Use `shared/hooks/` for cross-feature hooks, `shared/utils/api.js` for the Axios instance, `shared/i18n/` for translations, and `store/slice/` for Redux slices registered in `store/index.js`.
+- Organize the React source using the JHipster React layout under `apps/web/src/app/`. The Vite entry point is `app/main.jsx`. `app/App.jsx` composes app providers and the browser router. Register routes in `app/routes/AppRoutes.jsx`.
+- Keep Redux configuration and slices in `app/config/store/` and the Axios client in `app/config/api.js`. Place translations, their provider, and the language hook in `i18n/`.
+- Keep route pages and user workflows in `app/modules/`. The account module owns authentication and profile pages, and the storefront module owns the home page and catalog. Keep workflow-specific forms, tables, and filters beside their owning pages.
+- Put reusable entity-specific code in `app/entities/`, such as product cards and image selection or order status charts. Pages and modules compose this code. Keep entity code independent of page-specific workflows.
+- Put shared UI primitives in `app/shared/ui/`. Look for existing controls, including `FormInput`, `FormSelect`, `Dialog`, `TextField`, and `QuantityStepper`, before creating another. Put cross-module compositions in `app/shared/components/` and hooks in `app/shared/hooks/`.
+- Keep domain logic and validation with their owner. Use shared code for behavior and presentation that multiple modules reuse.
 
 ### Designing the component API
 
@@ -124,7 +125,7 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 - In React 19, function components can receive `ref` as a prop and provide context with `<SomeContext value={value}>`. Use `use()` to read context or a stable promise with a Suspense boundary. Route pages can supply document metadata with `<title>` and `<meta>`.
 - For action-based forms, use `useActionState` for submission results and pending state, or `useFormStatus` in a child of the submitting form. Use `useOptimistic` when an action benefits from immediate feedback. Add memoization when profiling identifies a cost.
 
-- For reloadable queries with a stable request callback, reuse `shared/hooks/useReloadableRequest.js` to derive loading state and cancel stale requests. Reset dependent pagination in the event handler that changes the filter. Resolve hook dependency warnings in the code.
+- For reloadable queries with a stable request callback, reuse `app/shared/hooks/useReloadableRequest.js` to derive loading state and cancel stale requests. Reset dependent pagination in the event handler that changes the filter. Resolve hook dependency warnings in the code.
 
 ### Naming and review
 
