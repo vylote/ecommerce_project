@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vlt.ecommerce.integration.redis.UserAuthorizationCache;
 import com.vlt.ecommerce.domain.Shop;
 import com.vlt.ecommerce.service.ShopService;
 import com.vlt.ecommerce.config.Constants;
@@ -53,6 +54,7 @@ public class ShopServiceImpl implements ShopService {
     ShopRepository shopRepository;
     ProductRepository productRepository;
     RoleRepository roleRepository;
+    UserAuthorizationCache authorizationCache;
     CategoryRepository categoryRepository;
     ShopMapper shopMapper;
     ProductMapper productMapper;
@@ -62,6 +64,7 @@ public class ShopServiceImpl implements ShopService {
     @Override
     @Transactional
     public ShopResponse create(ShopRequest request, MultipartFile file) {
+        authorizationCache.userChanged(currentUserProvider.getUserId());
         User seller = currentUserProvider.getUser();
 
         boolean isAlreadySeller = seller.getRoles().stream()

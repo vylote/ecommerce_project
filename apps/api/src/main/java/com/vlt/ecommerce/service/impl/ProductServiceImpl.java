@@ -1,7 +1,6 @@
 package com.vlt.ecommerce.service.impl;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,13 +24,16 @@ import com.vlt.ecommerce.domain.Product;
 import com.vlt.ecommerce.domain.ProductImage;
 import com.vlt.ecommerce.domain.SpecificProduct;
 import com.vlt.ecommerce.service.dto.request.ProductRequest;
+import com.vlt.ecommerce.service.dto.request.ProductReviewSearchRequest;
+import com.vlt.ecommerce.service.dto.request.ProductSearchRequest;
 import com.vlt.ecommerce.service.dto.response.ProductImageResponse;
 import com.vlt.ecommerce.service.dto.response.ProductResponse;
-import com.vlt.ecommerce.service.dto.response.SpecificProductResponse;
+import com.vlt.ecommerce.service.mapper.ProductDetailMapper;
 import com.vlt.ecommerce.service.mapper.ProductImageMapper;
 import com.vlt.ecommerce.service.mapper.ProductMapper;
 import com.vlt.ecommerce.repository.CategoryRepository;
 import com.vlt.ecommerce.repository.ProductImageRepository;
+import com.vlt.ecommerce.repository.ProductFilter;
 import com.vlt.ecommerce.repository.ProductRepository;
 import com.vlt.ecommerce.repository.SpecificProductRepository;
 import com.vlt.ecommerce.domain.Review;
@@ -57,6 +59,7 @@ public class ProductServiceImpl implements ProductService {
     CurrentUserProvider currentUserProvider;
     ProductRepository productRepository;
     ProductMapper productMapper;
+    ProductDetailMapper productDetailMapper;
     ProductImageMapper productImageMapper;
     ShopRepository shopRepository;
     ProductImageRepository productImageRepository;
@@ -142,70 +145,23 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        ProductResponse response = productMapper.toProductResponse(product);
         List<SpecificProduct> variants = specificProductRepository.findByProductIdAndIsActiveTrue(id);
-        if (variants != null && !variants.isEmpty()) {
-            response.setHasVariants(true);
-            BigDecimal minP = variants.stream().map(SpecificProduct::getPrice).min(BigDecimal::compareTo).orElse(product.getPrice());
-            BigDecimal maxP = variants.stream().map(SpecificProduct::getPrice).max(BigDecimal::compareTo).orElse(product.getPrice());
-            int totalStock = variants.stream().mapToInt(SpecificProduct::getStockQuantity).sum();
-            response.setMinPrice(minP);
-            response.setMaxPrice(maxP);
-            response.setStockQuantity(totalStock);
-            response.setVariants(variants.stream().map(v -> SpecificProductResponse.builder()
-                    .id(v.getId())
-                    .productId(product.getId())
-                    .productName(product.getName())
-                    .name(v.getName())
-                    .sku(v.getSku())
-                    .price(v.getPrice())
-                    .stockQuantity(v.getStockQuantity())
-                    .imageUrl(v.getImageUrl())
-                    .isActive(v.getIsActive())
-                    .createdAt(v.getCreatedAt())
-                    .updatedAt(v.getUpdatedAt())
-                    .build()).toList());
-        } else {
-            response.setHasVariants(false);
-            response.setMinPrice(product.getPrice());
-            response.setMaxPrice(product.getPrice());
-            response.setVariants(Collections.emptyList());
-        }
-
-        return response;
+        return productDetailMapper.toProductDetailResponse(product, variants);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<ProductResponse> getAllProducts(
-            Long categoryId, Long shopId, String keyword, BigDecimal minPrice, BigDecimal maxPrice, Double minRating,
-            int page, int size, String sortBy, String order) {
-
-        Sort sort = Sort.unsorted();
-        if (!sortBy.equalsIgnoreCase("random")) {
-            sort = order.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        }
-
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-
-        Page<Product> productPage = productRepository.filterProducts(
-                categoryId, shopId, keyword, minPrice, maxPrice, minRating, "ACTIVE", pageable);
-
-        List<ProductResponse> content = productMapper.toProductResponseList(productPage.getContent());
-
-        if (sortBy.equalsIgnoreCase("random")) {
-            Collections.shuffle(content);
-        }
-
-        return PageResponse.of(productPage, content);
+    public PageResponse<ProductResponse> getAllProducts(ProductSearchRequest request) {
+        boolean shuffle = "random".equalsIgnoreCase(request.sortBy());
+        return searchProducts(request, request.shopId(), "ACTIVE", shuffle);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<ReviewResponse> getProductReviews(Long productId, Integer rating, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
+    public PageResponse<ReviewResponse> getProductReviews(Long productId, ProductReviewSearchRequest request) {
+        Pageable pageable = PageRequest.of(request.page() - 1, request.size(), Sort.by("createdAt").descending());
 
-        Page<Review> reviewPage = reviewRepository.findByProductIdWithBuyer(productId, rating, pageable);
+        Page<Review> reviewPage = reviewRepository.findByProductIdWithBuyer(productId, request.rating(), pageable);
 
         List<ReviewResponse> content = reviewMapper.toReviewResponses(reviewPage.getContent());
 
@@ -232,25 +188,36 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('SELLER')")
-    public PageResponse<ProductResponse> getMyProducts(
-            Long categoryId, String keyword, BigDecimal minPrice, BigDecimal maxPrice, Double minRating,
-            String statusFilter,
-            int page, int size, String sortBy, String order) {
-
+    public PageResponse<ProductResponse> getMyProducts(ProductSearchRequest request) {
         Long sellerId = currentUserProvider.getUserId();
-
         Shop shop = shopRepository.findBySellerId(sellerId)
                 .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
-        Sort sort = order.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        String status = StringUtils.hasText(request.status()) ? request.status() : "ALL";
+        return searchProducts(request, shop.getId(), status, false);
+    }
 
-        String finalStatus = (!StringUtils.hasText(statusFilter)) ? "ALL" : statusFilter;
+    private PageResponse<ProductResponse> searchProducts(
+            ProductSearchRequest request, Long shopId, String status, boolean shuffle) {
+        Sort.Direction direction = "asc".equalsIgnoreCase(request.order())
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = shuffle ? Sort.unsorted() : Sort.by(direction, request.sortBy());
+        Pageable pageable = PageRequest.of(request.page() - 1, request.size(), sort);
 
-        Page<Product> productPage = productRepository.filterProducts(
-                categoryId, shop.getId(), keyword, minPrice, maxPrice, minRating, finalStatus, pageable);
-
+        ProductFilter filter = ProductFilter.builder()
+                .categoryId(request.categoryId())
+                .shopId(shopId)
+                .keyword(request.keyword())
+                .minPrice(request.minPrice())
+                .maxPrice(request.maxPrice())
+                .minRating(request.minRating())
+                .status(status)
+                .build();
+        Page<Product> productPage = productRepository.filterProducts(filter, pageable);
         List<ProductResponse> content = productMapper.toProductResponseList(productPage.getContent());
+        if (shuffle) {
+            Collections.shuffle(content);
+        }
 
         return PageResponse.of(productPage, content);
     }

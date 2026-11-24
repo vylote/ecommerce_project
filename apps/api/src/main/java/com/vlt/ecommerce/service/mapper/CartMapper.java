@@ -20,6 +20,7 @@ public interface CartMapper {
     @Mapping(target = "addedAt", ignore = true)
     @Mapping(target = "product", source = "productId", qualifiedByName = "idToProduct")
     @Mapping(target = "buyer", ignore = true)
+    @Mapping(target = "specificProduct", ignore = true)
     CartItem toCartItem(CartItemRequest request);
 
     default CartItemResponse toCartItemResponse(CartItem cartItem) {
@@ -61,6 +62,7 @@ public interface CartMapper {
     @Mapping(target = "addedAt", ignore = true)
     @Mapping(target = "product", ignore = true)
     @Mapping(target = "buyer", ignore = true)
+    @Mapping(target = "specificProduct", ignore = true)
     void updateQuantityCartItem(CartItemRequest request, @MappingTarget CartItem cartItem);
 
     List<CartItemResponse> toCartItemsResponse(List<CartItem> cartItems);

@@ -24,7 +24,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.service.exception.AppException;
 import com.vlt.ecommerce.service.exception.ErrorCode;
-import com.vlt.ecommerce.domain.Permission;
 import com.vlt.ecommerce.domain.Role;
 import com.vlt.ecommerce.domain.User;
 
@@ -44,14 +43,10 @@ public class JwtServiceImpl implements JwtService {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
             Set<String> roles = new HashSet<>();
-            Set<String> permissions = new HashSet<>();
 
             if (user.getRoles() != null) {
                 for (Role role : user.getRoles()) {
                     roles.add(role.getName());
-                    for (Permission perm : role.getPermissions()) {
-                        permissions.add(perm.getName());
-                    }
                 }
             }
 
@@ -62,7 +57,6 @@ public class JwtServiceImpl implements JwtService {
                 .expirationTime(new Date(Instant.now().plus(24, ChronoUnit.HOURS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim(Constants.ROLES_CLAIM, roles)
-                .claim(Constants.PERMISSIONS_CLAIM, permissions)
                 .claim(Constants.USER_ID_CLAIM, user.getId())
                 .claim(Constants.SESSION_ID_CLAIM, sessionId)
                 .build();
@@ -83,7 +77,7 @@ public class JwtServiceImpl implements JwtService {
 
             JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getEmail())
-                .issuer("mini-ecommerce")
+                .issuer("VLT's Ecommerce")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(7, ChronoUnit.DAYS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())

@@ -74,7 +74,6 @@ public class AuthController {
                                         .build());
                 }
 
-                // Nếu là tài khoản cũ -> Nặn cookie đăng nhập
                 TokenResponse tokenResponse = authResponse.getTokenResponse();
                 ResponseCookie jwtCookie = buildCookie(Constants.ACCESS_TOKEN_COOKIE, tokenResponse.getAccessToken(), Constants.ACCESS_COOKIE_MAX_AGE_SECONDS);
                 ResponseCookie refreshCookie = buildCookie(Constants.REFRESH_TOKEN_COOKIE, tokenResponse.getRefreshToken(), Constants.REFRESH_COOKIE_MAX_AGE_SECONDS);
@@ -100,7 +99,7 @@ public class AuthController {
                                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                                 .body(ApiResponse.<String>builder()
-                                                .result("Đăng ký tài khoản thành công")
+                                                .result("Register successfully")
                                                 .build());
         }
 
@@ -128,7 +127,7 @@ public class AuthController {
                                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                                 .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
                                 .body(ApiResponse.<String>builder()
-                                                .result("Đăng nhập thành công")
+                                                .result("Login successfully")
                                                 .build());
         }
 
@@ -150,7 +149,7 @@ public class AuthController {
                                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
                                 .header(HttpHeaders.SET_COOKIE, newRefreshCookie.toString())
                                 .body(ApiResponse.<String>builder()
-                                                .result("Làm mới phiên thành công")
+                                                .result("Refresh session successfully")
                                                 .build());
         }
 
@@ -168,7 +167,7 @@ public class AuthController {
                                 .header(HttpHeaders.SET_COOKIE, cleanJwtCookie.toString())
                                 .header(HttpHeaders.SET_COOKIE, cleanRefreshCookie.toString())
                                 .body(ApiResponse.<String>builder()
-                                                .result("Đăng xuất thành công")
+                                                .result("Logout successfully")
                                                 .build());
         }
 
@@ -183,7 +182,7 @@ public class AuthController {
         public ApiResponse<String> revokeSession(@RequestParam String ssid) {
                 sessionService.revokeSession(ssid);
                 return ApiResponse.<String>builder()
-                                .result("thu hoi thanh cong")
+                                .result("Revoke session successfully")
                                 .build();
         }
 }

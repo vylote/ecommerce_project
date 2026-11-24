@@ -11,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import com.vlt.ecommerce.domain.Shop;
 
 public interface ShopRepository extends JpaRepository<Shop, Long>{
-    Boolean existsBySellerId(Long id);
     Optional<Shop> findBySellerId(Long id);
     @Query("SELECT s FROM Shop s WHERE " +
            "(:keyword IS NULL OR " +

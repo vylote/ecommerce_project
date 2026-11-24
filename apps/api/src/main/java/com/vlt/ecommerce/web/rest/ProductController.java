@@ -1,10 +1,9 @@
 package com.vlt.ecommerce.web.rest;
 
-import java.math.BigDecimal;
-
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.vlt.ecommerce.service.dto.response.ApiResponse;
 import com.vlt.ecommerce.service.dto.response.PageResponse;
 import com.vlt.ecommerce.service.dto.request.ProductRequest;
+import com.vlt.ecommerce.service.dto.request.ProductReviewSearchRequest;
+import com.vlt.ecommerce.service.dto.request.ProductSearchRequest;
 import com.vlt.ecommerce.service.dto.response.ProductImageResponse;
 import com.vlt.ecommerce.service.dto.response.ProductResponse;
 import com.vlt.ecommerce.service.ProductService;
@@ -76,60 +77,29 @@ public class ProductController {
 
     @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> getAllProducts(
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long shopId,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) Double minRating,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String order) {
+            @ModelAttribute ProductSearchRequest request) {
 
         return ApiResponse.<PageResponse<ProductResponse>>builder()
-                .result(productService.getAllProducts(categoryId, shopId, keyword, minPrice, maxPrice, minRating, page, size, sortBy, order))
+                .result(productService.getAllProducts(request))
                 .build();
     }
 
     @GetMapping("/{id}/reviews")
     public ApiResponse<PageResponse<ReviewResponse>> getProductReviews(
             @PathVariable Long id,
-            @RequestParam(required = false) Integer rating,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @ModelAttribute ProductReviewSearchRequest request) {
 
         return ApiResponse.<PageResponse<ReviewResponse>>builder()
-                .result(productService.getProductReviews(id, rating, page, size))
+                .result(productService.getProductReviews(id, request))
                 .build();
     }
 
     @GetMapping("/seller")
     public ApiResponse<PageResponse<ProductResponse>> getMyProducts(
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) Double minRating,
-            @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "createdAt") String sortBy,
-            @RequestParam(defaultValue = "desc") String order) {
+            @ModelAttribute ProductSearchRequest request) {
 
         return ApiResponse.<PageResponse<ProductResponse>>builder()
-                .result(productService.getMyProducts(categoryId, keyword, minPrice, maxPrice, minRating, status, page, size, sortBy, order))
+                .result(productService.getMyProducts(request))
                 .build();
     }
 }
-/* ==============================================================================
-     * CHUẨN MỰC THIẾT KẾ RESTFUL API: @RequestParam vs @PathVariable
-     * ==============================================================================
-     * 1. @PathVariable: Dùng để CHỈ ĐÍCH DANH 1 thực thể. Nằm TRƯỚC dấu '?' trên URL.
-     * VD: GET /products/15 (Lấy chi tiết SP số 15). Bắt buộc phải có.
-     * * 2. @RequestParam: Dùng để LỌC (Filter) một DANH SÁCH. Nằm SAU dấu '?' trên URL.
-     * VD: GET /products?keyword=iphone&page=2
-     * - Không bắt buộc (required = false). 
-     * - Nếu User gọi trần trụi (GET /products), Spring sẽ tự động lấy các giá trị 
-     * 'defaultValue' bù vào -> Không bao giờ lo sập API vì thiếu tham số.
-     * ============================================================================== */

@@ -121,6 +121,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - Write a new versioned SQL changelog for every schema change or seed update. Store it in apps/api/src/main/resources/db/migration with the full date and a descriptive purpose. Use VYYYY.MM.DD.NN__describe_change.sql and preserve already applied changelogs.
 - Define granular operation authorities and document their default role grants in docs/authorization.md. Use roles to bundle permissions. Keep resource ownership checks alongside authority checks and document read-any grants separately.
+- Omit permission lists from JWTs. Use Redis read-through caches for account status, role assignments, and shared role permissions. Fall back to current MySQL data on misses or concurrent authorization writes. Mark affected authorization writes in Redis before changing MySQL and evict affected entries after transaction completion. Keep cache fills guarded against concurrent updates.
 
 ### JPA column mappings
 
@@ -131,6 +132,8 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - Give controllers, services, repositories, and mappers clear responsibilities. Keep business orchestration in services, keep interfaces focused on caller needs, honor interface contracts in implementations, and depend on stable abstractions at module boundaries. Extend through composition where behavior genuinely varies.
 - Put pure entity and DTO conversion in stateless Spring-managed mappers under service.mapper. Reuse existing mapper beans through constructor injection and use MapStruct for direct field mappings. Use custom mapper methods for transformations that need explicit control. Keep data access, authorization, and business decisions in services.
+- Assemble detail responses from already loaded data in a mapper. Reuse nested mappers and keep display-only aggregates, such as a variant price range, with the response mapping.
+- When a MapStruct target field is owned by the service or by another entity relationship, verify the create and update flows and explicitly ignore that field in the mapping. Keep unmapped-target diagnostics enabled.
 - Use MapStruct for request-to-entity conversion across registration flows. Map profile fields explicitly and keep raw credentials out of the entity. Set the encoded password, roles, and account state in the service. Use a builder when assembling a new object from business values or when named construction improves readability.
 
 - Resolve the authenticated user through CurrentUserProvider. Read the email or user ID directly when the caller only needs identity. Load the User entity when business logic needs it. Resolve identity from the current security context on each call and keep authorization decisions with their owners.
@@ -144,6 +147,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 ### Backend service contracts
 
 - Group related service inputs into an immutable parameter object when positional arguments become hard to distinguish or evolve. Use a record for a data-only input and add a builder when named fields improve the call site. Keep short, clear signatures simple.
+- Keep search and listing methods to at most three parameters at controller and service boundaries. Bind related search query parameters to a request record. Pass an immutable filter and `Pageable` to the repository. Resolve authorization-dependent scope, such as the current seller's shop, inside the service.
 
 - Keep one interface for the related use cases of a service, including operations called by controllers and other beans. Use a separate interface when it defines a distinct responsibility or integration boundary.
 - For standalone services called by other beans, such as application services or integration adapters, define an interface for the operations their callers need and provide a Spring-managed implementation.

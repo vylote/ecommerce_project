@@ -1,7 +1,6 @@
 package com.vlt.ecommerce.repository;
 
 import com.vlt.ecommerce.domain.Review;
-import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 public interface ReviewRepository extends JpaRepository<Review, Long>{
     boolean existsByBuyerIdAndOrderIdAndProductId(Long buyerId, Long orderId, Long productId);
     boolean existsByOrderId(Long orderId);
-    List<Review> findByProductIdOrderByCreatedAtDesc(Long productId);
+
     @Query("SELECT r FROM Review r JOIN FETCH r.buyer WHERE r.product.id = :productId AND "+
         "(:rating IS NULL OR r.rating = :rating)")
     Page<Review> findByProductIdWithBuyer(

@@ -32,7 +32,6 @@ import lombok.experimental.FieldDefaults;
 public class RolePermissionController {
     RolePermissionService rolePermissionService;
 
-    // ================= ROLES =================
     @GetMapping("/roles")
     public ApiResponse<List<RoleResponse>> getAllRoles() {
         return ApiResponse.<List<RoleResponse>>builder()
@@ -71,7 +70,6 @@ public class RolePermissionController {
                 .build();
     }
 
-    // ================= PERMISSIONS =================
     @GetMapping("/permissions")
     public ApiResponse<List<PermissionResponse>> getAllPermissions() {
         return ApiResponse.<List<PermissionResponse>>builder()
@@ -103,7 +101,6 @@ public class RolePermissionController {
                 .build();
     }
 
-    // ================= GÁN ROLE CHO USER =================
     @PutMapping("/users/{userId}/roles")
     public ApiResponse<UserResponse> assignRolesToUser(
             @PathVariable Long userId,

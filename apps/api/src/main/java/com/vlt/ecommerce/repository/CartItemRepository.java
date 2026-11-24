@@ -19,15 +19,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long>{
     void deleteAllByBuyerId(@Param("buyerId") Long buyerId);
     @EntityGraph(attributePaths = {"product"})
     List<CartItem> findByBuyerId(Long buyerId);
-    @Modifying
-    @Query(value = """
-        INSERT INTO cart_items (buyer_id, product_id, quantity, added_at) 
-        VALUES (:buyerId, :productId, :qty, NOW()) 
-        ON DUPLICATE KEY UPDATE quantity = quantity + :qty
-        """, nativeQuery = true)
-    void upsertCartItem(@Param("buyerId") Long buyerId, 
-                        @Param("productId") Long productId, 
-                        @Param("qty") Integer qty);
-    // Lấy chính xác các item được chọn và đảm bảo tính sở hữu của Buyer
+
     List<CartItem> findAllByIdInAndBuyerId(List<Long> ids, Long buyerId);
 }

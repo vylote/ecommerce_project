@@ -27,7 +27,6 @@ import lombok.experimental.FieldDefaults;
 public class SpecificProductController {
     SpecificProductService specificProductService;
 
-    // ================= LẤY DANH SÁCH BIẾN THỂ =================
     @GetMapping("/products/{productId}/variants")
     public ApiResponse<List<SpecificProductResponse>> getVariants(
             @PathVariable Long productId,
@@ -37,7 +36,6 @@ public class SpecificProductController {
                 .build();
     }
 
-    // ================= XEM CHI TIẾT 1 BIẾN THỂ =================
     @GetMapping("/variants/{id}")
     public ApiResponse<SpecificProductResponse> getVariantById(@PathVariable Long id) {
         return ApiResponse.<SpecificProductResponse>builder()
@@ -45,7 +43,6 @@ public class SpecificProductController {
                 .build();
     }
 
-    // ================= TẠO BIẾN THỂ MỚI CHO SẢN PHẨM =================
     @PostMapping("/products/{productId}/variants")
     public ApiResponse<SpecificProductResponse> createVariant(
             @PathVariable Long productId,
@@ -55,7 +52,6 @@ public class SpecificProductController {
                 .build();
     }
 
-    // ================= CẬP NHẬT BIẾN THỂ =================
     @PutMapping("/variants/{id}")
     public ApiResponse<SpecificProductResponse> updateVariant(
             @PathVariable Long id,
@@ -65,7 +61,6 @@ public class SpecificProductController {
                 .build();
     }
 
-    // ================= XÓA BIẾN THỂ =================
     @DeleteMapping("/variants/{id}")
     public ApiResponse<String> deleteVariant(@PathVariable Long id) {
         specificProductService.deleteVariant(id);

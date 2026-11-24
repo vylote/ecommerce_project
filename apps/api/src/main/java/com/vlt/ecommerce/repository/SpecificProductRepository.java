@@ -1,7 +1,6 @@
 package com.vlt.ecommerce.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -15,7 +14,7 @@ import com.vlt.ecommerce.domain.SpecificProduct;
 public interface SpecificProductRepository extends JpaRepository<SpecificProduct, Long> {
     List<SpecificProduct> findByProductId(Long productId);
     List<SpecificProduct> findByProductIdAndIsActiveTrue(Long productId);
-    Optional<SpecificProduct> findBySku(String sku);
+
     boolean existsByProductIdAndIsActiveTrue(Long productId);
     boolean existsBySku(String sku);
     boolean existsBySkuAndIdNot(String sku, Long id);
@@ -35,6 +34,6 @@ public interface SpecificProductRepository extends JpaRepository<SpecificProduct
         SET sp.stockQuantity = sp.stockQuantity + :qty 
         WHERE sp.id = :variantId
         """)
-    int incrementStock(@Param("variantId") Long variantId, 
+    void incrementStock(@Param("variantId") Long variantId,
                        @Param("qty") Integer qty);
 }
