@@ -1,14 +1,7 @@
-notification:
-  service-url: ${NOTIFICATION_SERVICE_URL:}
-
 app:
   order:
-    expiration-ttl-ms: ${ORDER_EXPIRATION_TTL_MS:3600000} # Môi trường production: 1 giờ (3,600,000 ms)
-
-# Trên server thường cấu hình tắt show-sql hoặc ddl-auto: validate
+    expiration-ttl-ms: 3600000
 spring:
-  rabbitmq:
-    virtual-host: ${RABBITMQ_VHOST:ecommerce_prod}
   jpa:
     show-sql: false
     hibernate:

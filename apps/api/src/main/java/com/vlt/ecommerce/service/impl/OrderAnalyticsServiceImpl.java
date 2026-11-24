@@ -52,7 +52,6 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
         if (shop == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
         List<OrderStatusStat> stats = orderRepository.countOrdersByStatusForShop(shop.getId());
-        // Chuyển List thành Map để Frontend dễ hiển thị (VD: { "PENDING": 12, "SHIPPING": 5 })
         Map<OrderStatus, Long> result = new EnumMap<>(OrderStatus.class);
         for (OrderStatus status : OrderStatus.values()) {
             result.put(status, 0L);
@@ -95,13 +94,11 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
 
         List<Order> orders = orderRepository.findByShopIdAndCreatedAtAfter(shop.getId(), startDate);
 
-        // Tính tổng doanh thu thực tế từ các đơn COMPLETED
         BigDecimal totalRevenue = orders.stream()
                 .filter(o -> o.getStatus() == OrderStatus.COMPLETED)
                 .map(Order::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Doanh thu tạm tính từ các đơn CONFIRMED / SHIPPING
         BigDecimal pendingRevenue = orders.stream()
                 .filter(o -> o.getStatus() == OrderStatus.CONFIRMED || o.getStatus() == OrderStatus.SHIPPING)
                 .map(Order::getTotalAmount)
@@ -117,7 +114,6 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
                 ? totalRevenue.divide(BigDecimal.valueOf(completedOrdersCount), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
-        // Thống kê theo trạng thái
         Map<OrderStatus, Long> statusBreakdown = new EnumMap<>(OrderStatus.class);
         for (OrderStatus st : OrderStatus.values()) {
             statusBreakdown.put(st, 0L);
@@ -126,7 +122,6 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
             statusBreakdown.put(o.getStatus(), statusBreakdown.get(o.getStatus()) + 1);
         }
 
-        // Tạo mảng timeline liên tục tùy theo period
         List<SellerAnalyticsResponse.DailyTimeline> timeline = new ArrayList<>();
 
         if (Constants.ANALYTICS_PERIOD_WEEK.equals(period)) {

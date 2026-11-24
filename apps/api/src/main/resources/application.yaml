@@ -2,11 +2,11 @@ spring:
   application:
     name: ecommerce-backend
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE}
   datasource:
-    url: jdbc:mysql://localhost:3306/ecommerce_db?useSSL=false&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
-    username: user
-    password: "3821"
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -22,54 +22,50 @@ spring:
   servlet:
     multipart:
       enabled: true
-      max-file-size: 5MB       # Dung lượng tối đa của MỘT file
-      max-request-size: 15MB   # Dung lượng tối đa của TOÀN BỘ request (nếu up nhiều file cùng lúc)
+      max-file-size: 5MB
+      max-request-size: 15MB
   data:
     redis:
-      host: localhost
-      port: 6379
+      repositories:
+        enabled: false
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
   rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:guest}
-    password: ${RABBITMQ_PASSWORD:guest}
-    virtual-host: ${RABBITMQ_VHOST:/}
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: ${RABBITMQ_VHOST}
   mail:
-    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
-    port: ${SPRING_MAIL_PORT:587}
+    host: ${SPRING_MAIL_HOST:}
+    port: ${SPRING_MAIL_PORT}
     username: ${SPRING_MAIL_USERNAME:}
     password: ${SPRING_MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
-          auth: true
+          auth: ${SMTP_AUTH_ENABLED}
           starttls:
-            enable: true
-
+            enable: ${SMTP_STARTTLS_ENABLED}
 server:
   port: 8080
   servlet:
     context-path: /api/v1
-
 jwt:
-  secret: ${JWT_SECRET:}
+  secret: ${JWT_SECRET}
   expiration: 86400000
   refresh-expiration: 604800000
-
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
     operationsSorter: method
-
 notification:
-  service-url: ${NOTIFICATION_SERVICE_URL:http://localhost:3000}
-
+  service-url: ${NOTIFICATION_SERVICE_URL:}
 app:
   order:
-    expiration-ttl-ms: ${ORDER_EXPIRATION_TTL_MS:900000} # Mặc định 15 phút (900,000 ms)
-
+    expiration-ttl-ms: 900000
 logging:
   file:
     name: logs/ecommerce-app.log
@@ -80,9 +76,8 @@ logging:
     org.hibernate.orm.jdbc.bind: WARN
   logback:
     rollingpolicy:
-      max-file-size: 10MB # Khi file đạt 10MB, nó sẽ tự cắt sang file mới (ví dụ: ecommerce-app-1.log)
-      max-history: 30 #
-
+      max-file-size: 10MB
+      max-history: 30
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME:}
   api-key: ${CLOUDINARY_API_KEY:}

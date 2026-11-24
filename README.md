@@ -41,21 +41,14 @@ Cài JDK và Node.js phù hợp với bản phân phối. Cài [Docker Engine v�
 
 ### Cấu hình và chạy
 
-1. **Khởi động hạ tầng.** Mở Docker Desktop trên Windows hoặc macOS, hoặc khởi động Docker Engine trên Linux. Từ thư mục gốc của repo, chạy Compose để bật MySQL, Redis và RabbitMQ. Chờ các dịch vụ sẵn sàng, đặc biệt là MySQL khi khởi tạo lần đầu, rồi mới chạy API.
+1. **Chuẩn bị .env.** Sao chép `.env.example` thành `.env` ở thư mục gốc. Điền `DB_PASSWORD`, `MYSQL_ROOT_PASSWORD`, `RABBITMQ_PASSWORD` và `JWT_SECRET`. Khóa JWT bí mật cần có ít nhất 64 byte. Nếu đã có MySQL volume, dùng thông tin đăng nhập hiện tại vì các biến khởi tạo Compose chỉ áp dụng khi tạo database lần đầu.
+
+   Điền cấu hình SMTP, Cloudinary và `VITE_GOOGLE_CLIENT_ID` cho các tính năng tương ứng. Khi triển khai production, dùng bộ biến môi trường riêng với `SPRING_PROFILES_ACTIVE=prod` và cấu hình kết nối thật. Profile `prod` dùng JPA `validate` theo `application-prod.yml`.
+
+2. **Khởi động hạ tầng.** Mở Docker Desktop trên Windows hoặc macOS, hoặc khởi động Docker Engine trên Linux. Từ thư mục gốc chạy Compose rồi chờ MySQL sẵn sàng.
 
    <pre><code>docker compose up -d
    docker compose ps</code></pre>
-
-2. **Chuẩn bị file `.env`.** Tạo file ở thư mục gốc, cùng cấp với `docker-compose.yml`.
-
-   ```dotenv
-   VITE_API_URL=http://localhost:8080/api/v1
-   VITE_NOTIFICATION_URL=http://localhost:3000
-   ```
-
-   Đặt `JWT_SECRET` trong `.env` bằng khóa ký JWT bí mật có ít nhất 64 byte.
-
-   Điền cấu hình Cloudinary qua `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và `CLOUDINARY_API_SECRET`. Cấu hình SMTP nếu cần gửi email xác thực và `VITE_GOOGLE_CLIENT_ID` nếu dùng đăng nhập Google.
 
 3. **Chạy API bằng IntelliJ IDEA 2026.**
    - Mở thư mục gốc của repo. Nếu IntelliJ chưa nhận Maven module, nhấp phải vào `apps/api/pom.xml` và chọn **Add as Maven Project**.

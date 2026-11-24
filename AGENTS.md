@@ -45,7 +45,9 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - Use a single `.env` file at the repository root for the backend, frontend, and realtime gateway.
 - Keep environment configuration out of subdirectory files such as `apps/api/.env` and `apps/web/.env`.
-- Use environment variable placeholders such as `${ENV_VAR:default_value}` in `application.yaml`. Keep SMTP credentials, Cloudinary credentials, database passwords, and JWT secrets in environment variables.
+- Use .env for secrets and deployment-specific inputs, including credentials, signing keys, tokens, external service hosts, ports and URLs, provider settings, and environment feature flags. Keep secret values out of version control and leave secret fields blank in .env.example.
+- Keep safe application defaults in YAML. This includes the application name, internal port, JPA settings, pool and timeout defaults, pagination, logging, JSON, CORS, and request limits. Put profile-specific application defaults in application-dev.yml and application-prod.yml. Keep stable queue, exchange, and Redis key names in the established Constants class.
+- Before adding an environment variable, check whether committing the value would expose sensitive data or whether deployment operators supply different values across environments. Keep the value in source configuration when both checks are negative.
 
 - Bind related Spring settings with `@ConfigurationProperties` in `config.properties` and inject the typed bean into consumers. Reuse Spring Boot property beans for framework settings. Keep the same YAML keys and environment mappings when migrating existing settings.
 
@@ -89,6 +91,8 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 - Inject Spring dependencies through the constructor. Represent an optional dependency explicitly with `Optional<T>` when the service can operate without that bean.
 - Log each operation's outcome once with relevant context. Omit decorative separators, repeated messages, and sensitive data such as OTPs or email contents.
 
+- Disable repository scanning for Spring Data stores accessed through templates alone. Keep startup logging focused on operational status and omit account identifiers and one-off diagnostic probes.
+
 ### Email templates
 
 - Store email layout and markup in UTF-8 HTML templates under apps/api/src/main/resources/templates/mail/. Load templates from the classpath and HTML-escape dynamic text when rendering.
@@ -108,6 +112,11 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - Declare entity field visibility directly. Keep a public or protected no-argument constructor for JPA, using the implicit constructor when it meets that contract.
 - Keep builder and all-arguments constructor annotations when application code relies on the builder. Use setter mapping for simple entities created by MapStruct. Check existing construction sites and preserve field initializers when removing @Builder.Default.
+
+### Database changelogs and authorization
+
+- Write a new versioned SQL changelog for every schema change or seed update. Store it in apps/api/src/main/resources/db/migration with the full date and a descriptive purpose. Use VYYYY.MM.DD.NN__describe_change.sql and preserve already applied changelogs.
+- Define granular operation authorities and document their default role grants in docs/authorization.md. Use roles to bundle permissions. Keep resource ownership checks alongside authority checks and document read-any grants separately.
 
 ### JPA column mappings
 
