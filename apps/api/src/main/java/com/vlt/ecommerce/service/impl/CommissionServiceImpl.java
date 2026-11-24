@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.vlt.ecommerce.domain.CommissionConfig;
@@ -18,7 +17,8 @@ import com.vlt.ecommerce.service.dto.response.CommissionConfigResponse;
 import com.vlt.ecommerce.domain.Category;
 import com.vlt.ecommerce.repository.CategoryRepository;
 import com.vlt.ecommerce.domain.User;
-import com.vlt.ecommerce.repository.UserRepository;
+
+import com.vlt.ecommerce.security.CurrentUserProvider;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class CommissionServiceImpl implements CommissionService {
-    UserRepository userRepository;
+    CurrentUserProvider currentUserProvider;
     CategoryRepository categoryRepository;
     CommissionConfigRepository commissionConfigRepository;
     CommissionConfigMapper commissionConfigMapper;
@@ -36,10 +36,10 @@ public class CommissionServiceImpl implements CommissionService {
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public CommissionConfigResponse createOrUpdateConfig(CommissionConfigRequest request) {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
 
         Category category = categoryRepository.findById(request.getCategoryId())
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         Optional<CommissionConfig> existingConfig = commissionConfigRepository.findByCategoryId(category.getId());
 
@@ -59,16 +59,10 @@ public class CommissionServiceImpl implements CommissionService {
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public List<CommissionConfigResponse> getConfigs() {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
 
         List<CommissionConfig> configs = commissionConfigRepository.findByCreatedById(user.getId());
 
         return commissionConfigMapper.toCommissionConfigResponses(configs);
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

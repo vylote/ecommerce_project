@@ -8,22 +8,22 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddressRequest {
-    @NotBlank(message = "Họ tên không được để trống")
+    @NotBlank(message = "{validation.fullName.required}")
     String fullName;
 
-    @NotBlank(message = "Số điện thoại không được để trống")
+    @NotBlank(message = "{validation.phone.required}")
     String phone;
 
-    @NotBlank(message = "Tỉnh/Thành phố không được để trống")
+    @NotBlank(message = "{validation.address.province.required}")
     String province;
 
-    @NotBlank(message = "Quận/Huyện không được để trống")
+    @NotBlank(message = "{validation.address.district.required}")
     String district;
 
-    @NotBlank(message = "Phường/Xã không được để trống")
+    @NotBlank(message = "{validation.address.ward.required}")
     String ward;
 
-    @NotBlank(message = "Địa chỉ chi tiết không được để trống")
+    @NotBlank(message = "{validation.address.detail.required}")
     String detail;
 
     Boolean isDefault;

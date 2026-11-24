@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.integration.rabbitmq.dto;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -19,6 +20,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NotificationMessage implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     Long id;

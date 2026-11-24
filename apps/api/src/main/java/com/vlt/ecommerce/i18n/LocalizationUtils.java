@@ -10,6 +10,8 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.vlt.ecommerce.config.Constants;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,37 +25,40 @@ import lombok.extern.slf4j.Slf4j;
 public class LocalizationUtils {
     MessageSource messageSource;
 
-    private static final String DEFAULT_LANG = "vi";
-
     public String getLanguage() {
         HttpServletRequest request = getCurrentHttpRequest();
         if (request != null) {
             String headerLang = request.getHeader(HttpHeaders.ACCEPT_LANGUAGE);
             if (headerLang != null && !headerLang.isBlank()) {
                 String firstLang = headerLang.split(",")[0].trim().toLowerCase();
-                if (firstLang.startsWith("en")) {
-                    return "en";
+                if (firstLang.startsWith(Constants.ENGLISH_LANGUAGE)) {
+                    return Constants.ENGLISH_LANGUAGE;
                 }
-                if (firstLang.startsWith("vi")) {
-                    return DEFAULT_LANG;
+                if (firstLang.startsWith(Constants.VIETNAMESE_LANGUAGE)) {
+                    return Constants.VIETNAMESE_LANGUAGE;
                 }
             }
-            String xLang = request.getHeader("X-Lang");
+            String xLang = request.getHeader(Constants.ALTERNATE_LANGUAGE_HEADER);
             if (xLang != null && !xLang.isBlank()) {
-                return xLang.trim().equalsIgnoreCase("en") ? "en" : DEFAULT_LANG;
+                String language = xLang.trim();
+                if (Constants.VIETNAMESE_LANGUAGE.equalsIgnoreCase(language)) {
+                    return Constants.VIETNAMESE_LANGUAGE;
+                }
+                return Constants.ENGLISH_LANGUAGE.equalsIgnoreCase(language)
+                        ? Constants.ENGLISH_LANGUAGE
+                        : Constants.DEFAULT_LANGUAGE;
             }
         }
 
         Locale currentLocale = LocaleContextHolder.getLocale();
-        if ("en".equalsIgnoreCase(currentLocale.getLanguage())) {
-            return "en";
+        if (Constants.ENGLISH_LANGUAGE.equalsIgnoreCase(currentLocale.getLanguage())) {
+            return Constants.ENGLISH_LANGUAGE;
         }
-        return DEFAULT_LANG;
+        return Constants.DEFAULT_LANGUAGE;
     }
 
     public Locale getCurrentLocale() {
-        String lang = getLanguage();
-        return "en".equalsIgnoreCase(lang) ? Locale.ENGLISH : Locale.of(DEFAULT_LANG);
+        return Locale.forLanguageTag(getLanguage());
     }
 
     public String getMessage(String messageKey, Object... params) {

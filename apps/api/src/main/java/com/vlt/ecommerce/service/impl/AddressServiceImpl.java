@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.vlt.ecommerce.service.AddressService;
@@ -16,9 +15,10 @@ import com.vlt.ecommerce.service.dto.request.AddressRequest;
 import com.vlt.ecommerce.service.dto.response.AddressResponse;
 import com.vlt.ecommerce.service.mapper.AddressMapper;
 import com.vlt.ecommerce.repository.AddressRepository;
-import com.vlt.ecommerce.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
+import com.vlt.ecommerce.security.CurrentUserProvider;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -29,14 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService {
+    CurrentUserProvider currentUserProvider;
     AddressRepository addressRepository;
     AddressMapper addressMapper;
-    UserRepository userRepository;
 
     @Override
     @PreAuthorize("hasRole('BUYER')")
     public AddressResponse create(AddressRequest request) {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
 
         var newAddress = addressMapper.toAddress(request);
         newAddress.setUser(user);
@@ -57,7 +57,7 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public List<AddressResponse> getMyAddresses() {
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getUser();
         return addressRepository.findByUserId(currentUser.getId()).stream()
                 .map(addressMapper::toAddressResponse)
                 .collect(Collectors.toList());
@@ -68,7 +68,7 @@ public class AddressServiceImpl implements AddressService {
     @PreAuthorize("hasRole('BUYER') and @addressSecurity.isOwner(#id)")
     public void delete(Long id) {
         addressRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
 
         addressRepository.deleteById(id);
     }
@@ -78,7 +78,7 @@ public class AddressServiceImpl implements AddressService {
     @PreAuthorize("hasRole('BUYER') and @addressSecurity.isOwner(#id)")
     public AddressResponse update(AddressRequest request, Long id) {
         Address currentAddress = addressRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
 
         if (Boolean.TRUE.equals(request.getIsDefault()) && !currentAddress.getIsDefault()) {
             List<Address> existingAddresses = addressRepository.findByUserId(currentAddress.getUser().getId());
@@ -87,12 +87,6 @@ public class AddressServiceImpl implements AddressService {
 
         addressMapper.updateAddress(request, currentAddress);
         return addressMapper.toAddressResponse(currentAddress);
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 
     private void resetDefaultAddress(List<Address> addresses) {

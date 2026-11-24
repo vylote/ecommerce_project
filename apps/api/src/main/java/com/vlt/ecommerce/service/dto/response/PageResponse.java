@@ -4,25 +4,18 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class PageResponse<T> {
-    int currentPage;
-    int pageSize;
-    int totalPages;
-    long totalElements;
-    boolean isLast;
-    List<T> data;
+    private int currentPage;
+    private int pageSize;
+    private int totalPages;
+    private long totalElements;
+    private boolean isLast;
+    private List<T> data;
 
     public static <T> PageResponse<T> of(Page<?> page, List<T> data) {
         return PageResponse.<T>builder()

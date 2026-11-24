@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 
 @Configuration
 @OpenAPIDefinition(
-    info = @Info(title = "Mini E-Commerce API", version = "v1"),
+    info = @Info(title = "ECommerce API", version = "v1"),
     security = @SecurityRequirement(name = "bearerAuth")
 )
 @SecurityScheme(

@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +36,8 @@ import com.vlt.ecommerce.repository.ShopRepository;
 import com.vlt.ecommerce.domain.User;
 import com.vlt.ecommerce.repository.UserRepository;
 
+import com.vlt.ecommerce.security.CurrentUserProvider;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -45,6 +46,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class CommissionAnalyticsServiceImpl implements CommissionAnalyticsService {
+    CurrentUserProvider currentUserProvider;
     UserRepository userRepository;
     ShopRepository shopRepository;
     CommissionRecordRepository commissionRecordRepository;
@@ -55,11 +57,11 @@ public class CommissionAnalyticsServiceImpl implements CommissionAnalyticsServic
     @PreAuthorize("hasRole('SELLER')")
     @Transactional(readOnly = true)
     public SellerStatsResponse getSellerStats() {
-        User seller = getCurrentUser();
+        User seller = currentUserProvider.getUser();
 
         Shop shop = shopRepository.findBySellerId(seller.getId());
         if (shop == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
         }
 
         Long sellerId = seller.getId();
@@ -342,11 +344,5 @@ public class CommissionAnalyticsServiceImpl implements CommissionAnalyticsServic
                 .statusBreakdown(statusBreakdown)
                 .timeline(timeline)
                 .build();
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

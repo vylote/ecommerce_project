@@ -18,66 +18,55 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lombok.experimental.FieldDefaults;
 
 @Entity
 @Table(name = "categories")
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    @Column(nullable = false, length = 150)
-    String name;
-    @Column(nullable = false, length = 150, unique = true)
-    String slug;
+    @Column(name = "id")
+    private Long id;
+    @Column(name = "name", nullable = false, length = 150)
+    private String name;
+    @Column(name = "slug", nullable = false, length = 150, unique = true)
+    private String slug;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    Category parent;
+    private Category parent;
 
     @OneToMany(mappedBy = "parent")
-    List<Category> children;
+    private List<Category> children;
     @Column(name = "image_url", length = 500)
-    String imageUrl;
-    @Builder.Default
+    private String imageUrl;
     @Column(name = "is_active", nullable = false)
-    Boolean isActive = true;
+    private Boolean isActive = true;
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<Product> products;
+    private List<Product> products;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<CommissionConfig> configs;
+    private List<CommissionConfig> configs;
 
     @Version
     @Column(name = "version")
-    Long version;
+    private Long version;
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
-    @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    Set<Shop> shops = new HashSet<>();
+    private Set<Shop> shops = new HashSet<>();
 
     @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
-    @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    Set<SpecificationType> specificationTypes = new HashSet<>();
+    private Set<SpecificationType> specificationTypes = new HashSet<>();
 }

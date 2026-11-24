@@ -9,41 +9,32 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
 
 @Entity
 @Table(name = "addresses")
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @Column(name = "id")
+    private Long id;
     @Column(name = "full_name", nullable = false, length = 150)
-    String fullName;
-    @Column(nullable = false, length = 20)
-    String phone;
-    @Column(nullable = false, length = 100)
-    String province; // tỉnh
-    @Column(nullable = false, length = 100)
-    String district; //quận
-    @Column(nullable = false, length = 100)
-    String ward; // phường
-    @Column(nullable = false, length = 500)
-    String detail;
-    @Builder.Default
+    private String fullName;
+    @Column(name = "phone", nullable = false, length = 20)
+    private String phone;
+    @Column(name = "province", nullable = false, length = 100)
+    private String province;
+    @Column(name = "district", nullable = false, length = 100)
+    private String district;
+    @Column(name = "ward", nullable = false, length = 100)
+    private String ward;
+    @Column(name = "detail", nullable = false, length = 500)
+    private String detail;
     @Column(name = "is_default", nullable = false)
-    Boolean isDefault = false;
+    private Boolean isDefault = false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    User user;
+    private User user;
 }

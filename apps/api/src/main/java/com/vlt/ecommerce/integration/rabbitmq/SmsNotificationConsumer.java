@@ -3,8 +3,8 @@ package com.vlt.ecommerce.integration.rabbitmq;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import com.vlt.ecommerce.config.Constants;
 import com.vlt.ecommerce.integration.sms.SmsService;
-import com.vlt.ecommerce.config.RabbitMQConfig;
 import com.vlt.ecommerce.integration.rabbitmq.dto.NotificationMessage;
 import com.vlt.ecommerce.domain.User;
 import com.vlt.ecommerce.repository.UserRepository;
@@ -23,7 +23,7 @@ public class SmsNotificationConsumer {
     SmsService smsService;
     UserRepository userRepository;
 
-    @RabbitListener(queues = RabbitMQConfig.NOTIFICATION_SMS_QUEUE)
+    @RabbitListener(queues = Constants.NOTIFICATION_SMS_QUEUE)
     public void consumeSmsNotification(NotificationMessage message) {
         log.info("[RABBITMQ FANOUT -> SMS QUEUE] Nhan thong bao ID #{} cho User ID {}", 
                 message.getId(), message.getUserId());

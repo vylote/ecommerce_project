@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +35,8 @@ import com.vlt.ecommerce.repository.SpecificProductRepository;
 import com.vlt.ecommerce.domain.Shop;
 import com.vlt.ecommerce.repository.ShopRepository;
 import com.vlt.ecommerce.domain.User;
-import com.vlt.ecommerce.repository.UserRepository;
+
+import com.vlt.ecommerce.security.CurrentUserProvider;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -48,26 +48,26 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ImportReceiptServiceImpl implements ImportReceiptService {
+    CurrentUserProvider currentUserProvider;
 
     ImportReceiptRepository importReceiptRepository;
     ProductRepository productRepository;
     SpecificProductRepository specificProductRepository;
     ShopRepository shopRepository;
-    UserRepository userRepository;
     ImportReceiptMapper importReceiptMapper;
 
     @Override
     @Transactional
     @PreAuthorize("hasRole('SELLER')")
     public ImportReceiptResponse createReceipt(ImportReceiptRequest request) {
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(currentUser.getId());
         if (shop == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
         }
 
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         if (!product.getShop().getId().equals(shop.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -79,7 +79,7 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
                     + "-" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
         } else {
             if (importReceiptRepository.existsByReceiptCode(receiptCode)) {
-                throw new AppException(ErrorCode.RESOURCE_EXISTED);
+                throw new AppException(ErrorCode.IMPORT_RECEIPT_CODE_ALREADY_EXISTS);
             }
         }
 
@@ -101,10 +101,10 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
 
         for (ImportReceiptDetailRequest detailReq : request.getDetails()) {
             SpecificProduct variant = specificProductRepository.findById(detailReq.getSpecificProductId())
-                    .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
 
             if (!variant.getProduct().getId().equals(product.getId())) {
-                throw new AppException(ErrorCode.INVALID_DATA);
+                throw new AppException(ErrorCode.VARIANT_PRODUCT_MISMATCH);
             }
 
             BigDecimal itemTotalPrice = detailReq.getImportPrice()
@@ -148,14 +148,14 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
     @Transactional
     @PreAuthorize("hasRole('SELLER')")
     public ImportReceiptResponse completeReceipt(Long id) {
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(currentUser.getId());
         if (shop == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
         }
 
         ImportReceipt receipt = importReceiptRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND));
 
         if (!receipt.getShop().getId().equals(shop.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -188,14 +188,14 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
     @Transactional
     @PreAuthorize("hasRole('SELLER')")
     public ImportReceiptResponse cancelReceipt(Long id) {
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(currentUser.getId());
         if (shop == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
         }
 
         ImportReceipt receipt = importReceiptRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND));
 
         if (!receipt.getShop().getId().equals(shop.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -215,9 +215,9 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
     @Override
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     public ImportReceiptResponse getReceiptById(Long id) {
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getUser();
         ImportReceipt receipt = importReceiptRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND));
 
         boolean isAdmin = currentUser.getRoles().stream().anyMatch(r -> r.getName().equals(Constants.ROLE_ADMIN));
         boolean isOwner = receipt.getShop().getSeller().getId().equals(currentUser.getId());
@@ -232,10 +232,10 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
     @Override
     @PreAuthorize("hasRole('SELLER')")
     public PageResponse<ImportReceiptResponse> getMyReceipts(int page, int size, ImportReceiptStatus status, Long productId) {
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(currentUser.getId());
         if (shop == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
         }
 
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
@@ -253,11 +253,5 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
 
         List<ImportReceiptResponse> content = importReceiptMapper.toResponses(receiptPage.getContent());
         return PageResponse.of(receiptPage, content);
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

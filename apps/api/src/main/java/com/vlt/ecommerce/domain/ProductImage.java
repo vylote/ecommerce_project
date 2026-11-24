@@ -9,34 +9,24 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
 
 @Entity
 @Table(name = "product_images")
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    @Column(nullable = false, length = 200)
-    String url;
-    @Builder.Default
+    @Column(name = "id")
+    private Long id;
+    @Column(name = "url", nullable = false, length = 200)
+    private String url;
     @Column(name = "is_primary", nullable = false)
-    Boolean isPrimary = false;
-    @Builder.Default
+    private Boolean isPrimary = false;
     @Column(name = "sort_order", nullable = false)
-    Integer sortOrder = 0;
+    private Integer sortOrder = 0;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
-    Product product;
+    private Product product;
 }

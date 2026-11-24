@@ -71,7 +71,6 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
                 throw new AppException(ErrorCode.USER_LOCKED);
             }
 
-            // Đã có tài khoản -> Đăng nhập thành công ngay
             TokenResponse tokenResponse = createSessionAndGenerateTokens(user, userAgent);
             return GoogleAuthResponse.builder()
                     .isNewUser(false)
@@ -82,7 +81,6 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
                     .build();
         }
 
-        // Tài khoản chưa tồn tại -> Yêu cầu bổ sung thông tin (Họ tên, SĐT, Mật khẩu)
         return GoogleAuthResponse.builder()
                 .isNewUser(true)
                 .email(email)
@@ -95,7 +93,7 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
     @Transactional
     public TokenResponse completeRegistration(GoogleCompleteRegistrationRequest request, String userAgent) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
         if (userRepository.existsByPhone(request.getPhone())) {
@@ -103,7 +101,7 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
         }
 
         Role buyerRole = roleRepository.findByName(Constants.ROLE_BUYER)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.DEFAULT_ROLE_NOT_CONFIGURED));
 
         User user = User.builder()
                 .email(request.getEmail().trim().toLowerCase())
@@ -142,7 +140,6 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
     }
 
     private GoogleUserInfo verifyGoogleToken(String token) {
-        // 1. Thử gọi Google userinfo API (hỗ trợ access_token từ Google OAuth2 TokenClient)
         try {
             ResponseEntity<Map<String, Object>> response = restClient.get()
                     .uri("https://www.googleapis.com/oauth2/v3/userinfo")
@@ -162,7 +159,6 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
             log.debug("Token không phải access_token hoặc lỗi userinfo: {}", e.getMessage());
         }
 
-        // 2. Thử gọi Google TokenInfo API (hỗ trợ ID Token từ Google GIS)
         try {
             ResponseEntity<Map<String, Object>> response = restClient.get()
                     .uri("https://oauth2.googleapis.com/tokeninfo?id_token={token}", token)
@@ -181,7 +177,6 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
             log.warn("Không thể xác thực token qua Google TokenInfo API: {}. Thử parse JWT...", e.getMessage());
         }
 
-        // 3. Fallback parse JWT nếu offline hoặc test
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
             var claims = signedJWT.getJWTClaimsSet();

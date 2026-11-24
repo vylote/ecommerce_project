@@ -15,10 +15,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PermissionRequest {
-    @NotBlank(message = "Tên quyền không được để trống")
-    @Size(max = 100, message = "Tên quyền tối đa 100 ký tự")
+    @NotBlank(message = "{validation.permission.name.required}")
+    @Size(max = 100, message = "{validation.permission.name.maxLength}")
     String name;
 
-    @Size(max = 255, message = "Mô tả tối đa 255 ký tự")
+    @Size(max = 255, message = "{validation.description.maxLength}")
     String description;
 }

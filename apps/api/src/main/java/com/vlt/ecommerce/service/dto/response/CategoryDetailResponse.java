@@ -2,24 +2,17 @@ package com.vlt.ecommerce.service.dto.response;
 
 import java.util.List;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CategoryDetailResponse {
-    Long id;
-    String name;
-    String slug;
-    String imageUrl;
-    boolean isActive;
+    private Long id;
+    private String name;
+    private String slug;
+    private String imageUrl;
+    private boolean isActive;
     // Chuỗi danh mục cha kéo theo từ cấp cao nhất đến sát danh mục hiện tại
-    List<CategoryResponse> breadcrumbs; 
+    private List<CategoryResponse> breadcrumbs;
 }

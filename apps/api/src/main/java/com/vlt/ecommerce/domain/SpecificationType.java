@@ -19,14 +19,12 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lombok.experimental.FieldDefaults;
 
 @Entity
 @Table(name = "specification_types")
@@ -34,30 +32,30 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SpecificationType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @Column(name = "id")
+    private Long id;
 
-    @Column(nullable = false, unique = true, length = 100)
-    String name;
+    @Column(name = "name", nullable = false, unique = true, length = 100)
+    private String name;
 
-    @Column(length = 255)
-    String description;
+    @Column(name = "description", length = 255)
+    private String description;
 
     @Builder.Default
     @Column(name = "is_variant", nullable = false)
-    Boolean isVariant = false;
+    private Boolean isVariant = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "specificationType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<Specification> specifications;
+    private List<Specification> specifications;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -68,5 +66,5 @@ public class SpecificationType {
     @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    Set<Category> categories = new HashSet<>();
+    private Set<Category> categories = new HashSet<>();
 }

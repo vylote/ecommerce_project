@@ -1,4 +1,4 @@
-import { ROLE_ADMIN } from "../../../shared/constants";
+import { ROLE_ADMIN, USER_LOCKED_ERROR_CODE } from "../../../shared/constants";
 import Dialog from "../../../shared/ui/Dialog";
 import TextField from "../../../shared/ui/TextField";
 import PasswordField from "./components/PasswordField";
@@ -55,7 +55,7 @@ export default function LoginPage() {
         navigate('/', { replace: true });
       }
     } catch (err) {
-      if (err.response?.data?.code === 1025) {
+      if (err.response?.data?.code === USER_LOCKED_ERROR_CODE) {
         setErrorMsg(t("auth.error_locked"));
       } else {
         setErrorMsg(t("auth.error_invalid_credentials"));

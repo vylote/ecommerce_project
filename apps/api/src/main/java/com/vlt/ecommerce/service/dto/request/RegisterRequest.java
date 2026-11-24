@@ -11,25 +11,25 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisterRequest {
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "{validation.email.required}")
+    @Email(message = "{validation.email.invalid}")
     String email;
-    @NotBlank(message = "Mật khẩu không được để trống")
-    @Size(min = 8, message = "Mật khẩu phải từ 8 ký tự trở lên, tối đa 20 ký tự")
+    @NotBlank(message = "{validation.password.required}")
+    @Size(min = 8, message = "{validation.password.minLength}")
     @Pattern(
         regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$!%*?&])[A-Za-z\\d@#$!%*?&]+$",
-        message = "WEAK_PASSWORD"
+        message = "{validation.password.pattern}"
     )
     String password;
-    @NotBlank(message = "Họ tên không được để trống")
+    @NotBlank(message = "{validation.fullName.required}")
     String fullName;
-    @NotBlank(message = "SDT không được để trống")
+    @NotBlank(message = "{validation.phone.required}")
     @Pattern(
         regexp = "^(0|\\+84)(3|5|7|8|9)[0-9]{8}$",
-        message = "Số điện thoại không hợp lệ"
+        message = "{validation.phone.invalid}"
     )
     String phone;
 
-    @NotBlank(message = "Mã OTP không được để trống")
+    @NotBlank(message = "{validation.otp.required}")
     String otp;
 }

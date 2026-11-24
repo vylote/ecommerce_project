@@ -8,9 +8,9 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CategoryRequest {
-    @NotBlank(message = "Tên danh mục không được để trống")
+    @NotBlank(message = "{validation.category.name.required}")
     String name;
-    @NotBlank(message = "Slug không được để trống")
+    @NotBlank(message = "{validation.category.slug.required}")
     String slug;
     Long parentId;
     String imageUrl;

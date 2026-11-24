@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,6 @@ import com.vlt.ecommerce.service.dto.response.PageResponse;
 import com.vlt.ecommerce.domain.event.OrderStatusChangedEvent;
 import com.vlt.ecommerce.service.exception.AppException;
 import com.vlt.ecommerce.service.exception.ErrorCode;
-import com.vlt.ecommerce.config.RabbitMQConfig;
 import com.vlt.ecommerce.config.properties.OrderProperties;
 import com.vlt.ecommerce.domain.CartItem;
 import com.vlt.ecommerce.repository.CartItemRepository;
@@ -54,7 +52,8 @@ import com.vlt.ecommerce.domain.User;
 import com.vlt.ecommerce.service.dto.response.AddressResponse;
 import com.vlt.ecommerce.service.mapper.AddressMapper;
 import com.vlt.ecommerce.repository.AddressRepository;
-import com.vlt.ecommerce.repository.UserRepository;
+
+import com.vlt.ecommerce.security.CurrentUserProvider;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -66,11 +65,11 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
+    CurrentUserProvider currentUserProvider;
     CommissionCalculator commissionCalculator;
     OrderRepository orderRepository;
     ReviewRepository reviewRepository;
     CartItemRepository cartItemRepository;
-    UserRepository userRepository;
     AddressRepository addressRepository;
     ShopRepository shopRepository;
     ProductRepository productRepository;
@@ -86,21 +85,20 @@ public class OrderServiceImpl implements OrderService {
     @PreAuthorize("hasRole('BUYER')")
     @Transactional
     public List<OrderResponse> create(OrderRequest request) {
-        User buyer = getCurrentUser();
+        User buyer = currentUserProvider.getUser();
 
         List<CartItem> cartItems = cartItemRepository.findAllByIdInAndBuyerId(request.getCartItemIds(), buyer.getId());
         if (cartItems.isEmpty() || cartItems.size() != request.getCartItemIds().size()) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.CART_ITEM_NOT_FOUND);
         }
 
         Address address = addressRepository.findById(request.getAddressId())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
 
         if (!address.getUser().getId().equals(buyer.getId())) {
             throw new AppException(ErrorCode.INVALID_ADDRESS);
         }
 
-        // convert string addreson json
         String addressSnapshot;
         try {
             AddressResponse addressDto = addressMapper.toAddressResponse(address);
@@ -118,14 +116,13 @@ public class OrderServiceImpl implements OrderService {
             List<CartItem> shopItems = entry.getValue();
 
             Shop shop = shopRepository.findById(entry.getKey())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
             Order newOrder = orderMapper.toOrder(request);
             newOrder.setBuyer(buyer);
             newOrder.setShop(shop);
             newOrder.setAddressSnapshot(addressSnapshot);
             newOrder.setNote(request.getNote());
-            //Gắn khóa chống trùng lặp (Kết hợp UUID của FE và ID của Shop)
             if (request.getIdempotencyKey() != null) {
                 newOrder.setIdempotencyKey(request.getIdempotencyKey() + "-shop" + shop.getId());
             }
@@ -192,7 +189,6 @@ public class OrderServiceImpl implements OrderService {
             createdOrders.add(savedOrder);
             eventPublisher.publishEvent(new OrderStatusChangedEvent(this, savedOrder.getId()));
 
-            // Lên lịch tự động hủy đơn sau 15 phút nếu khách không thanh toán
             sendOrderExpirationSchedule(savedOrder.getId());
         }
 
@@ -204,11 +200,10 @@ public class OrderServiceImpl implements OrderService {
         int orderExpirationTtlMs = orderProperties.expirationTtlMs();
         try {
             rabbitTemplate.convertAndSend(
-                    RabbitMQConfig.ORDER_DELAY_EXCHANGE,
-                    RabbitMQConfig.ORDER_DELAY_ROUTING_KEY,
+                    Constants.ORDER_DELAY_EXCHANGE,
+                    Constants.ORDER_DELAY_ROUTING_KEY,
                     orderId,
                     message -> {
-                        // Thiết lập thời gian sống (TTL) linh hoạt theo từng message lấy từ cấu hình
                         message.getMessageProperties().setExpiration(String.valueOf(orderExpirationTtlMs));
                         return message;
                     }
@@ -229,11 +224,10 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @PreAuthorize("hasRole('SELLER')")
     public OrderResponse confirmOrder(Long id) {
-        User seller = getCurrentUser();
+        User seller = currentUserProvider.getUser();
 
-        // Sử dụng khóa bi quan (Pessimistic Lock) để chống xung đột race condition giữa Seller xác nhận và Buyer hủy đơn
         Order order = orderRepository.findByIdForUpdate(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         if (order.getStatus() != OrderStatus.PENDING) {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
@@ -241,7 +235,7 @@ public class OrderServiceImpl implements OrderService {
 
         Shop shop = shopRepository.findBySellerId(seller.getId());
         if (shop == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
         }
 
         boolean isOwner = order.getItems().stream()
@@ -261,10 +255,10 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @PreAuthorize("hasRole('SELLER')")
     public OrderResponse shipOrder(Long id) {
-        User seller = getCurrentUser();
+        User seller = currentUserProvider.getUser();
 
         Order order = orderRepository.findByIdForUpdate(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         if (order.getStatus() != OrderStatus.CONFIRMED) {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
@@ -272,7 +266,7 @@ public class OrderServiceImpl implements OrderService {
 
         Shop shop = shopRepository.findBySellerId(seller.getId());
         if (shop == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
         }
 
         boolean isOwner = order.getItems().stream()
@@ -290,10 +284,10 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public OrderResponse completeOrder(Long id) {
-        User buyer = getCurrentUser();
+        User buyer = currentUserProvider.getUser();
 
         Order order = orderRepository.findByIdForUpdate(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         if (!order.getBuyer().getId().equals(buyer.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -312,7 +306,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @PreAuthorize("hasRole('BUYER')")
     public PageResponse<OrderResponse> getOwnHistoryOrder(int page, int size, OrderStatus status) {
-        User buyer = getCurrentUser();
+        User buyer = currentUserProvider.getUser();
 
         // Sắp xếp đơn hàng mới nhất lên đầu
         Pageable pageable = PageRequest.of(page-1, size, Sort.by("createdAt").descending());
@@ -335,10 +329,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @PreAuthorize("hasAnyRole('BUYER', 'SELLER', 'ADMIN')")
     public OrderResponse getDetailOrder(Long id) {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
 
         Order order = orderRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         boolean isBuyer = order.getBuyer() != null && order.getBuyer().getId().equals(user.getId());
         boolean isSeller = order.getShop() != null && order.getShop().getSeller() != null
@@ -357,11 +351,11 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public OrderResponse cancelOrder(Long id) {
-        User buyer = getCurrentUser();
+        User buyer = currentUserProvider.getUser();
 
         // Sử dụng khóa bi quan (Pessimistic Lock) để chống hủy đơn kép và hoàn lặp tồn kho
         Order order = orderRepository.findByIdForUpdate(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         if (!order.getBuyer().getId().equals(buyer.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -397,11 +391,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @PreAuthorize("hasRole('SELLER')")
     public PageResponse<OrderResponse> getSellerOrders(int page, int size, OrderStatus status) {
-        User seller = getCurrentUser();
+        User seller = currentUserProvider.getUser();
 
         Shop shop = shopRepository.findBySellerId(seller.getId());
         if (shop == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
         }
 
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
@@ -415,11 +409,5 @@ public class OrderServiceImpl implements OrderService {
         List<OrderResponse> content = orderMapper.toOrderResponses(orderPage.getContent());
 
         return PageResponse.of(orderPage, content);
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

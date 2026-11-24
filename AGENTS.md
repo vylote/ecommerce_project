@@ -63,6 +63,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 ## 5. Java Imports
 
 - Declare explicit imports at the top of each Java file and use simple names for external types and annotations throughout the Java source. Keep a fully qualified reference only when a name collision or framework syntax requires it.
+- Remove unused imports after refactoring and omit imports for types in the same Java package.
 - Preserve the nullability contract of framework overrides. When overriding a JSpecify `@NullMarked` method from an unmarked scope, annotate non-null parameters with `org.jspecify.annotations.NonNull` via an explicit import.
 - For Spring AOP pointcuts that match annotations, bind the annotation to an explicitly typed advice parameter. When specifying `argNames`, list every formal parameter by its declared name and in declaration order, including the join point. Preserve single execution of shared advice when pointcuts overlap.
 
@@ -74,7 +75,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 ### Constants and comments
 
-- Keep values used by one class private and close to their usage. Put shared constants in the backend `config/Constants.java` or the web `shared/constants.js`. Use descriptive names to identify their purpose. Reuse standard constants for protocol headers and encodings.
+- Declare Java static final constants in config/Constants.java, including values used by a single class. Keep class-specific JVM metadata such as serialVersionUID on the owning class. Group constants by purpose, use descriptive names, and reuse standard library constants for protocol headers and encodings. Centralize shared frontend values in shared/constants.js.
 - Put deployment-dependent values in the established environment configuration. Preserve serialized names and values when replacing literals with constants.
 
 ### Readability and control flow
@@ -88,13 +89,47 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 - Inject Spring dependencies through the constructor. Represent an optional dependency explicitly with `Optional<T>` when the service can operate without that bean.
 - Log each operation's outcome once with relevant context. Omit decorative separators, repeated messages, and sensitive data such as OTPs or email contents.
 
+### Email templates
+
+- Store email layout and markup in UTF-8 HTML templates under apps/api/src/main/resources/templates/mail/. Load templates from the classpath and HTML-escape dynamic text when rendering.
+
+### Response DTOs
+
+- Choose Lombok annotations based on how each response is constructed and consumed. Use getters for read-only response DTOs and declare field visibility directly. Keep setters or value equality where code relies on them.
+- Avoid pairing a class-level @Builder with explicit constructor annotations unless a caller, mapper, or deserializer needs those constructors. Before removing annotations, check direct construction, mapper targets, default values, and JSON property names.
+
 ### Backend package layout
 
 - Place REST controllers and HTTP exception handlers in `web.rest` and `web.rest.errors`. Place JPA entities in `domain`, enums in `domain.enumeration`, and application events in `domain.event`.
 - Keep repositories and their query projections in `repository` and `repository.projection`. Put service contracts in `service`, implementations in `service.impl`, and mappers, request and response DTOs, exceptions, and internal event listeners under the matching `service` subpackages.
 - Keep bean configuration in `config`, JWT and authorization code in `security`, localization in `i18n`, and external adapters in the matching `integration` subpackages.
 
+### JPA entity construction
+
+- Declare entity field visibility directly. Keep a public or protected no-argument constructor for JPA, using the implicit constructor when it meets that contract.
+- Keep builder and all-arguments constructor annotations when application code relies on the builder. Use setter mapping for simple entities created by MapStruct. Check existing construction sites and preserve field initializers when removing @Builder.Default.
+
+### JPA column mappings
+
+- Declare the existing physical column name explicitly with @Column(name = "...") for every basic persistent field, including identifiers and version fields. Keep other column attributes intact and verify names against the schema before modifying mappings.
+- Use @JoinColumn or @JoinTable for owning relationships and mappedBy for inverse relationships.
+
+### SOLID and mapper ownership
+
+- Give controllers, services, repositories, and mappers clear responsibilities. Keep business orchestration in services, keep interfaces focused on caller needs, honor interface contracts in implementations, and depend on stable abstractions at module boundaries. Extend through composition where behavior genuinely varies.
+- Put pure entity and DTO conversion in stateless Spring-managed mappers under service.mapper. Reuse existing mapper beans through constructor injection and use MapStruct for direct field mappings. Use custom mapper methods for transformations that need explicit control. Keep data access, authorization, and business decisions in services.
+
+- Resolve the authenticated user through CurrentUserProvider. Read the email or user ID directly when the caller only needs identity. Load the User entity when business logic needs it. Resolve identity from the current security context on each call and keep authorization decisions with their owners.
+
+### ACID and transaction boundaries
+
+- Define transaction boundaries at the service use case. Commit related writes atomically and check rollback behavior when exceptions are caught, checked, or translated.
+- Preserve consistency with database constraints and domain invariants. Use database-enforced uniqueness, optimistic locking, or targeted pessimistic locking where concurrent operations can violate invariants. Choose isolation based on the actual race or read consistency requirement.
+- Persist durable state before acknowledging success. Coordinate external side effects with the commit, and use an outbox with idempotent consumers when delivery must survive a process failure.
+
 ### Backend service contracts
+
+- Group related service inputs into an immutable parameter object when positional arguments become hard to distinguish or evolve. Use a record for a data-only input and add a builder when named fields improve the call site. Keep short, clear signatures simple.
 
 - Keep one interface for the related use cases of a service, including operations called by controllers and other beans. Use a separate interface when it defines a distinct responsibility or integration boundary.
 - For standalone services called by other beans, such as application services or integration adapters, define an interface for the operations their callers need and provide a Spring-managed implementation.
@@ -150,10 +185,15 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 
 ## Backend validation and localization
 
+- Return API error messages in English, including authentication, framework errors, and Bean Validation. Keep the request locale for other localized content.
+- Assign each business domain its own 1,000-number range in ErrorCode. Reserve 1000 for success and keep every error number unique within the range of its owning domain. Reuse the same code across callers for the same failure. Keep frontend consumers in sync when changing an existing number. Reserve generic codes for boundary failures without reliable domain context.
+- Return the same invalid-credentials response for unknown login identifiers and incorrect passwords.
+
+
 - Write all new agent rules and skills in English. Before changing validation, trace the controller or service entry point to `@Valid` or `validator.validate(...)` and follow the error handler to the returned response.
 - Check existing constraints, their `ConstraintValidator` implementations, and regexes in `Constants`. Where available, look in `handler/annotation` and `handler/validator` for `@NotNullWithArgs`, `@PatternWithArgs`, and `@MaxWithArgs`. Use standard Jakarta constraints when they express the rule directly.
 - Use bundle keys for user-facing validation messages. Keep the default Vietnamese bundle and both VI/EN bundles under `i18n/` in sync. For standard constraints use named attributes such as `{value}` and `{max}`. For argument-aware validators, pass a localizable field name via `args` and match the validator's argument order in both translations. For example, if supported, `@MaxWithArgs(args = "description", value = 500)` supplies the field at `{0}` and the limit at `{1}`.
 - Check omitted fields, explicit nulls, empty strings, whitespace, and both sides of a boundary. Pair optional format or range constraints with a required constraint where appropriate. Use `@GroupSequence` when the returned error depends on validation order.
 - Check existing string utilities before adding helpers. Use Spring's `StringUtils.hasText()` for non-whitespace text. Keep format checks on DTOs and data-dependent checks in the owning service, such as matching an identity number to a customer and session.
-- For business errors reuse this project's `AppException` and `ErrorCode` (the equivalents of `ApplicationException` and `ApplicationExceptionCode`). Resolve localized business messages through `MessageSource` and supply translations for new codes.
+- For business errors reuse this project's `AppException` and `ErrorCode` (the equivalents of `ApplicationException` and `ApplicationExceptionCode`). Write the message for each code in English.
 - Report the entry point, reused constraints or helpers, and input cases reviewed. Distinguish source inspection from runtime verification.

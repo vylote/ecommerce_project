@@ -16,7 +16,6 @@ import com.vlt.ecommerce.config.Constants;
 import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.service.exception.ErrorCode;
 import com.vlt.ecommerce.integration.redis.TokenBlacklistService;
-import com.vlt.ecommerce.security.JwtService;
 import com.vlt.ecommerce.domain.User;
 import com.vlt.ecommerce.repository.UserRepository;
 
@@ -82,7 +81,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (blacklistService.isSsidBlacklisted(ssid)) {
                     log.warn("Chặn truy cập: Phiên đăng nhập {} đã bị thu hồi", ssid);
-                    sendErrorResponse(request, response, ErrorCode.UNAUTHENTICATED, "Phiên đăng nhập đã bị thu hồi từ xa.");
+                    sendErrorResponse(request, response, ErrorCode.UNAUTHENTICATED, "The login session has been revoked.");
                     return;
                 }
 

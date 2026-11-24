@@ -21,61 +21,56 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Table(name = "shops")
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Shop {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    @Column(nullable = false, length = 100)
-    String name;
-    @Column(columnDefinition = "TEXT")
-    String description;
+    @Column(name = "id")
+    private Long id;
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
     @Column(name = "logo_url", length = 500)
-    String logoUrl;
+    private String logoUrl;
     @Column(name = "address", columnDefinition = "TEXT")
-    String address;
-    @Builder.Default
+    private String address;
     @Column(name = "is_active", nullable = false)
-    Boolean isActive = false;
+    private Boolean isActive = false;
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
 
-    @Builder.Default
     @Column(name = "rating", nullable = false)
-    Double rating = 0.0;
+    private Double rating = 0.0;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false, unique = true)
-    User seller;
+    private User seller;
 
     @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<Product> products;
+    private List<Product> products;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "shop_categories",
-        joinColumns = @JoinColumn(name = "shop_id"),
-        inverseJoinColumns = @JoinColumn(name = "category_id")
+            name = "shop_categories",
+            joinColumns = @JoinColumn(name = "shop_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    @Builder.Default
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    Set<Category> categories = new HashSet<>();
+    private Set<Category> categories = new HashSet<>();
 
     @OneToMany(mappedBy = "shop", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<ImportReceipt> importReceipts;
+    private List<ImportReceipt> importReceipts;
 }

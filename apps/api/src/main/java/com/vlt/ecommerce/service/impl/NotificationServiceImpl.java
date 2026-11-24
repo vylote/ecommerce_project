@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +24,8 @@ import com.vlt.ecommerce.integration.rabbitmq.dto.NotificationMessage;
 import com.vlt.ecommerce.domain.User;
 import com.vlt.ecommerce.repository.UserRepository;
 
+import com.vlt.ecommerce.security.CurrentUserProvider;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -35,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class NotificationServiceImpl implements NotificationService {
+    CurrentUserProvider currentUserProvider;
     NotificationRepository notificationRepository;
     NotificationClient notificationClient;
     NotificationMapper notificationMapper;
@@ -45,7 +47,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void createAndPushNotification(Long userId, String type, String title, String message, Long refId) {
         log.info("--- [NOTIFICATION] BẮT ĐẦU XỬ LÝ THÔNG BÁO CHO USER {} ---", userId);
         User user = userRepository.findById(userId)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         Notification notification = Notification.builder()
             .user(user)
@@ -87,7 +89,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional(readOnly = true)
     public PageResponse<NotificationResponse> getMyNotifications(int page, int size) {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
 
         Page<Notification> notificationPage = notificationRepository.findByUserId(user.getId(), pageable);
@@ -99,9 +101,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void markAsRead(Long id) {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
         Notification notification = notificationRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.NOTIFICATION_NOT_FOUND));
 
         if (!notification.getUser().getId().equals(user.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -115,20 +117,14 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void markAllAsRead() {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
         notificationRepository.markAllAsReadByUserId(user.getId());
     }
 
     @Override
     @Transactional(readOnly = true)
     public long countUnread() {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
         return notificationRepository.countByUserIdAndIsReadFalse(user.getId());
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

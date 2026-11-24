@@ -3,8 +3,9 @@ package com.vlt.ecommerce.integration.rabbitmq;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import com.vlt.ecommerce.config.Constants;
 import com.vlt.ecommerce.integration.mail.EmailService;
-import com.vlt.ecommerce.config.RabbitMQConfig;
+import com.vlt.ecommerce.integration.mail.NotificationEmail;
 import com.vlt.ecommerce.integration.rabbitmq.dto.NotificationMessage;
 import com.vlt.ecommerce.domain.User;
 import com.vlt.ecommerce.repository.UserRepository;
@@ -23,7 +24,7 @@ public class EmailNotificationConsumer {
     EmailService emailService;
     UserRepository userRepository;
 
-    @RabbitListener(queues = RabbitMQConfig.NOTIFICATION_EMAIL_QUEUE)
+    @RabbitListener(queues = Constants.NOTIFICATION_EMAIL_QUEUE)
     public void consumeEmailNotification(NotificationMessage message) {
         log.info("[RABBITMQ FANOUT -> EMAIL QUEUE] Nhan thong bao ID #{} cho User ID {}", 
                 message.getId(), message.getUserId());
@@ -46,13 +47,14 @@ public class EmailNotificationConsumer {
                 return;
             }
 
-            emailService.sendNotificationEmail(
-                    email,
-                    user.getFullName(),
-                    message.getTitle(),
-                    message.getMessage(),
-                    message.getRefId()
-            );
+            NotificationEmail notification = NotificationEmail.builder()
+                    .recipientEmail(email)
+                    .recipientName(user.getFullName())
+                    .title(message.getTitle())
+                    .content(message.getMessage())
+                    .refId(message.getRefId())
+                    .build();
+            emailService.sendNotificationEmail(notification);
         } catch (Exception e) {
             log.error("[EMAIL CONSUMER] Loi xu ly gui email cho thong bao #{}: {}", message.getId(), e.getMessage(), e);
         }

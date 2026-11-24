@@ -26,7 +26,6 @@ public class NotificationClient {
 
     public void pushNotification(Long userId, Notification notification) {
         try {
-            // Đóng gói payload động bằng Map, tuân thủ nghiêm ngặt tài liệu không tạo file DTO rác
             Map<String, Object> payload = new HashMap<>();
             payload.put("userId", userId);
             payload.put("type", notification.getType());
@@ -34,7 +33,6 @@ public class NotificationClient {
             payload.put("message", notification.getMessage());
             payload.put("refId", notification.getRefId());
 
-            // Giao tiếp ngoại vi: Bắn tín hiệu sang Node.js
             restTemplate.postForObject(notificationProperties.serviceUrl() + "/notify", payload, Void.class);
             log.info("Successfully pushed notification to Node.js for user {}", userId);
         } catch (Exception e) {

@@ -13,14 +13,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lombok.experimental.FieldDefaults;
 
 @Entity
 @Table(name = "specifications")
@@ -28,24 +26,24 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Specification {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @Column(name = "id")
+    private Long id;
 
-    @Column(nullable = false, length = 100)
-    String name;
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
 
-    @Column(length = 255)
-    String description;
+    @Column(name = "description", length = 255)
+    private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "specification_type_id", nullable = false)
-    SpecificationType specificationType;
+    private SpecificationType specificationType;
 
     @OneToMany(mappedBy = "specification", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<ProductSpecification> productSpecifications;
+    private List<ProductSpecification> productSpecifications;
 }

@@ -27,7 +27,7 @@ public class SessionServiceImpl implements SessionService {
     @Transactional
     public void revokeSession(String ssid) {
         UserSession session = sessionRepository.findById(ssid)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SESSION_NOT_FOUND));
 
         Long nowMillis = System.currentTimeMillis();
         Long expireMillis = Timestamp.valueOf(session.getExpires_at()).getTime();

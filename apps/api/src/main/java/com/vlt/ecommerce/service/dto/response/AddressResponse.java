@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 public class AddressResponse {
     Long id;
-    Long userId; // Trả về để Frontend biết của ai
+    Long userId;
     String fullName;
     String phone;
     String province;

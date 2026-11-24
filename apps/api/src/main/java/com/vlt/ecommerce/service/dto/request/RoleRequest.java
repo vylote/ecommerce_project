@@ -17,11 +17,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleRequest {
-    @NotBlank(message = "Tên vai trò không được để trống")
-    @Size(max = 50, message = "Tên vai trò tối đa 50 ký tự")
+    @NotBlank(message = "{validation.role.name.required}")
+    @Size(max = 50, message = "{validation.role.name.maxLength}")
     String name;
 
-    @Size(max = 255, message = "Mô tả tối đa 255 ký tự")
+    @Size(max = 255, message = "{validation.description.maxLength}")
     String description;
 
     List<Long> permissionIds;

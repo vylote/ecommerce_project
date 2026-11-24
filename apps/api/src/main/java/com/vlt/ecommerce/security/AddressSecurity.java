@@ -10,7 +10,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-@Component("addressSecurity") // Tên bean để gọi trong @PreAuthorize
+@Component("addressSecurity")
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AddressSecurity {
@@ -22,7 +22,6 @@ public class AddressSecurity {
 
         Address address = addressRepository.findById(addressId).orElse(null);
 
-        // Trả về true để cho đi tiếp (Lỗi Not Found sẽ do Service lo)
         if (address == null) return true;
         return address.getUser().getId().equals(currentUserId);
     }

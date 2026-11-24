@@ -9,6 +9,7 @@ import org.mapstruct.Named;
 
 import com.vlt.ecommerce.domain.Category;
 import com.vlt.ecommerce.service.dto.request.CategoryRequest;
+import com.vlt.ecommerce.service.dto.response.CategoryDetailResponse;
 import com.vlt.ecommerce.service.dto.response.CategoryResponse;
 
 @Mapper(componentModel = "spring")
@@ -17,6 +18,17 @@ public interface CategoryMapper {
     @Mapping(source = "parent.name", target = "parentName")
     @Mapping(target = "productCount", expression = "java(category.getProducts() != null ? category.getProducts().size() : 0)")
     CategoryResponse toCategoryResponse(Category category);
+
+    default CategoryDetailResponse toCategoryDetailResponse(Category category, List<Category> parentChain) {
+        return CategoryDetailResponse.builder()
+                .id(category.getId())
+                .name(category.getName())
+                .slug(category.getSlug())
+                .imageUrl(category.getImageUrl())
+                .isActive(category.getIsActive())
+                .breadcrumbs(toCategoriesResponse(parentChain))
+                .build();
+    }
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "parent", source = "parentId", qualifiedByName = "idToCategory")

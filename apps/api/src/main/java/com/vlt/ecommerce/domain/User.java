@@ -8,15 +8,13 @@ import java.util.Set;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.vlt.ecommerce.domain.CartItem;
-import com.vlt.ecommerce.domain.ImportReceipt;
-import com.vlt.ecommerce.domain.Order;
-import com.vlt.ecommerce.domain.Review;
-import com.vlt.ecommerce.domain.Shop;
-
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "users")
@@ -24,30 +22,30 @@ import lombok.experimental.FieldDefaults;
 @Builder 
 @NoArgsConstructor 
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
-    @Column(nullable = false, unique = true, length = 100)
-    String email;
-    @Column(nullable = false)
-    String password;
+    @Column(name = "id")
+    private Long id;
+    @Column(name = "email", nullable = false, unique = true, length = 100)
+    private String email;
+    @Column(name = "password", nullable = false)
+    private String password;
     @Column(name = "full_name", nullable = false, length = 30)
-    String fullName;
-    @Column(length = 20) 
-    String phone;
+    private String fullName;
+    @Column(name = "phone", length = 20)
+    private String phone;
     @Column(name = "avatar_url", length = 500)
-    String avatarUrl;
+    private String avatarUrl;
     @Builder.Default
     @Column(name = "is_active", nullable = false)
-    Boolean isActive = true;
+    private Boolean isActive = true;
     @Column(name = "created_at", nullable = false, updatable = false)
     @CreationTimestamp
-    LocalDateTime createdAt;
+    private LocalDateTime createdAt;
     @Column(name = "updated_at", nullable = false)
     @UpdateTimestamp
-    LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -56,35 +54,35 @@ public class User {
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     @Builder.Default
-    Set<Role> roles = new HashSet<>();
+    private Set<Role> roles = new HashSet<>();
 
     @OneToOne(mappedBy = "seller", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    Shop shop;
+    private Shop shop;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<Address> addresses;
+    private List<Address> addresses;
 
     @OneToMany(mappedBy = "buyer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<CartItem> cartItems;
+    private List<CartItem> cartItems;
 
     @OneToMany(mappedBy = "buyer", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<Order> orders;
+    private List<Order> orders;
 
     @OneToMany(mappedBy = "buyer", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<Review> reviews;
+    private List<Review> reviews;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    List<ImportReceipt> importReceipts;
+    private List<ImportReceipt> importReceipts;
 }

@@ -6,45 +6,35 @@ import java.util.Map;
 
 import com.vlt.ecommerce.domain.enumeration.OrderStatus;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminAnalyticsResponse {
-    BigDecimal totalGrossRevenue;
-    BigDecimal totalCommissionRevenue;
-    BigDecimal totalNetRevenue;
-    BigDecimal pendingGrossRevenue;
-    BigDecimal averageOrderValue;
+    private BigDecimal totalGrossRevenue;
+    private BigDecimal totalCommissionRevenue;
+    private BigDecimal totalNetRevenue;
+    private BigDecimal pendingGrossRevenue;
+    private BigDecimal averageOrderValue;
     
-    Long totalOrders;
-    Long totalOrdersAll;
-    Long totalUsers;
-    Long totalShops;
-    Long totalProducts;
+    private Long totalOrders;
+    private Long totalOrdersAll;
+    private Long totalUsers;
+    private Long totalShops;
+    private Long totalProducts;
 
-    Map<OrderStatus, Long> statusBreakdown;
-    List<AdminTimeline> timeline;
+    private Map<OrderStatus, Long> statusBreakdown;
+    private List<AdminTimeline> timeline;
 
-    @Data
+    @Getter
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class AdminTimeline {
-        String date;
-        String label;
-        BigDecimal grossRevenue;
-        BigDecimal commissionRevenue;
-        Long orderCount;
-        Long totalCount;
+        private String date;
+        private String label;
+        private BigDecimal grossRevenue;
+        private BigDecimal commissionRevenue;
+        private Long orderCount;
+        private Long totalCount;
     }
 }

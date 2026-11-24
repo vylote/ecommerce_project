@@ -6,10 +6,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import com.vlt.ecommerce.config.Constants;
 import com.vlt.ecommerce.domain.OrderItem;
 import com.vlt.ecommerce.domain.enumeration.OrderStatus;
 import com.vlt.ecommerce.domain.event.OrderStatusChangedEvent;
-import com.vlt.ecommerce.config.RabbitMQConfig;
 import com.vlt.ecommerce.config.properties.OrderProperties;
 import com.vlt.ecommerce.repository.OrderRepository;
 import com.vlt.ecommerce.repository.ProductRepository;
@@ -33,12 +33,11 @@ public class OrderExpirationConsumer {
     OrderProperties orderProperties;
 
     @Transactional
-    @RabbitListener(queues = RabbitMQConfig.ORDER_CANCEL_QUEUE)
+    @RabbitListener(queues = Constants.ORDER_CANCEL_QUEUE)
     public void handleExpiredOrder(Long orderId) {
         log.info("[RabbitMQ DLX] Nhận tín hiệu kiểm tra hết hạn cho đơn hàng #{}", orderId);
 
         orderRepository.findByIdForUpdate(orderId).ifPresent(order -> {
-            // Chỉ tự động hủy nếu đơn hàng vẫn đang ở trạng thái PENDING (chưa được thanh toán hoặc xác nhận)
             if (order.getStatus() == OrderStatus.PENDING) {
                 int ttlMs = orderProperties.expirationTtlMs();
                 String durationStr = (ttlMs < 60000)
@@ -49,7 +48,6 @@ public class OrderExpirationConsumer {
                 log.info("[ORDER EXPIRATION] Don hang #{} da qua han cho thanh toan (TTL {}). Tien hanh tu dong huy va hoan kho!", orderId, durationStr);
                 order.setStatus(OrderStatus.CANCELLED);
 
-                // Hoàn lại tồn kho cho sản phẩm và biến thể
                 for (OrderItem item : order.getItems()) {
                     if (item.getSpecificProduct() != null) {
                         specificProductRepository.incrementStock(item.getSpecificProduct().getId(), item.getQuantity());

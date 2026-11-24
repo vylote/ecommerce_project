@@ -1,7 +1,6 @@
 package com.vlt.ecommerce.service.impl;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,8 @@ import com.vlt.ecommerce.repository.OrderRepository;
 import com.vlt.ecommerce.domain.Product;
 import com.vlt.ecommerce.service.ProductService;
 import com.vlt.ecommerce.domain.User;
-import com.vlt.ecommerce.repository.UserRepository;
+
+import com.vlt.ecommerce.security.CurrentUserProvider;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +32,9 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
+    CurrentUserProvider currentUserProvider;
     ReviewRepository reviewRepository;
     ReviewMapper reviewMapper;
-    UserRepository userRepository;
     OrderRepository orderRepository;
     ProductService productService;
 
@@ -42,12 +42,10 @@ public class ReviewServiceImpl implements ReviewService {
     @PreAuthorize("hasRole('BUYER')")
     @Transactional
     public ReviewResponse createReview(CreateReviewRequest request) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User buyer = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+        User buyer = currentUserProvider.getUser();
 
         Order order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         if (order.getShop().getSeller().getId().equals(buyer.getId())) {
             throw new AppException(ErrorCode.CANNOT_BUY_OWN_PRODUCT);
@@ -65,7 +63,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .anyMatch(item -> item.getProduct().getId().equals(request.getProductId()));
 
         if (!productInOrder) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.PRODUCT_NOT_IN_ORDER);
         }
 
         boolean alreadyReviewed = reviewRepository.existsByBuyerIdAndOrderIdAndProductId(
@@ -79,12 +77,11 @@ public class ReviewServiceImpl implements ReviewService {
         review.setBuyer(buyer);
         review.setOrder(order);
 
-        // Lấy managed Product từ OrderItems
         Product product = order.getItems().stream()
             .map(OrderItem::getProduct)
             .filter(p -> p.getId().equals(request.getProductId()))
             .findFirst()
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_IN_ORDER));
         review.setProduct(product);
 
         Review savedReview = reviewRepository.save(review);

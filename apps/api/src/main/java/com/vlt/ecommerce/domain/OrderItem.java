@@ -1,11 +1,6 @@
 package com.vlt.ecommerce.domain;
 
-
 import java.math.BigDecimal;
-
-import com.vlt.ecommerce.domain.Product;
-import com.vlt.ecommerce.domain.SpecificProduct;
-import com.vlt.ecommerce.domain.Shop;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,12 +11,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
 
 @Entity
 @Table(name = "order_items")
@@ -29,36 +22,36 @@ import lombok.experimental.FieldDefaults;
 @Builder 
 @NoArgsConstructor 
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @Column(name = "id")
+    private Long id;
     @Column(name = "product_name", nullable = false, length = 500)
-    String productName;
+    private String productName;
     @Column(name = "product_price", nullable = false, precision = 15, scale = 2)
-    BigDecimal productPrice;
-    @Column(nullable = false)
-    Integer quantity;
+    private BigDecimal productPrice;
+    @Column(name = "quantity", nullable = false)
+    private Integer quantity;
     @Column(name = "total_price", nullable = false, precision = 15, scale = 2)
-    BigDecimal totalPrice;
+    private BigDecimal totalPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
-    Order order;
+    private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
-    Product product;
+    private Product product;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "specific_product_id")
-    SpecificProduct specificProduct;
+    private SpecificProduct specificProduct;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)
-    Shop shop;
+    private Shop shop;
 
     @Column(name = "product_image_url", length = 500)
-    String productImageUrl;
+    private String productImageUrl;
 }

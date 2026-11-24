@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +20,8 @@ import com.vlt.ecommerce.repository.OrderRepository;
 import com.vlt.ecommerce.service.dto.request.PaymentRequest;
 import com.vlt.ecommerce.service.dto.response.PaymentResponse;
 import com.vlt.ecommerce.domain.User;
-import com.vlt.ecommerce.repository.UserRepository;
+
+import com.vlt.ecommerce.security.CurrentUserProvider;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -33,26 +33,26 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
+    CurrentUserProvider currentUserProvider;
     PaymentRepository paymentRepository;
     PaymentMapper paymentMapper;
     OrderRepository orderRepository;
-    UserRepository userRepository;
     ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public PaymentResponse create(Long orderId, PaymentRequest request) {
-        User buyer = getCurrentUser();
+        User buyer = currentUserProvider.getUser();
         Order order = orderRepository.findById(orderId)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         if (!order.getBuyer().getId().equals(buyer.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         if (paymentRepository.findByOrderId(orderId).isPresent()) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.PAYMENT_ALREADY_EXISTS);
         }
 
         Payment payment = paymentMapper.toPayment(request);
@@ -66,12 +66,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public PaymentResponse confirmMockPayment(Long paymentId) {
-        User buyer = getCurrentUser();
+        User buyer = currentUserProvider.getUser();
 
         Payment payment = paymentRepository.findByIdForUpdate(paymentId)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
 
-        // Chống IDOR: Chỉ người mua sở hữu đơn hàng mới có quyền thanh toán
         if (payment.getOrder() == null || payment.getOrder().getBuyer() == null
                 || !payment.getOrder().getBuyer().getId().equals(buyer.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -93,9 +92,9 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @PreAuthorize("hasAnyRole('BUYER', 'SELLER')")
     public PaymentResponse getPaymentByOrderId(Long orderId) {
-        User currentUser = getCurrentUser();
+        User currentUser = currentUserProvider.getUser();
         Payment payment = paymentRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
         boolean isBuyer = payment.getOrder().getBuyer().getId().equals(currentUser.getId());
         boolean isSeller = payment.getOrder().getShop().getSeller().getId().equals(currentUser.getId());
 
@@ -103,11 +102,5 @@ public class PaymentServiceImpl implements PaymentService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         return paymentMapper.toPaymentResponse(payment);
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

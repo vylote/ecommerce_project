@@ -2,6 +2,7 @@ package com.vlt.ecommerce.web.rest.errors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -34,20 +35,22 @@ public class GlobalExceptionHandler {
         @SuppressWarnings("rawtypes")
         @ExceptionHandler(value = NoResourceFoundException.class)
         ResponseEntity<ApiResponse> handlingNotFoundException(NoResourceFoundException e) {
-                return ResponseEntity.status(404).body(
+                ErrorCode errorCode = ErrorCode.REQUEST_PATH_NOT_FOUND;
+                return ResponseEntity.status(errorCode.getStatusCode()).body(
                                 ApiResponse.builder()
-                                                .code(404)
-                                                .message("Không tìm thấy đường dẫn hoặc tài nguyên (404)")
+                                                .code(errorCode.getCode())
+                                                .message(errorCode.getMessage())
                                                 .build());
         }
 
         @SuppressWarnings("rawtypes")
         @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
         ResponseEntity<ApiResponse> handlingMethodNotSupported(HttpRequestMethodNotSupportedException e) {
-                return ResponseEntity.status(405).body(
+                ErrorCode errorCode = ErrorCode.METHOD_NOT_SUPPORTED;
+                return ResponseEntity.status(errorCode.getStatusCode()).body(
                                 ApiResponse.builder()
-                                                .code(405)
-                                                .message("Phương thức HTTP " + e.getMethod() + " không được hỗ trợ cho đường dẫn này")
+                                                .code(errorCode.getCode())
+                                                .message("HTTP method " + e.getMethod() + " is not supported for this path.")
                                                 .build());
         }
 
@@ -56,15 +59,25 @@ public class GlobalExceptionHandler {
         ResponseEntity<ApiResponse> handlingMethodArgumentTypeMismatch(MethodArgumentTypeMismatchException e) {
                 return ResponseEntity.status(400).body(
                                 ApiResponse.builder()
-                                                .code(1021)
-                                                .message("Tham số '" + e.getName() + "' không hợp lệ: '" + e.getValue() + "' sai định dạng!")
+                                                .code(ErrorCode.INVALID_DATA.getCode())
+                                                .message("Invalid format for parameter: " + e.getName() + ".")
+                                                .build());
+        }
+
+        @ExceptionHandler(value = HttpMessageNotReadableException.class)
+        ResponseEntity<ApiResponse<Void>> handlingUnreadableRequest(HttpMessageNotReadableException e) {
+                ErrorCode errorCode = ErrorCode.INVALID_DATA;
+                return ResponseEntity.status(errorCode.getStatusCode()).body(
+                                ApiResponse.<Void>builder()
+                                                .code(errorCode.getCode())
+                                                .message("The request body is missing or malformed.")
                                                 .build());
         }
 
         @SuppressWarnings("rawtypes")
         @ExceptionHandler(value = Exception.class)
         ResponseEntity<ApiResponse> handlingException(Exception e) {
-                log.error("BẮT ĐƯỢC THỦ PHẠM GÂY LỖI 9999: ", e);
+                log.error("Unhandled API exception", e);
                 ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
 
                 return ResponseEntity.status(errorCode.getStatusCode()).body(
@@ -104,7 +117,7 @@ public class GlobalExceptionHandler {
         @ExceptionHandler(value = DataIntegrityViolationException.class)
         ResponseEntity<ApiResponse> handlingDataIntegrityViolationException(DataIntegrityViolationException e) {
                 String message = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
-                log.warn("Lỗi vi phạm toàn vẹn dữ liệu: {}", message);
+                log.warn("Database constraint violation");
 
                 ErrorCode errorCode;
                 if (message.contains("idempotency")) {

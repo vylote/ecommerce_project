@@ -12,7 +12,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-@Component("productSecurity") // Tên bean để gọi trong @PreAuthorize
+@Component("productSecurity")
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ProductSecurity {
@@ -25,7 +25,6 @@ public class ProductSecurity {
 
         Product product = productRepository.findById(productId).orElse(null);
 
-        // Trả về true để cho đi tiếp (Lỗi Not Found sẽ do Service lo)
         if (product == null) return true;
         return product.getShop().getSeller().getId().equals(currentUserId);
     }

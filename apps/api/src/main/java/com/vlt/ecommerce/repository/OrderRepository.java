@@ -19,14 +19,12 @@ import com.vlt.ecommerce.repository.projection.OrderStatusStat;
 import jakarta.persistence.LockModeType;
 
 public interface OrderRepository extends JpaRepository<Order, Long>{
-    // Dành cho BUYER: Kéo luôn danh sách items và payment để tránh N+1 Query
     @EntityGraph(attributePaths = {"items", "payment"})
     Page<Order> findByBuyerIdAndStatus(Long buyerId, OrderStatus status, Pageable pageable);
 
     @EntityGraph(attributePaths = {"items", "payment"})
     Page<Order> findByBuyerId(Long buyerId, Pageable pageable);
 
-    // Dành cho SHOP: Kéo luôn danh sách items và payment để tránh N+1 Query
     @EntityGraph(attributePaths = {"items", "payment"})
     Page<Order> findByShopId(Long shopId, Pageable pageable);
 
@@ -43,7 +41,6 @@ public interface OrderRepository extends JpaRepository<Order, Long>{
     @Query("SELECT o FROM Order o WHERE o.id = :id")
     Optional<Order> findByIdForUpdate(@Param("id") Long id);
 
-    // KỸ THUẬT GOM NHÓM (GROUP BY) TỐI ƯU DASHBOARD
     @Query("SELECT o.status AS status, COUNT(o.id) AS count " +
            "FROM Order o WHERE o.shop.id = :shopId " +
            "GROUP BY o.status")
