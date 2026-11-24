@@ -38,6 +38,7 @@ public interface CategoryMapper {
     @Mapping(target = "configs", ignore = true)
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "shops", ignore = true)
+    @Mapping(target = "specificationTypes", ignore = true)
     Category toCategory(CategoryRequest request);
 
     List<CategoryResponse> toCategoriesResponse(List<Category> categories);
@@ -50,6 +51,7 @@ public interface CategoryMapper {
     @Mapping(target = "configs", ignore = true)
     @Mapping(target = "version", ignore = true)
     @Mapping(target = "shops", ignore = true)
+    @Mapping(target = "specificationTypes", ignore = true)
     void updateCategoryFromRequest(CategoryRequest request, @MappingTarget Category category);
 
     @Named("idToCategory")

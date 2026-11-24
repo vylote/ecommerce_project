@@ -12,6 +12,6 @@ import com.vlt.ecommerce.domain.ProductSpecification;
 public interface ProductSpecificationRepository extends JpaRepository<ProductSpecification, Long> {
     List<ProductSpecification> findByProductId(Long productId);
     Optional<ProductSpecification> findByProductIdAndSpecificationId(Long productId, Long specificationId);
-    boolean existsByProductIdAndSpecificationId(Long productId, Long specificationId);
+
     void deleteByProductIdAndSpecificationId(Long productId, Long specificationId);
 }

@@ -15,8 +15,36 @@ public final class Constants {
     public static final String SESSION_ID_CLAIM = "sessionId";
     public static final String USER_ID_CLAIM = "userId";
     public static final String ROLES_CLAIM = "roles";
-    public static final String PERMISSIONS_CLAIM = "permissions";
     public static final String JWT_BLACKLIST_PREFIX = "jwt:blacklist:";
+    public static final String AUTHORIZATION_CACHE_STATE_KEY = "authorization:{rbac}:state";
+    public static final String USER_AUTHORIZATION_CACHE_PREFIX = "authorization:{rbac}:user:";
+    public static final String ROLE_PERMISSION_CACHE_PREFIX = "authorization:{rbac}:role:";
+    public static final Duration AUTHORIZATION_CACHE_TTL = Duration.ofMinutes(15);
+    public static final int AUTHORIZATION_CACHE_LOCK_COUNT = 32;
+    private static final String AUTHORIZATION_REDIS_INSTANCE_SCRIPT = """
+            local runId = redis.call('INFO', 'server'):match('run_id:([%da-f]+)')
+            if not runId then return redis.error_reply('Missing Redis run ID') end
+            """;
+    public static final String AUTHORIZATION_STABLE_GENERATION_SCRIPT = AUTHORIZATION_REDIS_INSTANCE_SCRIPT + """
+            if redis.call('HLEN', KEYS[1]) > 1 then return nil end
+            local generation = redis.call('HGET', KEYS[1], 'generation')
+            if not generation then
+                generation = ARGV[1]
+                redis.call('HSET', KEYS[1], 'generation', generation)
+            end
+            return runId .. ':' .. generation
+            """;
+    public static final String AUTHORIZATION_WRITE_CACHE_SCRIPT = AUTHORIZATION_REDIS_INSTANCE_SCRIPT + """
+            if redis.call('HLEN', KEYS[1]) ~= 1 then return 0 end
+            if runId .. ':' .. redis.call('HGET', KEYS[1], 'generation') ~= ARGV[1] then return 0 end
+            redis.call('SET', KEYS[2], ARGV[2], 'PX', ARGV[3])
+            return 1
+            """;
+    public static final String AUTHORIZATION_FINISH_MUTATION_SCRIPT = """
+            for i = 2, #KEYS do redis.call('DEL', KEYS[i]) end
+            redis.call('HSET', KEYS[1], 'generation', ARGV[2])
+            return redis.call('HDEL', KEYS[1], ARGV[1])
+            """;
     public static final String EMAIL_OTP_KEY_PREFIX = "EMAIL_OTP:";
     public static final Duration EMAIL_OTP_TTL = Duration.ofMinutes(5);
 

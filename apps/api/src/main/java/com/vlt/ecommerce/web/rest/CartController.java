@@ -53,7 +53,7 @@ public class CartController {
     public ApiResponse<String> remove(@PathVariable Long identifier) {
         cartService.remove(identifier);
         return ApiResponse.<String>builder()
-            .result("da xoa san pham khoi gio hang")
+            .result("Product was deleted successfully from cart")
             .build();
     }
 
@@ -61,7 +61,7 @@ public class CartController {
     public ApiResponse<String> removeAllProductsFromCart() {
         cartService.removeAllProductsFromCart();
         return ApiResponse.<String>builder()
-            .result("Da xoa toan bo gio hang")
+            .result("All cart were deleted successfully")
             .build();
     }
 }

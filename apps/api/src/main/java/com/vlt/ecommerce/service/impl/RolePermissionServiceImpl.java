@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vlt.ecommerce.integration.redis.UserAuthorizationCache;
 import com.vlt.ecommerce.service.RolePermissionService;
 import com.vlt.ecommerce.config.Constants;
 import com.vlt.ecommerce.service.exception.AppException;
@@ -40,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RolePermissionServiceImpl implements RolePermissionService {
     RoleRepository roleRepository;
+    UserAuthorizationCache authorizationCache;
     PermissionRepository permissionRepository;
     UserRepository userRepository;
     UserMapper userMapper;
@@ -94,6 +96,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public RoleResponse updateRole(Long id, RoleRequest request) {
+        authorizationCache.roleChanged(id);
         Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
 
@@ -125,6 +128,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteRole(Long id) {
+        authorizationCache.roleChanged(id);
         Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
 
@@ -163,6 +167,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public PermissionResponse updatePermission(Long id, PermissionRequest request) {
+        authorizationCache.permissionChanged(id);
         Permission permission = permissionRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
 
@@ -181,6 +186,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public void deletePermission(Long id) {
+        authorizationCache.permissionChanged(id);
         Permission permission = permissionRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
 
@@ -191,6 +197,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse assignRolesToUser(Long userId, UserRoleAssignRequest request) {
+        authorizationCache.userChanged(userId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 

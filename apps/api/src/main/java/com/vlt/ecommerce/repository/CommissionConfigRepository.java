@@ -13,9 +13,6 @@ public interface CommissionConfigRepository extends JpaRepository<CommissionConf
     @Query(value = "SELECT * FROM commission_configs WHERE category_id = :categoryId AND effective_from <= :currentDate ORDER BY effective_from DESC LIMIT 1", nativeQuery = true)
     Optional<CommissionConfig> findActiveConfigByCategory(@Param("categoryId") Long categoryId, @Param("currentDate") LocalDate currentDate);
 
-    @Query(value = "SELECT * FROM commission_configs WHERE category_id IS NULL AND effective_from <= :currentDate ORDER BY effective_from DESC LIMIT 1", nativeQuery = true)
-    Optional<CommissionConfig> findActiveGlobalConfig(@Param("currentDate") LocalDate currentDate);
-
     Optional<CommissionConfig> findByCategoryId(Long categoryId);
 
     List<CommissionConfig> findByCreatedById(Long id);

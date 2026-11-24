@@ -51,7 +51,7 @@ public class AddressController {
     public ApiResponse<String> delete(@PathVariable Long id) {
         addressService.delete(id);
         return ApiResponse.<String>builder()
-            .result("Xoa thanh cong dia chi")
+            .result("Deleting successfully address")
             .build();
     }
 }

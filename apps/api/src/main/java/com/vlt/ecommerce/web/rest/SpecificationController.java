@@ -29,7 +29,6 @@ import lombok.experimental.FieldDefaults;
 public class SpecificationController {
     SpecificationService specificationService;
 
-    // ================= SPECIFICATION TYPES =================
     @GetMapping("/specification-types")
     public ApiResponse<List<SpecificationTypeResponse>> getAllSpecificationTypes() {
         return ApiResponse.<List<SpecificationTypeResponse>>builder()
@@ -77,7 +76,6 @@ public class SpecificationController {
                 .build();
     }
 
-    // ================= SPECIFICATIONS =================
     @GetMapping("/specifications")
     public ApiResponse<List<SpecificationResponse>> getSpecifications(
             @RequestParam(name = "typeId") Long typeId) {

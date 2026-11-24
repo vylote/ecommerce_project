@@ -4,6 +4,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -102,7 +104,10 @@ public class GlobalExceptionHandler {
         @SuppressWarnings("rawtypes")
         @ExceptionHandler(value = MethodArgumentNotValidException.class)
         ResponseEntity<ApiResponse> handlingValidationException(MethodArgumentNotValidException e) {
-                String errorMessage = e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
+                ObjectError error = e.getBindingResult().getAllErrors().getFirst();
+                String errorMessage = error instanceof FieldError fieldError && fieldError.isBindingFailure()
+                        ? "Invalid format for parameter: " + fieldError.getField() + "."
+                        : error.getDefaultMessage();
 
                 ErrorCode errorCode = ErrorCode.INVALID_DATA;
 

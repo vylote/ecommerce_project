@@ -1,9 +1,8 @@
 package com.vlt.ecommerce.security;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,8 +16,7 @@ import com.vlt.ecommerce.config.Constants;
 import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.service.exception.ErrorCode;
 import com.vlt.ecommerce.integration.redis.TokenBlacklistService;
-import com.vlt.ecommerce.domain.User;
-import com.vlt.ecommerce.repository.UserRepository;
+import com.vlt.ecommerce.integration.redis.UserAuthorizationCache;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -37,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     JwtService jwtService;
     TokenBlacklistService blacklistService;
-    UserRepository userRepository;
+    UserAuthorizationCache authorizationCache;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -77,36 +75,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = signedJWT.getJWTClaimsSet().getSubject();
                 Long userId = signedJWT.getJWTClaimsSet().getLongClaim(Constants.USER_ID_CLAIM);
 
-                List<String> roles = signedJWT.getJWTClaimsSet().getStringListClaim(Constants.ROLES_CLAIM);
-                List<String> permissions = signedJWT.getJWTClaimsSet().getStringListClaim(Constants.PERMISSIONS_CLAIM);
-
                 if (blacklistService.isSsidBlacklisted(ssid)) {
                     log.warn("Chặn truy cập: Phiên đăng nhập {} đã bị thu hồi", ssid);
                     sendErrorResponse(request, response, ErrorCode.UNAUTHENTICATED, "The login session has been revoked.");
                     return;
                 }
 
-                User user = userRepository.findById(userId).orElse(null);
-                if (user == null || Boolean.FALSE.equals(user.getIsActive())) {
-                    log.warn("Chặn truy cập: User bị khóa hoặc không tồn tại. UserId: {}", userId);
+                Optional<Set<SimpleGrantedAuthority>> authorities = authorizationCache.resolveAuthorities(userId);
+                if (authorities.isEmpty()) {
+                    log.warn("Blocked authentication for a missing or inactive account (userId={})", userId);
                     sendErrorResponse(request, response, ErrorCode.USER_LOCKED, ErrorCode.USER_LOCKED.getMessage());
                     return;
                 }
 
-                List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-                if (roles != null) {
-                    authorities.addAll(roles.stream()
-                            .map(SimpleGrantedAuthority::new)
-                            .collect(Collectors.toList()));
-                }
-
-                if (permissions != null) {
-                    authorities.addAll(permissions.stream()
-                            .map(SimpleGrantedAuthority::new)
-                            .collect(Collectors.toList()));
-                }
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        email, null, authorities);
+                        email, null, authorities.get());
 
                 authentication.setDetails(userId);
                 SecurityContextHolder.getContext().setAuthentication(authentication);

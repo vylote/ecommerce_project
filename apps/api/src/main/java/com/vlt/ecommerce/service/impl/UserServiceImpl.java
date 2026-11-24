@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vlt.ecommerce.integration.redis.UserAuthorizationCache;
 import com.vlt.ecommerce.service.UserService;
 import com.vlt.ecommerce.service.dto.response.PageResponse;
 import com.vlt.ecommerce.service.exception.AppException;
@@ -37,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserServiceImpl implements UserService {
     CurrentUserProvider currentUserProvider;
     UserRepository userRepository;
+    UserAuthorizationCache authorizationCache;
     UserMapper userMapper;
     ImageStorageService imageStorageService;
 
@@ -89,6 +91,7 @@ public class UserServiceImpl implements UserService {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public UserResponse updateUserStatus(Long id) {
+        authorizationCache.userChanged(id);
         User user = userRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 

@@ -50,9 +50,6 @@ public interface OrderRepository extends JpaRepository<Order, Long>{
     List<Order> findByShopIdAndCreatedAtAfter(Long shopId, LocalDateTime after);
 
     @EntityGraph(attributePaths = {"payment"})
-    List<Order> findByShopId(Long shopId);
-
-    @EntityGraph(attributePaths = {"payment"})
     List<Order> findByCreatedAtAfter(LocalDateTime after);
 
     @Query("SELECT o.status AS status, COUNT(o.id) AS count FROM Order o GROUP BY o.status")
