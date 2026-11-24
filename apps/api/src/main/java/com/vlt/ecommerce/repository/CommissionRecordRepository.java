@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface CommissionRecordRepository extends JpaRepository<CommissionRecord, Long>{
-    // DÀNH CHO SELLER: Tính tổng theo ID của Seller
+
     @Query("SELECT SUM(c.itemRevenue) FROM CommissionRecord c WHERE c.seller.id = :sellerId")
     BigDecimal sumGrossRevenueBySellerId(@Param("sellerId") Long sellerId);
 

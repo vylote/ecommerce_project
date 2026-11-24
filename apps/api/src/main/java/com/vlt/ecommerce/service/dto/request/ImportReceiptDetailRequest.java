@@ -18,14 +18,14 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ImportReceiptDetailRequest {
-    @NotNull(message = "specificProductId không được để trống")
+    @NotNull(message = "{validation.variant.id.required}")
     Long specificProductId;
 
-    @NotNull(message = "Số lượng nhập không được để trống")
-    @Min(value = 1, message = "Số lượng nhập phải lớn hơn hoặc bằng 1")
+    @NotNull(message = "{validation.receipt.quantity.required}")
+    @Min(value = 1, message = "{validation.receipt.quantity.min}")
     Integer quantity;
 
-    @NotNull(message = "Giá nhập không được để trống")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Giá nhập không được âm")
+    @NotNull(message = "{validation.receipt.cost.required}")
+    @DecimalMin(value = "0.0", inclusive = true, message = "{validation.receipt.cost.min}")
     BigDecimal importPrice;
 }

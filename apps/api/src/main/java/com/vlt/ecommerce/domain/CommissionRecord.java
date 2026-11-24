@@ -15,14 +15,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lombok.experimental.FieldDefaults;
 
 @Entity
 @Table(name = "commission_records")
@@ -30,38 +28,38 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommissionRecord {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @Column(name = "id")
+    private Long id;
     @Column(name = "commission_rate", nullable = false, precision = 5, scale = 4)
-    BigDecimal commissionRate;
+    private BigDecimal commissionRate;
     @Column(name = "item_revenue", nullable = false, precision = 15, scale = 2)
-    BigDecimal itemRevenue;
+    private BigDecimal itemRevenue;
     @Column(name = "commission_amount", nullable = false, precision = 15, scale = 2)
-    BigDecimal commissionAmount;
+    private BigDecimal commissionAmount;
     @Column(name = "net_revenue", nullable = false, precision = 15, scale = 2)
-    BigDecimal netRevenue;
+    private BigDecimal netRevenue;
     @Column(name = "recorded_at", nullable = false, updatable = false)
     @CreationTimestamp
-    LocalDateTime recordedAt;
+    private LocalDateTime recordedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    Order order;
+    private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_item_id", nullable = false, unique = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    OrderItem orderItem;
+    private OrderItem orderItem;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    User seller;
+    private User seller;
 }

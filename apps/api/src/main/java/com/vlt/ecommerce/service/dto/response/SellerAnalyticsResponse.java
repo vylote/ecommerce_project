@@ -6,37 +6,27 @@ import java.util.Map;
 
 import com.vlt.ecommerce.domain.enumeration.OrderStatus;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SellerAnalyticsResponse {
-    BigDecimal totalRevenue;
-    Long totalOrders;
-    BigDecimal pendingRevenue;
-    Long totalOrdersAll;
-    BigDecimal averageOrderValue;
-    Map<OrderStatus, Long> statusBreakdown;
-    List<DailyTimeline> timeline;
+    private BigDecimal totalRevenue;
+    private Long totalOrders;
+    private BigDecimal pendingRevenue;
+    private Long totalOrdersAll;
+    private BigDecimal averageOrderValue;
+    private Map<OrderStatus, Long> statusBreakdown;
+    private List<DailyTimeline> timeline;
 
-    @Data
+    @Getter
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class DailyTimeline {
-        String date;
-        String label;
-        BigDecimal revenue;
-        Long orderCount;
-        Long totalCount;
+        private String date;
+        private String label;
+        private BigDecimal revenue;
+        private Long orderCount;
+        private Long totalCount;
     }
 }

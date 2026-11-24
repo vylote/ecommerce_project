@@ -18,6 +18,8 @@ import com.vlt.ecommerce.service.dto.response.SpecificProductResponse;
 import com.vlt.ecommerce.repository.ProductRepository;
 import com.vlt.ecommerce.repository.SpecificProductRepository;
 
+import com.vlt.ecommerce.service.mapper.SpecificProductMapper;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -30,8 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 public class SpecificProductServiceImpl implements SpecificProductService {
     SpecificProductRepository specificProductRepository;
     ProductRepository productRepository;
+    SpecificProductMapper specificProductMapper;
 
-    // ================= 1. TRUY VẤN BIẾN THỂ =================
     @Override
     @Transactional(readOnly = true)
     public List<SpecificProductResponse> getVariantsByProductId(Long productId, boolean onlyActive) {
@@ -40,7 +42,7 @@ public class SpecificProductServiceImpl implements SpecificProductService {
                 : specificProductRepository.findByProductId(productId);
 
         return variants.stream()
-                .map(this::toSpecificProductResponse)
+                .map(specificProductMapper::toSpecificProductResponse)
                 .collect(Collectors.toList());
     }
 
@@ -48,20 +50,18 @@ public class SpecificProductServiceImpl implements SpecificProductService {
     @Transactional(readOnly = true)
     public SpecificProductResponse getVariantById(Long variantId) {
         SpecificProduct variant = specificProductRepository.findById(variantId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
 
-        return toSpecificProductResponse(variant);
+        return specificProductMapper.toSpecificProductResponse(variant);
     }
 
-    // ================= 2. TẠO BIẾN THỂ MỚI =================
     @Override
     @Transactional
     @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#productId)")
     public SpecificProductResponse createVariant(Long productId, SpecificProductRequest request) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        // Tự động sinh mã SKU nếu người bán không nhập
         String sku = request.getSku();
         if (sku == null || sku.trim().isEmpty()) {
             sku = "SKU-" + productId + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
@@ -70,7 +70,7 @@ public class SpecificProductServiceImpl implements SpecificProductService {
         }
 
         if (specificProductRepository.existsBySku(sku)) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.VARIANT_SKU_ALREADY_EXISTS);
         }
 
         SpecificProduct variant = SpecificProduct.builder()
@@ -78,25 +78,24 @@ public class SpecificProductServiceImpl implements SpecificProductService {
                 .name(request.getName().trim())
                 .sku(sku)
                 .price(request.getPrice())
-                .stockQuantity(0) // Mặc định tồn kho = 0 (bắt buộc qua Phiếu nhập kho mới có hàng)
+                .stockQuantity(0)
                 .imageUrl(request.getImageUrl())
-                .isActive(request.getIsActive() != null ? request.getIsActive() : true)
+                .isActive(request.getIsActive() == null || request.getIsActive())
                 .build();
 
-        return toSpecificProductResponse(specificProductRepository.save(variant));
+        return specificProductMapper.toSpecificProductResponse(specificProductRepository.save(variant));
     }
 
-    // ================= 3. CẬP NHẬT BIẾN THỂ =================
     @Override
     @Transactional
     @PreAuthorize("hasRole('SELLER') and @productSecurity.isVariantOwner(#variantId)")
     public SpecificProductResponse updateVariant(Long variantId, SpecificProductRequest request) {
         SpecificProduct variant = specificProductRepository.findById(variantId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
 
         String newSku = request.getSku() != null ? request.getSku().trim() : variant.getSku();
         if (!newSku.equalsIgnoreCase(variant.getSku()) && specificProductRepository.existsBySkuAndIdNot(newSku, variantId)) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.VARIANT_SKU_ALREADY_EXISTS);
         }
 
         variant.setName(request.getName().trim());
@@ -107,18 +106,16 @@ public class SpecificProductServiceImpl implements SpecificProductService {
             variant.setIsActive(request.getIsActive());
         }
 
-        return toSpecificProductResponse(specificProductRepository.save(variant));
+        return specificProductMapper.toSpecificProductResponse(specificProductRepository.save(variant));
     }
 
-    // ================= 4. XÓA BIẾN THỂ =================
     @Override
     @Transactional
     @PreAuthorize("hasRole('SELLER') and @productSecurity.isVariantOwner(#variantId)")
     public void deleteVariant(Long variantId) {
         SpecificProduct variant = specificProductRepository.findById(variantId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
 
-        // Nếu biến thể đã có đơn hàng thì chuyển sang inactive thay vì xóa cứng
         if (variant.getOrderItems() != null && !variant.getOrderItems().isEmpty()) {
             variant.setIsActive(false);
             specificProductRepository.save(variant);
@@ -126,22 +123,5 @@ public class SpecificProductServiceImpl implements SpecificProductService {
         } else {
             specificProductRepository.delete(variant);
         }
-    }
-
-    // ================= HELPER MAPPER =================
-    private SpecificProductResponse toSpecificProductResponse(SpecificProduct v) {
-        return SpecificProductResponse.builder()
-                .id(v.getId())
-                .productId(v.getProduct().getId())
-                .productName(v.getProduct().getName())
-                .name(v.getName())
-                .sku(v.getSku())
-                .price(v.getPrice())
-                .stockQuantity(v.getStockQuantity())
-                .imageUrl(v.getImageUrl())
-                .isActive(v.getIsActive())
-                .createdAt(v.getCreatedAt())
-                .updatedAt(v.getUpdatedAt())
-                .build();
     }
 }

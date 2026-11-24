@@ -16,6 +16,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserRoleAssignRequest {
-    @NotEmpty(message = "Danh sách vai trò không được để trống")
+    @NotEmpty(message = "{validation.user.roles.required}")
     List<Long> roleIds;
 }

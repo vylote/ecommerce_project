@@ -1,21 +1,14 @@
 package com.vlt.ecommerce.service.dto.response;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class GoogleAuthResponse {
-    Boolean isNewUser;
-    String email;
-    String fullName;
-    String avatarUrl;
-    TokenResponse tokenResponse;
+    private Boolean isNewUser;
+    private String email;
+    private String fullName;
+    private String avatarUrl;
+    private TokenResponse tokenResponse;
 }

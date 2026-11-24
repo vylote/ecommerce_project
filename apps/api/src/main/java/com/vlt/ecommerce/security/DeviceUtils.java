@@ -1,10 +1,10 @@
 package com.vlt.ecommerce.security;
 
+import com.vlt.ecommerce.config.Constants;
+
 import java.util.Locale;
 
 public final class DeviceUtils {
-
-    private static final String CHROME = "chrome";
 
     private DeviceUtils() {
     }
@@ -41,9 +41,9 @@ public final class DeviceUtils {
         } else if (uaLower.contains("brave")) {
             // Brave can also identify itself as Chrome.
             browser = "Brave";
-        } else if (uaLower.contains(CHROME + "/") && !uaLower.contains("chromium")) {
+        } else if (uaLower.contains(Constants.CHROME_USER_AGENT_TOKEN + "/") && !uaLower.contains("chromium")) {
             browser = "Chrome";
-        } else if (uaLower.contains("safari/") && !uaLower.contains(CHROME)) {
+        } else if (uaLower.contains("safari/") && !uaLower.contains(Constants.CHROME_USER_AGENT_TOKEN)) {
             browser = "Safari";
         } else if (uaLower.contains("firefox/")) {
             browser = "Firefox";

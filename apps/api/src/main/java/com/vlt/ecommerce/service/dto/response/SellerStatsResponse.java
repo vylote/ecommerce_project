@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SellerStatsResponse {
-    BigDecimal totalGrossRevenue;   // Tổng tiền khách mua hàng (Doanh thu gộp)
-    BigDecimal totalCommissionPaid; // Tổng tiền phí Shop đã nộp cho sàn
-    BigDecimal totalNetRevenue; // doanh thu
+    BigDecimal totalGrossRevenue;
+    BigDecimal totalCommissionPaid;
+    BigDecimal totalNetRevenue;
 }

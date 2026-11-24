@@ -1,7 +1,5 @@
 package com.vlt.ecommerce.web.rest;
 
-import java.time.Duration;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -44,9 +42,6 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class AuthController {
-        private static final String REFRESH_TOKEN_COOKIE = "refreshToken";
-        private static final long ACCESS_COOKIE_MAX_AGE_SECONDS = Duration.ofDays(1).toSeconds();
-        private static final long REFRESH_COOKIE_MAX_AGE_SECONDS = Duration.ofDays(7).toSeconds();
 
         AuthService authService;
         GoogleAuthService googleAuthService;
@@ -81,8 +76,8 @@ public class AuthController {
 
                 // Nếu là tài khoản cũ -> Nặn cookie đăng nhập
                 TokenResponse tokenResponse = authResponse.getTokenResponse();
-                ResponseCookie jwtCookie = buildCookie(Constants.ACCESS_TOKEN_COOKIE, tokenResponse.getAccessToken(), ACCESS_COOKIE_MAX_AGE_SECONDS);
-                ResponseCookie refreshCookie = buildCookie(REFRESH_TOKEN_COOKIE, tokenResponse.getRefreshToken(), REFRESH_COOKIE_MAX_AGE_SECONDS);
+                ResponseCookie jwtCookie = buildCookie(Constants.ACCESS_TOKEN_COOKIE, tokenResponse.getAccessToken(), Constants.ACCESS_COOKIE_MAX_AGE_SECONDS);
+                ResponseCookie refreshCookie = buildCookie(Constants.REFRESH_TOKEN_COOKIE, tokenResponse.getRefreshToken(), Constants.REFRESH_COOKIE_MAX_AGE_SECONDS);
 
                 return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
@@ -98,8 +93,8 @@ public class AuthController {
                         @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent) {
                 TokenResponse tokenResponse = googleAuthService.completeRegistration(request, userAgent);
 
-                ResponseCookie jwtCookie = buildCookie(Constants.ACCESS_TOKEN_COOKIE, tokenResponse.getAccessToken(), ACCESS_COOKIE_MAX_AGE_SECONDS);
-                ResponseCookie refreshCookie = buildCookie(REFRESH_TOKEN_COOKIE, tokenResponse.getRefreshToken(), REFRESH_COOKIE_MAX_AGE_SECONDS);
+                ResponseCookie jwtCookie = buildCookie(Constants.ACCESS_TOKEN_COOKIE, tokenResponse.getAccessToken(), Constants.ACCESS_COOKIE_MAX_AGE_SECONDS);
+                ResponseCookie refreshCookie = buildCookie(Constants.REFRESH_TOKEN_COOKIE, tokenResponse.getRefreshToken(), Constants.REFRESH_COOKIE_MAX_AGE_SECONDS);
 
                 return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
@@ -125,9 +120,9 @@ public class AuthController {
                         @RequestHeader(value = HttpHeaders.USER_AGENT, required = false) String userAgent) {
                 TokenResponse tokenResponse = authService.login(request, userAgent);
 
-                ResponseCookie jwtCookie = buildCookie(Constants.ACCESS_TOKEN_COOKIE, tokenResponse.getAccessToken(), ACCESS_COOKIE_MAX_AGE_SECONDS);
+                ResponseCookie jwtCookie = buildCookie(Constants.ACCESS_TOKEN_COOKIE, tokenResponse.getAccessToken(), Constants.ACCESS_COOKIE_MAX_AGE_SECONDS);
 
-                ResponseCookie refreshCookie = buildCookie(REFRESH_TOKEN_COOKIE, tokenResponse.getRefreshToken(), REFRESH_COOKIE_MAX_AGE_SECONDS);
+                ResponseCookie refreshCookie = buildCookie(Constants.REFRESH_TOKEN_COOKIE, tokenResponse.getRefreshToken(), Constants.REFRESH_COOKIE_MAX_AGE_SECONDS);
 
                 return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
@@ -139,7 +134,7 @@ public class AuthController {
 
         @PostMapping("/refresh")
         public ResponseEntity<ApiResponse<String>> refreshToken(
-                        @CookieValue(name = REFRESH_TOKEN_COOKIE, required = false) String currentRefreshToken) {
+                        @CookieValue(name = Constants.REFRESH_TOKEN_COOKIE, required = false) String currentRefreshToken) {
 
                 if (currentRefreshToken == null || currentRefreshToken.isEmpty()) {
                         throw new AppException(ErrorCode.UNAUTHENTICATED);
@@ -147,9 +142,9 @@ public class AuthController {
 
                 TokenResponse tokenResponse = authService.refreshToken(currentRefreshToken);
 
-                ResponseCookie jwtCookie = buildCookie(Constants.ACCESS_TOKEN_COOKIE, tokenResponse.getAccessToken(), ACCESS_COOKIE_MAX_AGE_SECONDS);
+                ResponseCookie jwtCookie = buildCookie(Constants.ACCESS_TOKEN_COOKIE, tokenResponse.getAccessToken(), Constants.ACCESS_COOKIE_MAX_AGE_SECONDS);
 
-                ResponseCookie newRefreshCookie = buildCookie(REFRESH_TOKEN_COOKIE, tokenResponse.getRefreshToken(), REFRESH_COOKIE_MAX_AGE_SECONDS);
+                ResponseCookie newRefreshCookie = buildCookie(Constants.REFRESH_TOKEN_COOKIE, tokenResponse.getRefreshToken(), Constants.REFRESH_COOKIE_MAX_AGE_SECONDS);
 
                 return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
@@ -167,7 +162,7 @@ public class AuthController {
 
                 ResponseCookie cleanJwtCookie = buildCookie(Constants.ACCESS_TOKEN_COOKIE, "", 0);
 
-                ResponseCookie cleanRefreshCookie = buildCookie(REFRESH_TOKEN_COOKIE, "", 0);
+                ResponseCookie cleanRefreshCookie = buildCookie(Constants.REFRESH_TOKEN_COOKIE, "", 0);
 
                 return ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, cleanJwtCookie.toString())

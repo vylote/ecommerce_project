@@ -19,18 +19,18 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SpecificProductRequest {
-    @NotBlank(message = "Tên biến thể sản phẩm không được để trống")
-    @Size(max = 255, message = "Tên biến thể tối đa 255 ký tự")
+    @NotBlank(message = "{validation.variant.name.required}")
+    @Size(max = 255, message = "{validation.variant.name.maxLength}")
     String name;
 
-    @Size(max = 100, message = "Mã SKU tối đa 100 ký tự")
+    @Size(max = 100, message = "{validation.variant.sku.maxLength}")
     String sku;
 
-    @NotNull(message = "Giá bán không được để trống")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Giá bán phải lớn hơn hoặc bằng 0")
+    @NotNull(message = "{validation.variant.price.required}")
+    @DecimalMin(value = "0.0", inclusive = true, message = "{validation.variant.price.min}")
     BigDecimal price;
 
-    @Size(max = 500, message = "Đường dẫn ảnh tối đa 500 ký tự")
+    @Size(max = 500, message = "{validation.image.url.maxLength}")
     String imageUrl;
 
     @Builder.Default

@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.vlt.ecommerce.domain.Order;
@@ -30,7 +29,8 @@ import com.vlt.ecommerce.repository.OrderRepository;
 import com.vlt.ecommerce.domain.Shop;
 import com.vlt.ecommerce.repository.ShopRepository;
 import com.vlt.ecommerce.domain.User;
-import com.vlt.ecommerce.repository.UserRepository;
+
+import com.vlt.ecommerce.security.CurrentUserProvider;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -40,16 +40,16 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
+    CurrentUserProvider currentUserProvider;
     OrderRepository orderRepository;
-    UserRepository userRepository;
     ShopRepository shopRepository;
 
     @Override
     @PreAuthorize("hasRole('SELLER')")
     public Map<OrderStatus, Long> getDashboardStats() {
-        User seller = getCurrentUser();
+        User seller = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(seller.getId());
-        if (shop == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        if (shop == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
         List<OrderStatusStat> stats = orderRepository.countOrdersByStatusForShop(shop.getId());
         // Chuyển List thành Map để Frontend dễ hiển thị (VD: { "PENDING": 12, "SHIPPING": 5 })
@@ -66,9 +66,9 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
     @Override
     @PreAuthorize("hasRole('SELLER')")
     public SellerAnalyticsResponse getSellerAnalytics(String periodType, int range) {
-        User seller = getCurrentUser();
+        User seller = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(seller.getId());
-        if (shop == null) throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+        if (shop == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
         String period = (periodType == null || periodType.isBlank()) ? Constants.ANALYTICS_PERIOD_DAY : periodType.toUpperCase();
         LocalDate today = LocalDate.now();
@@ -265,11 +265,5 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
                 .statusBreakdown(statusBreakdown)
                 .timeline(timeline)
                 .build();
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

@@ -3,7 +3,6 @@ package com.vlt.ecommerce.service.impl;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,8 @@ import com.vlt.ecommerce.domain.SpecificProduct;
 import com.vlt.ecommerce.repository.ProductRepository;
 import com.vlt.ecommerce.repository.SpecificProductRepository;
 import com.vlt.ecommerce.domain.User;
-import com.vlt.ecommerce.repository.UserRepository;
+
+import com.vlt.ecommerce.security.CurrentUserProvider;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,9 +32,9 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class CartServiceImpl implements CartService {
+    CurrentUserProvider currentUserProvider;
     CartItemRepository cartItemRepository;
     CartMapper cartMapper;
-    UserRepository userRepository;
     ProductRepository productRepository;
     SpecificProductRepository specificProductRepository;
 
@@ -42,7 +42,7 @@ public class CartServiceImpl implements CartService {
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('BUYER')")
     public List<CartItemResponse> getCurrentCart() {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
 
         List<CartItem> cartItems = cartItemRepository.findByBuyerId(user.getId());
         return cartMapper.toCartItemsResponse(cartItems);
@@ -52,10 +52,10 @@ public class CartServiceImpl implements CartService {
     @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public CartItemResponse add(CartItemRequest request) {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
 
         Product product = productRepository.findById(request.getProductId())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         if (product.getShop().getSeller().getId().equals(user.getId())) {
             throw new AppException(ErrorCode.CANNOT_BUY_OWN_PRODUCT);
@@ -73,10 +73,10 @@ public class CartServiceImpl implements CartService {
         if (request.getSpecificProductId() != null) {
             SpecificProduct variant = specificProductRepository
                     .findById(request.getSpecificProductId())
-                    .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
 
             if (!variant.getProduct().getId().equals(product.getId())) {
-                throw new AppException(ErrorCode.INVALID_DATA);
+                throw new AppException(ErrorCode.VARIANT_PRODUCT_MISMATCH);
             }
 
             if (Boolean.FALSE.equals(variant.getIsActive())) {
@@ -139,12 +139,12 @@ public class CartServiceImpl implements CartService {
     @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public CartItemResponse update(CartItemRequest request, Long identifier) {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
         // Hỗ trợ cả identifier là cartItemId hoặc productId (tương thích ngược)
         CartItem cartItem = cartItemRepository.findById(identifier)
                 .filter(c -> c.getBuyer().getId().equals(user.getId()))
                 .orElseGet(() -> cartItemRepository.findByBuyerIdAndProductId(user.getId(), identifier)
-                        .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND)));
+                        .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND)));
 
         int availableStock = cartItem.getSpecificProduct() != null
                 ? cartItem.getSpecificProduct().getStockQuantity()
@@ -162,11 +162,11 @@ public class CartServiceImpl implements CartService {
     @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public void remove(Long identifier) {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
         CartItem cartItem = cartItemRepository.findById(identifier)
                 .filter(c -> c.getBuyer().getId().equals(user.getId()))
                 .orElseGet(() -> cartItemRepository.findByBuyerIdAndProductId(user.getId(), identifier)
-                        .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND)));
+                        .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND)));
 
         cartItemRepository.delete(cartItem);
     }
@@ -175,14 +175,8 @@ public class CartServiceImpl implements CartService {
     @Transactional
     @PreAuthorize("hasRole('BUYER')")
     public void removeAllProductsFromCart() {
-        User user = getCurrentUser();
+        User user = currentUserProvider.getUser();
         // Gọi 1 lệnh duy nhất. Nếu giỏ hàng đang trống, nó xóa 0 dòng (không báo lỗi).
         cartItemRepository.deleteAllByBuyerId(user.getId());
-    }
-
-    private User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
     }
 }

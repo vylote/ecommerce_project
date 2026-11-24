@@ -29,6 +29,8 @@ import com.vlt.ecommerce.repository.ProductSpecificationRepository;
 import com.vlt.ecommerce.repository.SpecificationRepository;
 import com.vlt.ecommerce.repository.SpecificationTypeRepository;
 
+import com.vlt.ecommerce.service.mapper.SpecificationMapper;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -44,13 +46,13 @@ public class SpecificationServiceImpl implements SpecificationService {
     ProductSpecificationRepository productSpecificationRepository;
     ProductRepository productRepository;
     CategoryRepository categoryRepository;
+    SpecificationMapper specificationMapper;
 
-    // ================= 1. QUẢN LÝ LOẠI ĐẶC TẢ (SpecificationType) =================
     @Override
     @Transactional(readOnly = true)
     public List<SpecificationTypeResponse> getAllSpecificationTypes() {
         return specificationTypeRepository.findAll().stream()
-                .map(this::toSpecificationTypeResponse)
+                .map(specificationMapper::toSpecificationTypeResponse)
                 .collect(Collectors.toList());
     }
 
@@ -58,7 +60,7 @@ public class SpecificationServiceImpl implements SpecificationService {
     @Transactional(readOnly = true)
     public List<SpecificationTypeResponse> getSpecificationTypesByCategory(Long categoryId) {
         return specificationTypeRepository.findByCategoryIdOrCommon(categoryId).stream()
-                .map(this::toSpecificationTypeResponse)
+                .map(specificationMapper::toSpecificationTypeResponse)
                 .collect(Collectors.toList());
     }
 
@@ -66,8 +68,8 @@ public class SpecificationServiceImpl implements SpecificationService {
     @Transactional(readOnly = true)
     public SpecificationTypeResponse getSpecificationTypeById(Long id) {
         SpecificationType type = specificationTypeRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
-        return toSpecificationTypeResponse(type);
+                .orElseThrow(() -> new AppException(ErrorCode.SPECIFICATION_TYPE_NOT_FOUND));
+        return specificationMapper.toSpecificationTypeResponse(type);
     }
 
     @Override
@@ -75,7 +77,7 @@ public class SpecificationServiceImpl implements SpecificationService {
     @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
     public SpecificationTypeResponse createSpecificationType(SpecificationTypeRequest request) {
         if (specificationTypeRepository.existsByNameIgnoreCase(request.getName())) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.SPECIFICATION_TYPE_NAME_ALREADY_EXISTS);
         }
 
         Set<Category> categories = new HashSet<>();
@@ -90,7 +92,7 @@ public class SpecificationServiceImpl implements SpecificationService {
                 .categories(categories)
                 .build();
 
-        return toSpecificationTypeResponse(specificationTypeRepository.save(type));
+        return specificationMapper.toSpecificationTypeResponse(specificationTypeRepository.save(type));
     }
 
     @Override
@@ -98,11 +100,11 @@ public class SpecificationServiceImpl implements SpecificationService {
     @PreAuthorize("hasRole('ADMIN')")
     public SpecificationTypeResponse updateSpecificationType(Long id, SpecificationTypeRequest request) {
         SpecificationType type = specificationTypeRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SPECIFICATION_TYPE_NOT_FOUND));
 
         String newName = request.getName().trim();
         if (!newName.equalsIgnoreCase(type.getName()) && specificationTypeRepository.existsByNameIgnoreCaseAndIdNot(newName, id)) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.SPECIFICATION_TYPE_NAME_ALREADY_EXISTS);
         }
 
         type.setName(newName);
@@ -116,7 +118,7 @@ public class SpecificationServiceImpl implements SpecificationService {
             type.setCategories(categories);
         }
 
-        return toSpecificationTypeResponse(specificationTypeRepository.save(type));
+        return specificationMapper.toSpecificationTypeResponse(specificationTypeRepository.save(type));
     }
 
     @Override
@@ -124,17 +126,16 @@ public class SpecificationServiceImpl implements SpecificationService {
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteSpecificationType(Long id) {
         if (!specificationTypeRepository.existsById(id)) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SPECIFICATION_TYPE_NOT_FOUND);
         }
         specificationTypeRepository.deleteById(id);
     }
 
-    // ================= 2. QUẢN LÝ GIÁ TRỊ ĐẶC TẢ (Specification) =================
     @Override
     @Transactional(readOnly = true)
     public List<SpecificationResponse> getSpecificationsByType(Long typeId) {
         return specificationRepository.findBySpecificationTypeId(typeId).stream()
-                .map(this::toSpecificationResponse)
+                .map(specificationMapper::toSpecificationResponse)
                 .collect(Collectors.toList());
     }
 
@@ -143,14 +144,14 @@ public class SpecificationServiceImpl implements SpecificationService {
     @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
     public SpecificationResponse createSpecification(SpecificationRequest request) {
         if (request.getSpecificationTypeId() == null) {
-            throw new AppException(ErrorCode.INVALID_DATA);
+            throw new AppException(ErrorCode.SPECIFICATION_TYPE_REQUIRED);
         }
 
         SpecificationType type = specificationTypeRepository.findById(request.getSpecificationTypeId())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SPECIFICATION_TYPE_NOT_FOUND));
 
         if (specificationRepository.existsByNameIgnoreCaseAndSpecificationTypeId(request.getName(), type.getId())) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.SPECIFICATION_NAME_ALREADY_EXISTS);
         }
 
         Specification spec = Specification.builder()
@@ -159,7 +160,7 @@ public class SpecificationServiceImpl implements SpecificationService {
                 .specificationType(type)
                 .build();
 
-        return toSpecificationResponse(specificationRepository.save(spec));
+        return specificationMapper.toSpecificationResponse(specificationRepository.save(spec));
     }
 
     @Override
@@ -167,26 +168,26 @@ public class SpecificationServiceImpl implements SpecificationService {
     @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
     public SpecificationResponse updateSpecification(Long id, SpecificationRequest request) {
         Specification spec = specificationRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SPECIFICATION_NOT_FOUND));
 
         String newName = request.getName().trim();
         Long typeId = request.getSpecificationTypeId() != null ? request.getSpecificationTypeId() : spec.getSpecificationType().getId();
 
         if (!newName.equalsIgnoreCase(spec.getName())
                 && specificationRepository.existsByNameIgnoreCaseAndSpecificationTypeIdAndIdNot(newName, typeId, id)) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.SPECIFICATION_NAME_ALREADY_EXISTS);
         }
 
         if (request.getSpecificationTypeId() != null && !request.getSpecificationTypeId().equals(spec.getSpecificationType().getId())) {
             SpecificationType newType = specificationTypeRepository.findById(request.getSpecificationTypeId())
-                    .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                    .orElseThrow(() -> new AppException(ErrorCode.SPECIFICATION_TYPE_NOT_FOUND));
             spec.setSpecificationType(newType);
         }
 
         spec.setName(newName);
         spec.setDescription(request.getDescription());
 
-        return toSpecificationResponse(specificationRepository.save(spec));
+        return specificationMapper.toSpecificationResponse(specificationRepository.save(spec));
     }
 
     @Override
@@ -194,17 +195,16 @@ public class SpecificationServiceImpl implements SpecificationService {
     @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
     public void deleteSpecification(Long id) {
         if (!specificationRepository.existsById(id)) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SPECIFICATION_NOT_FOUND);
         }
         specificationRepository.deleteById(id);
     }
 
-    // ================= 3. GẮN ĐẶC TẢ VÀO SẢN PHẨM (ProductSpecification) =================
     @Override
     @Transactional(readOnly = true)
     public List<ProductSpecificationResponse> getProductSpecifications(Long productId) {
         return productSpecificationRepository.findByProductId(productId).stream()
-                .map(this::toProductSpecificationResponse)
+                .map(specificationMapper::toProductSpecificationResponse)
                 .collect(Collectors.toList());
     }
 
@@ -213,10 +213,10 @@ public class SpecificationServiceImpl implements SpecificationService {
     @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#productId)")
     public ProductSpecificationResponse addProductSpecification(Long productId, ProductSpecificationRequest request) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         Specification spec = specificationRepository.findById(request.getSpecificationId())
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SPECIFICATION_NOT_FOUND));
 
         ProductSpecification prodSpec = productSpecificationRepository
                 .findByProductIdAndSpecificationId(productId, spec.getId())
@@ -226,7 +226,7 @@ public class SpecificationServiceImpl implements SpecificationService {
                         .build());
 
         prodSpec.setCustomValue(request.getCustomValue());
-        return toProductSpecificationResponse(productSpecificationRepository.save(prodSpec));
+        return specificationMapper.toProductSpecificationResponse(productSpecificationRepository.save(prodSpec));
     }
 
     @Override
@@ -234,53 +234,5 @@ public class SpecificationServiceImpl implements SpecificationService {
     @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#productId)")
     public void removeProductSpecification(Long productId, Long specificationId) {
         productSpecificationRepository.deleteByProductIdAndSpecificationId(productId, specificationId);
-    }
-
-    // ================= HELPER MAPPERS =================
-    private SpecificationTypeResponse toSpecificationTypeResponse(SpecificationType type) {
-        List<SpecificationResponse> specs = type.getSpecifications() != null
-                ? type.getSpecifications().stream().map(this::toSpecificationResponse).collect(Collectors.toList())
-                : List.of();
-
-        List<Long> catIds = type.getCategories() != null
-                ? type.getCategories().stream().map(Category::getId).collect(Collectors.toList())
-                : List.of();
-
-        List<String> catNames = type.getCategories() != null
-                ? type.getCategories().stream().map(Category::getName).collect(Collectors.toList())
-                : List.of();
-
-        return SpecificationTypeResponse.builder()
-                .id(type.getId())
-                .name(type.getName())
-                .description(type.getDescription())
-                .isVariant(Boolean.TRUE.equals(type.getIsVariant()))
-                .createdAt(type.getCreatedAt())
-                .specifications(specs)
-                .categoryIds(catIds)
-                .categoryNames(catNames)
-                .build();
-    }
-
-    private SpecificationResponse toSpecificationResponse(Specification spec) {
-        return SpecificationResponse.builder()
-                .id(spec.getId())
-                .name(spec.getName())
-                .description(spec.getDescription())
-                .specificationTypeId(spec.getSpecificationType() != null ? spec.getSpecificationType().getId() : null)
-                .specificationTypeName(spec.getSpecificationType() != null ? spec.getSpecificationType().getName() : null)
-                .build();
-    }
-
-    private ProductSpecificationResponse toProductSpecificationResponse(ProductSpecification ps) {
-        return ProductSpecificationResponse.builder()
-                .id(ps.getId())
-                .productId(ps.getProduct().getId())
-                .specificationId(ps.getSpecification().getId())
-                .specificationName(ps.getSpecification().getName())
-                .specificationTypeId(ps.getSpecification().getSpecificationType() != null ? ps.getSpecification().getSpecificationType().getId() : null)
-                .specificationTypeName(ps.getSpecification().getSpecificationType() != null ? ps.getSpecification().getSpecificationType().getName() : null)
-                .customValue(ps.getCustomValue())
-                .build();
     }
 }

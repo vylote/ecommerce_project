@@ -33,17 +33,17 @@ public class CategoryServiceImpl implements CategoryService {
     @PreAuthorize("hasRole('ADMIN')")
     public CategoryResponse create(CategoryRequest request) {
         if (categoryRepository.existsBySlug(request.getSlug())) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.CATEGORY_SLUG_ALREADY_EXISTS);
         }
 
         if (request.getParentId() != null && !categoryRepository.existsById(request.getParentId())) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.PARENT_CATEGORY_NOT_FOUND);
         }
 
         Category newCategory = categoryMapper.toCategory(request);
         if (request.getParentId() != null) {
             Category parent = categoryRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                    .orElseThrow(() -> new AppException(ErrorCode.PARENT_CATEGORY_NOT_FOUND));
             newCategory.setParent(parent);
         } else {
             newCategory.setParent(null);
@@ -56,7 +56,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     public CategoryDetailResponse getCategoryDetailWithBreadcrumbs(Long id) {
         Category category = categoryRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         List<Category> parentChain = new ArrayList<>();
         Category currentParent = category.getParent();
@@ -67,16 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
             currentParent = currentParent.getParent();
         }
 
-        List<CategoryResponse> breadcrumbsDto = categoryMapper.toCategoriesResponse(parentChain);
-
-        return CategoryDetailResponse.builder()
-                .id(category.getId())
-                .name(category.getName())
-                .slug(category.getSlug())
-                .imageUrl(category.getImageUrl())
-                .isActive(category.getIsActive())
-                .breadcrumbs(breadcrumbsDto)
-                .build();
+        return categoryMapper.toCategoryDetailResponse(category, parentChain);
     }
 
     @Override
@@ -88,7 +79,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryResponse> getParentCategories() {
         List<Category> parents = categoryRepository.findByParentIsNull();
         if (parents == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
         }
         return categoryMapper.toCategoriesResponse(parents);
     }
@@ -97,16 +88,16 @@ public class CategoryServiceImpl implements CategoryService {
     @PreAuthorize("hasRole('ADMIN')")
     public CategoryResponse update(CategoryRequest request, Long id) {
         Category category = categoryRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         if (!category.getSlug().equals(request.getSlug()) &&
             categoryRepository.existsBySlug(request.getSlug())) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.CATEGORY_SLUG_ALREADY_EXISTS);
         }
 
         if (request.getParentId() != null) {
             if (!categoryRepository.existsById(request.getParentId())) {
-                throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+                throw new AppException(ErrorCode.PARENT_CATEGORY_NOT_FOUND);
             }
             if (request.getParentId().equals(id)) {
                 throw new AppException(ErrorCode.INVALID_HIERARCHY);
@@ -122,7 +113,7 @@ public class CategoryServiceImpl implements CategoryService {
     @PreAuthorize("hasRole('ADMIN')")
     public void delete(Long id) {
         categoryRepository.findById(id)
-            .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+            .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         categoryRepository.deleteById(id);
     }
@@ -130,7 +121,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryResponse> getChildrenCategories(Long parentId) {
         if (!categoryRepository.existsById(parentId)) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.PARENT_CATEGORY_NOT_FOUND);
         }
 
         List<Category> childs = categoryRepository.findByParentIdAndIsActiveTrue(parentId);

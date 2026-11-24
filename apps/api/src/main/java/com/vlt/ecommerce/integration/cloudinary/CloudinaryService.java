@@ -21,7 +21,7 @@ public class CloudinaryService implements ImageStorageService {
     public String uploadFile(MultipartFile file, String folder) throws IOException {
         Map<?,?> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
                 "folder", folder,
-                "resource_type", "auto" // Tự động nhận diện định dạng (jpg, png, webp...)
+                "resource_type", "auto"
         ));
 
         return uploadResult.get("secure_url").toString();

@@ -15,9 +15,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductSpecificationRequest {
-    @NotNull(message = "ID đặc tả (specificationId) không được để trống")
+    @NotNull(message = "{validation.specification.id.required}")
     Long specificationId;
 
-    @Size(max = 255, message = "Giá trị tùy biến tối đa 255 ký tự")
+    @Size(max = 255, message = "{validation.specification.customValue.maxLength}")
     String customValue;
 }

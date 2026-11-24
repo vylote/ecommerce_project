@@ -27,6 +27,8 @@ import com.vlt.ecommerce.repository.PermissionRepository;
 import com.vlt.ecommerce.repository.RoleRepository;
 import com.vlt.ecommerce.repository.UserRepository;
 
+import com.vlt.ecommerce.service.mapper.RoleMapper;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -41,17 +43,14 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     PermissionRepository permissionRepository;
     UserRepository userRepository;
     UserMapper userMapper;
+    RoleMapper roleMapper;
 
-    // Các vai trò mặc định của hệ thống - không được phép xóa
-    private static final Set<String> SYSTEM_ROLES = Set.of(Constants.ROLE_ADMIN, Constants.ROLE_SELLER, Constants.ROLE_BUYER);
-
-    // ================= 1. QUẢN LÝ VAI TRÒ (ROLES) =================
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
     public List<RoleResponse> getAllRoles() {
         return roleRepository.findAll().stream()
-                .map(this::toRoleResponse)
+                .map(roleMapper::toAdminRoleResponse)
                 .collect(Collectors.toList());
     }
 
@@ -60,8 +59,8 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @PreAuthorize("hasRole('ADMIN')")
     public RoleResponse getRoleById(Long id) {
         Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
-        return toRoleResponse(role);
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+        return roleMapper.toAdminRoleResponse(role);
     }
 
     @Override
@@ -74,7 +73,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
         }
 
         if (roleRepository.findByName(roleName).isPresent()) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.ROLE_NAME_ALREADY_EXISTS);
         }
 
         Set<Permission> permissions = new HashSet<>();
@@ -88,7 +87,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
                 .permissions(permissions)
                 .build();
 
-        return toRoleResponse(roleRepository.save(role));
+        return roleMapper.toAdminRoleResponse(roleRepository.save(role));
     }
 
     @Override
@@ -96,20 +95,19 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @PreAuthorize("hasRole('ADMIN')")
     public RoleResponse updateRole(Long id, RoleRequest request) {
         Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
 
         String newRoleName = request.getName().trim().toUpperCase();
         if (!newRoleName.startsWith("ROLE_")) {
             newRoleName = "ROLE_" + newRoleName;
         }
 
-        // Không cho đổi tên các role hệ thống
-        if (SYSTEM_ROLES.contains(role.getName()) && !role.getName().equals(newRoleName)) {
+        if (Constants.SYSTEM_ROLES.contains(role.getName()) && !role.getName().equals(newRoleName)) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         if (!role.getName().equals(newRoleName) && roleRepository.findByName(newRoleName).isPresent()) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.ROLE_NAME_ALREADY_EXISTS);
         }
 
         role.setName(newRoleName);
@@ -120,7 +118,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
             role.setPermissions(permissions);
         }
 
-        return toRoleResponse(roleRepository.save(role));
+        return roleMapper.toAdminRoleResponse(roleRepository.save(role));
     }
 
     @Override
@@ -128,22 +126,21 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteRole(Long id) {
         Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
 
-        if (SYSTEM_ROLES.contains(role.getName())) {
+        if (Constants.SYSTEM_ROLES.contains(role.getName())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         roleRepository.delete(role);
     }
 
-    // ================= 2. QUẢN LÝ QUYỀN HẠN (PERMISSIONS) =================
     @Override
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
     public List<PermissionResponse> getAllPermissions() {
         return permissionRepository.findAll().stream()
-                .map(this::toPermissionResponse)
+                .map(roleMapper::toPermissionResponse)
                 .collect(Collectors.toList());
     }
 
@@ -154,15 +151,12 @@ public class RolePermissionServiceImpl implements RolePermissionService {
         String permName = request.getName().trim().toUpperCase().replace(" ", "_");
 
         if (permissionRepository.existsByName(permName)) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.PERMISSION_NAME_ALREADY_EXISTS);
         }
 
-        Permission permission = Permission.builder()
-                .name(permName)
-                .description(request.getDescription())
-                .build();
+        Permission permission = new Permission(permName, request.getDescription());
 
-        return toPermissionResponse(permissionRepository.save(permission));
+        return roleMapper.toPermissionResponse(permissionRepository.save(permission));
     }
 
     @Override
@@ -170,17 +164,17 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @PreAuthorize("hasRole('ADMIN')")
     public PermissionResponse updatePermission(Long id, PermissionRequest request) {
         Permission permission = permissionRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
 
         String newName = request.getName().trim().toUpperCase().replace(" ", "_");
         if (!permission.getName().equals(newName) && permissionRepository.existsByNameAndIdNot(newName, id)) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED);
+            throw new AppException(ErrorCode.PERMISSION_NAME_ALREADY_EXISTS);
         }
 
         permission.setName(newName);
         permission.setDescription(request.getDescription());
 
-        return toPermissionResponse(permissionRepository.save(permission));
+        return roleMapper.toPermissionResponse(permissionRepository.save(permission));
     }
 
     @Override
@@ -188,44 +182,21 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @PreAuthorize("hasRole('ADMIN')")
     public void deletePermission(Long id) {
         Permission permission = permissionRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
 
         permissionRepository.delete(permission);
     }
 
-    // ================= 3. GÁN VAI TRÒ CHO NGƯỜI DÙNG =================
     @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse assignRolesToUser(Long userId, UserRoleAssignRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoleIds()));
         user.setRoles(roles);
 
         return userMapper.toUserResponse(userRepository.save(user));
-    }
-
-    // ================= HELPERS =================
-    private RoleResponse toRoleResponse(Role role) {
-        List<PermissionResponse> perms = role.getPermissions() != null
-                ? role.getPermissions().stream().map(this::toPermissionResponse).collect(Collectors.toList())
-                : List.of();
-
-        return RoleResponse.builder()
-                .id(role.getId())
-                .name(role.getName())
-                .description(role.getDescription())
-                .permissions(perms)
-                .build();
-    }
-
-    private PermissionResponse toPermissionResponse(Permission permission) {
-        return PermissionResponse.builder()
-                .id(permission.getId())
-                .name(permission.getName())
-                .description(permission.getDescription())
-                .build();
     }
 }

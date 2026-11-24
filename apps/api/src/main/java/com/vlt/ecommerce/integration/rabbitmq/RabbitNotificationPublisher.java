@@ -3,7 +3,7 @@ package com.vlt.ecommerce.integration.rabbitmq;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
-import com.vlt.ecommerce.config.RabbitMQConfig;
+import com.vlt.ecommerce.config.Constants;
 import com.vlt.ecommerce.integration.rabbitmq.dto.NotificationMessage;
 
 import lombok.RequiredArgsConstructor;
@@ -18,9 +18,9 @@ public class RabbitNotificationPublisher implements NotificationPublisher {
 
     @Override
     public void publish(NotificationMessage message) {
-        log.info("=> Bắn thông báo qua RabbitMQ Fanout Exchange (Web, Email, SMS): {}", RabbitMQConfig.NOTIFICATION_FANOUT_EXCHANGE);
+        log.info("=> Bắn thông báo qua RabbitMQ Fanout Exchange (Web, Email, SMS): {}", Constants.NOTIFICATION_FANOUT_EXCHANGE);
         rabbitTemplate.convertAndSend(
-                RabbitMQConfig.NOTIFICATION_FANOUT_EXCHANGE,
+                Constants.NOTIFICATION_FANOUT_EXCHANGE,
                 "",
                 message
         );

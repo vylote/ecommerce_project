@@ -20,7 +20,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ImportReceiptRequest {
-    @NotNull(message = "productId không được để trống")
+    @NotNull(message = "{validation.product.id.required}")
     Long productId;
 
     String receiptCode;
@@ -30,7 +30,7 @@ public class ImportReceiptRequest {
     @Builder.Default
     ImportReceiptStatus status = ImportReceiptStatus.COMPLETED;
 
-    @NotEmpty(message = "Danh sách chi tiết nhập kho không được để trống")
+    @NotEmpty(message = "{validation.receipt.details.required}")
     @Valid
     List<ImportReceiptDetailRequest> details;
 }

@@ -17,13 +17,13 @@ public class ProductRequest {
     @NotBlank
     String name;
     String description;
-    @NotNull(message = "Giá không được để trống")
-    @Min(value = 0, message = "Giá sản phẩm phải lớn hơn hoặc bằng 0")
+    @NotNull(message = "{validation.product.price.required}")
+    @Min(value = 0, message = "{validation.product.price.min}")
     BigDecimal price;
-    @NotNull(message = "Số lượng kho không được để trống")
-    @Min(value = 0, message = "Số lượng không được âm")
+    @NotNull(message = "{validation.product.stock.required}")
+    @Min(value = 0, message = "{validation.product.stock.min}")
     Integer stockQuantity;
-    @NotNull(message = "Danh mục không được để trống")
+    @NotNull(message = "{validation.product.category.required}")
     Long categoryId;
     ProductStatus status;
 }

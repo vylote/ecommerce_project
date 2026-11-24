@@ -16,7 +16,7 @@ public class CloudinaryConfig {
                 "cloud_name", properties.cloudName(),
                 "api_key", properties.apiKey(),
                 "api_secret", properties.apiSecret(),
-                "secure", true // Bắt buộc dùng HTTPS bảo mật
+                "secure", true
         ));
     }
 }

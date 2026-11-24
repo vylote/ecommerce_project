@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,7 +36,8 @@ import com.vlt.ecommerce.repository.ShopRepository;
 import com.vlt.ecommerce.domain.Role;
 import com.vlt.ecommerce.domain.User;
 import com.vlt.ecommerce.repository.RoleRepository;
-import com.vlt.ecommerce.repository.UserRepository;
+
+import com.vlt.ecommerce.security.CurrentUserProvider;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -49,8 +49,8 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class ShopServiceImpl implements ShopService {
+    CurrentUserProvider currentUserProvider;
     ShopRepository shopRepository;
-    UserRepository userRepository;
     ProductRepository productRepository;
     RoleRepository roleRepository;
     CategoryRepository categoryRepository;
@@ -60,23 +60,19 @@ public class ShopServiceImpl implements ShopService {
     ImageStorageService imageStorageService;
 
     @Override
-    @Transactional // tối ưu đường truyền, k phải nhằm mục đích lazy loading
+    @Transactional
     public ShopResponse create(ShopRequest request, MultipartFile file) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        User seller = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+        User seller = currentUserProvider.getUser();
 
         boolean isAlreadySeller = seller.getRoles().stream()
                 .anyMatch(r -> r.getName().equals(Constants.ROLE_SELLER));
 
         if (isAlreadySeller) {
-            throw new AppException(ErrorCode.RESOURCE_EXISTED); // Hoặc tạo lỗi riêng: SHOP_ALREADY_EXISTS
+            throw new AppException(ErrorCode.SHOP_ALREADY_EXISTS);
         }
 
         Role sellerRole = roleRepository.findByName(Constants.ROLE_SELLER)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.DEFAULT_ROLE_NOT_CONFIGURED));
         seller.getRoles().add(sellerRole);
 
         Set<Category> categories = new HashSet<>(categoryRepository.findAllById(request.getCategoryIds()));
@@ -98,13 +94,12 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    @Transactional // giữ mạng gọi proxy - note trong model
+    @Transactional
     public ShopResponse update(ShopRequest request, Long id, MultipartFile file) {
         Shop shop = shopRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
+        String email = currentUserProvider.getEmail();
         if (!shop.getSeller().getEmail().equals(email)) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
@@ -134,10 +129,9 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public ShopResponse get(Long id) {
         Shop shop = shopRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         ShopResponse response = shopMapper.toShopResponse(shop);
-        // Bảo vệ quyền riêng tư: Ẩn email và SĐT cá nhân của chủ shop đối với khách xem công khai
         response.setSellerEmail(null);
         response.setSellerPhone(null);
         return response;
@@ -146,15 +140,11 @@ public class ShopServiceImpl implements ShopService {
     @Override
     @PreAuthorize("hasRole('SELLER')")
     public ShopResponse getMyShop() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-
-        User seller = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+        User seller = currentUserProvider.getUser();
 
         Shop shop = shopRepository.findBySellerId(seller.getId());
         if (shop == null) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
         }
 
         return shopMapper.toShopResponse(shop);
@@ -163,7 +153,7 @@ public class ShopServiceImpl implements ShopService {
     @Override
     public List<ProductResponse> getProductsShop(Long shopId) {
         if (!shopRepository.existsById(shopId)) {
-            throw new AppException(ErrorCode.RESOURCE_NOT_FOUND);
+            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
         }
 
         List<Product> products = productRepository.findByShopId(shopId);
@@ -175,12 +165,9 @@ public class ShopServiceImpl implements ShopService {
     @Transactional
     public void updateShopRating(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
-        // 1. Lấy điểm trung bình cộng của các sản phẩm thuộc Shop
         Double avgRating = productRepository.getAverageRatingByShopId(shopId);
-
-        // 2. Ghi đè điểm rating mới vào Shop
         shop.setRating(avgRating != null ? avgRating : 0.0);
     }
 
@@ -209,7 +196,7 @@ public class ShopServiceImpl implements ShopService {
     @Transactional
     public ShopResponse toggleShopStatus(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
-                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         shop.setIsActive(!Boolean.TRUE.equals(shop.getIsActive()));
         return shopMapper.toShopResponse(shopRepository.save(shop));

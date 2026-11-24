@@ -17,11 +17,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SpecificationTypeRequest {
-    @NotBlank(message = "Tên loại đặc tả không được để trống")
-    @Size(max = 100, message = "Tên loại đặc tả tối đa 100 ký tự")
+    @NotBlank(message = "{validation.specificationType.name.required}")
+    @Size(max = 100, message = "{validation.specificationType.name.maxLength}")
     String name;
 
-    @Size(max = 255, message = "Mô tả tối đa 255 ký tự")
+    @Size(max = 255, message = "{validation.description.maxLength}")
     String description;
 
     Boolean isVariant;

@@ -54,10 +54,8 @@ public class CommissionCalculatorImpl implements CommissionCalculator {
             BigDecimal commissionRate = config.getRate();
             BigDecimal itemRevenue = item.getTotalPrice();
 
-            //Hoa hong rate*itemrevenue
             BigDecimal commissionAmount = itemRevenue.multiply(commissionRate);
 
-            //doanh thu seller
             BigDecimal netRevenue = itemRevenue.subtract(commissionAmount);
 
             CommissionRecord record = CommissionRecord.builder()

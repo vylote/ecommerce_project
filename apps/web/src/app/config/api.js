@@ -1,4 +1,5 @@
 import axios from "axios";
+import { USER_LOCKED_ERROR_CODE } from "../shared/constants";
 import { store } from "./store/index";
 import { logout } from "./store/slice/authSlice";
 
@@ -44,7 +45,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (error.response?.data?.code === 1025) {
+    if (error.response?.data?.code === USER_LOCKED_ERROR_CODE) {
       localStorage.setItem('account_locked_alert', 'true');
       store.dispatch(logout());
       return Promise.reject(error);
