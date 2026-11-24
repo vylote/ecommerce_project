@@ -2,11 +2,8 @@ package com.vlt.ecommerce.service.impl;
 
 import java.security.SecureRandom;
 import java.text.ParseException;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,14 +19,12 @@ import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.service.exception.AppException;
 import com.vlt.ecommerce.service.exception.ErrorCode;
 import com.vlt.ecommerce.integration.mail.EmailService;
-import com.vlt.ecommerce.security.DeviceUtils;
 import com.vlt.ecommerce.service.dto.request.LoginRequest;
 import com.vlt.ecommerce.service.dto.request.RegisterRequest;
 import com.vlt.ecommerce.service.dto.request.SendOtpRequest;
 import com.vlt.ecommerce.service.dto.response.TokenResponse;
 import com.vlt.ecommerce.domain.Role;
 import com.vlt.ecommerce.domain.User;
-import com.vlt.ecommerce.domain.UserSession;
 import com.vlt.ecommerce.service.dto.response.UserResponse;
 import com.vlt.ecommerce.service.mapper.UserMapper;
 import com.vlt.ecommerce.repository.RoleRepository;
@@ -60,26 +55,23 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void sendEmailOtp(SendOtpRequest request) {
-        String email = request.getEmail().trim().toLowerCase();
+        String email = request.getEmail();
 
         if (userRepository.existsByEmail(email)) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
 
-        // Sinh mã OTP 6 chữ số ngẫu nhiên
         String otp = String.format("%06d", new SecureRandom().nextInt(1_000_000));
 
-        // Lưu vào Redis với TTL 5 phút
-        String redisKey = Constants.EMAIL_OTP_KEY_PREFIX + email;
-        redisTemplate.opsForValue().set(redisKey, otp, 5, TimeUnit.MINUTES);
-
-        // Gửi email OTP
         emailService.sendOtpEmail(email, otp);
+
+        String redisKey = Constants.EMAIL_OTP_KEY_PREFIX + email;
+        redisTemplate.opsForValue().set(redisKey, otp, Constants.EMAIL_OTP_TTL);
     }
 
     @Override
     public UserResponse register(RegisterRequest request) {
-        String email = request.getEmail().trim().toLowerCase();
+        String email = request.getEmail();
 
         if (userRepository.existsByEmail(email)) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
@@ -89,24 +81,18 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(ErrorCode.PHONE_EXISTED);
         }
 
-        // Xác thực mã OTP từ Redis
         String redisKey = Constants.EMAIL_OTP_KEY_PREFIX + email;
         String cachedOtp = redisTemplate.opsForValue().get(redisKey);
         if (cachedOtp == null || !cachedOtp.equals(request.getOtp().trim())) {
             throw new AppException(ErrorCode.INVALID_OTP);
         }
 
-        // Đã xác thực thành công -> Xóa OTP khỏi Redis
         redisTemplate.delete(redisKey);
 
-        Role buyerRole = roleRepository.findByName(Constants.ROLE_BUYER)
-            .orElseThrow(() -> new AppException(ErrorCode.DEFAULT_ROLE_NOT_CONFIGURED));
+        Role buyerRole = roleRepository.getRequiredSystemRole(Constants.ROLE_BUYER);
 
         User user = userMapper.toUser(request);
-        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setFullName(request.getFullName().trim());
-        user.setPhone(request.getPhone().trim());
         user.setRoles(new HashSet<>(Collections.singletonList(buyerRole)));
         user.setIsActive(true);
 
@@ -115,8 +101,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public TokenResponse login(LoginRequest request, String userAgent) {
-        String identifier = request.getEmail().trim();
-        var user = userRepository.findByEmailOrPhone(identifier, identifier)
+        String identifier = request.getIdentifier();
+
+        User user = userRepository.findByEmailOrPhone(identifier, identifier)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CREDENTIALS));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -127,23 +114,7 @@ public class AuthServiceImpl implements AuthService {
             throw new AppException(ErrorCode.USER_LOCKED);
         }
 
-        String sessionId = UUID.randomUUID().toString();
-        String deviceInfo = DeviceUtils.parseDeviceInfo(userAgent);
-
-        UserSession userSession = UserSession.builder()
-                .id(sessionId)
-                .user(user)
-                .deviceInfo(deviceInfo)
-                .expires_at(LocalDateTime.now().plusHours(24))
-                .build();
-        sessionRepository.save(userSession);
-
-        var accessToken = jwtService.generateAccessToken(user, sessionId);
-        var refreshToken = jwtService.generateRefreshToken(user, sessionId);
-        return TokenResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return sessionService.createSessionAndGenerateTokens(user, userAgent);
     }
 
     @Override
@@ -156,16 +127,10 @@ public class AuthServiceImpl implements AuthService {
             if (!sessionRepository.existsById(sessionId))
                 throw new AppException(ErrorCode.SESSION_NOT_FOUND);
 
-            var user = userRepository.findByEmail(email)
+            User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-            var accessToken = jwtService.generateAccessToken(user, sessionId);
-            var newRefreshToken = jwtService.generateRefreshToken(user, sessionId);
-
-            return TokenResponse.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(newRefreshToken)
-                    .build();
+            return sessionService.generateTokens(user, sessionId);
         } catch (ParseException e) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }

@@ -65,6 +65,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 ## 5. Java Imports
 
 - Declare explicit imports at the top of each Java file and use simple names for external types and annotations throughout the Java source. Keep a fully qualified reference only when a name collision or framework syntax requires it.
+- Declare Java local variables with explicit types and generic arguments where applicable. Use the declared return type or the relevant interface for the value. Avoid local variable type inference with `var`.
 - Remove unused imports after refactoring and omit imports for types in the same Java package.
 - Preserve the nullability contract of framework overrides. When overriding a JSpecify `@NullMarked` method from an unmarked scope, annotate non-null parameters with `org.jspecify.annotations.NonNull` via an explicit import.
 - For Spring AOP pointcuts that match annotations, bind the annotation to an explicitly typed advice parameter. When specifying `argNames`, list every formal parameter by its declared name and in declaration order, including the join point. Preserve single execution of shared advice when pointcuts overlap.
@@ -106,6 +107,9 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - Place REST controllers and HTTP exception handlers in `web.rest` and `web.rest.errors`. Place JPA entities in `domain`, enums in `domain.enumeration`, and application events in `domain.event`.
 - Keep repositories and their query projections in `repository` and `repository.projection`. Put service contracts in `service`, implementations in `service.impl`, and mappers, request and response DTOs, exceptions, and internal event listeners under the matching `service` subpackages.
+- Return `Optional<T>` for repository queries that can yield zero or one value. Verify uniqueness or an explicit row limit before using it for entity lookups. Keep collection and page queries as collections and pages.
+- Decide how to handle missing data at each caller. For a record required by an HTTP operation, use `orElseThrow(() -> new AppException(ErrorCode.<DOMAIN_CODE>))`. Preserve create, fallback, or empty-result paths when absence is valid. For best-effort after-commit notifications, log and skip a missing target. Preserve existing aggregate defaults and response contracts when exposing nullable aggregates through `Optional`.
+- Treat seeded system roles required for registration as deployment invariants. Resolve them by name through a required lookup and let a missing seed surface as an internal failure rather than a registration business error.
 - Keep bean configuration in `config`, JWT and authorization code in `security`, localization in `i18n`, and external adapters in the matching `integration` subpackages.
 
 ### JPA entity construction
@@ -127,6 +131,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - Give controllers, services, repositories, and mappers clear responsibilities. Keep business orchestration in services, keep interfaces focused on caller needs, honor interface contracts in implementations, and depend on stable abstractions at module boundaries. Extend through composition where behavior genuinely varies.
 - Put pure entity and DTO conversion in stateless Spring-managed mappers under service.mapper. Reuse existing mapper beans through constructor injection and use MapStruct for direct field mappings. Use custom mapper methods for transformations that need explicit control. Keep data access, authorization, and business decisions in services.
+- Use MapStruct for request-to-entity conversion across registration flows. Map profile fields explicitly and keep raw credentials out of the entity. Set the encoded password, roles, and account state in the service. Use a builder when assembling a new object from business values or when named construction improves readability.
 
 - Resolve the authenticated user through CurrentUserProvider. Read the email or user ID directly when the caller only needs identity. Load the User entity when business logic needs it. Resolve identity from the current security context on each call and keep authorization decisions with their owners.
 
@@ -150,6 +155,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 ## 7. Tests and Builds
 
 - Do not add or run tests, compile source code, or run builds. Use source inspection and Git diff checks for verification.
+- After each change, verify the final diff against the request and trace affected callers, including relevant edge cases. Perform permitted checks yourself before reporting completion. State which checks passed and what remains unverified.
 
 ---
 
@@ -197,12 +203,19 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 - Return API error messages in English, including authentication, framework errors, and Bean Validation. Keep the request locale for other localized content.
 - Assign each business domain its own 1,000-number range in ErrorCode. Reserve 1000 for success and keep every error number unique within the range of its owning domain. Reuse the same code across callers for the same failure. Keep frontend consumers in sync when changing an existing number. Reserve generic codes for boundary failures without reliable domain context.
 - Return the same invalid-credentials response for unknown login identifiers and incorrect passwords.
+- Use `identifier` for login input that accepts either email or phone. Pass it unchanged to the account lookup and use the existing invalid-credentials error when lookup or password verification fails. Enforce uniqueness for account emails and phone numbers in the database.
+- Reuse the existing service that owns a duplicated operation. Keep session creation and token issuance shared across login methods, and reuse token issuance for refresh after validating the existing session.
+- Pass Redis TTLs as `Duration` with `ValueOperations.set`. Use `Expiration` when the operation needs expiration options beyond a relative TTL.
+- Preserve the submitted email address during registration. Send the OTP to that exact address and use the same address for the Redis OTP key and account storage.
+- For registration OTP, treat SMTP delivery as a prerequisite for storing or replacing the Redis code. Report configuration and delivery failures through the API. Keep SMTP optional at startup so unrelated features can run.
 
 
 - Write all new agent rules and skills in English. Before changing validation, trace the controller or service entry point to `@Valid` or `validator.validate(...)` and follow the error handler to the returned response.
 - Check existing constraints, their `ConstraintValidator` implementations, and regexes in `Constants`. Where available, look in `handler/annotation` and `handler/validator` for `@NotNullWithArgs`, `@PatternWithArgs`, and `@MaxWithArgs`. Use standard Jakarta constraints when they express the rule directly.
+- Declare validation regexes as named String constants in Constants so annotation attributes can reuse them. Share a regex across DTOs that enforce the same business rule.
 - Use bundle keys for user-facing validation messages. Keep the default Vietnamese bundle and both VI/EN bundles under `i18n/` in sync. For standard constraints use named attributes such as `{value}` and `{max}`. For argument-aware validators, pass a localizable field name via `args` and match the validator's argument order in both translations. For example, if supported, `@MaxWithArgs(args = "description", value = 500)` supplies the field at `{0}` and the limit at `{1}`.
 - Check omitted fields, explicit nulls, empty strings, whitespace, and both sides of a boundary. Pair optional format or range constraints with a required constraint where appropriate. Use `@GroupSequence` when the returned error depends on validation order.
 - Check existing string utilities before adding helpers. Use Spring's `StringUtils.hasText()` for non-whitespace text. Keep format checks on DTOs and data-dependent checks in the owning service, such as matching an identity number to a customer and session.
+- Use `StringUtils.hasLength` for null-or-empty checks when whitespace is valid. Use `StringUtils.hasText` when whitespace-only input is invalid. Reuse request constraints at validated entry points and avoid duplicating the same DTO check in the service.
 - For business errors reuse this project's `AppException` and `ErrorCode` (the equivalents of `ApplicationException` and `ApplicationExceptionCode`). Write the message for each code in English.
 - Report the entry point, reused constraints or helpers, and input cases reviewed. Distinguish source inspection from runtime verification.

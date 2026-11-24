@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vlt.ecommerce.service.exception.ErrorCode;
@@ -28,7 +29,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                        @NonNull HttpServletResponse response,
                        @NonNull AccessDeniedException accessDeniedException) throws IOException {
         String origin = request.getHeader(HttpHeaders.ORIGIN);
-        if (origin != null && !origin.isBlank()) {
+        if (StringUtils.hasText(origin)) {
             response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
             response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
         }

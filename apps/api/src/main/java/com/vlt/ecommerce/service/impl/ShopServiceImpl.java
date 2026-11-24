@@ -142,10 +142,8 @@ public class ShopServiceImpl implements ShopService {
     public ShopResponse getMyShop() {
         User seller = currentUserProvider.getUser();
 
-        Shop shop = shopRepository.findBySellerId(seller.getId());
-        if (shop == null) {
-            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-        }
+        Shop shop = shopRepository.findBySellerId(seller.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         return shopMapper.toShopResponse(shop);
     }

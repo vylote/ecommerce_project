@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -29,7 +30,7 @@ public class LocalizationUtils {
         HttpServletRequest request = getCurrentHttpRequest();
         if (request != null) {
             String headerLang = request.getHeader(HttpHeaders.ACCEPT_LANGUAGE);
-            if (headerLang != null && !headerLang.isBlank()) {
+            if (StringUtils.hasText(headerLang)) {
                 String firstLang = headerLang.split(",")[0].trim().toLowerCase();
                 if (firstLang.startsWith(Constants.ENGLISH_LANGUAGE)) {
                     return Constants.ENGLISH_LANGUAGE;
@@ -39,7 +40,7 @@ public class LocalizationUtils {
                 }
             }
             String xLang = request.getHeader(Constants.ALTERNATE_LANGUAGE_HEADER);
-            if (xLang != null && !xLang.isBlank()) {
+            if (StringUtils.hasText(xLang)) {
                 String language = xLang.trim();
                 if (Constants.VIETNAMESE_LANGUAGE.equalsIgnoreCase(language)) {
                     return Constants.VIETNAMESE_LANGUAGE;

@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.security;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +21,7 @@ public class ProductSecurity {
     SpecificProductRepository specificProductRepository;
 
     public Boolean isOwner(Long productId) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long currentUserId = (Long) authentication.getDetails();
 
         Product product = productRepository.findById(productId).orElse(null);
@@ -30,7 +31,7 @@ public class ProductSecurity {
     }
 
     public Boolean isVariantOwner(Long variantId) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long currentUserId = (Long) authentication.getDetails();
 
         SpecificProduct variant = specificProductRepository.findById(variantId).orElse(null);

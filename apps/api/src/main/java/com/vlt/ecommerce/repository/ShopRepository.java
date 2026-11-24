@@ -1,5 +1,7 @@
 package com.vlt.ecommerce.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,7 +12,7 @@ import com.vlt.ecommerce.domain.Shop;
 
 public interface ShopRepository extends JpaRepository<Shop, Long>{
     Boolean existsBySellerId(Long id);
-    Shop findBySellerId(Long id);
+    Optional<Shop> findBySellerId(Long id);
     @Query("SELECT s FROM Shop s WHERE " +
            "(:keyword IS NULL OR " +
            " LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +

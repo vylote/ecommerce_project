@@ -8,8 +8,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import com.vlt.ecommerce.domain.Order;
 import com.vlt.ecommerce.domain.event.OrderStatusChangedEvent;
 import com.vlt.ecommerce.domain.event.PaymentSuccessEvent;
-import com.vlt.ecommerce.service.exception.AppException;
-import com.vlt.ecommerce.service.exception.ErrorCode;
 import com.vlt.ecommerce.i18n.LocalizationUtils;
 import com.vlt.ecommerce.service.NotificationService;
 import com.vlt.ecommerce.repository.OrderRepository;
@@ -31,8 +29,11 @@ public class OrderEventListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePaymentSuccess(PaymentSuccessEvent event) {
-        Order order = orderRepository.findByIdWithShopAndSeller(event.getOrderId())
-            .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        Order order = orderRepository.findByIdWithShopAndSeller(event.getOrderId()).orElse(null);
+        if (order == null) {
+            log.warn("Skipping payment success notification because order {} was not found", event.getOrderId());
+            return;
+        }
 
         Long sellerId = order.getShop().getSeller().getId();
         String title = localizationUtils.getMessage("notification.payment_success.title");
@@ -51,8 +52,11 @@ public class OrderEventListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleOrderStatusChanged(OrderStatusChangedEvent event) {
-        Order order = orderRepository.findOrderForNotification(event.getOrderId())
-            .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        Order order = orderRepository.findOrderForNotification(event.getOrderId()).orElse(null);
+        if (order == null) {
+            log.warn("Skipping order status change notification because order {} was not found", event.getOrderId());
+            return;
+        }
 
         Long buyerId = order.getBuyer().getId();
         Long sellerId = order.getShop().getSeller().getId();

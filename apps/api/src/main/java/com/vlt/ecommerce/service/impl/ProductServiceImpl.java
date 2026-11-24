@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.vlt.ecommerce.service.ProductService;
@@ -72,9 +73,8 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse create(ProductRequest request) {
         Long sellerId = currentUserProvider.getUserId();
 
-        Shop shop = shopRepository.findBySellerId(sellerId);
-        if (shop == null)
-            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+        Shop shop = shopRepository.findBySellerId(sellerId)
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -239,15 +239,13 @@ public class ProductServiceImpl implements ProductService {
 
         Long sellerId = currentUserProvider.getUserId();
 
-        Shop shop = shopRepository.findBySellerId(sellerId);
-        if (shop == null) {
-            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-        }
+        Shop shop = shopRepository.findBySellerId(sellerId)
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         Sort sort = order.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        String finalStatus = (statusFilter == null || statusFilter.isBlank()) ? "ALL" : statusFilter;
+        String finalStatus = (!StringUtils.hasText(statusFilter)) ? "ALL" : statusFilter;
 
         Page<Product> productPage = productRepository.filterProducts(
                 categoryId, shop.getId(), keyword, minPrice, maxPrice, minRating, finalStatus, pageable);

@@ -27,6 +27,7 @@ public enum ErrorCode {
     INVALID_OTP(2003, "The verification code is invalid or has expired.", HttpStatus.BAD_REQUEST),
     SESSION_NOT_FOUND(2004, "The login session was not found.", HttpStatus.NOT_FOUND),
     INVALID_CREDENTIALS(2005, "The login identifier or password is incorrect.", HttpStatus.UNAUTHORIZED),
+    OTP_EMAIL_SEND_FAILED(2006, "The verification email could not be sent. Please try again later.", HttpStatus.SERVICE_UNAVAILABLE),
 
     // 3000-3999 Users
     USER_LOCKED(3001, "Your account is locked.", HttpStatus.FORBIDDEN),

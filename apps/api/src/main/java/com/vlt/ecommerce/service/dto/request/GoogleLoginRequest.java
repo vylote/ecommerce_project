@@ -1,5 +1,7 @@
 package com.vlt.ecommerce.service.dto.request;
 
+import org.springframework.util.StringUtils;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
@@ -11,7 +13,7 @@ public class GoogleLoginRequest {
     String accessToken;
 
     public String getToken() {
-        if (accessToken != null && !accessToken.isBlank()) {
+        if (StringUtils.hasText(accessToken)) {
             return accessToken;
         }
         return idToken;

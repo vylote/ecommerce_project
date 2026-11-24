@@ -12,6 +12,7 @@ import com.vlt.ecommerce.domain.CartItem;
 import com.vlt.ecommerce.service.dto.request.CartItemRequest;
 import com.vlt.ecommerce.service.dto.response.CartItemResponse;
 import com.vlt.ecommerce.domain.Product;
+import com.vlt.ecommerce.domain.SpecificProduct;
 
 @Mapper(componentModel = "spring")
 public interface CartMapper {
@@ -23,8 +24,8 @@ public interface CartMapper {
 
     default CartItemResponse toCartItemResponse(CartItem cartItem) {
         if (cartItem == null) return null;
-        var product = cartItem.getProduct();
-        var variant = cartItem.getSpecificProduct();
+        Product product = cartItem.getProduct();
+        SpecificProduct variant = cartItem.getSpecificProduct();
 
         BigDecimal price = (variant != null && variant.getPrice() != null)
                 ? variant.getPrice()

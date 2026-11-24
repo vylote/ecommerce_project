@@ -13,7 +13,7 @@ import AuthAlternatives from "./components/AuthAlternatives";
 
 export default function LoginPage() {
   const { t } = useI18n();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -40,7 +40,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       // 1. Gọi API Login để lấy Token/Cookie
-      await api.post('/auth/login', { email, password });
+      await api.post('/auth/login', { identifier, password });
       
       // 2. Gọi API lấy thông tin Profile ngay lập tức để đút vào Redux
       const userRes = await api.get('/auth/me');
@@ -86,18 +86,18 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-5" aria-busy={isSubmitting}>
           <div>
             <TextField
-              id="login-email"
+              id="login-identifier"
               label={t("auth.email_or_phone")}
               name="username"
               type="text"
               autoComplete="username"
               placeholder={t("auth.email_or_phone_placeholder")}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              aria-describedby={errorMsg ? "login-email-help login-error" : "login-email-help"}
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              aria-describedby={errorMsg ? "login-identifier-help login-error" : "login-identifier-help"}
               required
             />
-            <p id="login-email-help" className="text-xs text-base-content/60 mt-2">
+            <p id="login-identifier-help" className="text-xs text-base-content/60 mt-2">
               {t("auth.email_or_phone_help")}
             </p>
           </div>

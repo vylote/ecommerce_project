@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.vlt.ecommerce.domain.Order;
 import com.vlt.ecommerce.domain.enumeration.OrderStatus;
@@ -48,8 +49,8 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
     @PreAuthorize("hasRole('SELLER')")
     public Map<OrderStatus, Long> getDashboardStats() {
         User seller = currentUserProvider.getUser();
-        Shop shop = shopRepository.findBySellerId(seller.getId());
-        if (shop == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+        Shop shop = shopRepository.findBySellerId(seller.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         List<OrderStatusStat> stats = orderRepository.countOrdersByStatusForShop(shop.getId());
         Map<OrderStatus, Long> result = new EnumMap<>(OrderStatus.class);
@@ -66,10 +67,10 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
     @PreAuthorize("hasRole('SELLER')")
     public SellerAnalyticsResponse getSellerAnalytics(String periodType, int range) {
         User seller = currentUserProvider.getUser();
-        Shop shop = shopRepository.findBySellerId(seller.getId());
-        if (shop == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+        Shop shop = shopRepository.findBySellerId(seller.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
-        String period = (periodType == null || periodType.isBlank()) ? Constants.ANALYTICS_PERIOD_DAY : periodType.toUpperCase();
+        String period = (!StringUtils.hasText(periodType)) ? Constants.ANALYTICS_PERIOD_DAY : periodType.toUpperCase();
         LocalDate today = LocalDate.now();
         LocalDateTime startDate;
 
