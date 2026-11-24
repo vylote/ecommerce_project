@@ -2,6 +2,7 @@ package com.vlt.ecommerce.integration.rabbitmq;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.vlt.ecommerce.config.Constants;
 import com.vlt.ecommerce.integration.mail.EmailService;
@@ -42,7 +43,7 @@ public class EmailNotificationConsumer {
             }
 
             String email = user.getEmail();
-            if (email == null || email.isBlank()) {
+            if (!StringUtils.hasText(email)) {
                 log.warn("[EMAIL CONSUMER] User {} khong co email hop le", user.getId());
                 return;
             }

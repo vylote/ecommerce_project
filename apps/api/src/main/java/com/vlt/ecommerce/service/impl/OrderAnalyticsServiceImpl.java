@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.vlt.ecommerce.domain.Order;
 import com.vlt.ecommerce.domain.enumeration.OrderStatus;
@@ -48,11 +49,10 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
     @PreAuthorize("hasRole('SELLER')")
     public Map<OrderStatus, Long> getDashboardStats() {
         User seller = currentUserProvider.getUser();
-        Shop shop = shopRepository.findBySellerId(seller.getId());
-        if (shop == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+        Shop shop = shopRepository.findBySellerId(seller.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         List<OrderStatusStat> stats = orderRepository.countOrdersByStatusForShop(shop.getId());
-        // Chuyển List thành Map để Frontend dễ hiển thị (VD: { "PENDING": 12, "SHIPPING": 5 })
         Map<OrderStatus, Long> result = new EnumMap<>(OrderStatus.class);
         for (OrderStatus status : OrderStatus.values()) {
             result.put(status, 0L);
@@ -67,10 +67,10 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
     @PreAuthorize("hasRole('SELLER')")
     public SellerAnalyticsResponse getSellerAnalytics(String periodType, int range) {
         User seller = currentUserProvider.getUser();
-        Shop shop = shopRepository.findBySellerId(seller.getId());
-        if (shop == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+        Shop shop = shopRepository.findBySellerId(seller.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
-        String period = (periodType == null || periodType.isBlank()) ? Constants.ANALYTICS_PERIOD_DAY : periodType.toUpperCase();
+        String period = (!StringUtils.hasText(periodType)) ? Constants.ANALYTICS_PERIOD_DAY : periodType.toUpperCase();
         LocalDate today = LocalDate.now();
         LocalDateTime startDate;
 
@@ -95,13 +95,11 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
 
         List<Order> orders = orderRepository.findByShopIdAndCreatedAtAfter(shop.getId(), startDate);
 
-        // Tính tổng doanh thu thực tế từ các đơn COMPLETED
         BigDecimal totalRevenue = orders.stream()
                 .filter(o -> o.getStatus() == OrderStatus.COMPLETED)
                 .map(Order::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // Doanh thu tạm tính từ các đơn CONFIRMED / SHIPPING
         BigDecimal pendingRevenue = orders.stream()
                 .filter(o -> o.getStatus() == OrderStatus.CONFIRMED || o.getStatus() == OrderStatus.SHIPPING)
                 .map(Order::getTotalAmount)
@@ -117,7 +115,6 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
                 ? totalRevenue.divide(BigDecimal.valueOf(completedOrdersCount), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
 
-        // Thống kê theo trạng thái
         Map<OrderStatus, Long> statusBreakdown = new EnumMap<>(OrderStatus.class);
         for (OrderStatus st : OrderStatus.values()) {
             statusBreakdown.put(st, 0L);
@@ -126,7 +123,6 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
             statusBreakdown.put(o.getStatus(), statusBreakdown.get(o.getStatus()) + 1);
         }
 
-        // Tạo mảng timeline liên tục tùy theo period
         List<SellerAnalyticsResponse.DailyTimeline> timeline = new ArrayList<>();
 
         if (Constants.ANALYTICS_PERIOD_WEEK.equals(period)) {

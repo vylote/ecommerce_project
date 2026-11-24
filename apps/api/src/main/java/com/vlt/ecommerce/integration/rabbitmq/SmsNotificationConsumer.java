@@ -2,6 +2,7 @@ package com.vlt.ecommerce.integration.rabbitmq;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.vlt.ecommerce.config.Constants;
 import com.vlt.ecommerce.integration.sms.SmsService;
@@ -41,7 +42,7 @@ public class SmsNotificationConsumer {
             }
 
             String phone = user.getPhone();
-            if (phone == null || phone.isBlank()) {
+            if (!StringUtils.hasText(phone)) {
                 phone = "09" + String.format("%08d", user.getId());
                 log.info("[SMS CONSUMER] User #{} ({}) chua cap nhat so dien thoai, mo phong gui toi SDT: {}", 
                         user.getId(), user.getFullName(), phone);

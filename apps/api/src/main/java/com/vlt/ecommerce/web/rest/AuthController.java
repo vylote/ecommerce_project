@@ -51,7 +51,7 @@ public class AuthController {
         public ApiResponse<String> sendEmailOtp(@RequestBody @Valid SendOtpRequest request) {
                 authService.sendEmailOtp(request);
                 return ApiResponse.<String>builder()
-                                .result("Mã xác thực OTP đã được gửi đến email của bạn")
+                                .result("Authenticated code OTP was send to your email")
                                 .build();
         }
 

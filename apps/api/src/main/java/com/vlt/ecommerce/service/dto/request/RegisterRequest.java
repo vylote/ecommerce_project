@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.service.dto.request;
 
+import com.vlt.ecommerce.config.Constants;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -17,7 +18,7 @@ public class RegisterRequest {
     @NotBlank(message = "{validation.password.required}")
     @Size(min = 8, message = "{validation.password.minLength}")
     @Pattern(
-        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$!%*?&])[A-Za-z\\d@#$!%*?&]+$",
+        regexp = Constants.ACCOUNT_PASSWORD_REGEX,
         message = "{validation.password.pattern}"
     )
     String password;
@@ -25,7 +26,7 @@ public class RegisterRequest {
     String fullName;
     @NotBlank(message = "{validation.phone.required}")
     @Pattern(
-        regexp = "^(0|\\+84)(3|5|7|8|9)[0-9]{8}$",
+        regexp = Constants.VIETNAMESE_MOBILE_PHONE_REGEX,
         message = "{validation.phone.invalid}"
     )
     String phone;

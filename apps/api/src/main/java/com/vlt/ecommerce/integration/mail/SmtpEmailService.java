@@ -8,13 +8,18 @@ import java.util.regex.Matcher;
 
 import org.springframework.boot.mail.autoconfigure.MailProperties;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.HtmlUtils;
 
 import com.vlt.ecommerce.config.Constants;
+import com.vlt.ecommerce.service.exception.AppException;
+import com.vlt.ecommerce.service.exception.ErrorCode;
 
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,9 +36,9 @@ public class SmtpEmailService implements EmailService {
     public void sendOtpEmail(String toEmail, String otp) {
         JavaMailSender sender = mailSender.orElse(null);
         String fromEmail = mailProperties.getUsername();
-        if (sender == null || fromEmail == null || fromEmail.isBlank()) {
-            log.warn("Skipped OTP email because SMTP is not configured");
-            return;
+        if (sender == null || !StringUtils.hasText(fromEmail)) {
+            log.warn("Cannot send OTP email because SMTP is not configured");
+            throw new AppException(ErrorCode.OTP_EMAIL_SEND_FAILED);
         }
 
         try {
@@ -44,11 +49,12 @@ public class SmtpEmailService implements EmailService {
             helper.setTo(toEmail);
             helper.setSubject("[Ecommerce] Mã xác thực đăng ký tài khoản: " + otp);
 
-            helper.setText(render("otp.html", Map.of("otp", String.valueOf(otp))), true);
+            helper.setText(render("otp.html", Map.of("otp", otp)), true);
             sender.send(message);
             log.info("Sent OTP email via SMTP");
-        } catch (Exception e) {
+        } catch (MessagingException | IOException | MailException | IllegalArgumentException e) {
             log.error("Failed to send OTP email via SMTP (errorType={})", e.getClass().getSimpleName());
+            throw new AppException(ErrorCode.OTP_EMAIL_SEND_FAILED);
         }
     }
 
@@ -57,7 +63,7 @@ public class SmtpEmailService implements EmailService {
         Long refId = notification.refId();
         JavaMailSender sender = mailSender.orElse(null);
         String fromEmail = mailProperties.getUsername();
-        if (sender == null || fromEmail == null || fromEmail.isBlank()) {
+        if (sender == null || !StringUtils.hasText(fromEmail)) {
             log.warn("Skipped notification email because SMTP is not configured (refId={})", refId);
             return;
         }
@@ -71,7 +77,7 @@ public class SmtpEmailService implements EmailService {
             helper.setSubject("[Ecommerce] " + notification.title());
 
             String recipientName = notification.recipientName();
-            String greetingName = (recipientName != null && !recipientName.isBlank()) ? recipientName : "Quý khách";
+            String greetingName = (StringUtils.hasText(recipientName)) ? recipientName : "Quý khách";
             Map<String, String> values = Map.of(
                     "greetingName", greetingName,
                     "title", String.valueOf(notification.title()),

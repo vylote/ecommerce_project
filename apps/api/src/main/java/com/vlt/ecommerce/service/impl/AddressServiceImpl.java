@@ -38,7 +38,7 @@ public class AddressServiceImpl implements AddressService {
     public AddressResponse create(AddressRequest request) {
         User user = currentUserProvider.getUser();
 
-        var newAddress = addressMapper.toAddress(request);
+        Address newAddress = addressMapper.toAddress(request);
         newAddress.setUser(user);
 
         List<Address> existingAddresses = addressRepository.findByUserId(user.getId());

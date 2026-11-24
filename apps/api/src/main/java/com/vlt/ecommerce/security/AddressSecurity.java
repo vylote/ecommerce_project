@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.security;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,7 @@ public class AddressSecurity {
     AddressRepository addressRepository;
 
     public Boolean isOwner(Long addressId) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Long currentUserId = (Long) authentication.getDetails();
 
         Address address = addressRepository.findById(addressId).orElse(null);

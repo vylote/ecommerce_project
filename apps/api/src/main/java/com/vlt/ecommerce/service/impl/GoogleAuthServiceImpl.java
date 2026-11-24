@@ -1,10 +1,9 @@
 package com.vlt.ecommerce.service.impl;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.core.ParameterizedTypeReference;
@@ -12,23 +11,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 
-import com.vlt.ecommerce.repository.SessionRepository;
-import com.vlt.ecommerce.security.JwtService;
 import com.vlt.ecommerce.service.GoogleAuthService;
+import com.vlt.ecommerce.service.SessionService;
 import com.vlt.ecommerce.config.Constants;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.service.exception.AppException;
 import com.vlt.ecommerce.service.exception.ErrorCode;
-import com.vlt.ecommerce.security.DeviceUtils;
 import com.vlt.ecommerce.service.dto.request.GoogleCompleteRegistrationRequest;
 import com.vlt.ecommerce.service.dto.request.GoogleLoginRequest;
 import com.vlt.ecommerce.service.dto.response.GoogleAuthResponse;
 import com.vlt.ecommerce.service.dto.response.TokenResponse;
+import com.vlt.ecommerce.service.mapper.UserMapper;
 import com.vlt.ecommerce.domain.Role;
 import com.vlt.ecommerce.domain.User;
-import com.vlt.ecommerce.domain.UserSession;
 import com.vlt.ecommerce.repository.RoleRepository;
 import com.vlt.ecommerce.repository.UserRepository;
 
@@ -46,23 +45,23 @@ import lombok.extern.slf4j.Slf4j;
 public class GoogleAuthServiceImpl implements GoogleAuthService {
     UserRepository userRepository;
     PasswordEncoder passwordEncoder;
-    JwtService jwtService;
-    SessionRepository sessionRepository;
+    SessionService sessionService;
     RoleRepository roleRepository;
+    UserMapper userMapper;
 
     RestClient restClient = RestClient.create();
 
     @Override
     public GoogleAuthResponse authenticateGoogle(GoogleLoginRequest request, String userAgent) {
         String token = request.getToken();
-        if (token == null || token.isBlank()) {
+        if (!StringUtils.hasText(token)) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
         GoogleUserInfo googleUserInfo = verifyGoogleToken(token);
 
         String email = googleUserInfo.getEmail();
-        var existingUserOpt = userRepository.findByEmail(email);
+        Optional<User> existingUserOpt = userRepository.findByEmail(email);
 
         if (existingUserOpt.isPresent()) {
             User user = existingUserOpt.get();
@@ -71,7 +70,7 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
                 throw new AppException(ErrorCode.USER_LOCKED);
             }
 
-            TokenResponse tokenResponse = createSessionAndGenerateTokens(user, userAgent);
+            TokenResponse tokenResponse = sessionService.createSessionAndGenerateTokens(user, userAgent);
             return GoogleAuthResponse.builder()
                     .isNewUser(false)
                     .email(user.getEmail())
@@ -100,43 +99,16 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
             throw new AppException(ErrorCode.PHONE_EXISTED);
         }
 
-        Role buyerRole = roleRepository.findByName(Constants.ROLE_BUYER)
-                .orElseThrow(() -> new AppException(ErrorCode.DEFAULT_ROLE_NOT_CONFIGURED));
+        Role buyerRole = roleRepository.getRequiredSystemRole(Constants.ROLE_BUYER);
 
-        User user = User.builder()
-                .email(request.getEmail().trim().toLowerCase())
-                .fullName(request.getFullName().trim())
-                .phone(request.getPhone().trim())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .avatarUrl(request.getAvatarUrl())
-                .roles(new HashSet<>(Collections.singletonList(buyerRole)))
-                .isActive(true)
-                .build();
+        User user = userMapper.toUser(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRoles(new HashSet<>(Collections.singletonList(buyerRole)));
+        user.setIsActive(true);
 
         user = userRepository.save(user);
 
-        return createSessionAndGenerateTokens(user, userAgent);
-    }
-
-    private TokenResponse createSessionAndGenerateTokens(User user, String userAgent) {
-        String sessionId = UUID.randomUUID().toString();
-        String deviceInfo = DeviceUtils.parseDeviceInfo(userAgent);
-
-        UserSession userSession = UserSession.builder()
-                .id(sessionId)
-                .user(user)
-                .deviceInfo(deviceInfo)
-                .expires_at(LocalDateTime.now().plusHours(24))
-                .build();
-        sessionRepository.save(userSession);
-
-        var accessToken = jwtService.generateAccessToken(user, sessionId);
-        var refreshToken = jwtService.generateRefreshToken(user, sessionId);
-
-        return TokenResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return sessionService.createSessionAndGenerateTokens(user, userAgent);
     }
 
     private GoogleUserInfo verifyGoogleToken(String token) {
@@ -179,12 +151,12 @@ public class GoogleAuthServiceImpl implements GoogleAuthService {
 
         try {
             SignedJWT signedJWT = SignedJWT.parse(token);
-            var claims = signedJWT.getJWTClaimsSet();
+            JWTClaimsSet claims = signedJWT.getJWTClaimsSet();
             String email = (String) claims.getClaim("email");
             String name = (String) claims.getClaim("name");
             String picture = (String) claims.getClaim("picture");
 
-            if (email != null && !email.isBlank()) {
+            if (StringUtils.hasText(email)) {
                 return GoogleUserInfo.builder()
                         .email(email)
                         .name(name != null ? name : email.split("@")[0])

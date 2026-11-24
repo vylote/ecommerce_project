@@ -17,26 +17,10 @@ public class AppStartupListener implements ApplicationListener<ApplicationReadyE
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
-        String[] activeProfiles = environment.getActiveProfiles();
-        String currentProfile = (activeProfiles.length > 0) ? String.join(", ", activeProfiles) : "dev (default)";
+        String[] profiles = environment.getActiveProfiles();
+        String currentProfile = String.join(", ", profiles.length == 0 ? environment.getDefaultProfiles() : profiles);
         String serverPort = environment.getProperty("server.port", "8080");
         String contextPath = environment.getProperty("server.servlet.context-path", "");
-        String rabbitVhost = environment.getProperty("spring.rabbitmq.virtual-host", "ecommerce_dev");
-        String mailUsername = environment.getProperty("spring.mail.username", "");
-
-        log.info("\n"
-                + "=========================================================================================\n"
-                + "[ECOMMERCE BACKEND] ỨNG DỤNG ĐÃ KHỞI ĐỘNG THÀNH CÔNG!\n"
-                + "MÔI TRƯỜNG ĐANG CHẠY (PROFILE)   : [{}]\n"
-                + "ĐỊA CHỈ API CỦA HỆ THỐNG         : http://localhost:{}{}\n"
-                + "RABBITMQ VIRTUAL HOST (VHOST)    : [{}]\n"
-                + "GMAIL SMTP GỬI THÔNG BÁO         : [{}]\n"
-                + "=========================================================================================",
-                currentProfile.toUpperCase(),
-                serverPort,
-                contextPath,
-                rabbitVhost,
-                mailUsername.isBlank() ? "CHƯA CẤU HÌNH (MÔ PHỎNG LOG)" : mailUsername
-        );
+        log.info("API ready (profiles={}, port={}, contextPath={})", currentProfile, serverPort, contextPath);
     }
 }

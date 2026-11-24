@@ -18,6 +18,7 @@ public final class Constants {
     public static final String PERMISSIONS_CLAIM = "permissions";
     public static final String JWT_BLACKLIST_PREFIX = "jwt:blacklist:";
     public static final String EMAIL_OTP_KEY_PREFIX = "EMAIL_OTP:";
+    public static final Duration EMAIL_OTP_TTL = Duration.ofMinutes(5);
 
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     public static final String ROLE_BUYER = "ROLE_BUYER";
@@ -40,6 +41,11 @@ public final class Constants {
     public static final String ANALYTICS_PERIOD_DAY = "DAY";
     public static final String ANALYTICS_PERIOD_WEEK = "WEEK";
     public static final String ANALYTICS_PERIOD_MONTH = "MONTH";
+
+    public static final String ACCOUNT_PASSWORD_REGEX =
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@#$!%*?&])[A-Za-z\\d@#$!%*?&]+$";
+    public static final String VIETNAMESE_MOBILE_PHONE_REGEX =
+            "^(0|\\+84)(3|5|7|8|9)[0-9]{8}$";
 
     public static final int MIN_REVIEW_STARS = 1;
     public static final int MAX_REVIEW_STARS = 5;

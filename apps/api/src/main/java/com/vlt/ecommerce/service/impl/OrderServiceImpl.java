@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -153,7 +154,7 @@ public class OrderServiceImpl implements OrderService {
                 BigDecimal itemTotalPrice = unitPrice.multiply(BigDecimal.valueOf(orderQuantity));
 
                 String itemImage = null;
-                if (variant != null && variant.getImageUrl() != null && !variant.getImageUrl().isBlank()) {
+                if (variant != null && StringUtils.hasText(variant.getImageUrl())) {
                     itemImage = variant.getImageUrl();
                 } else if (product.getImages() != null && !product.getImages().isEmpty()) {
                     itemImage = product.getImages().stream()
@@ -164,7 +165,7 @@ public class OrderServiceImpl implements OrderService {
                 }
 
                 String itemName = product.getName();
-                if (variant != null && variant.getName() != null && !variant.getName().isBlank()) {
+                if (variant != null && StringUtils.hasText(variant.getName())) {
                     itemName = itemName + " - " + variant.getName();
                 }
 
@@ -233,10 +234,8 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
-        Shop shop = shopRepository.findBySellerId(seller.getId());
-        if (shop == null) {
-            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-        }
+        Shop shop = shopRepository.findBySellerId(seller.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         boolean isOwner = order.getItems().stream()
                 .anyMatch(item -> item.getShop().getId().equals(shop.getId()));
@@ -264,10 +263,8 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
-        Shop shop = shopRepository.findBySellerId(seller.getId());
-        if (shop == null) {
-            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-        }
+        Shop shop = shopRepository.findBySellerId(seller.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         boolean isOwner = order.getItems().stream()
                 .anyMatch(item -> item.getShop().getId().equals(shop.getId()));
@@ -393,10 +390,8 @@ public class OrderServiceImpl implements OrderService {
     public PageResponse<OrderResponse> getSellerOrders(int page, int size, OrderStatus status) {
         User seller = currentUserProvider.getUser();
 
-        Shop shop = shopRepository.findBySellerId(seller.getId());
-        if (shop == null) {
-            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-        }
+        Shop shop = shopRepository.findBySellerId(seller.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
         Page<Order> orderPage;

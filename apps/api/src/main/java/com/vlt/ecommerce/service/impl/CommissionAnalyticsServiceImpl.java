@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.vlt.ecommerce.domain.CommissionRecord;
 import com.vlt.ecommerce.repository.CommissionRecordRepository;
@@ -31,7 +32,6 @@ import com.vlt.ecommerce.domain.Order;
 import com.vlt.ecommerce.domain.enumeration.OrderStatus;
 import com.vlt.ecommerce.repository.OrderRepository;
 import com.vlt.ecommerce.repository.ProductRepository;
-import com.vlt.ecommerce.domain.Shop;
 import com.vlt.ecommerce.repository.ShopRepository;
 import com.vlt.ecommerce.domain.User;
 import com.vlt.ecommerce.repository.UserRepository;
@@ -59,19 +59,16 @@ public class CommissionAnalyticsServiceImpl implements CommissionAnalyticsServic
     public SellerStatsResponse getSellerStats() {
         User seller = currentUserProvider.getUser();
 
-        Shop shop = shopRepository.findBySellerId(seller.getId());
-        if (shop == null) {
-            throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-        }
+        shopRepository.findBySellerId(seller.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         Long sellerId = seller.getId();
-        BigDecimal totalGrossRevenue = commissionRecordRepository.sumGrossRevenueBySellerId(sellerId);
-        BigDecimal totalCommissionPaid = commissionRecordRepository.sumCommissionPaidBySellerId(sellerId);
-        BigDecimal totalNetRevenue = commissionRecordRepository.sumNetRevenueBySellerId(sellerId);
-
-        totalGrossRevenue = totalGrossRevenue != null ? totalGrossRevenue : BigDecimal.ZERO;
-        totalCommissionPaid = totalCommissionPaid != null ? totalCommissionPaid : BigDecimal.ZERO;
-        totalNetRevenue = totalNetRevenue != null ? totalNetRevenue : BigDecimal.ZERO;
+        BigDecimal totalGrossRevenue = commissionRecordRepository.sumGrossRevenueBySellerId(sellerId)
+                .orElse(BigDecimal.ZERO);
+        BigDecimal totalCommissionPaid = commissionRecordRepository.sumCommissionPaidBySellerId(sellerId)
+                .orElse(BigDecimal.ZERO);
+        BigDecimal totalNetRevenue = commissionRecordRepository.sumNetRevenueBySellerId(sellerId)
+                .orElse(BigDecimal.ZERO);
 
         return SellerStatsResponse.builder()
             .totalGrossRevenue(totalGrossRevenue)
@@ -84,8 +81,8 @@ public class CommissionAnalyticsServiceImpl implements CommissionAnalyticsServic
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
     public AdminStatsResponse getAdminStats() {
-        BigDecimal gross = commissionRecordRepository.sumTotalGrossRevenue();
-        BigDecimal commission = commissionRecordRepository.sumTotalCommissionRevenue();
+        BigDecimal gross = commissionRecordRepository.sumTotalGrossRevenue().orElse(null);
+        BigDecimal commission = commissionRecordRepository.sumTotalCommissionRevenue().orElse(null);
 
         return AdminStatsResponse.builder()
             .totalGrossRevenue(gross)
@@ -97,7 +94,7 @@ public class CommissionAnalyticsServiceImpl implements CommissionAnalyticsServic
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
     public AdminAnalyticsResponse getAdminAnalytics(String periodType, int range) {
-        String period = (periodType == null || periodType.isBlank()) ? Constants.ANALYTICS_PERIOD_DAY : periodType.toUpperCase();
+        String period = (!StringUtils.hasText(periodType)) ? Constants.ANALYTICS_PERIOD_DAY : periodType.toUpperCase();
         LocalDate today = LocalDate.now();
         LocalDateTime startDate;
 
@@ -136,9 +133,11 @@ public class CommissionAnalyticsServiceImpl implements CommissionAnalyticsServic
 
         // Nếu commissionRecords chưa có nhưng có đơn COMPLETED, tính tổng hoa hồng theo cấu hình hoặc tỷ lệ thực tế
         if (totalCommissionRevenue.compareTo(BigDecimal.ZERO) == 0 && totalGrossRevenue.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal recordedGross = commissionRecordRepository.sumTotalCommissionRevenue();
-            if (recordedGross != null && recordedGross.compareTo(BigDecimal.ZERO) > 0) {
-                totalCommissionRevenue = recordedGross;
+            BigDecimal recordedCommission = commissionRecordRepository.sumTotalCommissionRevenue()
+                    .filter(amount -> amount.signum() > 0)
+                    .orElse(BigDecimal.ZERO);
+            if (recordedCommission.signum() > 0) {
+                totalCommissionRevenue = recordedCommission;
             }
         }
 

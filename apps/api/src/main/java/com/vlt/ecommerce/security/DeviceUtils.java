@@ -4,13 +4,15 @@ import com.vlt.ecommerce.config.Constants;
 
 import java.util.Locale;
 
+import org.springframework.util.StringUtils;
+
 public final class DeviceUtils {
 
     private DeviceUtils() {
     }
 
     public static String parseDeviceInfo(String userAgent) {
-        if (userAgent == null || userAgent.isBlank()) {
+        if (!StringUtils.hasText(userAgent)) {
             return "Thiết bị không xác định";
         }
 
