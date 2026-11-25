@@ -7,9 +7,11 @@ public interface SessionService {
 
     TokenResponse createSessionAndGenerateTokens(User user, String userAgent);
 
-    TokenResponse generateTokens(User user, String sessionId);
+    TokenResponse refreshSession(User user, String sessionId);
 
     void revokeOwnSession(String ssid);
 
     void revokeSession(String ssid);
+
+    void revokeUserSessions(Long userId);
 }

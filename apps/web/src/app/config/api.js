@@ -79,7 +79,10 @@ api.interceptors.response.use(
         
         try {
            processQueue(refreshError);
-           store.dispatch(logout()); 
+           if (refreshError.response?.data?.code === USER_LOCKED_ERROR_CODE) {
+             localStorage.setItem('account_locked_alert', 'true');
+           }
+           store.dispatch(logout());
            console.log("[API-7] Đã dispatch logout thành công.");
         } catch (e) {
            console.error("[API-8] Lỗi nghiêm trọng khi dispatch logout hoặc processQueue:", e);

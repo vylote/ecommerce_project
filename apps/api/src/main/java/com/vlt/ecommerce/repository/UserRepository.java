@@ -6,11 +6,13 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.vlt.ecommerce.domain.User;
-import com.vlt.ecommerce.repository.projection.UserAuthorizationRole;
+
+import jakarta.persistence.LockModeType;
 
 public interface UserRepository extends JpaRepository<User, Long>{
     Boolean existsByEmail(String email);
@@ -19,13 +21,12 @@ public interface UserRepository extends JpaRepository<User, Long>{
 
     Optional<User> findByEmailOrPhone(String email, String phone);
 
-    @Query(value = """
-            SELECT ur.role_id AS roleId
-            FROM users u
-            LEFT JOIN user_roles ur ON ur.user_id = u.id
-            WHERE u.id = :userId AND u.is_active = TRUE
-            """, nativeQuery = true)
-    List<UserAuthorizationRole> findAuthorizationRoles(@Param("userId") Long userId);
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM User u WHERE u.id = :userId")
+    Optional<User> findByIdForUpdate(@Param("userId") Long userId);
+
+    @Query("SELECT u.id FROM User u JOIN u.roles r WHERE r.id = :roleId ORDER BY u.id")
+    List<Long> findUserIdsByRoleId(@Param("roleId") Long roleId);
 
     @Query("SELECT u FROM User u WHERE "+
            "(:email IS NULL OR u.email LIKE CONCAT('%', :email, '%')) AND"+ 

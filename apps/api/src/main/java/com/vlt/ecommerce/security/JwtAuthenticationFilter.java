@@ -1,7 +1,7 @@
 package com.vlt.ecommerce.security;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.HttpHeaders;
@@ -15,8 +15,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.vlt.ecommerce.config.Constants;
 import com.nimbusds.jwt.SignedJWT;
 import com.vlt.ecommerce.service.exception.ErrorCode;
-import com.vlt.ecommerce.integration.redis.TokenBlacklistService;
-import com.vlt.ecommerce.integration.redis.UserAuthorizationCache;
+import com.vlt.ecommerce.integration.redis.SessionAccessStore;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -34,8 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     JwtService jwtService;
-    TokenBlacklistService blacklistService;
-    UserAuthorizationCache authorizationCache;
+    SessionAccessStore sessionAccessStore;
+    RoleAuthorityResolver authorityResolver;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -75,24 +74,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = signedJWT.getJWTClaimsSet().getSubject();
                 Long userId = signedJWT.getJWTClaimsSet().getLongClaim(Constants.USER_ID_CLAIM);
 
-                if (blacklistService.isSsidBlacklisted(ssid)) {
+                if (ssid == null || userId == null || !sessionAccessStore.isActive(ssid, userId)) {
                     log.warn("Chặn truy cập: Phiên đăng nhập {} đã bị thu hồi", ssid);
-                    sendErrorResponse(request, response, ErrorCode.UNAUTHENTICATED, "The login session has been revoked.");
+                    sendErrorResponse(request, response, ErrorCode.UNAUTHENTICATED, "The login session is no longer active.");
                     return;
                 }
 
-                // get current role & permission -> read key from redis
-                Optional<Set<SimpleGrantedAuthority>> authorities = authorizationCache.resolveAuthorities(userId);
-                if (authorities.isEmpty()) {
-                    log.warn("Blocked authentication for a missing or inactive account (userId={})", userId);
-                    sendErrorResponse(request, response, ErrorCode.USER_LOCKED, ErrorCode.USER_LOCKED.getMessage());
+                List<String> roles = signedJWT.getJWTClaimsSet().getStringListClaim(Constants.ROLES_CLAIM);
+                if (roles == null) {
+                    sendErrorResponse(request, response, ErrorCode.UNAUTHENTICATED, "Please refresh your login session.");
                     return;
                 }
 
-                // use list permission getting to create Authentication put in SecurityContext.
-                // Spring will use it when remark hasRole or hasAuthority
+                Set<SimpleGrantedAuthority> authorities = authorityResolver.resolve(roles);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        email, null, authorities.get());
+                        email, null, authorities);
 
                 authentication.setDetails(userId);
                 SecurityContextHolder.getContext().setAuthentication(authentication);

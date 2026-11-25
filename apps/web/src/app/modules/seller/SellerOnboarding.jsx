@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import toast from 'react-hot-toast';
 import { Store, MapPin, CheckCircle2, Truck } from 'lucide-react';
 import api from '../../config/api';
-import { loginSuccess } from '../../config/store/slice/authSlice'; // ASSUMPTION: tên action giống bên LoginPage, sửa lại nếu khác
+import { logout } from '../../config/store/slice/authSlice';
 
 const STEPS = [
   { id: 1, label: 'Thông tin Shop' },
@@ -156,18 +156,9 @@ export default function SellerOnboarding() {
 
       await api.post('/shops', formData);
 
-      // 2. Refresh token để nhận quyền Seller mới
-      await api.post('/auth/refresh');
-
-      // 3. Gọi lại API /me để lấy chính xác thông tin User đã được cấp thêm Role Seller
-      const meRes = await api.get('/auth/me');
-
-      // 4. Cập nhật lại Redux store
-      dispatch(loginSuccess({ user: meRes.data.result }));
-
-      toast.success('Đăng ký Shop thành công!');
-      navigate('/seller/dashboard');
-
+      dispatch(logout());
+      toast.success('Đã tạo shop. Vui lòng đăng nhập lại để vào Kênh Người Bán.');
+      navigate('/login', { replace: true });
     } catch (error) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra.');
     } finally {
