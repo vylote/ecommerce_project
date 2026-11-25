@@ -4,30 +4,26 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.vlt.ecommerce.domain.Product;
 
-public interface ProductRepository extends JpaRepository<Product, Long>{
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     List<Product> findByShopId(Long shopId);
 
+    default Page<Product> filterProducts(ProductFilter filter, Pageable pageable) {
+        return findAll(ProductSearchSpecification.matching(filter), pageable);
+    }
+
+    @Override
     @EntityGraph(attributePaths = {"category", "shop"})
-    @Query("SELECT p FROM Product p WHERE " +
-           "(:#{#filter.categoryId()} IS NULL OR p.category.id = :#{#filter.categoryId()}) AND " +
-           "(:#{#filter.shopId()} IS NULL OR p.shop.id = :#{#filter.shopId()}) AND "+
-           "(:#{#filter.keyword()} IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :#{#filter.keyword()}, '%'))) AND " +
-           "(:#{#filter.minPrice()} IS NULL OR p.price >= :#{#filter.minPrice()}) AND " +
-           "(:#{#filter.maxPrice()} IS NULL OR p.price <= :#{#filter.maxPrice()}) AND " +
-           "(:#{#filter.minRating()} IS NULL OR p.averageRating >= :#{#filter.minRating()}) AND " +
-           "((:#{#filter.status()} = 'ALL' AND p.status != 'DELETED') OR " +
-           " (:#{#filter.status()} = 'ACTIVE' AND p.status = 'ACTIVE') OR " +
-           " (:#{#filter.status()} = 'INACTIVE' AND p.status = 'INACTIVE') OR " +
-           " (:#{#filter.status()} = 'OUT_OF_STOCK' AND p.stockQuantity = 0 AND p.status != 'DELETED'))")
-    Page<Product> filterProducts(@Param("filter") ProductFilter filter, Pageable pageable);
+    Page<Product> findAll(Specification<Product> specification, Pageable pageable);
 
     @Query("SELECT COALESCE(AVG(p.averageRating), 0.0) FROM Product p WHERE p.shop.id = :shopId AND p.status = 'ACTIVE'")
     Double getAverageRatingByShopId(@Param("shopId") Long shopId);

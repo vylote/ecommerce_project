@@ -1,7 +1,9 @@
 package com.vlt.ecommerce.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,78 +60,53 @@ public class CartServiceImpl implements CartService {
             throw new AppException(ErrorCode.CANNOT_BUY_OWN_PRODUCT);
         }
 
-        boolean hasVariants = specificProductRepository.existsByProductIdAndIsActiveTrue(product.getId());
-        if (hasVariants && request.getSpecificProductId() == null) {
-            throw new AppException(ErrorCode.PLEASE_SELECT_VARIANT);
-        }
-        if (!hasVariants && request.getSpecificProductId() != null) {
-            throw new AppException(ErrorCode.PRODUCT_HAS_NO_VARIANTS);
-        }
+        Long productId = product.getId();
+        SpecificProduct variant = resolveVariant(productId, request.getSpecificProductId());
+        int availableStock = switch (variant) {
+            case null -> product.getStockQuantity();
+            case SpecificProduct selectedVariant -> selectedVariant.getStockQuantity();
+        };
+        Optional<CartItem> existing = cartItemRepository
+                .findByBuyerIdAndProductIdAndSpecificProduct(user.getId(), productId, variant);
 
-        // Trường hợp 1: Có chọn biến thể cụ thể (SpecificProduct)
-        if (request.getSpecificProductId() != null) {
-            SpecificProduct variant = specificProductRepository
-                    .findById(request.getSpecificProductId())
-                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
-
-            if (!variant.getProduct().getId().equals(product.getId())) {
-                throw new AppException(ErrorCode.VARIANT_PRODUCT_MISMATCH);
-            }
-
-            if (Boolean.FALSE.equals(variant.getIsActive())) {
-                throw new AppException(ErrorCode.OUT_OF_STOCK);
-            }
-
-            CartItem existing = cartItemRepository
-                    .findByBuyerIdAndProductIdAndSpecificProductId(user.getId(), product.getId(), variant.getId())
-                    .orElse(null);
-
-            if (existing != null) {
-                int newQty = existing.getQuantity() + request.getQuantity();
-                if (newQty > variant.getStockQuantity()) {
-                    throw new AppException(ErrorCode.OUT_OF_STOCK);
-                }
-                existing.setQuantity(newQty);
-                return cartMapper.toCartItemResponse(cartItemRepository.save(existing));
-            } else {
-                if (request.getQuantity() > variant.getStockQuantity()) {
-                    throw new AppException(ErrorCode.OUT_OF_STOCK);
-                }
-                CartItem newItem = CartItem.builder()
-                        .buyer(user)
-                        .product(product)
-                        .specificProduct(variant)
-                        .quantity(request.getQuantity())
-                        .build();
-                return cartMapper.toCartItemResponse(cartItemRepository.save(newItem));
-            }
-        }
-
-        // Trường hợp 2: Sản phẩm đơn không có biến thể
-        if (request.getQuantity() > product.getStockQuantity()) {
+        long quantity = (long) existing.map(CartItem::getQuantity).orElse(0) + request.getQuantity();
+        if (quantity > availableStock) {
             throw new AppException(ErrorCode.OUT_OF_STOCK);
         }
 
-        CartItem existing = cartItemRepository
-                .findByBuyerIdAndProductIdAndSpecificProductIsNull(user.getId(), product.getId())
-                .orElse(null);
+        CartItem cartItem = existing.orElseGet(() -> CartItem.builder()
+                .buyer(user)
+                .product(product)
+                .specificProduct(variant)
+                .build());
+        cartItem.setQuantity((int) quantity);
+        return cartMapper.toCartItemResponse(cartItemRepository.save(cartItem));
+    }
 
-        if (existing != null) {
-            int newQty = existing.getQuantity() + request.getQuantity();
-            if (newQty > product.getStockQuantity()) {
-                throw new AppException(ErrorCode.OUT_OF_STOCK);
+    private @Nullable SpecificProduct resolveVariant(Long productId, @Nullable Long variantId) {
+        if (variantId == null) {
+            if (specificProductRepository.existsByProductIdAndIsActiveTrue(productId)) {
+                throw new AppException(ErrorCode.PLEASE_SELECT_VARIANT);
             }
-            existing.setQuantity(newQty);
-            return cartMapper.toCartItemResponse(cartItemRepository.save(existing));
-        } else {
-            CartItem newItem = CartItem.builder()
-                    .buyer(user)
-                    .product(product)
-                    .specificProduct(null)
-                    .quantity(request.getQuantity())
-                    .build();
-            return cartMapper.toCartItemResponse(cartItemRepository.save(newItem));
+            return null;
         }
+
+        SpecificProduct variant = specificProductRepository.findById(variantId).orElse(null);
+        boolean belongsToProduct = variant != null && variant.getProduct().getId().equals(productId);
+        if (variant != null && belongsToProduct && Boolean.TRUE.equals(variant.getIsActive())) {
+            return variant;
+        }
+
+        if (!specificProductRepository.existsByProductIdAndIsActiveTrue(productId)) {
+            throw new AppException(ErrorCode.PRODUCT_HAS_NO_VARIANTS);
+        }
+        if (variant == null) {
+            throw new AppException(ErrorCode.VARIANT_NOT_FOUND);
+        }
+        if (!belongsToProduct) {
+            throw new AppException(ErrorCode.VARIANT_PRODUCT_MISMATCH);
+        }
+        throw new AppException(ErrorCode.OUT_OF_STOCK);
     }
 
     @Override
@@ -166,7 +143,6 @@ public class CartServiceImpl implements CartService {
     @Transactional
     public void removeAllProductsFromCart() {
         User user = currentUserProvider.getUser();
-        // Gọi 1 lệnh duy nhất. Nếu giỏ hàng đang trống, nó xóa 0 dòng (không báo lỗi).
         cartItemRepository.deleteAllByBuyerId(user.getId());
     }
 }

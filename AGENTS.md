@@ -83,9 +83,12 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 ### Readability and control flow
 
-- Use clear names and straightforward code so readers can see what it does. Keep comments for non-obvious business rules, constraints, ordering dependencies, or compatibility decisions. Remove comments that restate the code or describe past edits.
+- Use clear names and straightforward code so readers can see what it does. Name use case methods with an action and the resource, and use the plural when the operation can return multiple resources. Keep comments for non-obvious business rules, constraints, ordering dependencies, or compatibility decisions. Remove comments that restate the code or describe past edits.
 - Minimize branching and nesting. Use guard clauses for invalid inputs or cases that need no work, and keep the main path easy to follow. Review nested `if`, `for`, and `while` blocks for duplicate checks or conditions that can be evaluated once.
 - Keep loops and branches when they clearly express the behavior. Prefer a simple loop over a dense collection pipeline or a chain of ternaries. Extract a helper only when it names a meaningful operation or removes duplication. Preserve evaluation order, short-circuiting, and side effects when simplifying control flow.
+- For create-or-update flows, resolve the lookup and applicable limits first. Share final-value validation, persistence, and response mapping across both paths.
+- When several values depend on the same condition, compute them in the same branch or switch case. Share the steps that follow.
+- Select cart lines by buyer, product, and exact variant association. A null variant matches only a cart line without a variant. A selected active variant of the product proves variant availability.
 
 ### Dependency injection and logging
 
@@ -150,6 +153,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - Group related service inputs into an immutable parameter object when positional arguments become hard to distinguish or evolve. Use a record for a data-only input and add a builder when named fields improve the call site. Keep short, clear signatures simple.
 - Keep search and listing methods to at most three parameters at controller and service boundaries. Bind related search query parameters to a request record. Pass an immutable filter and `Pageable` to the repository. Resolve authorization-dependent scope, such as the current seller's shop, inside the service.
+- Use Spring Data JPA Specification for dynamic searches with optional filters. Add predicates only for supplied filters. Use named JPQL parameters for fixed queries.
 
 - Keep one interface for the related use cases of a service, including operations called by controllers and other beans. Use a separate interface when it defines a distinct responsibility or integration boundary.
 - For standalone services called by other beans, such as application services or integration adapters, define an interface for the operations their callers need and provide a Spring-managed implementation.
@@ -189,6 +193,7 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 ### State, effects, and React 19
 
 - Keep field values and dialog visibility local. Lift state to the nearest common owner when siblings share it. Use React Router search parameters for shareable filters, search terms, and pagination. Use Redux Toolkit for application-wide state or drafts that span routes.
+- Provide clear actions for active filter groups and a reset action for the full filter set. Clear the corresponding URL parameters, return to the first page, and preserve unrelated search and sort state.
 - Put feature requests and mutations in feature hooks or API functions. Trigger user-initiated work from event handlers or form actions. For route data, use loaders where a data router is available. Reserve effects for external synchronization, including socket subscriptions with cleanup.
 - Calculate derived values during render. Use a key when a different record should start a fresh form. Define components at module scope and use stable record IDs as keys for editable or sortable lists.
 - In React 19, function components can receive `ref` as a prop and provide context with `<SomeContext value={value}>`. Use `use()` to read context or a stable promise with a Suspense boundary. Route pages can supply document metadata with `<title>` and `<meta>`.

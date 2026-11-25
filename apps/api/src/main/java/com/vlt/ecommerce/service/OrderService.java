@@ -9,7 +9,7 @@ import com.vlt.ecommerce.service.dto.response.OrderResponse;
 
 public interface OrderService {
 
-    List<OrderResponse> create(OrderRequest request);
+    List<OrderResponse> createOrders(OrderRequest request);
 
     OrderResponse confirmOrder(Long id);
 

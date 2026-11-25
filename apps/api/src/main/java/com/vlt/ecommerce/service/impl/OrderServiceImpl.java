@@ -12,7 +12,6 @@ import com.vlt.ecommerce.domain.OrderItem;
 import com.vlt.ecommerce.domain.enumeration.OrderStatus;
 import com.vlt.ecommerce.service.OrderService;
 import com.vlt.ecommerce.config.Constants;
-import com.vlt.ecommerce.domain.ProductImage;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -21,7 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,12 +33,12 @@ import com.vlt.ecommerce.repository.CartItemRepository;
 import com.vlt.ecommerce.service.CommissionCalculator;
 import com.vlt.ecommerce.service.dto.request.OrderRequest;
 import com.vlt.ecommerce.service.dto.response.OrderResponse;
+import com.vlt.ecommerce.service.mapper.OrderItemMapper;
 import com.vlt.ecommerce.service.mapper.OrderMapper;
 import com.vlt.ecommerce.repository.OrderRepository;
 import com.vlt.ecommerce.domain.Payment;
 import com.vlt.ecommerce.domain.Payment.PaymentMethod;
 import com.vlt.ecommerce.domain.Payment.PaymentStatus;
-import com.vlt.ecommerce.domain.Product;
 import com.vlt.ecommerce.domain.SpecificProduct;
 import com.vlt.ecommerce.repository.ProductRepository;
 import com.vlt.ecommerce.repository.SpecificProductRepository;
@@ -76,6 +74,7 @@ public class OrderServiceImpl implements OrderService {
     SpecificProductRepository specificProductRepository;
     AddressMapper addressMapper;
     OrderMapper orderMapper;
+    OrderItemMapper orderItemMapper;
     ObjectMapper objectMapper;
     ApplicationEventPublisher eventPublisher;
     RabbitTemplate rabbitTemplate;
@@ -83,116 +82,79 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public List<OrderResponse> create(OrderRequest request) {
+    public List<OrderResponse> createOrders(OrderRequest request) {
         User buyer = currentUserProvider.getUser();
+        List<CartItem> cartItems = findSelectedCartItems(request.getCartItemIds(), buyer.getId());
+        List<Order> createdOrders = createOrdersByShop(request, buyer, cartItems);
 
-        List<CartItem> cartItems = cartItemRepository.findAllByIdInAndBuyerId(request.getCartItemIds(), buyer.getId());
-        if (cartItems.isEmpty() || cartItems.size() != request.getCartItemIds().size()) {
-            throw new AppException(ErrorCode.CART_ITEM_NOT_FOUND);
-        }
+        cartItemRepository.deleteAll(cartItems);
+        return orderMapper.toOrderResponses(createdOrders);
+    }
 
-        Address address = addressRepository.findById(request.getAddressId())
-                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
-
-        if (!address.getUser().getId().equals(buyer.getId())) {
-            throw new AppException(ErrorCode.INVALID_ADDRESS);
-        }
-
-        String addressSnapshot;
-        try {
-            AddressResponse addressDto = addressMapper.toAddressResponse(address);
-            addressSnapshot = objectMapper.writeValueAsString(addressDto);
-        } catch (JsonProcessingException e) {
-            throw new AppException(ErrorCode.SYSTEM_ERROR);
-        }
-
+    private List<Order> createOrdersByShop(OrderRequest request, User buyer, List<CartItem> cartItems) {
+        String addressSnapshot = snapshotShippingAddress(request.getAddressId(), buyer.getId());
         Map<Long, List<CartItem>> itemsByShop = cartItems.stream()
                 .collect(Collectors.groupingBy(item -> item.getProduct().getShop().getId()));
 
         List<Order> createdOrders = new ArrayList<>();
+        for (Map.Entry<Long, List<CartItem>> shopItems : itemsByShop.entrySet()) {
+            Shop shop = shopRepository.findById(shopItems.getKey())
+                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
+            Order order = orderMapper.toShopOrder(request, buyer, shop);
+            order.setAddressSnapshot(addressSnapshot);
+            createdOrders.add(placeShopOrder(order, shopItems.getValue()));
+        }
+        return createdOrders;
+    }
 
-        for (Map.Entry<Long, List<CartItem>> entry : itemsByShop.entrySet()) {
-            List<CartItem> shopItems = entry.getValue();
+    private List<CartItem> findSelectedCartItems(List<Long> cartItemIds, Long buyerId) {
+        List<CartItem> cartItems = cartItemRepository.findAllByIdInAndBuyerId(cartItemIds, buyerId);
+        if (cartItems.isEmpty() || cartItems.size() != cartItemIds.size()) {
+            throw new AppException(ErrorCode.CART_ITEM_NOT_FOUND);
+        }
+        return cartItems;
+    }
 
-            Shop shop = shopRepository.findById(entry.getKey())
-                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-
-            Order newOrder = orderMapper.toOrder(request);
-            newOrder.setBuyer(buyer);
-            newOrder.setShop(shop);
-            newOrder.setAddressSnapshot(addressSnapshot);
-            newOrder.setNote(request.getNote());
-            if (request.getIdempotencyKey() != null) {
-                newOrder.setIdempotencyKey(request.getIdempotencyKey() + "-shop" + shop.getId());
-            }
-            newOrder.setItems(new ArrayList<>());
-            newOrder.setTotalAmount(BigDecimal.ZERO);
-
-            BigDecimal totalAmount = BigDecimal.ZERO;
-
-            for (CartItem shopItem : shopItems) {
-                Product product = shopItem.getProduct();
-                SpecificProduct variant = shopItem.getSpecificProduct();
-                int orderQuantity = shopItem.getQuantity();
-
-                if (variant != null) {
-                    int variantUpdated = specificProductRepository.decrementStock(variant.getId(), orderQuantity);
-                    if (variantUpdated == 0) {
-                        throw new AppException(ErrorCode.OUT_OF_STOCK);
-                    }
-                }
-
-                int updatedRows = productRepository.decrementStockAndIncrementSold(product.getId(), orderQuantity);
-
-                if (updatedRows == 0) {
-                    throw new AppException(ErrorCode.OUT_OF_STOCK);
-                }
-
-                BigDecimal unitPrice = (variant != null) ? variant.getPrice() : product.getPrice();
-                BigDecimal itemTotalPrice = unitPrice.multiply(BigDecimal.valueOf(orderQuantity));
-
-                String itemImage = null;
-                if (variant != null && StringUtils.hasText(variant.getImageUrl())) {
-                    itemImage = variant.getImageUrl();
-                } else if (product.getImages() != null && !product.getImages().isEmpty()) {
-                    itemImage = product.getImages().stream()
-                        .filter(img -> Boolean.TRUE.equals(img.getIsPrimary()))
-                        .map(ProductImage::getUrl)
-                        .findFirst()
-                        .orElse(product.getImages().getFirst().getUrl());
-                }
-
-                String itemName = product.getName();
-                if (variant != null && StringUtils.hasText(variant.getName())) {
-                    itemName = itemName + " - " + variant.getName();
-                }
-
-                OrderItem orderItem = OrderItem.builder()
-                        .order(newOrder)
-                        .product(product)
-                        .specificProduct(variant)
-                        .shop(product.getShop())
-                        .productName(itemName)
-                        .productPrice(unitPrice)
-                        .quantity(orderQuantity)
-                        .totalPrice(itemTotalPrice)
-                        .productImageUrl(itemImage)
-                        .build();
-
-                newOrder.getItems().add(orderItem);
-                totalAmount = totalAmount.add(itemTotalPrice);
-            }
-
-            newOrder.setTotalAmount(totalAmount);
-            Order savedOrder = orderRepository.save(newOrder);
-            createdOrders.add(savedOrder);
-            eventPublisher.publishEvent(new OrderStatusChangedEvent(this, savedOrder.getId()));
-
-            sendOrderExpirationSchedule(savedOrder.getId());
+    private String snapshotShippingAddress(Long addressId, Long buyerId) {
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
+        if (!address.getUser().getId().equals(buyerId)) {
+            throw new AppException(ErrorCode.INVALID_ADDRESS);
         }
 
-        cartItemRepository.deleteAll(cartItems);
-        return orderMapper.toOrderResponses(createdOrders);
+        try {
+            AddressResponse addressDto = addressMapper.toAddressResponse(address);
+            return objectMapper.writeValueAsString(addressDto);
+        } catch (JsonProcessingException e) {
+            throw new AppException(ErrorCode.SYSTEM_ERROR);
+        }
+    }
+
+    private Order placeShopOrder(Order order, List<CartItem> cartItems) {
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        for (CartItem cartItem : cartItems) {
+            reserveStock(cartItem);
+            OrderItem orderItem = orderItemMapper.toOrderItem(order, cartItem);
+            order.getItems().add(orderItem);
+            totalAmount = totalAmount.add(orderItem.getTotalPrice());
+        }
+
+        order.setTotalAmount(totalAmount);
+        Order savedOrder = orderRepository.save(order);
+        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, savedOrder.getId()));
+        sendOrderExpirationSchedule(savedOrder.getId());
+        return savedOrder;
+    }
+
+    private void reserveStock(CartItem cartItem) {
+        SpecificProduct variant = cartItem.getSpecificProduct();
+        int quantity = cartItem.getQuantity();
+        if (variant != null && specificProductRepository.decrementStock(variant.getId(), quantity) == 0) {
+            throw new AppException(ErrorCode.OUT_OF_STOCK);
+        }
+        if (productRepository.decrementStockAndIncrementSold(cartItem.getProduct().getId(), quantity) == 0) {
+            throw new AppException(ErrorCode.OUT_OF_STOCK);
+        }
     }
 
     private void sendOrderExpirationSchedule(Long orderId) {
@@ -222,68 +184,54 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponse confirmOrder(Long id) {
-        User seller = currentUserProvider.getUser();
-
-        Order order = orderRepository.findByIdForUpdate(id)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-
-        if (order.getStatus() != OrderStatus.PENDING) {
-            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
-        }
-
-        Shop shop = shopRepository.findBySellerId(seller.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-
-        boolean isOwner = order.getItems().stream()
-                .anyMatch(item -> item.getShop().getId().equals(shop.getId()));
-
-        if (!isOwner) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-
-        order.setStatus(OrderStatus.CONFIRMED);
-
-        eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order.getId()));
-        return orderMapper.toOrderResponse(order);
+        return transitionSellerOrder(id, OrderStatus.PENDING, OrderStatus.CONFIRMED);
     }
 
     @Override
     @Transactional
     public OrderResponse shipOrder(Long id) {
+        return transitionSellerOrder(id, OrderStatus.CONFIRMED, OrderStatus.SHIPPING);
+    }
+
+    private OrderResponse transitionSellerOrder(Long id, OrderStatus expectedStatus, OrderStatus nextStatus) {
         User seller = currentUserProvider.getUser();
-
-        Order order = orderRepository.findByIdForUpdate(id)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-
-        if (order.getStatus() != OrderStatus.CONFIRMED) {
+        Order order = findOrderForUpdate(id);
+        if (order.getStatus() != expectedStatus) {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
         Shop shop = shopRepository.findBySellerId(seller.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-
         boolean isOwner = order.getItems().stream()
                 .anyMatch(item -> item.getShop().getId().equals(shop.getId()));
-
         if (!isOwner) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
-        order.setStatus(OrderStatus.SHIPPING);
+
+        order.setStatus(nextStatus);
         eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order.getId()));
         return orderMapper.toOrderResponse(order);
+    }
+
+    // Lock the order before validating transitions to prevent duplicate cancellation and stock restoration.
+    private Order findOrderForUpdate(Long id) {
+        return orderRepository.findByIdForUpdate(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+    }
+
+    private Order findBuyerOrderForUpdate(Long id) {
+        User buyer = currentUserProvider.getUser();
+        Order order = findOrderForUpdate(id);
+        if (!order.getBuyer().getId().equals(buyer.getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        return order;
     }
 
     @Override
     @Transactional
     public OrderResponse completeOrder(Long id) {
-        User buyer = currentUserProvider.getUser();
-
-        Order order = orderRepository.findByIdForUpdate(id)
-            .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-
-        if (!order.getBuyer().getId().equals(buyer.getId())) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
+        Order order = findBuyerOrderForUpdate(id);
 
         if (order.getStatus() != OrderStatus.SHIPPING) {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
@@ -299,7 +247,6 @@ public class OrderServiceImpl implements OrderService {
     public PageResponse<OrderResponse> getOwnHistoryOrder(int page, int size, OrderStatus status) {
         User buyer = currentUserProvider.getUser();
 
-        // Sắp xếp đơn hàng mới nhất lên đầu
         Pageable pageable = PageRequest.of(page-1, size, Sort.by("createdAt").descending());
 
         Page<Order> orderPage;
@@ -311,7 +258,6 @@ public class OrderServiceImpl implements OrderService {
 
         List<OrderResponse> content = orderMapper.toOrderResponses(orderPage.getContent());
 
-        // Kiểm tra xem đơn hàng đã được đánh giá chưa
         content.forEach(res -> res.setReviewed(reviewRepository.existsByOrderId(res.getId())));
 
         return PageResponse.of(orderPage, content);
@@ -336,19 +282,10 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.toOrderResponse(order);
     }
 
-    //huy hang
     @Override
     @Transactional
     public OrderResponse cancelOrder(Long id) {
-        User buyer = currentUserProvider.getUser();
-
-        // Sử dụng khóa bi quan (Pessimistic Lock) để chống hủy đơn kép và hoàn lặp tồn kho
-        Order order = orderRepository.findByIdForUpdate(id)
-            .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-
-        if (!order.getBuyer().getId().equals(buyer.getId())) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
+        Order order = findBuyerOrderForUpdate(id);
 
         if (!order.getStatus().equals(OrderStatus.PENDING)) {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
@@ -362,7 +299,7 @@ public class OrderServiceImpl implements OrderService {
                 payment.getMethod() == PaymentMethod.BANK_TRANSFER) {
 
                 payment.setStatus(PaymentStatus.REFUNDED);
-                payment.setTransactionRef("REFUND_MOCK_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase()); // Mã hoàn tiền giả
+                payment.setTransactionRef("REFUND_MOCK_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
             }
         }
 

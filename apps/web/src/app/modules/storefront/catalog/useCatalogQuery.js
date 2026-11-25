@@ -20,5 +20,6 @@ export default function useCatalogQuery(defaultSort) {
     changeSort: (sortBy, order = "desc") => updateParams({ sortBy, order, page: 1 }),
     changePrice: (minPrice, maxPrice) => updateParams({ minPrice, maxPrice, page: 1 }),
     changeRating: (minRating) => updateParams({ minRating, page: 1 }),
+    clearFilters: () => updateParams({ minPrice: null, maxPrice: null, minRating: null, page: 1 }),
   };
 }
