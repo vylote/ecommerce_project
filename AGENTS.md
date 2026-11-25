@@ -126,7 +126,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 - Write a new versioned SQL changelog for every schema change or seed update. Store it in apps/api/src/main/resources/db/migration with the full date and a descriptive purpose. Use VYYYY.MM.DD.NN__describe_change.sql and preserve already applied changelogs.
 - Define granular operation authorities and document their default role grants in docs/authorization.md. Use roles to bundle permissions. Keep resource ownership checks alongside authority checks and document read-any grants separately.
 - Place HTTP operation guards on controller methods. Write seeded operation names directly inside hasAuthority and hasAnyAuthority expressions. Keep authority constants for Java code that performs programmatic checks. Preserve service-level ownership checks and require distinct read-any authorities for access to someone else's resources.
-- Omit permission lists from JWTs. Use Redis read-through caches for account status, role assignments, and shared role permissions. Fall back to current MySQL data on misses or concurrent authorization writes. Mark affected authorization writes in Redis before changing MySQL and evict affected entries after transaction completion. Keep cache fills guarded against concurrent updates.
+- Put role names in access JWTs. During authorization, verify the active Redis session and resolve complete permission lists by role name. After committing an authorization change, replace affected role cache entries with the full committed lists. Use insert-if-absent for cache misses. Revoke user sessions when role assignments change, a role is renamed or deleted, or an account is locked.
 
 ### JPA column mappings
 

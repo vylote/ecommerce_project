@@ -4,8 +4,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -42,19 +41,15 @@ public class JwtServiceImpl implements JwtService {
         try {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
-            Set<String> roles = new HashSet<>();
-
-            if (user.getRoles() != null) {
-                for (Role role : user.getRoles()) {
-                    roles.add(role.getName());
-                }
-            }
+            List<String> roles = user.getRoles() == null
+                    ? List.of()
+                    : user.getRoles().stream().map(Role::getName).toList();
 
             JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getEmail())
                 .issuer("mini-ecommerce")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(24, ChronoUnit.HOURS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now().plusSeconds(Constants.ACCESS_COOKIE_MAX_AGE_SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim(Constants.ROLES_CLAIM, roles)
                 .claim(Constants.USER_ID_CLAIM, user.getId())

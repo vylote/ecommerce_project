@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.vlt.ecommerce.integration.redis.UserAuthorizationCache;
+import com.vlt.ecommerce.service.SessionService;
 import com.vlt.ecommerce.domain.Shop;
 import com.vlt.ecommerce.service.ShopService;
 import com.vlt.ecommerce.config.Constants;
@@ -36,6 +36,7 @@ import com.vlt.ecommerce.repository.ShopRepository;
 import com.vlt.ecommerce.domain.Role;
 import com.vlt.ecommerce.domain.User;
 import com.vlt.ecommerce.repository.RoleRepository;
+import com.vlt.ecommerce.repository.UserRepository;
 
 import com.vlt.ecommerce.security.CurrentUserProvider;
 
@@ -53,7 +54,8 @@ public class ShopServiceImpl implements ShopService {
     ShopRepository shopRepository;
     ProductRepository productRepository;
     RoleRepository roleRepository;
-    UserAuthorizationCache authorizationCache;
+    UserRepository userRepository;
+    SessionService sessionService;
     CategoryRepository categoryRepository;
     ShopMapper shopMapper;
     ProductMapper productMapper;
@@ -63,8 +65,11 @@ public class ShopServiceImpl implements ShopService {
     @Override
     @Transactional
     public ShopResponse create(ShopRequest request, MultipartFile file) {
-        authorizationCache.userChanged(currentUserProvider.getUserId());
-        User seller = currentUserProvider.getUser();
+        User seller = userRepository.findByIdForUpdate(currentUserProvider.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        if (!Boolean.TRUE.equals(seller.getIsActive())) {
+            throw new AppException(ErrorCode.USER_LOCKED);
+        }
 
         boolean isAlreadySeller = seller.getRoles().stream()
                 .anyMatch(r -> r.getName().equals(Constants.ROLE_SELLER));
@@ -92,7 +97,9 @@ public class ShopServiceImpl implements ShopService {
             log.error("Error uploading shop logo", e);
         }
 
-        return shopMapper.toShopResponse(shopRepository.save(newShop));
+        Shop savedShop = shopRepository.save(newShop);
+        sessionService.revokeUserSessions(seller.getId());
+        return shopMapper.toShopResponse(savedShop);
     }
 
     @Override

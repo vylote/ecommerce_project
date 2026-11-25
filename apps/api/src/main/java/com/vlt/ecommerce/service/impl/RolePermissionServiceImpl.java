@@ -8,7 +8,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.vlt.ecommerce.integration.redis.UserAuthorizationCache;
+import com.vlt.ecommerce.integration.redis.RolePermissionCache;
+import com.vlt.ecommerce.service.SessionService;
 import com.vlt.ecommerce.service.RolePermissionService;
 import com.vlt.ecommerce.config.Constants;
 import com.vlt.ecommerce.service.exception.AppException;
@@ -40,7 +41,8 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RolePermissionServiceImpl implements RolePermissionService {
     RoleRepository roleRepository;
-    UserAuthorizationCache authorizationCache;
+    RolePermissionCache rolePermissionCache;
+    SessionService sessionService;
     PermissionRepository permissionRepository;
     UserRepository userRepository;
     UserMapper userMapper;
@@ -74,25 +76,21 @@ public class RolePermissionServiceImpl implements RolePermissionService {
             throw new AppException(ErrorCode.ROLE_NAME_ALREADY_EXISTS);
         }
 
-        Set<Permission> permissions = new HashSet<>();
-        if (request.getPermissionIds() != null && !request.getPermissionIds().isEmpty()) {
-            permissions.addAll(permissionRepository.findAllById(request.getPermissionIds()));
-        }
-
         Role role = Role.builder()
                 .name(roleName)
                 .description(request.getDescription())
-                .permissions(permissions)
+                .permissions(findPermissionsForAssignment(request.getPermissionIds()))
                 .build();
 
-        return roleMapper.toAdminRoleResponse(roleRepository.save(role));
+        Role saved = roleRepository.save(role);
+        rolePermissionCache.refreshAfterCommit(List.of(saved.getName()));
+        return roleMapper.toAdminRoleResponse(saved);
     }
 
     @Override
     @Transactional
     public RoleResponse updateRole(Long id, RoleRequest request) {
-        authorizationCache.roleChanged(id);
-        Role role = roleRepository.findById(id)
+        Role role = roleRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
 
         String newRoleName = request.getName().trim().toUpperCase();
@@ -108,29 +106,45 @@ public class RolePermissionServiceImpl implements RolePermissionService {
             throw new AppException(ErrorCode.ROLE_NAME_ALREADY_EXISTS);
         }
 
+        String previousName = role.getName();
+        boolean renaming = !previousName.equals(newRoleName);
+        if (renaming && request.getPermissionIds() == null) {
+            findPermissionsForAssignment(role.getPermissions().stream().map(Permission::getId).toList());
+        }
+        if (renaming) {
+            revokeSessionsForRole(id);
+        }
         role.setName(newRoleName);
+        rolePermissionCache.refreshAfterCommit(List.of(previousName, newRoleName));
         role.setDescription(request.getDescription());
 
         if (request.getPermissionIds() != null) {
-            Set<Permission> permissions = new HashSet<>(permissionRepository.findAllById(request.getPermissionIds()));
-            role.setPermissions(permissions);
+            role.setPermissions(findPermissionsForAssignment(request.getPermissionIds()));
         }
 
         return roleMapper.toAdminRoleResponse(roleRepository.save(role));
     }
 
+    private Set<Permission> findPermissionsForAssignment(List<Long> permissionIds) {
+        if (permissionIds == null || permissionIds.isEmpty()) {
+            return new HashSet<>();
+        }
+        return new HashSet<>(permissionRepository.findForRoleAssignment(permissionIds));
+    }
+
     @Override
     @Transactional
     public void deleteRole(Long id) {
-        authorizationCache.roleChanged(id);
-        Role role = roleRepository.findById(id)
+        Role role = roleRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
 
         if (Constants.SYSTEM_ROLES.contains(role.getName())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
+        revokeSessionsForRole(id);
         roleRepository.delete(role);
+        rolePermissionCache.refreshAfterCommit(List.of(role.getName()));
     }
 
     @Override
@@ -158,8 +172,7 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @Override
     @Transactional
     public PermissionResponse updatePermission(Long id, PermissionRequest request) {
-        authorizationCache.permissionChanged(id);
-        Permission permission = permissionRepository.findById(id)
+        Permission permission = permissionRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
 
         String newName = request.getName().trim().toUpperCase().replace(" ", "_");
@@ -167,6 +180,9 @@ public class RolePermissionServiceImpl implements RolePermissionService {
             throw new AppException(ErrorCode.PERMISSION_NAME_ALREADY_EXISTS);
         }
 
+        if (!permission.getName().equals(newName)) {
+            rolePermissionCache.refreshAfterCommit(permissionRepository.findRoleNamesByPermissionId(id));
+        }
         permission.setName(newName);
         permission.setDescription(request.getDescription());
 
@@ -176,23 +192,31 @@ public class RolePermissionServiceImpl implements RolePermissionService {
     @Override
     @Transactional
     public void deletePermission(Long id) {
-        authorizationCache.permissionChanged(id);
-        Permission permission = permissionRepository.findById(id)
+        Permission permission = permissionRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
 
+        rolePermissionCache.refreshAfterCommit(permissionRepository.findRoleNamesByPermissionId(id));
         permissionRepository.delete(permission);
+    }
+
+    private void revokeSessionsForRole(Long roleId) {
+        userRepository.findUserIdsByRoleId(roleId).forEach(sessionService::revokeUserSessions);
     }
 
     @Override
     @Transactional
     public UserResponse assignRolesToUser(Long userId, UserRoleAssignRequest request) {
-        authorizationCache.userChanged(userId);
-        User user = userRepository.findById(userId)
+        Set<Role> roles = request.getRoleIds().isEmpty()
+                ? new HashSet<>()
+                : new HashSet<>(roleRepository.findForUserAssignment(request.getRoleIds()));
+        User user = userRepository.findByIdForUpdate(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-
-        Set<Role> roles = new HashSet<>(roleRepository.findAllById(request.getRoleIds()));
-        user.setRoles(roles);
-
-        return userMapper.toUserResponse(userRepository.save(user));
+        Set<Long> currentRoleIds = user.getRoles().stream().map(Role::getId).collect(Collectors.toSet());
+        Set<Long> assignedRoleIds = roles.stream().map(Role::getId).collect(Collectors.toSet());
+        if (!currentRoleIds.equals(assignedRoleIds)) {
+            user.setRoles(roles);
+            sessionService.revokeUserSessions(userId);
+        }
+        return userMapper.toUserResponse(user);
     }
 }

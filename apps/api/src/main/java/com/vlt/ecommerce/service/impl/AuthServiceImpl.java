@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import com.vlt.ecommerce.repository.SessionRepository;
 import com.vlt.ecommerce.security.JwtService;
 import com.vlt.ecommerce.service.AuthService;
 import com.vlt.ecommerce.service.SessionService;
@@ -47,7 +46,6 @@ public class AuthServiceImpl implements AuthService {
     PasswordEncoder passwordEncoder;
     JwtService jwtService;
     UserMapper userMapper;
-    SessionRepository sessionRepository;
     RoleRepository roleRepository;
     SessionService sessionService;
     StringRedisTemplate redisTemplate;
@@ -124,13 +122,15 @@ public class AuthServiceImpl implements AuthService {
             String email = signedJWT.getJWTClaimsSet().getSubject();
             String sessionId = signedJWT.getJWTClaimsSet().getStringClaim(Constants.SESSION_ID_CLAIM);
 
-            if (!sessionRepository.existsById(sessionId))
-                throw new AppException(ErrorCode.SESSION_NOT_FOUND);
+            if (!StringUtils.hasText(sessionId)
+                    || signedJWT.getJWTClaimsSet().getClaim(Constants.USER_ID_CLAIM) != null) {
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
 
             User user = userRepository.findByEmail(email)
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-            return sessionService.generateTokens(user, sessionId);
+            return sessionService.refreshSession(user, sessionId);
         } catch (ParseException e) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
@@ -147,7 +147,7 @@ public class AuthServiceImpl implements AuthService {
     public void logout(String accessToken) {
         if (StringUtils.hasText(accessToken)) {
             try {
-                SignedJWT signedJWT = SignedJWT.parse(accessToken);
+                SignedJWT signedJWT = jwtService.verifyToken(accessToken);
                 String ssid = signedJWT.getJWTClaimsSet().getStringClaim(Constants.SESSION_ID_CLAIM);
 
                 if (ssid != null) {
