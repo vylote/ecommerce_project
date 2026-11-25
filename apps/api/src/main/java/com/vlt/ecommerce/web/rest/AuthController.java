@@ -3,6 +3,7 @@ package com.vlt.ecommerce.web.rest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -172,6 +173,7 @@ public class AuthController {
         }
 
         @GetMapping("/me")
+        @PreAuthorize("hasAuthority('ACCOUNT_READ')")
         public ApiResponse<UserResponse> getMyInfo() {
                 return ApiResponse.<UserResponse>builder()
                                 .result(authService.getMyInfo())
@@ -179,8 +181,9 @@ public class AuthController {
         }
 
         @PostMapping("/sessions/revoke")
+        @PreAuthorize("hasAuthority('SESSION_REVOKE')")
         public ApiResponse<String> revokeSession(@RequestParam String ssid) {
-                sessionService.revokeSession(ssid);
+                sessionService.revokeOwnSession(ssid);
                 return ApiResponse.<String>builder()
                                 .result("Revoke session successfully")
                                 .build();

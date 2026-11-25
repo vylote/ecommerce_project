@@ -37,7 +37,7 @@ public class CategoryController {
     ImageStorageService imageStorageService;
 
     @PostMapping(value = "/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('CATEGORY_IMAGE_UPLOAD')")
     public ApiResponse<String> uploadCategoryImage(@RequestParam("file") MultipartFile file) throws IOException {
         String url = imageStorageService.uploadFile(file, "categories");
         return ApiResponse.<String>builder()
@@ -46,6 +46,7 @@ public class CategoryController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('CATEGORY_CREATE')")
     public ApiResponse<CategoryResponse> create(@RequestBody @Valid CategoryRequest request) {
         return ApiResponse.<CategoryResponse>builder()
                 .result(categoryService.create(request))
@@ -74,6 +75,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('CATEGORY_UPDATE')")
     public ApiResponse<CategoryResponse> update(@RequestBody @Valid CategoryRequest request, @PathVariable Long id) {
         return ApiResponse.<CategoryResponse>builder()
                 .result(categoryService.update(request, id))
@@ -81,6 +83,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('CATEGORY_DELETE')")
     public ApiResponse<String> delete(@PathVariable Long id) {
         categoryService.delete(id);
         return ApiResponse.<String>builder()

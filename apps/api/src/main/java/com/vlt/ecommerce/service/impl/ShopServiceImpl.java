@@ -11,7 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -141,7 +140,6 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    @PreAuthorize("hasRole('SELLER')")
     public ShopResponse getMyShop() {
         User seller = currentUserProvider.getUser();
 
@@ -182,7 +180,6 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     @Transactional(readOnly = true)
     public PageResponse<ShopResponse> getShopsForAdmin(String keyword, Boolean isActive, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
@@ -193,7 +190,6 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ShopResponse toggleShopStatus(Long shopId) {
         Shop shop = shopRepository.findById(shopId)
@@ -204,7 +200,6 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public Map<String, Long> getShopStatsForAdmin() {
         long total = shopRepository.count();
         long active = shopRepository.countByIsActive(true);

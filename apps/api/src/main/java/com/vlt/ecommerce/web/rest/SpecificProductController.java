@@ -2,6 +2,7 @@ package com.vlt.ecommerce.web.rest;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,6 +45,7 @@ public class SpecificProductController {
     }
 
     @PostMapping("/products/{productId}/variants")
+    @PreAuthorize("hasAuthority('VARIANT_CREATE') and @productSecurity.isOwner(#productId)")
     public ApiResponse<SpecificProductResponse> createVariant(
             @PathVariable Long productId,
             @RequestBody @Valid SpecificProductRequest request) {
@@ -53,6 +55,7 @@ public class SpecificProductController {
     }
 
     @PutMapping("/variants/{id}")
+    @PreAuthorize("hasAuthority('VARIANT_UPDATE') and @productSecurity.isVariantOwner(#id)")
     public ApiResponse<SpecificProductResponse> updateVariant(
             @PathVariable Long id,
             @RequestBody @Valid SpecificProductRequest request) {
@@ -62,6 +65,7 @@ public class SpecificProductController {
     }
 
     @DeleteMapping("/variants/{id}")
+    @PreAuthorize("hasAuthority('VARIANT_DELETE') and @productSecurity.isVariantOwner(#id)")
     public ApiResponse<String> deleteVariant(@PathVariable Long id) {
         specificProductService.deleteVariant(id);
         return ApiResponse.<String>builder()

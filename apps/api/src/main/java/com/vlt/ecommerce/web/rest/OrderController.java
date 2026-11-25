@@ -3,12 +3,13 @@ package com.vlt.ecommerce.web.rest;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -36,34 +37,39 @@ public class OrderController {
     OrderAnalyticsService orderAnalyticsService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ORDER_CREATE')")
     public ApiResponse<List<OrderResponse>> create(@RequestBody @Valid OrderRequest request) {
         return ApiResponse.<List<OrderResponse>>builder()
                 .result(orderService.create(request))
                 .build();
     }
 
-    @RequestMapping(value = "/{id}/confirm", method = { RequestMethod.PATCH, RequestMethod.POST })
+    @PatchMapping("/{id}/confirm")
+    @PreAuthorize("hasAuthority('ORDER_CONFIRM')")
     public ApiResponse<OrderResponse> confirmOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.confirmOrder(id))
                 .build();
     }
 
-    @RequestMapping(value = "/{id}/ship", method = { RequestMethod.PATCH, RequestMethod.POST })
+    @PatchMapping("/{id}/ship")
+    @PreAuthorize("hasAuthority('ORDER_SHIP')")
     public ApiResponse<OrderResponse> shipOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.shipOrder(id))
                 .build();
     }
 
-    @RequestMapping(value = "/{id}/complete", method = { RequestMethod.PATCH, RequestMethod.POST })
+    @PatchMapping("/{id}/complete")
+    @PreAuthorize("hasAuthority('ORDER_COMPLETE')")
     public ApiResponse<OrderResponse> completeOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.completeOrder(id))
                 .build();
     }
 
-    @GetMapping({ "", "/history" })
+    @GetMapping
+    @PreAuthorize("hasAuthority('ORDER_BUYER_LIST')")
     public ApiResponse<PageResponse<OrderResponse>> getOwnHistoryOrder(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -74,7 +80,8 @@ public class OrderController {
                 .build();
     }
 
-    @RequestMapping(value = "/{id}/cancel", method = { RequestMethod.PATCH, RequestMethod.POST })
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasAuthority('ORDER_CANCEL')")
     public ApiResponse<OrderResponse> cancelOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.cancelOrder(id))
@@ -82,6 +89,7 @@ public class OrderController {
     }
 
     @GetMapping("/seller")
+    @PreAuthorize("hasAuthority('ORDER_SHOP_LIST')")
     public ApiResponse<PageResponse<OrderResponse>> getSellerOrders(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -93,6 +101,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ORDER_READ_OWN', 'ORDER_READ_ANY')")
     public ApiResponse<OrderResponse> getDetailOrder(@PathVariable Long id) {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.getDetailOrder(id))
@@ -100,6 +109,7 @@ public class OrderController {
     }
 
     @GetMapping("/seller/dashboard/stats")
+    @PreAuthorize("hasAuthority('ORDER_SHOP_STATS_READ')")
     public ApiResponse<Map<OrderStatus, Long>> getSellerDashboardStats() {
         return ApiResponse.<Map<OrderStatus, Long>>builder()
                 .result(orderAnalyticsService.getDashboardStats())
@@ -107,6 +117,7 @@ public class OrderController {
     }
 
     @GetMapping("/seller/dashboard/analytics")
+    @PreAuthorize("hasAuthority('ORDER_SHOP_ANALYTICS_READ')")
     public ApiResponse<SellerAnalyticsResponse> getSellerAnalytics(
             @RequestParam(defaultValue = Constants.ANALYTICS_PERIOD_DAY) String period,
             @RequestParam(defaultValue = "7") int range,

@@ -2,6 +2,7 @@ package com.vlt.ecommerce.web.rest;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,6 +34,7 @@ public class RolePermissionController {
     RolePermissionService rolePermissionService;
 
     @GetMapping("/roles")
+    @PreAuthorize("hasAuthority('ROLE_LIST')")
     public ApiResponse<List<RoleResponse>> getAllRoles() {
         return ApiResponse.<List<RoleResponse>>builder()
                 .result(rolePermissionService.getAllRoles())
@@ -40,6 +42,7 @@ public class RolePermissionController {
     }
 
     @GetMapping("/roles/{id}")
+    @PreAuthorize("hasAuthority('ROLE_READ')")
     public ApiResponse<RoleResponse> getRoleById(@PathVariable Long id) {
         return ApiResponse.<RoleResponse>builder()
                 .result(rolePermissionService.getRoleById(id))
@@ -47,6 +50,7 @@ public class RolePermissionController {
     }
 
     @PostMapping("/roles")
+    @PreAuthorize("hasAuthority('ROLE_CREATE')")
     public ApiResponse<RoleResponse> createRole(@RequestBody @Valid RoleRequest request) {
         return ApiResponse.<RoleResponse>builder()
                 .result(rolePermissionService.createRole(request))
@@ -54,6 +58,7 @@ public class RolePermissionController {
     }
 
     @PutMapping("/roles/{id}")
+    @PreAuthorize("hasAuthority('ROLE_UPDATE')")
     public ApiResponse<RoleResponse> updateRole(
             @PathVariable Long id,
             @RequestBody @Valid RoleRequest request) {
@@ -63,6 +68,7 @@ public class RolePermissionController {
     }
 
     @DeleteMapping("/roles/{id}")
+    @PreAuthorize("hasAuthority('ROLE_DELETE')")
     public ApiResponse<String> deleteRole(@PathVariable Long id) {
         rolePermissionService.deleteRole(id);
         return ApiResponse.<String>builder()
@@ -71,6 +77,7 @@ public class RolePermissionController {
     }
 
     @GetMapping("/permissions")
+    @PreAuthorize("hasAuthority('PERMISSION_LIST')")
     public ApiResponse<List<PermissionResponse>> getAllPermissions() {
         return ApiResponse.<List<PermissionResponse>>builder()
                 .result(rolePermissionService.getAllPermissions())
@@ -78,6 +85,7 @@ public class RolePermissionController {
     }
 
     @PostMapping("/permissions")
+    @PreAuthorize("hasAuthority('PERMISSION_CREATE')")
     public ApiResponse<PermissionResponse> createPermission(@RequestBody @Valid PermissionRequest request) {
         return ApiResponse.<PermissionResponse>builder()
                 .result(rolePermissionService.createPermission(request))
@@ -85,6 +93,7 @@ public class RolePermissionController {
     }
 
     @PutMapping("/permissions/{id}")
+    @PreAuthorize("hasAuthority('PERMISSION_UPDATE')")
     public ApiResponse<PermissionResponse> updatePermission(
             @PathVariable Long id,
             @RequestBody @Valid PermissionRequest request) {
@@ -94,6 +103,7 @@ public class RolePermissionController {
     }
 
     @DeleteMapping("/permissions/{id}")
+    @PreAuthorize("hasAuthority('PERMISSION_DELETE')")
     public ApiResponse<String> deletePermission(@PathVariable Long id) {
         rolePermissionService.deletePermission(id);
         return ApiResponse.<String>builder()
@@ -102,6 +112,7 @@ public class RolePermissionController {
     }
 
     @PutMapping("/users/{userId}/roles")
+    @PreAuthorize("hasAuthority('ROLE_ASSIGN')")
     public ApiResponse<UserResponse> assignRolesToUser(
             @PathVariable Long userId,
             @RequestBody @Valid UserRoleAssignRequest request) {

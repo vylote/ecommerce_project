@@ -8,7 +8,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -72,7 +71,6 @@ public class ProductServiceImpl implements ProductService {
     ShopService shopService;
 
     @Override
-    @PreAuthorize("hasRole('SELLER')")
     public ProductResponse create(ProductRequest request) {
         Long sellerId = currentUserProvider.getUserId();
 
@@ -94,7 +92,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#id)")
     public ProductResponse update(ProductRequest request, Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -104,7 +101,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#id)")
     public void delete(Long id) {
         productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -114,7 +110,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#productId)")
     public ProductImageResponse addProductImage(MultipartFile file, Long productId, Boolean isPrimary,
             Integer sortOrder) {
         Product product = productRepository.findById(productId)
@@ -187,7 +182,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('SELLER')")
     public PageResponse<ProductResponse> getMyProducts(ProductSearchRequest request) {
         Long sellerId = currentUserProvider.getUserId();
         Shop shop = shopRepository.findBySellerId(sellerId)

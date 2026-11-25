@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.web.rest;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,7 @@ public class NotificationController {
     NotificationService notificationService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('NOTIFICATION_LIST')")
     public ApiResponse<PageResponse<NotificationResponse>> getMyNotifications(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -34,6 +36,7 @@ public class NotificationController {
     }
 
     @GetMapping("/unread-count")
+    @PreAuthorize("hasAuthority('NOTIFICATION_UNREAD_COUNT')")
     public ApiResponse<Long> countUnread() {
         return ApiResponse.<Long>builder()
             .result(notificationService.countUnread())
@@ -41,12 +44,14 @@ public class NotificationController {
     }
 
     @PatchMapping("/{id}/read")
+    @PreAuthorize("hasAuthority('NOTIFICATION_MARK_READ')")
     public ApiResponse<Void> markAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);
         return ApiResponse.<Void>builder().build();
     }
 
     @PatchMapping("/read-all")
+    @PreAuthorize("hasAuthority('NOTIFICATION_MARK_ALL_READ')")
     public ApiResponse<Void> markAllAsRead() {
         notificationService.markAllAsRead();
         return ApiResponse.<Void>builder().build();

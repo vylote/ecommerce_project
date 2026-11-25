@@ -34,18 +34,18 @@ public interface ProductRepository extends JpaRepository<Product, Long>{
 
     @Modifying
     @Query("""
-        UPDATE Product p 
-        SET p.stockQuantity = p.stockQuantity - :qty, 
-            p.soldCount = p.soldCount + :qty 
+        UPDATE Product p
+        SET p.stockQuantity = p.stockQuantity - :qty,
+            p.soldCount = p.soldCount + :qty
         WHERE p.id = :productId AND p.stockQuantity >= :qty
         """)
     int decrementStockAndIncrementSold(@Param("productId") Long productId, @Param("qty") Integer qty);
 
     @Modifying
     @Query("""
-        UPDATE Product p 
-        SET p.stockQuantity = p.stockQuantity + :qty, 
-            p.soldCount = p.soldCount - :qty 
+        UPDATE Product p
+        SET p.stockQuantity = p.stockQuantity + :qty,
+            p.soldCount = p.soldCount - :qty
         WHERE p.id = :productId
         """)
     void restoreStockAndDecrementSold(@Param("productId") Long productId, @Param("qty") Integer qty);

@@ -2,6 +2,7 @@ package com.vlt.ecommerce.web.rest;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +37,7 @@ public class SpecificationController {
                 .build();
     }
 
-    @GetMapping({"/categories/{categoryId}/specification-types", "/specification-types/by-category/{categoryId}"})
+    @GetMapping("/categories/{categoryId}/specification-types")
     public ApiResponse<List<SpecificationTypeResponse>> getSpecificationTypesByCategory(
             @PathVariable Long categoryId) {
         return ApiResponse.<List<SpecificationTypeResponse>>builder()
@@ -52,6 +53,7 @@ public class SpecificationController {
     }
 
     @PostMapping("/specification-types")
+    @PreAuthorize("hasAuthority('SPECIFICATION_TYPE_CREATE')")
     public ApiResponse<SpecificationTypeResponse> createSpecificationType(
             @RequestBody @Valid SpecificationTypeRequest request) {
         return ApiResponse.<SpecificationTypeResponse>builder()
@@ -60,6 +62,7 @@ public class SpecificationController {
     }
 
     @PutMapping("/specification-types/{id}")
+    @PreAuthorize("hasAuthority('SPECIFICATION_TYPE_UPDATE')")
     public ApiResponse<SpecificationTypeResponse> updateSpecificationType(
             @PathVariable Long id,
             @RequestBody @Valid SpecificationTypeRequest request) {
@@ -69,6 +72,7 @@ public class SpecificationController {
     }
 
     @DeleteMapping("/specification-types/{id}")
+    @PreAuthorize("hasAuthority('SPECIFICATION_TYPE_DELETE')")
     public ApiResponse<String> deleteSpecificationType(@PathVariable Long id) {
         specificationService.deleteSpecificationType(id);
         return ApiResponse.<String>builder()
@@ -85,6 +89,7 @@ public class SpecificationController {
     }
 
     @PostMapping("/specifications")
+    @PreAuthorize("hasAuthority('SPECIFICATION_CREATE')")
     public ApiResponse<SpecificationResponse> createSpecification(
             @RequestBody @Valid SpecificationRequest request) {
         return ApiResponse.<SpecificationResponse>builder()
@@ -93,6 +98,7 @@ public class SpecificationController {
     }
 
     @PostMapping("/specification-types/{typeId}/specifications")
+    @PreAuthorize("hasAuthority('SPECIFICATION_CREATE')")
     public ApiResponse<SpecificationResponse> createSpecificationForType(
             @PathVariable Long typeId,
             @RequestBody @Valid SpecificationRequest request) {
@@ -103,6 +109,7 @@ public class SpecificationController {
     }
 
     @PutMapping("/specifications/{id}")
+    @PreAuthorize("hasAuthority('SPECIFICATION_UPDATE')")
     public ApiResponse<SpecificationResponse> updateSpecification(
             @PathVariable Long id,
             @RequestBody @Valid SpecificationRequest request) {
@@ -112,6 +119,7 @@ public class SpecificationController {
     }
 
     @DeleteMapping("/specifications/{id}")
+    @PreAuthorize("hasAuthority('SPECIFICATION_DELETE')")
     public ApiResponse<String> deleteSpecification(@PathVariable Long id) {
         specificationService.deleteSpecification(id);
         return ApiResponse.<String>builder()

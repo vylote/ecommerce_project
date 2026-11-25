@@ -1,6 +1,7 @@
 package com.vlt.ecommerce.web.rest;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class UserController {
     UserService userService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('USER_LIST')")
     public ApiResponse<PageResponse<UserResponse>> getAllUsers(
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String fullName,
@@ -44,6 +46,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER_READ')")
     public ApiResponse<UserResponse> getDetailUser(@PathVariable Long id) {
         return ApiResponse.<UserResponse>builder()
             .result(userService.getDetailUser(id))
@@ -51,6 +54,7 @@ public class UserController {
     }
 
     @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('ACCOUNT_UPDATE')")
     public ApiResponse<UserResponse> updateMyProfile(
             @RequestPart(value = "request", required = false) UpdateProfileRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file) {
@@ -60,6 +64,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAuthority('USER_STATUS_UPDATE')")
     public ApiResponse<UserResponse> updateUserStatus(@PathVariable Long id) {
         return ApiResponse.<UserResponse>builder()
             .result(userService.updateUserStatus(id))

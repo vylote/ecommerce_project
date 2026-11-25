@@ -1,6 +1,7 @@
 package com.vlt.ecommerce.web.rest;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -36,6 +37,7 @@ public class ProductController {
     ProductService productService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('PRODUCT_CREATE')")
     public ApiResponse<ProductResponse> create(@RequestBody @Valid ProductRequest request) {
         return ApiResponse.<ProductResponse>builder()
             .result(productService.create(request))
@@ -43,6 +45,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('PRODUCT_UPDATE') and @productSecurity.isOwner(#id)")
     public ApiResponse<ProductResponse> update(@RequestBody @Valid ProductRequest request, @PathVariable Long id) {
         return ApiResponse.<ProductResponse>builder()
             .result(productService.update(request, id))
@@ -50,6 +53,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('PRODUCT_DELETE') and @productSecurity.isOwner(#id)")
     public ApiResponse<String> delete(@PathVariable Long id) {
         productService.delete(id);
         return ApiResponse.<String>builder()
@@ -58,6 +62,7 @@ public class ProductController {
     } 
 
     @PostMapping(value = "/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('PRODUCT_IMAGE_UPLOAD') and @productSecurity.isOwner(#id)")
     public ApiResponse<ProductImageResponse> addImage(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file,
@@ -95,6 +100,7 @@ public class ProductController {
     }
 
     @GetMapping("/seller")
+    @PreAuthorize("hasAuthority('PRODUCT_SHOP_LIST')")
     public ApiResponse<PageResponse<ProductResponse>> getMyProducts(
             @ModelAttribute ProductSearchRequest request) {
 

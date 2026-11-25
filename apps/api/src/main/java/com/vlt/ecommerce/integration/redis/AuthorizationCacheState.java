@@ -38,10 +38,12 @@ public class AuthorizationCacheState {
     private final RedisScript<Long> finishMutationScript =
             RedisScript.of(Constants.AUTHORIZATION_FINISH_MUTATION_SCRIPT, Long.class);
     private final Queue<Invalidation> pendingInvalidations = new ConcurrentLinkedQueue<>();
+    // Reuse 32 locks per API process to load different keys in parallel with a fixed number of locks.
     private final List<Object> missLocks = IntStream.range(0, Constants.AUTHORIZATION_CACHE_LOCK_COUNT)
             .mapToObj(index -> new Object())
             .toList();
 
+    // The Redis hash normally holds only the generation. A pending write makes the Lua script return null.
     String stableGeneration() {
         retryInvalidation();
         return redis.execute(stableGenerationScript, List.of(Constants.AUTHORIZATION_CACHE_STATE_KEY),
@@ -49,14 +51,17 @@ public class AuthorizationCacheState {
     }
 
     <T> T getOrLoad(String key, String generation, Class<T> type, Supplier<T> loader) {
+        // Ignore snapshots restored from an earlier Redis process.
         String instancePrefix = generation.substring(0, generation.indexOf(':') + 1);
         Optional<T> cached = read(key, instancePrefix, type);
         if (cached.isPresent()) {
             return cached.get();
         }
 
+        // The same key always selects the same lock. Different keys can share a lock.
         Object lock = missLocks.get(Math.floorMod(key.hashCode(), missLocks.size()));
         synchronized (lock) {
+            // Read Redis again after waiting. A previous request may have loaded the key from MySQL.
             return read(key, instancePrefix, type).orElseGet(() -> {
                 T value = loader.get();
                 writeIfCurrent(key, generation, instancePrefix, value);
@@ -97,6 +102,7 @@ public class AuthorizationCacheState {
                 }
             }
         });
+        // Mark the write before MySQL changes so overlapping requests read the database.
         redis.opsForHash().putAll(Constants.AUTHORIZATION_CACHE_STATE_KEY,
                 Map.of("generation", UUID.randomUUID().toString(), marker, "pending"));
         keys.addAll(affectedKeys.get());
@@ -134,6 +140,7 @@ public class AuthorizationCacheState {
     }
 
     private void finish(Invalidation invalidation) {
+        // Lua evicts the affected cache keys, advances the generation, and removes the marker atomically.
         redis.execute(finishMutationScript, invalidation.keys(), invalidation.marker(),
                 UUID.randomUUID().toString());
     }

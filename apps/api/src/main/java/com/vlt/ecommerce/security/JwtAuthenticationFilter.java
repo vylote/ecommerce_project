@@ -81,6 +81,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
+                // get current role & permission -> read key from redis
                 Optional<Set<SimpleGrantedAuthority>> authorities = authorizationCache.resolveAuthorities(userId);
                 if (authorities.isEmpty()) {
                     log.warn("Blocked authentication for a missing or inactive account (userId={})", userId);
@@ -88,6 +89,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
+                // use list permission getting to create Authentication put in SecurityContext.
+                // Spring will use it when remark hasRole or hasAuthority
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         email, null, authorities.get());
 

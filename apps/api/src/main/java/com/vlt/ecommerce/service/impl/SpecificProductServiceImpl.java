@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +56,6 @@ public class SpecificProductServiceImpl implements SpecificProductService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#productId)")
     public SpecificProductResponse createVariant(Long productId, SpecificProductRequest request) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -88,7 +86,6 @@ public class SpecificProductServiceImpl implements SpecificProductService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('SELLER') and @productSecurity.isVariantOwner(#variantId)")
     public SpecificProductResponse updateVariant(Long variantId, SpecificProductRequest request) {
         SpecificProduct variant = specificProductRepository.findById(variantId)
                 .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
@@ -111,7 +108,6 @@ public class SpecificProductServiceImpl implements SpecificProductService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('SELLER') and @productSecurity.isVariantOwner(#variantId)")
     public void deleteVariant(Long variantId) {
         SpecificProduct variant = specificProductRepository.findById(variantId)
                 .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));

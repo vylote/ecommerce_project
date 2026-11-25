@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -54,7 +53,6 @@ public class CommissionAnalyticsServiceImpl implements CommissionAnalyticsServic
     ProductRepository productRepository;
 
     @Override
-    @PreAuthorize("hasRole('SELLER')")
     @Transactional(readOnly = true)
     public SellerStatsResponse getSellerStats() {
         User seller = currentUserProvider.getUser();
@@ -79,7 +77,6 @@ public class CommissionAnalyticsServiceImpl implements CommissionAnalyticsServic
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('ADMIN')")
     public AdminStatsResponse getAdminStats() {
         BigDecimal gross = commissionRecordRepository.sumTotalGrossRevenue().orElse(null);
         BigDecimal commission = commissionRecordRepository.sumTotalCommissionRevenue().orElse(null);
@@ -92,7 +89,6 @@ public class CommissionAnalyticsServiceImpl implements CommissionAnalyticsServic
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('ADMIN')")
     public AdminAnalyticsResponse getAdminAnalytics(String periodType, int range) {
         String period = (!StringUtils.hasText(periodType)) ? Constants.ANALYTICS_PERIOD_DAY : periodType.toUpperCase();
         LocalDate today = LocalDate.now();
