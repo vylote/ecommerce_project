@@ -76,10 +76,11 @@ export default function ReviewModal({ isOpen, onClose, order, onSuccess }) {
 
           {/* Viết nhận xét */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="review-comment" className="block text-sm font-medium text-gray-700 mb-2">
               Nhận xét chi tiết
             </label>
             <textarea
+              id="review-comment"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Hãy chia sẻ nhận xét của bạn về sản phẩm này nhé..."

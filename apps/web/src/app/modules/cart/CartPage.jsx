@@ -3,7 +3,7 @@ import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import QuantityStepper from "../../shared/ui/QuantityStepper";
 import ProductImage from "../../shared/components/ProductImage";
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Store, Trash2, ShoppingCart } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../config/api';
@@ -43,7 +43,7 @@ const CartPage = () => {
   const handleUpdateQuantity = async (cartItemId, currentQty, change, item) => {
     const newQty = currentQty + change;
     if (newQty <= 0) {
-      handleRemove(cartItemId);
+      await handleRemove(cartItemId);
       return;
     }
 
@@ -186,12 +186,12 @@ const CartPage = () => {
                       <ProductImage src={item.imageUrl} alt={item.productName} referrerPolicy="no-referrer" />
                     </div>
                     <div className="flex flex-col min-w-0 flex-1 pr-2">
-                      <span 
-                        onClick={() => navigate(`/product/${item.productId}`)} 
+                      <Link
+                        to={`/product/${item.productId}`}
                         className="text-sm font-medium line-clamp-2 text-gray-800 hover:text-primary cursor-pointer transition-colors"
                       >
                         {item.productName}
-                      </span>
+                      </Link>
                       {item.variantName ? (
                         <span className="inline-block mt-1 text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded-xs w-fit border border-gray-200">
                           {t("cart.variation")} <strong className="text-gray-800 font-medium">{item.variantName}</strong>

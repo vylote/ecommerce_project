@@ -12,16 +12,21 @@ export default function useDismissiblePopover() {
     const dismissOutside = (event) => {
       if (!containerRef.current?.contains(event.target)) setIsOpen(false);
     };
+    const container = containerRef.current;
+    const dismissOnEscape = (event) => {
+      if (event.key !== "Escape") return;
+      event.stopPropagation();
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    };
+
     document.addEventListener("pointerdown", dismissOutside);
-    return () => document.removeEventListener("pointerdown", dismissOutside);
+    container?.addEventListener("keydown", dismissOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", dismissOutside);
+      container?.removeEventListener("keydown", dismissOnEscape);
+    };
   }, [isOpen]);
 
-  function onKeyDown(event) {
-    if (event.key !== "Escape" || !isOpen) return;
-    event.stopPropagation();
-    setIsOpen(false);
-    triggerRef.current?.focus();
-  }
-
-  return { isOpen, setIsOpen, containerRef, triggerRef, panelId, onKeyDown };
+  return { isOpen, setIsOpen, containerRef, triggerRef, panelId };
 }

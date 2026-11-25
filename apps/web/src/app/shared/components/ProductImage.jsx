@@ -1,7 +1,9 @@
 import { useState } from "react";
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1").replace(/\/+$/, "");
-const PRODUCT_FALLBACK_IMAGE = `${API_BASE_URL}/images/products/no-thumbnail.png`;
+const API_BASE_URL = (import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1");
+let baseUrlEnd = API_BASE_URL.length;
+while (API_BASE_URL[baseUrlEnd - 1] === "/") baseUrlEnd--;
+const PRODUCT_FALLBACK_IMAGE = `${API_BASE_URL.slice(0, baseUrlEnd)}/images/products/no-thumbnail.png`;
 
 export default function ProductImage({ src, alt, className = "w-full h-full object-cover", style, onLoad, ...props }) {
   const [failedSrc, setFailedSrc] = useState(null);

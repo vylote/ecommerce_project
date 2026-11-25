@@ -259,27 +259,29 @@ export default function CheckoutPage() {
             <div className="mt-4 p-4 border border-gray-200 rounded bg-gray-50 space-y-3">
               {addresses.map((addr) => (
                 <label
+                  htmlFor={`checkout-address-${addr.id}`}
                   key={addr.id}
                   className="flex items-start gap-3 cursor-pointer"
                 >
                   <input
+                    id={`checkout-address-${addr.id}`}
                     type="radio"
                     name="address"
                     className="mt-1 accent-[#ee4d2d]"
                     checked={selectedAddressId === addr.id}
                     onChange={() => setSelectedAddressId(addr.id)}
                   />
-                  <div>
-                    <div className="font-medium text-gray-800">
+                  <span className="block">
+                    <span className="block font-medium text-gray-800">
                       {addr.fullName}{" "}
                       <span className="text-gray-500 font-normal ml-2">
                         {addr.phone}
                       </span>
-                    </div>
-                    <div className="text-gray-600 text-sm">
+                    </span>
+                    <span className="text-gray-600 text-sm">
                       {formatAddress(addr)}
-                    </div>
-                  </div>
+                    </span>
+                  </span>
                 </label>
               ))}
               <div className="pt-3 flex gap-3">

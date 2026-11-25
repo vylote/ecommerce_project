@@ -18,7 +18,7 @@ let channel = null;
 
 const initRabbitMQ = async () => {
     try {
-        console.log(`[*] Connecting to RabbitMQ at ${RABBITMQ_URL}...`);
+        console.log("[*] Connecting to RabbitMQ...");
         const connection = await amqp.connect(RABBITMQ_URL);
         
         connection.on('error', (err) => {
@@ -39,7 +39,7 @@ const initRabbitMQ = async () => {
 
         console.log(`[+] RabbitMQ connected. Bound ${QUEUE_NAME} to fanout exchange: ${FANOUT_EXCHANGE_NAME}`);
 
-        channel.consume(QUEUE_NAME, (msg) => {
+        await channel.consume(QUEUE_NAME, (msg) => {
             if (msg !== null) {
                 try {
                     const contentStr = msg.content.toString();

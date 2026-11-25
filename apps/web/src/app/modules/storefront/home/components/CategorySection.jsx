@@ -43,7 +43,7 @@ export default function CategorySection() {
         setLoading(false);
       }
     };
-    fetchCategories();
+    void fetchCategories();
   }, []);
 
   useEffect(() => {

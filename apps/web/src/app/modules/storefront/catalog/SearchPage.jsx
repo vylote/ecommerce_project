@@ -75,7 +75,7 @@ export default function SearchPage() {
         setLoading(false);
       }
     };
-    fetchData();
+    void fetchData();
   }, [keyword, page, sortBy, order, minPrice, maxPrice, minRating]);
 
 
@@ -110,8 +110,8 @@ export default function SearchPage() {
 
         <main className="flex-1 min-w-0">
           <div className="text-base mb-4 text-base-content/80">
-            Kết quả tìm kiếm cho từ khoá '
-            <span className="font-bold text-primary">{keyword}</span>'
+            {"Kết quả tìm kiếm cho từ khoá '"}
+            <span className="font-bold text-primary">{keyword}</span>{"'"}
           </div>
 
           {shopResult && (

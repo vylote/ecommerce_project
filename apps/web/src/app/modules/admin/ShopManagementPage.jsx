@@ -166,7 +166,7 @@ export default function ShopManagementPage() {
       <div className="bg-blue-50/60 border border-blue-200 rounded-xl p-4 flex items-start gap-3 text-blue-900 text-xs">
         <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
         <div>
-          <span className="font-bold">Nguyên tắc quản trị sàn: </span>
+          <span className="font-bold">Nguyên tắc quản trị sàn:</span>{" "}
           Admin chỉ thực hiện vai trò kiểm duyệt hồ sơ, tiếp nhận báo cáo vi phạm và chế tài khóa / mở khóa hoạt động của gian hàng.
           Hệ thống đảm bảo <span className="font-semibold underline">không can thiệp sâu</span> vào việc sửa đổi giá bán, sửa đổi nội dung sản phẩm hay can thiệp vào kho hàng nội bộ của người bán.
         </div>
@@ -476,9 +476,9 @@ export default function ShopManagementPage() {
           <div className="p-5 space-y-4 text-xs text-gray-600">
             {/* Mô tả Shop */}
             <div>
-              <label className="font-semibold text-gray-700 block mb-1">
+              <p className="font-semibold text-gray-700 block mb-1">
                 Mô tả gian hàng
-              </label>
+              </p>
               <div className="p-3 bg-gray-50 rounded-xl text-gray-600 leading-relaxed">
                 {selectedShop.description || "Chưa có mô tả gian hàng."}
               </div>

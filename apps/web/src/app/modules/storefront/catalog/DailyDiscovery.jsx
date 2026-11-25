@@ -41,7 +41,7 @@ export default function DailyDiscovery() {
       }
     };
 
-    fetchProducts();
+    void fetchProducts();
   }, [page]);
 
   const handlePageChange = (newPage) => {

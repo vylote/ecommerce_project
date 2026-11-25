@@ -60,7 +60,7 @@ export default function SellerOnboarding() {
         setLoadingCategories(false);
       }
     };
-    fetchCategories();
+    void fetchCategories();
   }, []);
 
   const { toggleCategory, handleFileChange } = useShopFormFields(setShopData);
@@ -242,22 +242,25 @@ export default function SellerOnboarding() {
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="form-control">
-                  <label className="label font-medium text-gray-700">Tên shop *</label>
+                  <label htmlFor="onboarding-shop-name" className="label font-medium text-gray-700">Tên shop *</label>
                   <FormInput
+                    id="onboarding-shop-name"
                     type="text" focusColor="green" placeholder="Nhập tên shop"
                     value={shopData.shopName} onChange={e => setShopData({...shopData, shopName: e.target.value})}
  />
                 </div>
                 <div className="form-control">
-                  <label className="label font-medium text-gray-700">Số điện thoại *</label>
+                  <label htmlFor="onboarding-shop-phone" className="label font-medium text-gray-700">Số điện thoại *</label>
                   <FormInput
+                    id="onboarding-shop-phone"
                     type="text" focusColor="green" placeholder="09xxxxxxx"
                     value={shopData.phone} onChange={e => setShopData({...shopData, phone: e.target.value})}
  />
                 </div>
                 <div className="form-control col-span-2">
-                  <label className="label font-medium text-gray-700">Email *</label>
+                  <label htmlFor="onboarding-shop-email" className="label font-medium text-gray-700">Email *</label>
                   <FormInput
+                    id="onboarding-shop-email"
                     type="email" focusColor="green" className="w-full" placeholder="email@domain.com"
                     value={shopData.email} onChange={e => setShopData({...shopData, email: e.target.value})}
  />
@@ -266,8 +269,9 @@ export default function SellerOnboarding() {
 
               {/* Ngành hàng - N-N nên chọn nhiều bằng chip, không dùng select đơn nữa */}
               <div className="form-control">
-                <label className="label font-medium text-gray-700">Ngành hàng kinh doanh</label>
+                <p id="onboarding-shop-categories" className="label font-medium text-gray-700">Ngành hàng kinh doanh</p>
                 <ShopCategoryChoices
+                  labelledBy="onboarding-shop-categories"
                   categories={categories}
                   selectedIds={shopData.categoryIds}
                   loading={loadingCategories}
@@ -463,18 +467,18 @@ export default function SellerOnboarding() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="form-control">
-                    <label className="label text-sm font-medium">Họ & Tên</label>
-                    <FormInput type="text"  value={tempAddress.fullName} onChange={e => setTempAddress({...tempAddress, fullName: e.target.value})} />
+                    <label htmlFor="pickup-name" className="label text-sm font-medium">Họ & Tên</label>
+                    <FormInput id="pickup-name" type="text"  value={tempAddress.fullName} onChange={e => setTempAddress({...tempAddress, fullName: e.target.value})} />
                   </div>
                   <div className="form-control">
-                    <label className="label text-sm font-medium">Số điện thoại</label>
-                    <FormInput type="text"  value={tempAddress.phone} onChange={e => setTempAddress({...tempAddress, phone: e.target.value})} />
+                    <label htmlFor="pickup-phone" className="label text-sm font-medium">Số điện thoại</label>
+                    <FormInput id="pickup-phone" type="text"  value={tempAddress.phone} onChange={e => setTempAddress({...tempAddress, phone: e.target.value})} />
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="form-control">
-                    <label className="label text-sm font-medium">Tỉnh/Thành phố</label>
-                    <FormSelect  value={tempAddress.province} onChange={e => setTempAddress({...tempAddress, province: e.target.value})}>
+                    <label htmlFor="pickup-province" className="label text-sm font-medium">Tỉnh/Thành phố</label>
+                    <FormSelect id="pickup-province"  value={tempAddress.province} onChange={e => setTempAddress({...tempAddress, province: e.target.value})}>
                       <option value="">Chọn</option>
                       <option value="Hà Nội">Hà Nội</option>
                       <option value="Hồ Chí Minh">Hồ Chí Minh</option>
@@ -482,17 +486,17 @@ export default function SellerOnboarding() {
                     </FormSelect>
                   </div>
                   <div className="form-control">
-                    <label className="label text-sm font-medium">Quận/Huyện</label>
-                    <FormInput type="text"  value={tempAddress.district} onChange={e => setTempAddress({...tempAddress, district: e.target.value})} />
+                    <label htmlFor="pickup-district" className="label text-sm font-medium">Quận/Huyện</label>
+                    <FormInput id="pickup-district" type="text"  value={tempAddress.district} onChange={e => setTempAddress({...tempAddress, district: e.target.value})} />
                   </div>
                   <div className="form-control">
-                    <label className="label text-sm font-medium">Phường/Xã</label>
-                    <FormInput type="text"  value={tempAddress.ward} onChange={e => setTempAddress({...tempAddress, ward: e.target.value})} />
+                    <label htmlFor="pickup-ward" className="label text-sm font-medium">Phường/Xã</label>
+                    <FormInput id="pickup-ward" type="text"  value={tempAddress.ward} onChange={e => setTempAddress({...tempAddress, ward: e.target.value})} />
                   </div>
                 </div>
                 <div className="form-control">
-                  <label className="label text-sm font-medium">Địa chỉ cụ thể</label>
-                  <textarea className="textarea textarea-bordered h-20" placeholder="Số nhà, tên đường..." value={tempAddress.detail} onChange={e => setTempAddress({...tempAddress, detail: e.target.value})}></textarea>
+                  <label htmlFor="pickup-address" className="label text-sm font-medium">Địa chỉ cụ thể</label>
+                  <textarea id="pickup-address" className="textarea textarea-bordered h-20" placeholder="Số nhà, tên đường..." value={tempAddress.detail} onChange={e => setTempAddress({...tempAddress, detail: e.target.value})}></textarea>
                 </div>
               </div>
             )}

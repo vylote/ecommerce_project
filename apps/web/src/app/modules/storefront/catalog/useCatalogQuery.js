@@ -10,7 +10,7 @@ export default function useCatalogQuery(defaultSort) {
 
   return {
     keyword: searchParams.get("keyword") || "",
-    page: parseInt(searchParams.get("page") || "1", 10),
+    page: Number.parseInt(searchParams.get("page") || "1", 10),
     sortBy: searchParams.get("sortBy") || defaultSort,
     order: searchParams.get("order") || "desc",
     minPrice: searchParams.get("minPrice"),

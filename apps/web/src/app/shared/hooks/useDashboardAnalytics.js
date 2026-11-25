@@ -27,7 +27,7 @@ export default function useDashboardAnalytics({
       }
     }
 
-    fetchAnalytics();
+    void fetchAnalytics();
     return () => controller.abort();
   }, [endpoint, period, range, refreshVersion, errorMessage, setAnalytics, setLoading]);
 

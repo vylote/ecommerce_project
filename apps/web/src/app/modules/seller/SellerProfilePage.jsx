@@ -57,7 +57,7 @@ export default function SellerProfilePage() {
         setLoadingShop(false);
       }
     };
-    fetchData();
+    void fetchData();
   }, []);
 
   const { toggleCategory, handleFileChange } = useShopFormFields(setShopData);
@@ -116,8 +116,9 @@ export default function SellerProfilePage() {
         {/* Left Side: Form */}
         <div className="flex-1 space-y-6">
           <div className="grid grid-cols-[120px_1fr] items-center gap-4">
-            <label className="text-sm font-medium text-gray-500 text-right">Tên Shop</label>
+            <label htmlFor="seller-profile-shop-name" className="text-sm font-medium text-gray-500 text-right">Tên Shop</label>
             <FormInput
+              id="seller-profile-shop-name"
               type="text"
               focusColor="green" className="h-10 w-full"
               value={shopData.shopName}
@@ -126,8 +127,9 @@ export default function SellerProfilePage() {
           </div>
 
           <div className="grid grid-cols-[120px_1fr] items-start gap-4">
-            <label className="text-sm font-medium text-gray-500 text-right mt-3">Mô tả Shop</label>
+            <label htmlFor="seller-profile-description" className="text-sm font-medium text-gray-500 text-right mt-3">Mô tả Shop</label>
             <textarea
+              id="seller-profile-description"
               className="textarea textarea-bordered focus:border-green-600 w-full"
               rows={3}
               value={shopData.description}
@@ -136,8 +138,9 @@ export default function SellerProfilePage() {
           </div>
 
           <div className="grid grid-cols-[120px_1fr] items-start gap-4">
-            <label className="text-sm font-medium text-gray-500 text-right mt-3">Ngành hàng</label>
+            <p id="seller-profile-categories" className="text-sm font-medium text-gray-500 text-right mt-3">Ngành hàng</p>
             <ShopCategoryChoices
+              labelledBy="seller-profile-categories"
               categories={categories}
               selectedIds={shopData.categoryIds}
               loading={loadingCategories}
@@ -147,8 +150,9 @@ export default function SellerProfilePage() {
           </div>
 
           <div className="grid grid-cols-[120px_1fr] items-start gap-4">
-            <label className="text-sm font-medium text-gray-500 text-right mt-3">Địa chỉ</label>
+            <label htmlFor="seller-profile-address" className="text-sm font-medium text-gray-500 text-right mt-3">Địa chỉ</label>
             <textarea
+              id="seller-profile-address"
               className="textarea textarea-bordered focus:border-green-600 w-full"
               rows={2}
               value={shopData.addressText}

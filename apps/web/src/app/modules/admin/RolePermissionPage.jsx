@@ -765,7 +765,7 @@ export default function RolePermissionPage() {
           <form onSubmit={handleSaveRole} className="p-6 overflow-y-auto space-y-5 flex-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="form-control">
-                <label className="label font-semibold text-xs text-gray-700">
+                <label htmlFor="role-name" className="label font-semibold text-xs text-gray-700">
                   Mã vai trò (Role Name) <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center">
@@ -773,6 +773,7 @@ export default function RolePermissionPage() {
                     ROLE_
                   </span>
                   <FormInput
+                    id="role-name"
                     type="text"
                     value={roleForm.name}
                     onChange={(e) => setRoleForm({ ...roleForm, name: e.target.value.toUpperCase().replace(/^ROLE_/, '') })}
@@ -785,8 +786,9 @@ export default function RolePermissionPage() {
               </div>
 
               <div className="form-control">
-                <label className="label font-semibold text-xs text-gray-700">Mô tả vai trò</label>
+                <label htmlFor="role-description" className="label font-semibold text-xs text-gray-700">Mô tả vai trò</label>
                 <FormInput
+                  id="role-description"
                   type="text"
                   value={roleForm.description}
                   onChange={(e) => setRoleForm({ ...roleForm, description: e.target.value })}
@@ -897,10 +899,11 @@ export default function RolePermissionPage() {
 
           <form onSubmit={handleSavePerm} className="p-6 space-y-4">
             <div className="form-control">
-              <label className="label font-semibold text-xs text-gray-700">
+              <label htmlFor="permission-name" className="label font-semibold text-xs text-gray-700">
                 Mã quyền (Permission Code) <span className="text-red-500">*</span>
               </label>
               <FormInput
+                id="permission-name"
                 type="text"
                 value={permForm.name}
                 onChange={(e) => setPermForm({ ...permForm, name: e.target.value.toUpperCase().replace(/\s+/g, '_') })}
@@ -911,8 +914,9 @@ export default function RolePermissionPage() {
             </div>
 
             <div className="form-control">
-              <label className="label font-semibold text-xs text-gray-700">Mô tả quyền hạn</label>
+              <label htmlFor="permission-description" className="label font-semibold text-xs text-gray-700">Mô tả quyền hạn</label>
               <textarea
+                id="permission-description"
                 value={permForm.description}
                 onChange={(e) => setPermForm({ ...permForm, description: e.target.value })}
                 placeholder="Mô tả mục đích và phạm vi sử dụng của quyền này..."
@@ -957,10 +961,10 @@ export default function RolePermissionPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="font-semibold text-xs text-gray-700">
+              <p id="user-roles-heading" className="font-semibold text-xs text-gray-700">
                 Chọn các vai trò áp dụng cho người dùng này:
-              </label>
-              <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-gray-50/40">
+              </p>
+              <div role="group" aria-labelledby="user-roles-heading" className="space-y-2 max-h-60 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-gray-50/40">
                 {roles.map((r) => {
                   const isChecked = assignedRoleIds.includes(r.id);
                   return (
