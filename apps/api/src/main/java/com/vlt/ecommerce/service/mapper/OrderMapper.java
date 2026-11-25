@@ -1,11 +1,15 @@
 package com.vlt.ecommerce.service.mapper;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import com.vlt.ecommerce.domain.Order;
+import com.vlt.ecommerce.domain.Shop;
+import com.vlt.ecommerce.domain.User;
 import com.vlt.ecommerce.service.dto.request.OrderRequest;
 import com.vlt.ecommerce.service.dto.response.OrderResponse;
 
@@ -38,6 +42,19 @@ public interface OrderMapper {
     @Mapping(target = "payment", ignore = true)
     @Mapping(target = "idempotencyKey", ignore = true)
     Order toOrder(OrderRequest request);
+
+    default Order toShopOrder(OrderRequest request, User buyer, Shop shop) {
+        Order order = toOrder(request);
+        order.setBuyer(buyer);
+        order.setShop(shop);
+        order.setNote(request.getNote());
+        if (request.getIdempotencyKey() != null) {
+            order.setIdempotencyKey(request.getIdempotencyKey() + "-shop" + shop.getId());
+        }
+        order.setItems(new ArrayList<>());
+        order.setTotalAmount(BigDecimal.ZERO);
+        return order;
+    }
 
     List<OrderResponse> toOrderResponses(List<Order> orders);
 }
