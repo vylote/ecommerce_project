@@ -8,7 +8,7 @@ const languages = [
 
 export default function LanguageMenu() {
   const { lang, changeLanguage } = useI18n();
-  const { isOpen, setIsOpen, containerRef, triggerRef, panelId, onKeyDown } = useDismissiblePopover();
+  const { isOpen, setIsOpen, containerRef, triggerRef, panelId } = useDismissiblePopover();
   const current = languages.find(({ code }) => code === lang) ?? languages[0];
 
   function closeAndFocus() {
@@ -23,7 +23,6 @@ export default function LanguageMenu() {
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false);
       }}
-      onKeyDown={onKeyDown}
     >
       <button
         ref={triggerRef}

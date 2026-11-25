@@ -17,7 +17,7 @@ export default function SellerProductPage() {
   const [searchInput, setSearchInput] = useState(searchParams.get('keyword') || '');
 
   // --- LẤY URL PARAMS (Có thêm status) ---
-  const page = parseInt(searchParams.get('page') || '1', 10);
+  const page = Number.parseInt(searchParams.get('page') || '1', 10);
   const sortBy = searchParams.get('sortBy') || 'createdAt';
   const order = searchParams.get('order') || 'desc';
   const keyword = searchParams.get('keyword') || '';

@@ -31,7 +31,7 @@ export default function SellerOrderPage() {
   // State quản lý Modal Hóa đơn & Chi tiết đơn hàng
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const page = parseInt(searchParams.get('page') || '1', 10);
+  const page = Number.parseInt(searchParams.get('page') || '1', 10);
   const currentStatus = searchParams.get('status') || 'ALL';
 
   const loadOrders = useCallback(async (signal) => {
@@ -652,7 +652,7 @@ export default function SellerOrderPage() {
                 {selectedOrder.status === 'PENDING' && (
                   <button
                     onClick={() => {
-                      handleAction(selectedOrder.id, 'Xác nhận & Chuẩn bị hàng', 'confirm');
+                      void handleAction(selectedOrder.id, 'Xác nhận & Chuẩn bị hàng', 'confirm');
                       setSelectedOrder(null);
                     }}
                     className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-colors"
@@ -664,7 +664,7 @@ export default function SellerOrderPage() {
                 {selectedOrder.status === 'CONFIRMED' && (
                   <button
                     onClick={() => {
-                      handleAction(selectedOrder.id, 'Giao cho đơn vị vận chuyển', 'ship');
+                      void handleAction(selectedOrder.id, 'Giao cho đơn vị vận chuyển', 'ship');
                       setSelectedOrder(null);
                     }}
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-colors"

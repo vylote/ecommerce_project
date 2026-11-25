@@ -11,10 +11,11 @@ export default function ProductShippingFields({ productForm, errors, handleInput
 
       <div className="grid grid-cols-4 gap-4">
         <div className="form-control">
-          <label className="label font-semibold text-sm">
+          <label htmlFor="product-weight" className="label font-semibold text-sm">
             Trọng lượng (gr) <span className="text-red-500">*</span>
           </label>
           <input
+            id="product-weight"
             type="number"
             name="weight"
             value={productForm.weight}
@@ -26,8 +27,9 @@ export default function ProductShippingFields({ productForm, errors, handleInput
         </div>
 
         <div className="form-control">
-          <label className="label font-medium text-sm">Dài (cm)</label>
+          <label htmlFor="product-length" className="label font-medium text-sm">Dài (cm)</label>
           <FormInput
+            id="product-length"
             type="number"
             name="length"
             value={productForm.length}
@@ -38,8 +40,9 @@ export default function ProductShippingFields({ productForm, errors, handleInput
         </div>
 
         <div className="form-control">
-          <label className="label font-medium text-sm">Rộng (cm)</label>
+          <label htmlFor="product-width" className="label font-medium text-sm">Rộng (cm)</label>
           <FormInput
+            id="product-width"
             type="number"
             name="width"
             value={productForm.width}
@@ -50,8 +53,9 @@ export default function ProductShippingFields({ productForm, errors, handleInput
         </div>
 
         <div className="form-control">
-          <label className="label font-medium text-sm">Cao (cm)</label>
+          <label htmlFor="product-height" className="label font-medium text-sm">Cao (cm)</label>
           <FormInput
+            id="product-height"
             type="number"
             name="height"
             value={productForm.height}

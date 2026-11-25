@@ -33,6 +33,7 @@ import com.vlt.ecommerce.service.mapper.ProductMapper;
 import com.vlt.ecommerce.repository.CategoryRepository;
 import com.vlt.ecommerce.repository.ProductImageRepository;
 import com.vlt.ecommerce.repository.ProductFilter;
+import com.vlt.ecommerce.repository.ProductFilter.ProductFilterBuilder;
 import com.vlt.ecommerce.repository.ProductRepository;
 import com.vlt.ecommerce.repository.SpecificProductRepository;
 import com.vlt.ecommerce.domain.Review;
@@ -147,8 +148,19 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> getAllProducts(ProductSearchRequest request) {
-        boolean shuffle = "random".equalsIgnoreCase(request.sortBy());
-        return searchProducts(request, request.shopId(), "ACTIVE", shuffle);
+        ProductFilter filter = productFilterBuilder(request)
+                .shopId(request.shopId())
+                .status("ACTIVE")
+                .build();
+
+        if ("random".equalsIgnoreCase(request.sortBy())) {
+            Pageable pageable = PageRequest.of(request.page() - 1, request.size());
+            PageResponse<ProductResponse> response = searchProducts(filter, pageable);
+            Collections.shuffle(response.getData());
+            return response;
+        }
+
+        return searchProducts(filter, toPageable(request));
     }
 
     @Override
@@ -188,31 +200,32 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
         String status = StringUtils.hasText(request.status()) ? request.status() : "ALL";
-        return searchProducts(request, shop.getId(), status, false);
+        ProductFilter filter = productFilterBuilder(request)
+                .shopId(shop.getId())
+                .status(status)
+                .build();
+        return searchProducts(filter, toPageable(request));
     }
 
-    private PageResponse<ProductResponse> searchProducts(
-            ProductSearchRequest request, Long shopId, String status, boolean shuffle) {
-        Sort.Direction direction = "asc".equalsIgnoreCase(request.order())
-                ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Sort sort = shuffle ? Sort.unsorted() : Sort.by(direction, request.sortBy());
-        Pageable pageable = PageRequest.of(request.page() - 1, request.size(), sort);
-
-        ProductFilter filter = ProductFilter.builder()
+    private ProductFilterBuilder productFilterBuilder(ProductSearchRequest request) {
+        return ProductFilter.builder()
                 .categoryId(request.categoryId())
-                .shopId(shopId)
                 .keyword(request.keyword())
                 .minPrice(request.minPrice())
                 .maxPrice(request.maxPrice())
-                .minRating(request.minRating())
-                .status(status)
-                .build();
+                .minRating(request.minRating());
+    }
+
+    private Pageable toPageable(ProductSearchRequest request) {
+        Sort.Direction direction = "asc".equalsIgnoreCase(request.order())
+                ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, request.sortBy());
+        return PageRequest.of(request.page() - 1, request.size(), sort);
+    }
+
+    private PageResponse<ProductResponse> searchProducts(ProductFilter filter, Pageable pageable) {
         Page<Product> productPage = productRepository.filterProducts(filter, pageable);
         List<ProductResponse> content = productMapper.toProductResponseList(productPage.getContent());
-        if (shuffle) {
-            Collections.shuffle(content);
-        }
-
         return PageResponse.of(productPage, content);
     }
 }

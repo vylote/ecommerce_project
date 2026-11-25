@@ -2,13 +2,12 @@ import CatalogFilters from "./components/CatalogFilters";
 import CatalogProductList from "./components/CatalogProductList";
 import useCatalogQuery from "./useCatalogQuery";
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Navbar from '../../../shared/components/Navbar';
 import api from '../../../config/api';
 
 export default function CategoryPage() {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,7 +76,7 @@ export default function CategoryPage() {
         setLoading(false);
       }
     };
-    fetchData();
+    void fetchData();
   }, [id, page, sortBy, order, minPrice, maxPrice, minRating]);
 
 
@@ -98,55 +97,64 @@ export default function CategoryPage() {
             {currentCategory?.breadcrumbs?.length > 0 && (
               <div className="text-sm mb-2">
                 {currentCategory.breadcrumbs.map((crumb, idx) => (
-                  <div 
-                    key={crumb.id} 
+                  <Link
+                    key={crumb.id}
                     className="flex items-center gap-1.5 cursor-pointer hover:text-primary transition-colors font-medium text-base-content/70 mb-2"
                     style={{ paddingLeft: `${idx * 12}px` }}
-                    onClick={() => navigate(`/category/${crumb.id}`)}
+                    to={`/category/${crumb.id}`}
                   >
                     {idx > 0 && <span className="text-xs text-base-300">↳</span>}
                     {crumb.name}
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
             
             {currentCategory && (
-              <div 
+              <Link
                 className={`text-sm flex items-center gap-1.5 cursor-pointer transition-colors mb-2 ${Number(id) === currentCategory.id ? 'font-bold text-primary' : 'hover:text-primary font-medium text-base-content/80'}`}
                 style={{ paddingLeft: `${(currentCategory.breadcrumbs?.length || 0) * 12}px` }}
-                onClick={() => navigate(`/category/${currentCategory.id}`)}
+                to={`/category/${currentCategory.id}`}
               >
                 {currentCategory.breadcrumbs?.length > 0 && <span className="text-xs text-base-300">↳</span>}
                 {currentCategory.name}
-              </div>
+              </Link>
             )}
 
             {childCategories.length > 0 && (
               <ul className="text-sm space-y-2" style={{ paddingLeft: `${((currentCategory?.breadcrumbs?.length || 0) + 1) * 12 + 4}px` }}>
-                <li 
-                  className={`cursor-pointer transition-colors ${Number(id) === currentCategory?.id ? 'font-bold text-primary' : 'hover:text-primary'}`}
-                  onClick={() => currentCategory && navigate(`/category/${currentCategory.id}`)}
-                >
-                  Tất cả
-                </li>
+                {currentCategory && (
+                  <li>
+                    <Link
+                      className={`transition-colors ${Number(id) === currentCategory.id ? 'font-bold text-primary' : 'hover:text-primary'}`}
+                      to={`/category/${currentCategory.id}`}
+                    >
+                      Tất cả
+                    </Link>
+                  </li>
+                )}
                 {displayedCategories.map(child => (
-                  <li 
-                    key={child.id}
-                    className={`cursor-pointer transition-colors ${Number(id) === child.id ? 'font-bold text-primary' : 'hover:text-primary'}`}
-                    onClick={() => navigate(`/category/${child.id}`)}
-                  >
-                    {child.name}
+                  <li key={child.id}>
+                    <Link
+                      className={`transition-colors ${Number(id) === child.id ? 'font-bold text-primary' : 'hover:text-primary'}`}
+                      to={`/category/${child.id}`}
+                    >
+                      {child.name}
+                    </Link>
                   </li>
                 ))}
-                
+
                 {childCategories.length > 4 && (
-                  <li 
-                    className="cursor-pointer text-primary font-medium mt-1 flex items-center gap-1"
-                    onClick={() => setShowMoreCategories(!showMoreCategories)}
-                  >
-                    {showMoreCategories ? 'Thu gọn' : 'Thêm...'}
-                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 transition-transform ${showMoreCategories ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  <li>
+                    <button
+                      type="button"
+                      aria-expanded={showMoreCategories}
+                      className="text-primary font-medium mt-1 flex items-center gap-1"
+                      onClick={() => setShowMoreCategories((value) => !value)}
+                    >
+                      {showMoreCategories ? 'Thu gọn' : 'Thêm...'}
+                      <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 transition-transform ${showMoreCategories ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                    </button>
                   </li>
                 )}
               </ul>

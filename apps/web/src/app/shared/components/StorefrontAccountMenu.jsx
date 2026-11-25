@@ -2,12 +2,14 @@ import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../../config/store/slice/authSlice";
 import { useI18n } from "../../../i18n";
+import useDismissiblePopover from "../hooks/useDismissiblePopover";
 import api from "../../config/api";
 
 export default function StorefrontAccountMenu({ user, avatar }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { t } = useI18n();
+  const { isOpen, setIsOpen, containerRef, triggerRef, panelId } = useDismissiblePopover();
 
   const handleLogout = async () => {
     try {
@@ -21,42 +23,58 @@ export default function StorefrontAccountMenu({ user, avatar }) {
   };
 
   return user ? (
-    <div className="dropdown dropdown-end">
-      <div
-        tabIndex={0}
-        role="button"
+    <div
+      className="relative"
+      ref={containerRef}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setIsOpen(false);
+      }}
+    >
+      <button
+        type="button"
+        ref={triggerRef}
+        aria-label={t("nav.my_account")}
+        aria-expanded={isOpen}
+        aria-controls={isOpen ? panelId : undefined}
+        onClick={() => setIsOpen((value) => !value)}
         className="btn btn-ghost btn-circle avatar cursor-pointer"
       >
         {avatar}
-      </div>
-      <ul
-        tabIndex={0}
-        className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-300"
-      >
-        <li>
-          <div className="font-bold text-base-content px-4 py-2 border-b border-base-200 rounded-none mb-1">
-            {user.fullName}
-          </div>
-        </li>
-        <li>
-          <Link to="/profile" className="py-2">
-            {t("nav.my_account")}
-          </Link>
-        </li>
-        <li>
-          <Link to="/orders" className="py-2">
-            {t("nav.my_orders")}
-          </Link>
-        </li>
-        <li>
-          <button
-            onClick={handleLogout}
-            className="text-error font-semibold py-2 cursor-pointer"
-          >
-            {t("nav.logout")}
-          </button>
-        </li>
-      </ul>
+      </button>
+      {isOpen && (
+        <ul
+          id={panelId}
+          className="menu menu-sm absolute right-0 mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-300"
+        >
+          <li>
+            <div className="font-bold text-base-content px-4 py-2 border-b border-base-200 rounded-none mb-1">
+              {user.fullName}
+            </div>
+          </li>
+          <li>
+            <Link to="/profile" onClick={() => setIsOpen(false)} className="py-2">
+              {t("nav.my_account")}
+            </Link>
+          </li>
+          <li>
+            <Link to="/orders" onClick={() => setIsOpen(false)} className="py-2">
+              {t("nav.my_orders")}
+            </Link>
+          </li>
+          <li>
+            <button
+              type="button"
+              onClick={() => {
+                setIsOpen(false);
+                void handleLogout();
+              }}
+              className="text-error font-semibold py-2 cursor-pointer"
+            >
+              {t("nav.logout")}
+            </button>
+          </li>
+        </ul>
+      )}
     </div>
   ) : (
     <div className="flex items-center gap-2">

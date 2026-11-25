@@ -1,7 +1,7 @@
 import useDismissiblePopover from "../../../shared/hooks/useDismissiblePopover";
 import MarkNotificationRead from "../../../shared/components/MarkNotificationRead";
 import { useState, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
   Bell,
   CheckCheck,
@@ -20,8 +20,7 @@ export default function SellerNotificationDropdown({
   markAsRead,
   markAllAsRead,
 }) {
-  const navigate = useNavigate();
-  const { isOpen, setIsOpen, containerRef, triggerRef, panelId, onKeyDown } = useDismissiblePopover();
+  const { isOpen, setIsOpen, containerRef, triggerRef, panelId } = useDismissiblePopover();
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'unread' | 'order'
 
 
@@ -102,7 +101,7 @@ export default function SellerNotificationDropdown({
   };
 
   return (
-    <div className="relative" ref={containerRef} onKeyDown={onKeyDown}>
+    <div className="relative" ref={containerRef}>
       {/* Nút Chuông Thông Báo */}
       <button
         ref={triggerRef}
@@ -213,19 +212,21 @@ export default function SellerNotificationDropdown({
                 return (
                   <div
                     key={notif.id ?? `local-${notif.createdAt}-${index}`}
-                    onClick={() => {
-                      if (!isRead && notif.id) {
-                        markAsRead(notif.id);
-                      }
-                      setIsOpen(false);
-                      navigate('/seller/orders');
-                    }}
                     className={`group relative p-3.5 flex gap-3 items-start transition-all cursor-pointer border-l-4 ${
                       !isRead
                         ? 'bg-gradient-to-r from-emerald-50/60 via-emerald-50/20 to-white border-l-emerald-500 hover:from-emerald-50 hover:to-emerald-50/40'
                         : 'bg-white hover:bg-gray-50/80 border-l-transparent'
                     }`}
                   >
+                    <Link
+                      to="/seller/orders"
+                      aria-label={notif.title}
+                      onClick={() => {
+                        if (!notif.isRead && notif.id) void markAsRead(notif.id);
+                        setIsOpen(false);
+                      }}
+                      className="absolute inset-0 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-emerald-600"
+                    />
                     {/* Icon đại diện */}
                     <div
                       className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border ${config.bgColor} shadow-2xs group-hover:scale-105 transition-transform`}
@@ -272,11 +273,11 @@ export default function SellerNotificationDropdown({
                     </div>
 
                     {/* Cột hành động: Nút đánh dấu đã đọc hoặc chấm xanh chưa đọc */}
-                    <div className="flex shrink-0 items-center">
+                    <div className="relative z-20 flex shrink-0 items-center">
                       {!isRead ? (
                         <div className="flex items-center gap-1.5">
                           {/* Nút Đã Đọc riêng cho item */}
-                          {notif.id && <MarkNotificationRead onRead={() => markAsRead(notif.id)} />}
+                          {notif.id && <MarkNotificationRead onRead={() => void markAsRead(notif.id)} />}
                           {/* Chấm tròn trạng thái chưa đọc */}
                           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100 shadow-2xs" />
                         </div>

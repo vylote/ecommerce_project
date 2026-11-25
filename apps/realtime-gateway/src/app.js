@@ -15,7 +15,9 @@ app.use(cors())
 app.use(express.json())
 
 initSocket(server)
-initRabbitMQ()
+initRabbitMQ().catch(() => {
+    console.error("Unexpected RabbitMQ initialization failure")
+})
 
 app.use('/notify', notifyRoutes)
 

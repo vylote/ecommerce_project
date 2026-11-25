@@ -7,7 +7,7 @@ import { useI18n } from '../../../i18n';
 
 export default function NotificationDropdown({ user }) {
   const navigate = useNavigate();
-  const { isOpen, setIsOpen, containerRef, triggerRef, panelId, onKeyDown } = useDismissiblePopover();
+  const { isOpen, setIsOpen, containerRef, triggerRef, panelId } = useDismissiblePopover();
 
   const { t } = useI18n();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotification(user?.id);
@@ -40,7 +40,7 @@ export default function NotificationDropdown({ user }) {
   };
 
   return (
-    <div className="relative inline-block text-left" ref={containerRef} onKeyDown={onKeyDown}>
+    <div className="relative inline-block text-left" ref={containerRef}>
       <button
         type="button"
         ref={triggerRef}
@@ -112,15 +112,19 @@ export default function NotificationDropdown({ user }) {
               notifications.slice(0, 15).map((notif, index) => (
                 <div
                   key={notif.id ?? `local-${notif.createdAt}-${index}`}
-                  onClick={() => {
-                    if (!notif.isRead && notif.id) markAsRead(notif.id);
-                    setIsOpen(false);
-                    navigate('/orders');
-                  }}
                   className={`p-3.5 flex gap-3 items-start hover:bg-gray-50 cursor-pointer transition-colors relative group ${
                     !notif.isRead ? 'bg-green-50/30' : ''
                   }`}
                 >
+                  <Link
+                    to="/orders"
+                    aria-label={notif.title}
+                    onClick={() => {
+                      if (!notif.isRead && notif.id) void markAsRead(notif.id);
+                      setIsOpen(false);
+                    }}
+                    className="absolute inset-0 z-10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-emerald-600"
+                  />
                   <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
                     {getIcon(notif.type)}
                   </div>
@@ -150,8 +154,8 @@ export default function NotificationDropdown({ user }) {
                     </div>
                   </div>
                   {!notif.isRead && (
-                    <div className="flex shrink-0 items-center gap-1.5">
-                      {notif.id && <MarkNotificationRead onRead={() => markAsRead(notif.id)} />}
+                    <div className="relative z-20 flex shrink-0 items-center gap-1.5">
+                      {notif.id && <MarkNotificationRead onRead={() => void markAsRead(notif.id)} />}
                       <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
                     </div>
                   )}

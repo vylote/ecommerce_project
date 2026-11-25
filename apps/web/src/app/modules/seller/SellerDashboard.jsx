@@ -74,7 +74,7 @@ export default function SellerDashboard() {
       }
     }
 
-    fetchStats();
+    void fetchStats();
     return () => controller.abort();
   }, [statsVersion]);
 

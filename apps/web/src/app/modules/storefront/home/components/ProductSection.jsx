@@ -40,7 +40,7 @@ export default function ProductSection() {
       }
     };
 
-    fetchProducts();
+    void fetchProducts();
   }, []);
 
 

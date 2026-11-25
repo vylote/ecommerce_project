@@ -82,7 +82,7 @@ export default function ProductDetailPage() {
         setLoading(false);
       }
     };
-    fetchProductData();
+    void fetchProductData();
   }, [id]);
 
   const loadReviews = async (pageToLoad, ratingToFilter = filterRating) => {
@@ -102,7 +102,7 @@ export default function ProductDetailPage() {
 
   const handleFilterChange = (rating) => {
     setFilterRating(rating);
-    loadReviews(1, rating);
+    void loadReviews(1, rating);
   };
 
   const hasVariants = variants && variants.length > 0;

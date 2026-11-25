@@ -532,10 +532,11 @@ export default function CategoryManagementPage() {
 
           <form onSubmit={handleSaveCategory} className="p-6 space-y-4">
             <div className="form-control">
-              <label className="label font-semibold text-xs text-gray-700">
+              <label htmlFor="category-name" className="label font-semibold text-xs text-gray-700">
                 Tên danh mục <span className="text-red-500">*</span>
               </label>
               <FormInput
+                id="category-name"
                 type="text"
                 value={categoryForm.name}
                 onChange={handleNameChange}
@@ -546,10 +547,11 @@ export default function CategoryManagementPage() {
             </div>
 
             <div className="form-control">
-              <label className="label font-semibold text-xs text-gray-700">
+              <label htmlFor="category-slug" className="label font-semibold text-xs text-gray-700">
                 Slug URL <span className="text-red-500">*</span>
               </label>
               <FormInput
+                id="category-slug"
                 type="text"
                 value={categoryForm.slug}
                 onChange={(e) => setCategoryForm({ ...categoryForm, slug: e.target.value })}
@@ -561,10 +563,11 @@ export default function CategoryManagementPage() {
             </div>
 
             <div className="form-control">
-              <label className="label font-semibold text-xs text-gray-700">
+              <label htmlFor="category-parent" className="label font-semibold text-xs text-gray-700">
                 Danh mục cha (Cấp độ)
               </label>
               <FormSelect
+                id="category-parent"
                 value={categoryForm.parentId}
                 onChange={(e) => setCategoryForm({ ...categoryForm, parentId: e.target.value })}
                 controlSize="sm" focusColor="blue" className="w-full text-xs"
@@ -582,11 +585,11 @@ export default function CategoryManagementPage() {
 
             {/* UPLOAD / NHẬP HÌNH ẢNH DANH MỤC */}
             <div className="form-control">
-              <label className="label font-semibold text-xs text-gray-700">
+              <p id="category-image-heading" className="label font-semibold text-xs text-gray-700">
                 Hình ảnh / Icon biểu tượng danh mục
-              </label>
+              </p>
 
-              <div className="space-y-2">
+              <div role="group" aria-labelledby="category-image-heading" className="space-y-2">
                 <div className="flex items-center gap-3">
                   {categoryForm.imageUrl ? (
                     <div className="relative w-16 h-16 rounded-xl border border-gray-200 overflow-hidden bg-gray-50 flex items-center justify-center shrink-0 shadow-xs">
@@ -627,8 +630,8 @@ export default function CategoryManagementPage() {
                     >
                       {uploadingImage ? (
                         <>
-                          <span className="loading loading-spinner loading-xs"></span>
-                          Đang tải ảnh lên...
+                          <span className="loading loading-spinner loading-xs" />
+                          <span>Đang tải ảnh lên...</span>
                         </>
                       ) : (
                         <>
@@ -641,6 +644,7 @@ export default function CategoryManagementPage() {
                       <LinkIcon size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                       <FormInput
                         type="url"
+                        aria-label="URL ảnh danh mục"
                         value={categoryForm.imageUrl}
                         onChange={(e) => setCategoryForm({ ...categoryForm, imageUrl: e.target.value })}
                         placeholder="Hoặc dán trực tiếp đường dẫn URL ảnh..."
@@ -653,14 +657,15 @@ export default function CategoryManagementPage() {
             </div>
 
             <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-              <label className="flex items-center justify-between cursor-pointer">
-                <div>
+              <label htmlFor="category-active" className="flex items-center justify-between cursor-pointer">
+                <span className="block">
                   <span className="font-semibold text-xs text-gray-800">Trạng thái hoạt động</span>
-                  <p className="text-[11px] text-gray-500 mt-0.5">
+                  <span className="block text-[11px] text-gray-500 mt-0.5">
                     Cho phép người bán chọn và hiển thị sản phẩm thuộc ngành hàng này trên sàn.
-                  </p>
-                </div>
+                  </span>
+                </span>
                 <input
+                  id="category-active"
                   type="checkbox"
                   checked={categoryForm.isActive}
                   onChange={(e) => setCategoryForm({ ...categoryForm, isActive: e.target.checked })}

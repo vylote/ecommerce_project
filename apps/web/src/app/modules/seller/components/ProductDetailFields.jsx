@@ -22,8 +22,9 @@ export default function ProductDetailFields({ productForm, handleInputChange, se
           {/* Các trường cơ bản chung */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div className="form-control">
-              <label className="label font-medium text-sm">Thương hiệu</label>
+              <label htmlFor="product-brand" className="label font-medium text-sm">Thương hiệu</label>
               <FormInput
+                id="product-brand"
                 type="text"
                 name="brand"
                 value={productForm.brand}
@@ -34,8 +35,9 @@ export default function ProductDetailFields({ productForm, handleInputChange, se
             </div>
 
             <div className="form-control">
-              <label className="label font-medium text-sm">Nhà sản xuất / Đơn vị phân phối</label>
+              <label htmlFor="product-manufacturer" className="label font-medium text-sm">Nhà sản xuất / Đơn vị phân phối</label>
               <FormInput
+                id="product-manufacturer"
                 type="text"
                 name="manufacturer"
                 value={productForm.manufacturer}

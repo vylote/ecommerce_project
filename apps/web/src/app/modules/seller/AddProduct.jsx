@@ -124,7 +124,7 @@ export default function AddProduct() {
         toast.error("Không thể tải danh sách ngành hàng");
       }
     };
-    fetchCategories();
+    void fetchCategories();
   }, []);
 
   // Fetch các loại đặc tả chuẩn khi người bán chọn ngành hàng

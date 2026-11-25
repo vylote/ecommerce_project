@@ -279,13 +279,19 @@ export default function SpecificationManagementPage() {
                 return (
                   <div
                     key={type.id}
-                    onClick={() => setSelectedType(type)}
-                    className={`p-4 cursor-pointer transition-all flex items-start justify-between gap-3 ${
+                    className={`relative p-4 cursor-pointer transition-all flex items-start justify-between gap-3 ${
                       isSelected
                         ? 'bg-blue-50/80 border-l-4 border-blue-600'
                         : 'hover:bg-gray-50 border-l-4 border-transparent'
                     }`}
                   >
+                    <button
+                      type="button"
+                      aria-label={type.name}
+                      aria-pressed={isSelected}
+                      onClick={() => setSelectedType(type)}
+                      className="absolute inset-0 z-10 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600"
+                    />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className={`font-bold text-sm ${isSelected ? 'text-blue-700' : 'text-gray-800'}`}>
@@ -334,7 +340,7 @@ export default function SpecificationManagementPage() {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex items-center gap-1 shrink-0">
+                    <div className="relative z-20 flex items-center gap-1 shrink-0">
                       <button
                         onClick={(e) => handleOpenEditType(type, e)}
                         className="btn btn-xs btn-ghost text-gray-500 hover:text-blue-600"
@@ -498,10 +504,11 @@ export default function SpecificationManagementPage() {
 
           <form onSubmit={handleSaveType} className="p-6 space-y-4">
             <div className="form-control">
-              <label className="label font-semibold text-sm">
+              <label htmlFor="spec-type-name" className="label font-semibold text-sm">
                 Tên loại đặc tả <span className="text-red-500">*</span>
               </label>
               <FormInput
+                id="spec-type-name"
                 type="text"
                 value={typeForm.name}
                 onChange={(e) => setTypeForm({ ...typeForm, name: e.target.value })}
@@ -512,8 +519,9 @@ export default function SpecificationManagementPage() {
             </div>
 
             <div className="form-control">
-              <label className="label font-medium text-sm">Mô tả loại đặc tả</label>
+              <label htmlFor="spec-type-description" className="label font-medium text-sm">Mô tả loại đặc tả</label>
               <textarea
+                id="spec-type-description"
                 value={typeForm.description}
                 onChange={(e) => setTypeForm({ ...typeForm, description: e.target.value })}
                 placeholder="Mô tả mục đích hoặc hướng dẫn sử dụng..."
@@ -523,14 +531,15 @@ export default function SpecificationManagementPage() {
 
             {/* Toggle Phân loại Biến thể vs Thuộc tính tĩnh */}
             <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <label className="flex items-center justify-between cursor-pointer">
-                <div>
+              <label htmlFor="spec-type-variant" className="flex items-center justify-between cursor-pointer">
+                <span className="block">
                   <span className="font-semibold text-sm text-gray-800">Dùng làm Phân loại Biến thể bán hàng</span>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <span className="block text-xs text-gray-500 mt-0.5">
                     Bật nếu là phân loại người mua click chọn khi đặt hàng (Màu sắc, Kích cỡ, Dung lượng...). Tắt nếu là thông số chi tiết (Chất liệu, Xuất xứ, Kiểu dáng...).
-                  </p>
-                </div>
+                  </span>
+                </span>
                 <input
+                  id="spec-type-variant"
                   type="checkbox"
                   checked={typeForm.isVariant}
                   onChange={(e) => setTypeForm({ ...typeForm, isVariant: e.target.checked })}
@@ -542,9 +551,9 @@ export default function SpecificationManagementPage() {
             {/* Chọn danh mục áp dụng */}
             <div className="form-control">
               <div className="flex items-center justify-between mb-1">
-                <label className="label font-semibold text-sm p-0">
+                <p id="spec-categories-heading" className="label font-semibold text-sm p-0">
                   Áp dụng cho các ngành hàng
-                </label>
+                </p>
                 <span className="text-xs text-gray-400">
                   {typeForm.categoryIds.length === 0
                     ? 'Áp dụng cho tất cả'
@@ -555,7 +564,7 @@ export default function SpecificationManagementPage() {
                 Để trống nếu muốn loại biến thể này xuất hiện ở mọi ngành hàng (như Màu sắc).
               </p>
 
-              <div className="border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 bg-gray-50/50">
+              <div role="group" aria-labelledby="spec-categories-heading" className="border border-gray-200 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2 bg-gray-50/50">
                 {categories.map((cat) => {
                   const isChecked = typeForm.categoryIds.includes(cat.id);
                   return (

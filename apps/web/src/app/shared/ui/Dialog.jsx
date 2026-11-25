@@ -28,6 +28,18 @@ export default function Dialog({
     };
   }, [initialFocusRef]);
 
+  useEffect(() => {
+    if (!closeOnBackdrop || busy) return;
+
+    const dialog = dialogRef.current;
+    const dismissOnBackdrop = (event) => {
+      if (event.target === dialog) onClose();
+    };
+
+    dialog.addEventListener("click", dismissOnBackdrop);
+    return () => dialog.removeEventListener("click", dismissOnBackdrop);
+  }, [busy, closeOnBackdrop, onClose]);
+
   function requestClose() {
     if (!busy) onClose();
   }
@@ -37,9 +49,6 @@ export default function Dialog({
       ref={dialogRef}
       aria-labelledby={titleId}
       aria-busy={busy}
-      onClick={(event) => {
-        if (closeOnBackdrop && event.target === event.currentTarget) requestClose();
-      }}
       onCancel={(event) => {
         event.preventDefault();
         requestClose();

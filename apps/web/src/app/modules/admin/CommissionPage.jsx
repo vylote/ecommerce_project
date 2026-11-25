@@ -59,7 +59,7 @@ export default function CommissionPage() {
 
   const handleUpdateConfig = async (e) => {
     e.preventDefault();
-    if (!newFee || isNaN(newFee) || Number(newFee) < 0 || Number(newFee) > 100) {
+    if (!newFee || Number.isNaN(Number(newFee)) || Number(newFee) < 0 || Number(newFee) > 100) {
       return toast.error('Vui lòng nhập phần trăm hợp lệ (0-100)');
     }
     if (!selectedCategory) {
@@ -227,10 +227,11 @@ export default function CommissionPage() {
         <Dialog title="Cập Nhật Phí Hoa Hồng" onClose={() => setShowConfigModal(false)} size="md" busy={savingConfig}>
           <form onSubmit={handleUpdateConfig} className="p-5">
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="commission-category" className="block text-sm font-medium text-gray-700 mb-1">
                 Chọn Danh Mục
               </label>
               <FormSelect
+                id="commission-category"
                 className="w-full"
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -244,11 +245,12 @@ export default function CommissionPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="commission-rate" className="block text-sm font-medium text-gray-700 mb-1">
                 Mức phí sàn (%)
               </label>
               <div className="relative">
                 <FormInput
+                  id="commission-rate"
                   type="number"
                   step="0.1"
                   min="0"
@@ -264,10 +266,11 @@ export default function CommissionPage() {
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="commission-effective-date" className="block text-sm font-medium text-gray-700 mb-1">
                 Ngày áp dụng
               </label>
               <FormInput
+                id="commission-effective-date"
                 type="date"
                 value={effectiveDate}
                 onChange={(e) => setEffectiveDate(e.target.value)}

@@ -46,7 +46,7 @@ function App() {
       }
     };
 
-    initAuth();
+    void initAuth();
   }, [dispatch]);
 
   // 2. KÍCH HOẠT SOCKET.IO (Chỉ kết nối khi đã có thông tin user)

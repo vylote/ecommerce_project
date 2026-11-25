@@ -152,8 +152,9 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 ### Backend service contracts
 
 - Group related service inputs into an immutable parameter object when positional arguments become hard to distinguish or evolve. Use a record for a data-only input and add a builder when named fields improve the call site. Keep short, clear signatures simple.
-- Keep search and listing methods to at most three parameters at controller and service boundaries. Bind related search query parameters to a request record. Pass an immutable filter and `Pageable` to the repository. Resolve authorization-dependent scope, such as the current seller's shop, inside the service.
+- Keep search and listing methods to at most three parameters at controller and service boundaries. Bind related search query parameters to a request record. Pass an immutable filter and `Pageable` to the repository. Resolve authorization-dependent scope, such as the current seller's shop, inside the service. Build the effective filter before calling a shared search helper so the helper receives one source for each filter value.
 - Use Spring Data JPA Specification for dynamic searches with optional filters. Add predicates only for supplied filters. Use named JPQL parameters for fixed queries.
+- Keep use-case-specific result ordering at the service entry point. Pass the resolved `Pageable` to shared search helpers.
 
 - Keep one interface for the related use cases of a service, including operations called by controllers and other beans. Use a separate interface when it defines a distinct responsibility or integration boundary.
 - For standalone services called by other beans, such as application services or integration adapters, define an interface for the operations their callers need and provide a Spring-managed implementation.
@@ -189,6 +190,8 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 - Prefer composition for content that varies. A dialog can receive a title, body, and actions. A create/edit form can share fields and validation while its caller supplies initial values, the submit callback, and the action label.
 - Look for two or three concrete uses before introducing an abstraction. If an API grows beyond roughly seven custom props or accumulates mode flags, reconsider its responsibilities. Keep Tailwind and daisyUI variants together and reuse the existing class-composition pattern.
 - Associate labels with inputs, connect hints and errors with `aria-describedby`, and set `aria-invalid` for invalid fields. Give icon-only buttons an accessible name. Data views should handle loading, failure, and empty results.
+- Use native buttons for actions and links with a real destination for navigation. Keep decorative content out of the tab order and preserve keyboard access when changing menus and dialogs.
+- Await or handle rejected Promises in JavaScript. Use `void` for intentional background work only when the called operation already handles its own failures.
 
 ### State, effects, and React 19
 

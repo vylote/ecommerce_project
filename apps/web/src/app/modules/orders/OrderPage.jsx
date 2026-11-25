@@ -2,7 +2,7 @@ import { NEW_NOTIFICATION_EVENT, ORDER_UPDATED_EVENT } from "../../shared/consta
 import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import ProductImage from "../../shared/components/ProductImage";
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../config/api";
 import Navbar from "../../shared/components/Navbar";
@@ -207,9 +207,9 @@ export default function OrdersPage() {
                     {/* Danh sách sản phẩm trong đơn */}
                     <div className="divide-y divide-gray-100">
                       {order.items?.map((item) => (
-                        <div
+                        <Link
                           key={item.id}
-                          onClick={() => navigate(`/product/${item.productId}`)}
+                          to={`/product/${item.productId}`}
                           className="flex items-center gap-4 px-6 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
                         >
                           <div className="w-20 h-20 border shrink-0 bg-gray-100 flex items-center justify-center overflow-hidden">
@@ -232,7 +232,7 @@ export default function OrdersPage() {
                               ₫{item.productPrice?.toLocaleString("vi-VN")}
                             </span>
                           </div>
-                        </div>
+                        </Link>
                       ))}
                     </div>
 

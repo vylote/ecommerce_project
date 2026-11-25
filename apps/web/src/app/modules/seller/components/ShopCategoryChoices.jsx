@@ -1,6 +1,6 @@
-export default function ShopCategoryChoices({ categories, selectedIds, loading, onToggle, className = "" }) {
+export default function ShopCategoryChoices({ categories, selectedIds, loading, onToggle, labelledBy, className = "" }) {
   return (
-    <div role="group" aria-label="Ngành hàng kinh doanh" className={`flex flex-wrap gap-2 ${className}`}>
+    <div role="group" aria-labelledby={labelledBy} className={`flex flex-wrap gap-2 ${className}`}>
       {loading ? (
         <p role="status" className="text-sm text-base-content/60">Đang tải...</p>
       ) : categories.map(({ id, name }) => {
