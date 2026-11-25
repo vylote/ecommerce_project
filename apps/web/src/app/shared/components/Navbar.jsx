@@ -65,7 +65,7 @@ export default function Navbar() {
       </StorefrontTopBar>
 
       {/* Main navbar */}
-      <div className="bg-gradient-to-r from-green-600 to-green-500 shadow-sm">
+      <div className="bg-gradient-to-r from-primary to-accent shadow-sm">
         <div className="max-w-[1400px] mx-auto flex items-center gap-6 px-4 md:px-12 py-3">
           <Link
             to="/"
@@ -161,7 +161,7 @@ export default function Navbar() {
             <StorefrontAccountMenu
               user={user}
               avatar={user && (
-                <div className="w-10 rounded-full border-2 border-white bg-green-800 flex items-center justify-center font-bold text-white">
+                <div className="w-10 rounded-full border-2 border-white bg-secondary flex items-center justify-center font-bold text-white">
                   {user.avatarUrl ? (
                     <img
                       src={user.avatarUrl}

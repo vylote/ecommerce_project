@@ -119,7 +119,7 @@ export default function AddProduct() {
     const fetchCategories = async () => {
       try {
         const res = await api.get("/categories");
-        setCategories(res.data.result || []);
+        setCategories((res.data.result || []).filter((category) => category.isActive === true));
       } catch {
         toast.error("Không thể tải danh sách ngành hàng");
       }

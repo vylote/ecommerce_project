@@ -4,6 +4,8 @@ import { logout } from "../../config/store/slice/authSlice";
 import { useI18n } from "../../../i18n";
 import useDismissiblePopover from "../hooks/useDismissiblePopover";
 import api from "../../config/api";
+import StorefrontPopover from "./StorefrontPopover";
+import StorefrontDisplayName from "./StorefrontDisplayName";
 
 export default function StorefrontAccountMenu({ user, avatar }) {
   const dispatch = useDispatch();
@@ -42,38 +44,35 @@ export default function StorefrontAccountMenu({ user, avatar }) {
         {avatar}
       </button>
       {isOpen && (
-        <ul
-          id={panelId}
-          className="menu menu-sm absolute right-0 mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-300"
-        >
-          <li>
-            <div className="font-bold text-base-content px-4 py-2 border-b border-base-200 rounded-none mb-1">
-              {user.fullName}
-            </div>
-          </li>
-          <li>
-            <Link to="/profile" onClick={() => setIsOpen(false)} className="py-2">
-              {t("nav.my_account")}
-            </Link>
-          </li>
-          <li>
-            <Link to="/orders" onClick={() => setIsOpen(false)} className="py-2">
-              {t("nav.my_orders")}
-            </Link>
-          </li>
-          <li>
-            <button
-              type="button"
-              onClick={() => {
-                setIsOpen(false);
-                void handleLogout();
-              }}
-              className="text-error font-semibold py-2 cursor-pointer"
-            >
-              {t("nav.logout")}
-            </button>
-          </li>
-        </ul>
+        <StorefrontPopover id={panelId} className="w-52">
+          <div className="border-b border-base-300 px-4 py-3 text-sm font-semibold">
+            <StorefrontDisplayName name={user.fullName || user.email} />
+          </div>
+          <ul className="menu menu-sm w-full p-2">
+            <li>
+              <Link to="/profile" onClick={() => setIsOpen(false)} className="py-2">
+                {t("nav.my_account")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/orders" onClick={() => setIsOpen(false)} className="py-2">
+                {t("nav.my_orders")}
+              </Link>
+            </li>
+            <li>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  void handleLogout();
+                }}
+                className="text-error font-semibold py-2 cursor-pointer"
+              >
+                {t("nav.logout")}
+              </button>
+            </li>
+          </ul>
+        </StorefrontPopover>
       )}
     </div>
   ) : (

@@ -1,8 +1,17 @@
 import { Link } from "react-router-dom";
+import { useI18n } from "../../../../i18n";
 import ProductImage from "../../../shared/components/ProductImage";
 import getDisplayImage from "../getDisplayImage";
 
 export default function CatalogProductCard({ product }) {
+  const { t, lang } = useI18n();
+  const locale = lang === "en" ? "en-GB" : "vi-VN";
+  const rating = product.averageRating || product.rating || 0;
+  const soldCount = product.soldCount ?? 0;
+  const soldLabel = soldCount >= 1000
+    ? `${(soldCount / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })}k`
+    : soldCount.toLocaleString(locale);
+
   return (
     <Link
       to={`/product/${product.id}`}
@@ -22,26 +31,18 @@ export default function CatalogProductCard({ product }) {
         </h4>
 
         <div className="mt-auto pt-2">
-          <div className="text-primary font-medium text-sm mb-1">
-            ₫
-            {product.price
-              ? product.price.toLocaleString("vi-VN")
-              : 0}
+          <div className="text-secondary font-medium text-sm mb-1">
+            {(product.price ?? 0).toLocaleString(locale, { style: "currency", currency: "VND" })}
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center text-warning text-[10px]">
+            <div className="flex items-center text-secondary text-[10px]">
               <span>
-                {product.averageRating ||
-                  product.rating ||
-                  "0.0"} sao
+                {t("catalog.product_rating").replace("{rating}", rating.toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }))}
               </span>
             </div>
             <span className="text-[10px] text-base-content/60">
-              Đã bán{" "}
-              {product.soldCount >= 1000
-                ? (product.soldCount / 1000).toFixed(1) + "k"
-                : product.soldCount}
+              {t("catalog.sold_count").replace("{count}", soldLabel)}
             </span>
           </div>
         </div>

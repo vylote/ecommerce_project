@@ -8,6 +8,7 @@ import DailyDiscovery from '../modules/storefront/catalog/DailyDiscovery';
 import CategoryPage from '../modules/storefront/catalog/CategoryPage';
 import SearchPage from '../modules/storefront/catalog/SearchPage';
 import ProductDetailPage from '../modules/storefront/catalog/ProductDetailPage';
+import ShopPage from '../modules/storefront/shop/ShopPage';
 import CartPage from '../modules/cart/CartPage';
 import CheckoutPage from '../modules/checkout/CheckoutPage'; 
 import OrdersPage from '../modules/orders/OrderPage';
@@ -45,6 +46,7 @@ export const AppRoutes = () => {
       <Route path="/category/:id" element={<CategoryPage />} />
       <Route path="/search" element={<SearchPage />} />
       <Route path="/product/:id" element={<ProductDetailPage />} />
+      <Route path="/shop/:id" element={<ShopPage />} />
       <Route path="/cart" element={user ? <CartPage /> : <Navigate to="/login" />} />
       <Route path="/checkout" element={user ? <CheckoutPage /> : <Navigate to="/login" />} />
       <Route path="/orders" element={user ? <OrdersPage /> : <Navigate to="/login" />} />

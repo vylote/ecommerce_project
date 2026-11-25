@@ -42,8 +42,8 @@ export default function ConfirmDialog({ state, onClose }) {
 
   const confirmBtnClass =
     variant === 'danger'
-      ? 'bg-red-500 hover:bg-red-600'
-      : 'bg-[#ee4d2d] hover:bg-[#d73211]';
+      ? 'bg-error hover:bg-error/90'
+      : 'bg-secondary hover:bg-secondary/90';
 
   return (
     <Dialog title={title} size="sm" onClose={onClose} busy={busy} closeOnBackdrop>

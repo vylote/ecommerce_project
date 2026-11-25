@@ -1,10 +1,13 @@
 package com.vlt.ecommerce.service.impl;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.vlt.ecommerce.config.Constants;
 import com.vlt.ecommerce.domain.CommissionConfig;
 import com.vlt.ecommerce.repository.CommissionConfigRepository;
 import com.vlt.ecommerce.service.CommissionService;
@@ -46,12 +49,30 @@ public class CommissionServiceImpl implements CommissionService {
             config = existingConfig.get();
             commissionConfigMapper.updateCommissionConfig(request, config);
         } else {
-            config = commissionConfigMapper.toCommissionConfig(request);
-            config.setCreatedBy(user);
-            config.setCategory(category);
+            config = newConfig(request, category, user);
         }
 
         return commissionConfigMapper.toCommissionConfigResponse(commissionConfigRepository.save(config));
+    }
+
+    @Override
+    public void createInitialConfig(Category category, BigDecimal rate) {
+        CommissionConfigRequest request = new CommissionConfigRequest();
+        request.setRate(rate != null ? rate : Constants.DEFAULT_CATEGORY_COMMISSION_RATE);
+        request.setEffectiveFrom(LocalDate.now());
+        commissionConfigRepository.save(newConfig(request, category, currentUserProvider.getUser()));
+    }
+
+    @Override
+    public boolean hasEffectiveConfig(Long categoryId) {
+        return commissionConfigRepository.existsByCategoryIdAndEffectiveFromLessThanEqual(categoryId, LocalDate.now());
+    }
+
+    private CommissionConfig newConfig(CommissionConfigRequest request, Category category, User creator) {
+        CommissionConfig config = commissionConfigMapper.toCommissionConfig(request);
+        config.setCategory(category);
+        config.setCreatedBy(creator);
+        return config;
     }
 
     @Override

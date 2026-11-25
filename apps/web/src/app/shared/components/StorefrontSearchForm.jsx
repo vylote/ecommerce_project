@@ -25,7 +25,7 @@ export default function StorefrontSearchForm({ className }) {
       />
       <button
         type="submit"
-        className="btn join-item bg-green-700 hover:bg-green-800 border-none text-white px-6"
+        className="btn join-item bg-secondary hover:bg-secondary/90 border-none text-white px-6"
         title={t("nav.search_button")}
       >
         <svg
