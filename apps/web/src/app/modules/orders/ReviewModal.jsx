@@ -59,13 +59,13 @@ export default function ReviewModal({ isOpen, onClose, order, onSuccess }) {
                   <Star
                     size={32}
                     className={`${
-                      star <= rating ? "fill-[#ee4d2d] text-[#ee4d2d]" : "text-gray-300"
+                      star <= rating ? "fill-primary text-secondary" : "text-gray-300"
                     } transition-colors`}
                   />
                 </button>
               ))}
             </div>
-            <span className="text-[#ee4d2d] font-medium text-sm">
+            <span className="text-secondary font-medium text-sm">
               {rating === 5 && "Tuyệt vời"}
               {rating === 4 && "Rất tốt"}
               {rating === 3 && "Bình thường"}
@@ -85,7 +85,7 @@ export default function ReviewModal({ isOpen, onClose, order, onSuccess }) {
               onChange={(e) => setComment(e.target.value)}
               placeholder="Hãy chia sẻ nhận xét của bạn về sản phẩm này nhé..."
               rows="4"
-              className="w-full border border-gray-300 rounded-md p-3 focus:ring-[#ee4d2d] focus:border-[#ee4d2d] outline-none transition-shadow"
+              className="w-full border border-gray-300 rounded-md p-3 focus:ring-primary/30 focus:border-primary outline-none transition-shadow"
               required
             ></textarea>
           </div>
@@ -103,7 +103,7 @@ export default function ReviewModal({ isOpen, onClose, order, onSuccess }) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-4 py-2 text-sm text-white bg-[#ee4d2d] rounded-sm hover:bg-[#d73211] disabled:opacity-50"
+            className="px-4 py-2 text-sm text-white bg-secondary rounded-sm hover:bg-secondary/90 disabled:opacity-50"
           >
             {isSubmitting ? "Đang gửi..." : "Hoàn thành"}
           </button>

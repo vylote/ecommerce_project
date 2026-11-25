@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import LanguageMenu from "./LanguageMenu";
 import NotificationDropdown from "./NotificationDropdown";
 import UserAvatar from "./UserAvatar";
+import StorefrontDisplayName from "./StorefrontDisplayName";
 import { useI18n } from "../../../i18n";
 
 export default function StorefrontTopBar({
@@ -14,18 +15,16 @@ export default function StorefrontTopBar({
   const { t } = useI18n();
 
   return (
-    <div className={`bg-gradient-to-r from-green-700 to-green-600 text-white text-xs ${className}`}>
+    <div className={`relative z-[60] bg-gradient-to-r from-secondary to-primary text-white text-xs ${className}`}>
       <div className={`max-w-[1400px] mx-auto flex items-center justify-between ${innerClassName}`}>
         <div className="flex items-center gap-3">
           {children}
           <Link to={sellerHref} className="hover:opacity-80">
             {t("nav.seller_channel")}
           </Link>
-          <span className="w-px h-3 bg-white/30" />
-          <span>
-            {t("nav.download_app")}
-          </span>
-          <span className="w-px h-3 bg-white/30" />
+          <span className="hidden h-3 w-px bg-white/30 sm:block" />
+          <span className="hidden sm:inline">{t("nav.download_app")}</span>
+          <span className="hidden h-3 w-px bg-white/30 sm:block" />
           <span className="hidden sm:inline">{t("nav.connect")}</span>
           <div className="hidden sm:flex items-center gap-2">
             <span aria-hidden="true">
@@ -50,7 +49,7 @@ export default function StorefrontTopBar({
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="relative flex items-center gap-2 sm:gap-3">
           <NotificationDropdown user={user} />
           <span className="w-px h-3 bg-white/30" />
           <button className="hover:opacity-80">{t("nav.support")}</button>
@@ -59,13 +58,10 @@ export default function StorefrontTopBar({
           <LanguageMenu />
 
           {user && (
-            <>
-              <span className="w-px h-3 bg-white/30" />
-              <span className="flex items-center gap-1.5">
-                <UserAvatar user={user} className="w-4 h-4" />
-                {user.fullName}
-              </span>
-            </>
+            <div className="hidden items-center gap-1.5 border-l border-white/30 pl-3 sm:flex">
+              <UserAvatar user={user} className="size-4 shrink-0" />
+              <StorefrontDisplayName name={user.fullName || user.email} />
+            </div>
           )}
         </div>
       </div>

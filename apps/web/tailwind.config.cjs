@@ -1,7 +1,8 @@
-import daisyui from "daisyui";
+const daisyui = require("daisyui");
+const colors = require("tailwindcss/colors");
 
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
@@ -15,11 +16,11 @@ export default {
     themes: [
       {
         brightgreen: {
-          primary: "#22B14C",
+          primary: colors.green[600],
           "primary-content": "#FFFFFF",
-          secondary: "#0E7C3F",
+          secondary: colors.green[700],
           "secondary-content": "#FFFFFF",
-          accent: "#7ED957",
+          accent: colors.green[500],
           "accent-content": "#12210A",
           neutral: "#16241A",
           "neutral-content": "#FFFFFF",

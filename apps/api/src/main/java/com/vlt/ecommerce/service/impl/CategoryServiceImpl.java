@@ -7,10 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vlt.ecommerce.service.CategoryService;
+import com.vlt.ecommerce.service.CommissionService;
 import com.vlt.ecommerce.service.exception.AppException;
 import com.vlt.ecommerce.service.exception.ErrorCode;
 import com.vlt.ecommerce.domain.Category;
 import com.vlt.ecommerce.service.dto.request.CategoryRequest;
+import com.vlt.ecommerce.service.dto.request.CreateCategoryRequest;
 import com.vlt.ecommerce.service.dto.response.CategoryDetailResponse;
 import com.vlt.ecommerce.service.dto.response.CategoryResponse;
 import com.vlt.ecommerce.service.mapper.CategoryMapper;
@@ -27,27 +29,29 @@ import lombok.extern.slf4j.Slf4j;
 public class CategoryServiceImpl implements CategoryService {
     CategoryRepository categoryRepository;
     CategoryMapper categoryMapper;
+    CommissionService commissionService;
 
     @Override
-    public CategoryResponse create(CategoryRequest request) {
+    @Transactional
+    public CategoryResponse create(CreateCategoryRequest request) {
         if (categoryRepository.existsBySlug(request.getSlug())) {
             throw new AppException(ErrorCode.CATEGORY_SLUG_ALREADY_EXISTS);
         }
 
-        if (request.getParentId() != null && !categoryRepository.existsById(request.getParentId())) {
-            throw new AppException(ErrorCode.PARENT_CATEGORY_NOT_FOUND);
-        }
 
         Category newCategory = categoryMapper.toCategory(request);
         if (request.getParentId() != null) {
             Category parent = categoryRepository.findById(request.getParentId())
                     .orElseThrow(() -> new AppException(ErrorCode.PARENT_CATEGORY_NOT_FOUND));
             newCategory.setParent(parent);
-        } else {
-            newCategory.setParent(null);
+        }
+        if (request.getIsActive() != null) {
+            newCategory.setIsActive(request.getIsActive());
         }
 
-        return categoryMapper.toCategoryResponse(categoryRepository.save(newCategory));
+        Category saved = categoryRepository.save(newCategory);
+        commissionService.createInitialConfig(saved, request.getCommissionRate());
+        return categoryMapper.toCategoryResponse(saved);
     }
 
     @Override
@@ -102,7 +106,9 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         categoryMapper.updateCategoryFromRequest(request, category);
-
+        if (request.getIsActive() != null) {
+            category.setIsActive(request.getIsActive());
+        }
         return categoryMapper.toCategoryResponse(categoryRepository.save(category));
     }
 

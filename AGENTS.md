@@ -190,6 +190,7 @@ Apply these conventions when creating, extracting, refactoring, or reviewing Rea
 - Prefer composition for content that varies. A dialog can receive a title, body, and actions. A create/edit form can share fields and validation while its caller supplies initial values, the submit callback, and the action label.
 - Look for two or three concrete uses before introducing an abstraction. If an API grows beyond roughly seven custom props or accumulates mode flags, reconsider its responsibilities. Keep Tailwind and daisyUI variants together and reuse the existing class-composition pattern.
 - Associate labels with inputs, connect hints and errors with `aria-describedby`, and set `aria-invalid` for invalid fields. Give icon-only buttons an accessible name. Data views should handle loading, failure, and empty results.
+- Use the storefront header palette for brand accents and banners. Reuse the Tailwind theme tokens and preserve a page’s existing button shape when changing its colors.
 - Use native buttons for actions and links with a real destination for navigation. Keep decorative content out of the tab order and preserve keyboard access when changing menus and dialogs.
 - Await or handle rejected Promises in JavaScript. Use `void` for intentional background work only when the called operation already handles its own failures.
 

@@ -19,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.vlt.ecommerce.service.dto.response.ApiResponse;
 import com.vlt.ecommerce.integration.cloudinary.ImageStorageService;
 import com.vlt.ecommerce.service.dto.request.CategoryRequest;
+import com.vlt.ecommerce.service.dto.request.CreateCategoryRequest;
 import com.vlt.ecommerce.service.dto.response.CategoryDetailResponse;
 import com.vlt.ecommerce.service.dto.response.CategoryResponse;
 import com.vlt.ecommerce.service.CategoryService;
@@ -46,8 +47,8 @@ public class CategoryController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CATEGORY_CREATE')")
-    public ApiResponse<CategoryResponse> create(@RequestBody @Valid CategoryRequest request) {
+    @PreAuthorize("hasAuthority('CATEGORY_CREATE') and (#request.commissionRate == null or hasAuthority('COMMISSION_CONFIG_WRITE'))")
+    public ApiResponse<CategoryResponse> create(@RequestBody @Valid CreateCategoryRequest request) {
         return ApiResponse.<CategoryResponse>builder()
                 .result(categoryService.create(request))
                 .build();

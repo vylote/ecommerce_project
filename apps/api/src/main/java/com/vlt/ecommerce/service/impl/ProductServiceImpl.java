@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vlt.ecommerce.service.CommissionService;
 import com.vlt.ecommerce.service.ProductService;
 import com.vlt.ecommerce.service.dto.response.PageResponse;
 import com.vlt.ecommerce.service.exception.AppException;
@@ -70,16 +71,24 @@ public class ProductServiceImpl implements ProductService {
 
     ImageStorageService imageStorageService;
     ShopService shopService;
+    CommissionService commissionService;
 
     @Override
+    @Transactional
     public ProductResponse create(ProductRequest request) {
         Long sellerId = currentUserProvider.getUserId();
 
         Shop shop = shopRepository.findBySellerId(sellerId)
                 .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
-        Category category = categoryRepository.findById(request.getCategoryId())
+        Category category = categoryRepository.findForProductAssignment(request.getCategoryId())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+        if (!Boolean.TRUE.equals(category.getIsActive())) {
+            throw new AppException(ErrorCode.CATEGORY_INACTIVE);
+        }
+        if (!commissionService.hasEffectiveConfig(category.getId())) {
+            throw new AppException(ErrorCode.CATEGORY_COMMISSION_NOT_CONFIGURED);
+        }
 
         Product newProduct = productMapper.toProduct(request);
         newProduct.setShop(shop);

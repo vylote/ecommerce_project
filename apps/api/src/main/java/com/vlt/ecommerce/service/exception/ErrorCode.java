@@ -51,6 +51,8 @@ public enum ErrorCode {
     PARENT_CATEGORY_NOT_FOUND(6002, "The parent category was not found.", HttpStatus.NOT_FOUND),
     CATEGORY_SLUG_ALREADY_EXISTS(6003, "A category with this slug already exists.", HttpStatus.CONFLICT),
     INVALID_HIERARCHY(6004, "A category cannot be its own parent.", HttpStatus.BAD_REQUEST),
+    CATEGORY_INACTIVE(6005, "An inactive category cannot be assigned to a product.", HttpStatus.CONFLICT),
+    CATEGORY_COMMISSION_NOT_CONFIGURED(6006, "The category does not have an effective commission rate.", HttpStatus.CONFLICT),
 
     // 7000-7999 Products and variants
     PRODUCT_NOT_FOUND(7001, "The product was not found.", HttpStatus.NOT_FOUND),

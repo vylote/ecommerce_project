@@ -1,3 +1,4 @@
+import { useI18n } from "../../../i18n";
 import FormSelect from "../ui/FormSelect";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 
@@ -11,6 +12,7 @@ export default function Pagination({
   pageSizeOptions = [10, 20, 50, 100],
   className = '',
 }) {
+  const { t } = useI18n();
   if (totalPages <= 0 && (!totalItems || totalItems === 0)) return null;
 
   // Tính toán khoảng hiển thị (Start - End)
@@ -66,7 +68,7 @@ export default function Pagination({
             <FormSelect
               value={pageSize}
               onChange={(e) => onPageSizeChange(Number(e.target.value))}
-              controlSize="xs" focusColor="blue" className="bg-white"
+              controlSize="xs" focusColor="green" className="bg-white"
             >
               {pageSizeOptions.map((opt) => (
                 <option key={opt} value={opt}>
@@ -86,7 +88,7 @@ export default function Pagination({
             onClick={() => onPageChange(1)}
             disabled={currentPage === 1}
             className="btn btn-xs btn-outline border-gray-200 text-gray-500 hover:bg-gray-100 disabled:bg-gray-50 disabled:text-gray-300 p-1 rounded"
-            title="Trang đầu"
+            title={t("pagination.first")}
           >
             <ChevronsLeft size={14} />
           </button>
@@ -96,7 +98,7 @@ export default function Pagination({
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage === 1}
             className="btn btn-xs btn-outline border-gray-200 text-gray-500 hover:bg-gray-100 disabled:bg-gray-50 disabled:text-gray-300 p-1 rounded"
-            title="Trang trước"
+            title={t("pagination.previous")}
           >
             <ChevronLeft size={14} />
           </button>
@@ -117,7 +119,7 @@ export default function Pagination({
                 onClick={() => onPageChange(p)}
                 className={`btn btn-xs min-w-[28px] h-7 rounded font-medium transition-colors ${
                   isActive
-                    ? 'bg-[#3b82f6] text-white border-none shadow-xs hover:bg-blue-600'
+                    ? 'bg-secondary text-secondary-content border-none shadow-xs hover:bg-secondary/90'
                     : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -131,7 +133,7 @@ export default function Pagination({
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="btn btn-xs btn-outline border-gray-200 text-gray-500 hover:bg-gray-100 disabled:bg-gray-50 disabled:text-gray-300 p-1 rounded"
-            title="Trang sau"
+            title={t("pagination.next")}
           >
             <ChevronRight size={14} />
           </button>
@@ -141,7 +143,7 @@ export default function Pagination({
             onClick={() => onPageChange(totalPages)}
             disabled={currentPage === totalPages}
             className="btn btn-xs btn-outline border-gray-200 text-gray-500 hover:bg-gray-100 disabled:bg-gray-50 disabled:text-gray-300 p-1 rounded"
-            title="Trang cuối"
+            title={t("pagination.last")}
           >
             <ChevronsRight size={14} />
           </button>

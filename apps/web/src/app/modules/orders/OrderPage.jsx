@@ -1,24 +1,40 @@
 import { NEW_NOTIFICATION_EVENT, ORDER_UPDATED_EVENT } from "../../shared/constants";
 import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
-import ProductImage from "../../shared/components/ProductImage";
+import Pagination from "../../shared/components/Pagination";
 import { useState, useEffect, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import api from "../../config/api";
 import Navbar from "../../shared/components/Navbar";
 import ConfirmDialog from "../../shared/components/ConfirmDialog";
-import { Store } from "lucide-react";
+import { Search } from "lucide-react";
+import PurchaseOrderCard from "./PurchaseOrderCard";
 import ReviewModal from "./ReviewModal";
 import ProfileSidebar from "../account/profile/ProfileSidebar";
 import { useI18n } from "../../../i18n";
 
+const pageSize = 10;
+const searchBatchSize = 50;
+
+function matchesOrder(order, keyword) {
+  const query = keyword.toLocaleLowerCase();
+  return String(order.id) === query.replace(/^#/, "")
+    || order.shopName?.toLocaleLowerCase().includes(query)
+    || order.items?.some((item) => item.productName?.toLocaleLowerCase().includes(query));
+}
+
+async function fetchOrderPage(params, signal) {
+  const { data } = await api.get("/orders", { params, signal });
+  return data.result;
+}
+
 export default function OrdersPage() {
-  const navigate = useNavigate();
   const { t } = useI18n();
 
   const [orders, setOrders] = useState([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [serverTotalPages, setServerTotalPages] = useState(1);
+  const [keyword, setKeyword] = useState("");
+  const [loadError, setLoadError] = useState(false);
   const [activeTab, setActiveTab] = useState("ALL");
   const [processingId, setProcessingId] = useState(null);
 
@@ -54,20 +70,43 @@ export default function OrdersPage() {
     }
   };
 
+  const searching = keyword !== "";
+  const requestPage = searching ? 1 : page;
   const loadOrders = useCallback(async (signal) => {
-    const params = { page, size: 10 };
+    const params = { page: requestPage, size: searching ? searchBatchSize : pageSize };
     if (activeTab !== "ALL") params.status = activeTab;
 
-    const response = await api.get("/orders", { params, signal });
+    const first = await fetchOrderPage(params, signal);
+    const entries = [...(first.data ?? [])];
+    if (searching) {
+      for (let next = 2; next <= first.totalPages && !signal.aborted; next++) {
+        const batch = await fetchOrderPage({ ...params, page: next }, signal);
+        entries.push(...(batch.data ?? []));
+      }
+    }
     if (signal.aborted) return;
+    const lastPage = Math.max(1, first.totalPages);
+    if (!searching && requestPage > lastPage) {
+      setPage(lastPage);
+      return;
+    }
+    setOrders(entries);
+    setServerTotalPages(lastPage);
+    setLoadError(false);
+  }, [requestPage, activeTab, searching]);
+  const { loading, reload: fetchOrders } = useReloadableRequest(loadOrders, () => setLoadError(true));
 
-    setOrders(response.data.result.data || []);
-    setTotalPages(response.data.result.totalPages || 1);
-  }, [page, activeTab]);
-  const { loading, reload: fetchOrders } = useReloadableRequest(
-    loadOrders,
-    () => toast.error(t("order.loading_error") || "Không thể tải danh sách đơn hàng"),
-  );
+  const matchingOrders = searching ? orders.filter((order) => matchesOrder(order, keyword)) : orders;
+  const totalPages = searching ? Math.max(1, Math.ceil(matchingOrders.length / pageSize)) : serverTotalPages;
+  const displayPage = Math.min(page, totalPages);
+  const displayedOrders = searching
+    ? matchingOrders.slice((displayPage - 1) * pageSize, displayPage * pageSize)
+    : matchingOrders;
+
+  function applySearch(value) {
+    setKeyword(value.trim());
+    setPage(1);
+  }
 
   useEffect(() => {
     window.addEventListener(ORDER_UPDATED_EVENT, fetchOrders);
@@ -134,194 +173,93 @@ export default function OrdersPage() {
   };
 
   return (
-    <div className="bg-[#f5f5f5] min-h-screen pb-10">
+    <div className="min-h-screen bg-base-200 pb-10 text-base-content">
       <Navbar />
 
-      <div className="max-w-[1200px] mx-auto py-6 flex gap-5">
-        {/* Sidebar */}
-        <ProfileSidebar />
+      <div className="mx-auto flex max-w-[1280px] gap-6 px-4 py-5 md:px-6 md:py-7">
+        <aside className="hidden md:block">
+          <ProfileSidebar />
+        </aside>
 
-        {/* Main content */}
-        <div className="flex-1">
-          {/* Tabs */}
-          <div className="flex bg-white rounded-sm shadow-sm mb-4">
+        <main className="min-w-0 flex-1 space-y-4 [--rounded-btn:0.125rem]">
+          <h1 className="text-2xl font-bold tracking-tight">{t("order.purchases")}</h1>
+          <nav aria-label={t("order.status_filter")} className="flex overflow-x-auto rounded-xl border border-base-300 bg-base-100 px-2">
             {tabs.map((tab) => (
               <button
                 key={tab.value}
+                type="button"
+                aria-pressed={activeTab === tab.value}
                 onClick={() => handleTabChange(tab.value)}
-                className={`flex-1 py-4 text-center text-sm font-medium transition-colors cursor-pointer ${
-                  activeTab === tab.value
-                    ? "text-[#ee4d2d] border-b-2 border-[#ee4d2d]"
-                    : "text-gray-700 hover:text-[#ee4d2d]"
-                }`}
+                className={`flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium ${activeTab === tab.value ? "border-primary text-secondary" : "border-transparent text-base-content/70 hover:text-secondary"}`}
               >
                 {tab.label}
               </button>
             ))}
-          </div>
+          </nav>
+
+          <form
+            role="search"
+            aria-label={t("order.search")}
+            className="flex items-center gap-2 rounded-xl border border-base-300 bg-base-100 p-2 focus-within:ring-2 focus-within:ring-primary/40"
+            onSubmit={(event) => {
+              event.preventDefault();
+              applySearch(String(new FormData(event.currentTarget).get("keyword") || ""));
+            }}
+          >
+            <input
+              key={keyword}
+              type="search"
+              name="keyword"
+              defaultValue={keyword}
+              aria-label={t("order.search")}
+              placeholder={t("order.search_placeholder")}
+              className="min-w-0 flex-1 bg-transparent px-2 text-sm outline-none"
+            />
+            {keyword && (
+              <button type="button" onClick={() => applySearch("")} className="btn btn-ghost btn-sm shrink-0">
+                {t("order.clear_search")}
+              </button>
+            )}
+            <button type="submit" aria-label={t("order.search")} className="btn btn-secondary btn-sm shrink-0">
+              <Search size={17} aria-hidden="true" />
+            </button>
+          </form>
 
           {loading ? (
-            <div className="text-center py-20 text-gray-500 bg-white rounded-sm shadow-sm">
+            <p role="status" className="rounded-2xl border border-base-300 bg-base-100 py-16 text-center text-base-content/65">
               {t("order.loading")}
+            </p>
+          ) : loadError ? (
+            <div role="alert" className="rounded-2xl border border-base-300 bg-base-100 py-12 text-center">
+              <p>{t("order.loading_error")}</p>
+              <button type="button" className="btn btn-outline btn-secondary btn-sm mt-3" onClick={fetchOrders}>
+                {t("order.retry")}
+              </button>
             </div>
-          ) : orders.length === 0 ? (
-            <div className="text-center py-24 bg-white rounded-sm shadow-sm text-gray-500 flex flex-col items-center justify-center">
-              <div className="text-6xl opacity-30 mb-4">🛒</div>
-              {t("order.empty")}
-              {activeTab !== "ALL"
-                ? ` ${t("order.in_status")} "${getStatusLabel(activeTab)}"`
-                : ""}
-              .
-            </div>
+          ) : displayedOrders.length === 0 ? (
+            <p className="rounded-2xl border border-base-300 bg-base-100 py-16 text-center text-base-content/65">
+              {t(searching ? "order.no_search_results" : "order.empty")}
+            </p>
           ) : (
-            <div className="space-y-3">
-              {orders.map((order) => {
-                const shopLabel = order.shopName || `Đơn #${order.id}`;
-
-                return (
-                  <div key={order.id} className="bg-white rounded-sm shadow-sm">
-                    {/* Header đơn */}
-                    <div className="flex justify-between items-center px-6 py-4 border-b">
-                      <div className="flex items-center gap-2 font-medium text-sm text-gray-800">
-                        <span className="bg-[#ee4d2d] text-white text-xs px-1.5 py-0.5 rounded-sm">
-                          {t("order.favorite")}
-                        </span>
-                        {shopLabel}
-                        <button className="bg-primary/10 text-primary border border-primary px-2 py-0.5 text-xs rounded-sm flex items-center gap-1 hover:bg-primary/20 transition-colors ml-2 cursor-pointer">
-                          <Store size={12} /> {t("order.view_shop")}
-                        </button>
-                      </div>
-                      <span
-                        className={`text-sm font-medium uppercase ${
-                          order.status === "COMPLETED"
-                            ? "text-green-600"
-                            : order.status === "CANCELLED"
-                              ? "text-gray-500"
-                              : "text-[#ee4d2d]"
-                        }`}
-                      >
-                        {getStatusLabel(order.status)}
-                      </span>
-                    </div>
-
-                    {/* Danh sách sản phẩm trong đơn */}
-                    <div className="divide-y divide-gray-100">
-                      {order.items?.map((item) => (
-                        <Link
-                          key={item.id}
-                          to={`/product/${item.productId}`}
-                          className="flex items-center gap-4 px-6 py-3 hover:bg-gray-50 transition-colors cursor-pointer"
-                        >
-                          <div className="w-20 h-20 border shrink-0 bg-gray-100 flex items-center justify-center overflow-hidden">
-                            <ProductImage
-                                src={item.productImageUrl}
-                                alt={item.productName}
-                                className="w-full h-full object-cover"
-                              />
-                          </div>
-                          <div className="flex-1 text-sm">
-                            <div className="line-clamp-2 text-gray-800 text-base">
-                              {item.productName}
-                            </div>
-                            <div className="text-gray-500 mt-2">
-                              x{item.quantity}
-                            </div>
-                          </div>
-                          <div className="text-sm shrink-0 flex gap-2 items-center">
-                            <span className="text-[#ee4d2d]">
-                              ₫{item.productPrice?.toLocaleString("vi-VN")}
-                            </span>
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-
-                    {/* Tổng tiền + hành động */}
-                    <div className="bg-[#fffefb] px-6 py-5 border-t flex flex-col items-end">
-                      <div className="text-sm mb-5 flex items-center">
-                        <span className="text-gray-600 mr-2">{t("order.total_amount")}</span>
-                        <span className="font-medium text-[#ee4d2d] text-2xl">
-                          ₫{order.totalAmount?.toLocaleString("vi-VN")}
-                        </span>
-                      </div>
-
-                      <div className="flex gap-3">
-                        {order.status === "PENDING" && (
-                          <button
-                            onClick={() => handleCancel(order.id)}
-                            disabled={processingId === order.id}
-                            className="w-40 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-sm hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
-                          >
-                            {t("order.cancel_order")}
-                          </button>
-                        )}
-                        {order.status === "SHIPPING" && (
-                          <button
-                            onClick={() => handleComplete(order.id)}
-                            disabled={processingId === order.id}
-                            className="w-40 py-2 text-sm bg-[#ee4d2d] text-white rounded-sm hover:bg-[#d73211] transition-colors disabled:opacity-50 cursor-pointer"
-                          >
-                            {t("order.received_order")}
-                          </button>
-                        )}
-                        {order.status === "COMPLETED" && (
-                          <button 
-                            onClick={() => !order.reviewed && setReviewOrder(order)}
-                            disabled={order.reviewed}
-                            className={`w-40 py-2 text-sm rounded-sm transition-colors cursor-pointer ${
-                              order.reviewed 
-                                ? "text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed" 
-                                : "text-[#ee4d2d] bg-white border border-[#ee4d2d] hover:bg-orange-50"
-                            }`}
-                          >
-                            {order.reviewed ? t("order.rated") : t("order.rate")}
-                          </button>
-                        )}
-                        {order.status === "CANCELLED" && (
-                          <button
-                            onClick={() =>
-                              navigate(
-                                `/product/${order.items?.[0]?.productId}`,
-                              )
-                            }
-                            className="w-40 py-2 text-sm text-[#ee4d2d] bg-white border border-[#ee4d2d] rounded-sm hover:bg-orange-50 transition-colors cursor-pointer"
-                          >
-                            {t("order.repurchase")}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+            <div className="space-y-4">
+              {displayedOrders.map((order) => (
+                <PurchaseOrderCard
+                  key={order.id}
+                  order={order}
+                  statusLabel={getStatusLabel(order.status)}
+                  processing={processingId === order.id}
+                  onCancel={handleCancel}
+                  onComplete={handleComplete}
+                  onReview={setReviewOrder}
+                />
+              ))}
             </div>
           )}
 
-          {/* Phân trang */}
-          {totalPages > 1 && (
-            <div className="flex justify-center mt-8">
-              <div className="join shadow-sm">
-                <button
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => p - 1)}
-                  className="join-item btn btn-sm bg-white border-gray-300 hover:bg-gray-100 text-gray-600"
-                >
-                  «
-                </button>
-                <button className="join-item btn btn-sm bg-[#ee4d2d] text-white border-[#ee4d2d] hover:bg-[#ee4d2d]">
-                  {t("order.page")} {page} / {totalPages}
-                </button>
-                <button
-                  disabled={page === totalPages}
-                  onClick={() => setPage((p) => p + 1)}
-                  className="join-item btn btn-sm bg-white border-gray-300 hover:bg-gray-100 text-gray-600"
-                >
-                  »
-                </button>
-              </div>
-            </div>
+          {!loading && !loadError && totalPages > 1 && (
+            <Pagination currentPage={displayPage} totalPages={totalPages} onPageChange={setPage} className="!justify-center [&_button]:rounded-sm" />
           )}
-        </div>
+        </main>
       </div>
 
       <ConfirmDialog

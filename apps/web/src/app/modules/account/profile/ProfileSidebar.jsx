@@ -25,7 +25,7 @@ export default function ProfileSidebar() {
           </div>
           <Link
             to="/profile"
-            className="text-xs text-gray-500 hover:text-[#ee4d2d] flex items-center gap-1 mt-0.5"
+            className="text-xs text-gray-500 hover:text-secondary flex items-center gap-1 mt-0.5"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -54,11 +54,11 @@ export default function ProfileSidebar() {
             to="/profile"
             className={`flex items-center gap-2 mb-2 transition-colors ${
               isAccountGroup
-                ? "text-[#ee4d2d]"
-                : "text-gray-800 hover:text-[#ee4d2d]"
+                ? "text-secondary"
+                : "text-gray-800 hover:text-secondary"
             }`}
           >
-            <User size={18} className="text-blue-500" />
+            <User size={18} className="text-secondary" />
             <span>{t("profile.my_account")}</span>
           </Link>
 
@@ -66,13 +66,13 @@ export default function ProfileSidebar() {
           <div className="flex flex-col gap-3 pl-7 text-gray-600 font-normal">
             <Link
               to="/profile"
-              className={`transition-colors ${isProfile ? "text-[#ee4d2d] font-medium" : "hover:text-[#ee4d2d]"}`}
+              className={`transition-colors ${isProfile ? "text-secondary font-medium" : "hover:text-secondary"}`}
             >
               {t("profile.profile")}
             </Link>
             <Link
               to="/profile/addresses"
-              className={`transition-colors ${isAddress ? "text-[#ee4d2d] font-medium" : "hover:text-[#ee4d2d]"}`}
+              className={`transition-colors ${isAddress ? "text-secondary font-medium" : "hover:text-secondary"}`}
             >
               {t("profile.addresses")}
             </Link>
@@ -88,23 +88,23 @@ export default function ProfileSidebar() {
           to="/orders"
           className={`flex items-center gap-2 transition-colors ${
             location.pathname.startsWith("/orders")
-              ? "text-[#ee4d2d]"
-              : "text-gray-800 hover:text-[#ee4d2d]"
+              ? "text-secondary"
+              : "text-gray-800 hover:text-secondary"
           }`}
         >
-          <ClipboardList size={18} className="text-blue-500" />
+          <ClipboardList size={18} className="text-secondary" />
           <span>{t("nav.my_orders")}</span>
         </Link>
 
         {/* GROUP 3: KHO VOUCHER (Root level) */}
         <div className="flex items-center gap-2 text-gray-800 cursor-not-allowed">
-          <Ticket size={18} className="text-[#ee4d2d]" />
+          <Ticket size={18} className="text-secondary" />
           <span>{t("profile.vouchers")}</span>
         </div>
 
         {/* GROUP 4: SHOPEE XU (Root level) */}
         <div className="flex items-center gap-2 text-gray-800 cursor-not-allowed">
-          <Coins size={18} className="text-yellow-500" />
+          <Coins size={18} className="text-secondary" />
           <span>{t("profile.coins")}</span>
         </div>
       </nav>

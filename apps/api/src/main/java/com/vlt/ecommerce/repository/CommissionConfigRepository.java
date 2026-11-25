@@ -15,5 +15,7 @@ public interface CommissionConfigRepository extends JpaRepository<CommissionConf
 
     Optional<CommissionConfig> findByCategoryId(Long categoryId);
 
+    boolean existsByCategoryIdAndEffectiveFromLessThanEqual(Long categoryId, LocalDate date);
+
     List<CommissionConfig> findByCreatedById(Long id);
 }

@@ -8,6 +8,7 @@ import {
   ChevronRight, Layers, X, UploadCloud, Link as LinkIcon
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import toast from 'react-hot-toast';
 import api from '../../config/api';
 import Pagination from '../../shared/components/Pagination';
@@ -48,6 +49,10 @@ export default function CategoryManagementPage() {
 
   // Modal Thêm/Sửa
   const [showModal, setShowModal] = useState(false);
+  const [commissionRate, setCommissionRate] = useState('');
+  const canSetCommissionRate = useSelector((state) => state.auth.user?.roles?.some(
+    (role) => role.permissions?.some((permission) => permission.name === 'COMMISSION_CONFIG_WRITE'),
+  ));
   const [isEditing, setIsEditing] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef(null);
@@ -97,6 +102,7 @@ export default function CategoryManagementPage() {
 
   const handleOpenCreate = () => {
     setIsEditing(false);
+    setCommissionRate('');
     setCategoryForm({
       id: null,
       name: '',
@@ -110,6 +116,7 @@ export default function CategoryManagementPage() {
 
   const handleOpenCreateChild = (parentCat) => {
     setIsEditing(false);
+    setCommissionRate('');
     setCategoryForm({
       id: null,
       name: '',
@@ -198,7 +205,10 @@ export default function CategoryManagementPage() {
         await api.put(`/categories/${categoryForm.id}`, payload);
         toast.success('Đã cập nhật danh mục thành công');
       } else {
-        await api.post('/categories', payload);
+        const initialRate = canSetCommissionRate && commissionRate !== ''
+          ? Number((Number(commissionRate) / 100).toFixed(4))
+          : undefined;
+        await api.post('/categories', { ...payload, commissionRate: initialRate });
         toast.success('Đã tạo danh mục mới thành công');
       }
 
@@ -655,6 +665,29 @@ export default function CategoryManagementPage() {
                 </div>
               </div>
             </div>
+
+            {!isEditing && canSetCommissionRate && (
+              <div className="form-control">
+                <label htmlFor="category-commission-rate" className="label font-semibold text-xs text-gray-700">
+                  Hoa hồng ban đầu (%)
+                </label>
+                <FormInput
+                  id="category-commission-rate"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={commissionRate}
+                  onChange={(event) => setCommissionRate(event.target.value)}
+                  controlSize="sm"
+                  focusColor="blue"
+                  aria-describedby="category-commission-rate-hint"
+                />
+                <p id="category-commission-rate-hint" className="mt-1 text-[11px] text-gray-500">
+                  Để trống để dùng mức mặc định của sàn.
+                </p>
+              </div>
+            )}
 
             <div className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
               <div>

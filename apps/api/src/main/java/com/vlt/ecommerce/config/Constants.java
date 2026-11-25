@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.config;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Set;
@@ -20,6 +21,8 @@ public final class Constants {
     public static final Duration AUTHORIZATION_CACHE_TTL = Duration.ofMinutes(15);
     public static final String EMAIL_OTP_KEY_PREFIX = "EMAIL_OTP:";
     public static final Duration EMAIL_OTP_TTL = Duration.ofMinutes(5);
+
+    public static final BigDecimal DEFAULT_CATEGORY_COMMISSION_RATE = new BigDecimal("0.05");
 
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
     public static final String ROLE_BUYER = "ROLE_BUYER";

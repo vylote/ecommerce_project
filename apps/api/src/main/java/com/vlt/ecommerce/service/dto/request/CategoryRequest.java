@@ -14,4 +14,5 @@ public class CategoryRequest {
     String slug;
     Long parentId;
     String imageUrl;
+    Boolean isActive;
 }

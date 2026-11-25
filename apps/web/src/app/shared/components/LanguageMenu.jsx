@@ -1,3 +1,4 @@
+import StorefrontPopover from "./StorefrontPopover";
 import useDismissiblePopover from "../hooks/useDismissiblePopover";
 import { useI18n } from "../../../i18n";
 
@@ -35,7 +36,7 @@ export default function LanguageMenu() {
         {current.label}
       </button>
       {isOpen && (
-        <div id={panelId} className="absolute right-0 z-50 mt-2 w-36 rounded-lg border border-base-300 bg-base-100 py-1.5 text-xs text-base-content shadow-xl">
+        <StorefrontPopover id={panelId} className="w-36 py-1.5 text-xs">
           {languages.map(({ code, label }) => (
             <button
               key={code}
@@ -51,7 +52,7 @@ export default function LanguageMenu() {
               {label}
             </button>
           ))}
-        </div>
+        </StorefrontPopover>
       )}
     </div>
   );
