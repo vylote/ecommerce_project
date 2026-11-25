@@ -53,6 +53,9 @@ public final class Constants {
     public static final String ROLE_SELLER = "ROLE_SELLER";
     public static final Set<String> SYSTEM_ROLES = Set.of(ROLE_ADMIN, ROLE_SELLER, ROLE_BUYER);
 
+    public static final String AUTHORITY_ORDER_READ_ANY = "ORDER_READ_ANY";
+    public static final String AUTHORITY_STOCK_RECEIPT_READ_ANY = "STOCK_RECEIPT_READ_ANY";
+
     public static final String NOTIFICATION_FANOUT_EXCHANGE = "notification.fanout.exchange";
     public static final String NOTIFICATION_QUEUE = "notification.queue";
     public static final String NOTIFICATION_EMAIL_QUEUE = "notification.email.queue";

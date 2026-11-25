@@ -2,6 +2,7 @@ package com.vlt.ecommerce.web.rest;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,6 +37,7 @@ public class ProductSpecificationController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('PRODUCT_SPECIFICATION_SET') and @productSecurity.isOwner(#productId)")
     public ApiResponse<ProductSpecificationResponse> addProductSpecification(
             @PathVariable Long productId,
             @RequestBody @Valid ProductSpecificationRequest request) {
@@ -45,6 +47,7 @@ public class ProductSpecificationController {
     }
 
     @DeleteMapping("/{specificationId}")
+    @PreAuthorize("hasAuthority('PRODUCT_SPECIFICATION_REMOVE') and @productSecurity.isOwner(#productId)")
     public ApiResponse<String> removeProductSpecification(
             @PathVariable Long productId,
             @PathVariable Long specificationId) {

@@ -9,5 +9,7 @@ public interface SessionService {
 
     TokenResponse generateTokens(User user, String sessionId);
 
+    void revokeOwnSession(String ssid);
+
     void revokeSession(String ssid);
 }

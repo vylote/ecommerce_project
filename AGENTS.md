@@ -106,6 +106,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 ### Backend package layout
 
 - Place REST controllers and HTTP exception handlers in `web.rest` and `web.rest.errors`. Place JPA entities in `domain`, enums in `domain.enumeration`, and application events in `domain.event`.
+- Give each HTTP handler one canonical path and verb. Name path variables for the resource they identify, and resolve them only as that ID type.
 - Keep repositories and their query projections in `repository` and `repository.projection`. Put service contracts in `service`, implementations in `service.impl`, and mappers, request and response DTOs, exceptions, and internal event listeners under the matching `service` subpackages.
 - Return `Optional<T>` for repository queries that can yield zero or one value. Verify uniqueness or an explicit row limit before using it for entity lookups. Keep collection and page queries as collections and pages.
 - Decide how to handle missing data at each caller. For a record required by an HTTP operation, use `orElseThrow(() -> new AppException(ErrorCode.<DOMAIN_CODE>))`. Preserve create, fallback, or empty-result paths when absence is valid. For best-effort after-commit notifications, log and skip a missing target. Preserve existing aggregate defaults and response contracts when exposing nullable aggregates through `Optional`.
@@ -121,6 +122,7 @@ Declare dependency and plugin versions in the `<properties>` section of `apps/ap
 
 - Write a new versioned SQL changelog for every schema change or seed update. Store it in apps/api/src/main/resources/db/migration with the full date and a descriptive purpose. Use VYYYY.MM.DD.NN__describe_change.sql and preserve already applied changelogs.
 - Define granular operation authorities and document their default role grants in docs/authorization.md. Use roles to bundle permissions. Keep resource ownership checks alongside authority checks and document read-any grants separately.
+- Place HTTP operation guards on controller methods. Write seeded operation names directly inside hasAuthority and hasAnyAuthority expressions. Keep authority constants for Java code that performs programmatic checks. Preserve service-level ownership checks and require distinct read-any authorities for access to someone else's resources.
 - Omit permission lists from JWTs. Use Redis read-through caches for account status, role assignments, and shared role permissions. Fall back to current MySQL data on misses or concurrent authorization writes. Mark affected authorization writes in Redis before changing MySQL and evict affected entries after transaction completion. Keep cache fills guarded against concurrent updates.
 
 ### JPA column mappings

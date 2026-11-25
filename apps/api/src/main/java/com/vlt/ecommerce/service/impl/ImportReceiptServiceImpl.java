@@ -11,7 +11,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,7 +57,6 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('SELLER')")
     public ImportReceiptResponse createReceipt(ImportReceiptRequest request) {
         User currentUser = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(currentUser.getId())
@@ -144,7 +142,6 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('SELLER')")
     public ImportReceiptResponse completeReceipt(Long id) {
         User currentUser = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(currentUser.getId())
@@ -182,7 +179,6 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('SELLER')")
     public ImportReceiptResponse cancelReceipt(Long id) {
         User currentUser = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(currentUser.getId())
@@ -207,16 +203,15 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     public ImportReceiptResponse getReceiptById(Long id) {
-        User currentUser = currentUserProvider.getUser();
+        Long userId = currentUserProvider.getUserId();
         ImportReceipt receipt = importReceiptRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.IMPORT_RECEIPT_NOT_FOUND));
 
-        boolean isAdmin = currentUser.getRoles().stream().anyMatch(r -> r.getName().equals(Constants.ROLE_ADMIN));
-        boolean isOwner = receipt.getShop().getSeller().getId().equals(currentUser.getId());
+        boolean canReadAny = currentUserProvider.hasAuthority(Constants.AUTHORITY_STOCK_RECEIPT_READ_ANY);
+        boolean isOwner = receipt.getShop().getSeller().getId().equals(userId);
 
-        if (!isAdmin && !isOwner) {
+        if (!canReadAny && !isOwner) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
@@ -224,7 +219,6 @@ public class ImportReceiptServiceImpl implements ImportReceiptService {
     }
 
     @Override
-    @PreAuthorize("hasRole('SELLER')")
     public PageResponse<ImportReceiptResponse> getMyReceipts(int page, int size, ImportReceiptStatus status, Long productId) {
         User currentUser = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(currentUser.getId())

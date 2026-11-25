@@ -3,7 +3,6 @@ package com.vlt.ecommerce.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,6 @@ public class CategoryServiceImpl implements CategoryService {
     CategoryMapper categoryMapper;
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public CategoryResponse create(CategoryRequest request) {
         if (categoryRepository.existsBySlug(request.getSlug())) {
             throw new AppException(ErrorCode.CATEGORY_SLUG_ALREADY_EXISTS);
@@ -85,7 +83,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public CategoryResponse update(CategoryRequest request, Long id) {
         Category category = categoryRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -110,7 +107,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public void delete(Long id) {
         categoryRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));

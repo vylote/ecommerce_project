@@ -3,7 +3,6 @@ package com.vlt.ecommerce.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.vlt.ecommerce.service.AddressService;
@@ -34,7 +33,6 @@ public class AddressServiceImpl implements AddressService {
     AddressMapper addressMapper;
 
     @Override
-    @PreAuthorize("hasRole('BUYER')")
     public AddressResponse create(AddressRequest request) {
         User user = currentUserProvider.getUser();
 
@@ -55,7 +53,6 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('BUYER')")
     public List<AddressResponse> getMyAddresses() {
         User currentUser = currentUserProvider.getUser();
         return addressRepository.findByUserId(currentUser.getId()).stream()
@@ -65,7 +62,6 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('BUYER') and @addressSecurity.isOwner(#id)")
     public void delete(Long id) {
         addressRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
@@ -75,7 +71,6 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('BUYER') and @addressSecurity.isOwner(#id)")
     public AddressResponse update(AddressRequest request, Long id) {
         Address currentAddress = addressRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));

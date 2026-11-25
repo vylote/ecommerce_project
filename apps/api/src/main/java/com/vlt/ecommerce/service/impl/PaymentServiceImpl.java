@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +40,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('BUYER')")
     public PaymentResponse create(Long orderId, PaymentRequest request) {
         User buyer = currentUserProvider.getUser();
         Order order = orderRepository.findById(orderId)
@@ -64,7 +62,6 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('BUYER')")
     public PaymentResponse confirmMockPayment(Long paymentId) {
         User buyer = currentUserProvider.getUser();
 
@@ -90,7 +87,6 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('BUYER', 'SELLER')")
     public PaymentResponse getPaymentByOrderId(Long orderId) {
         User currentUser = currentUserProvider.getUser();
         Payment payment = paymentRepository.findByOrderId(orderId)

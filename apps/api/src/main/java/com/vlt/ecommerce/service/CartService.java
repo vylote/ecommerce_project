@@ -10,9 +10,9 @@ public interface CartService {
 
     CartItemResponse add(CartItemRequest request);
 
-    CartItemResponse update(CartItemRequest request, Long identifier);
+    CartItemResponse update(CartItemRequest request, Long cartItemId);
 
-    void remove(Long identifier);
+    void remove(Long cartItemId);
 
     void removeAllProductsFromCart();
 }

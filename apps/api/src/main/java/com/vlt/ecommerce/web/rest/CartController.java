@@ -2,6 +2,7 @@ package com.vlt.ecommerce.web.rest;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,35 +30,40 @@ public class CartController {
     CartService cartService;
 
     @GetMapping
+    @PreAuthorize("hasAuthority('CART_READ')")
     public ApiResponse<List<CartItemResponse>> getCurrentCart() {
         return ApiResponse.<List<CartItemResponse>>builder()
             .result(cartService.getCurrentCart())
             .build();
     }
 
-    @PostMapping({"", "/items"})
+    @PostMapping("/items")
+    @PreAuthorize("hasAuthority('CART_ADD')")
     public ApiResponse<CartItemResponse> add(@RequestBody @Valid CartItemRequest request) {
         return ApiResponse.<CartItemResponse>builder()
             .result(cartService.add(request))
             .build();
     }
 
-    @PutMapping({"/items/{identifier}", "/{identifier}"})
-    public ApiResponse<CartItemResponse> update(@RequestBody @Valid CartItemRequest request, @PathVariable Long identifier) {
+    @PutMapping("/items/{cartItemId}")
+    @PreAuthorize("hasAuthority('CART_UPDATE')")
+    public ApiResponse<CartItemResponse> update(@RequestBody @Valid CartItemRequest request, @PathVariable Long cartItemId) {
         return ApiResponse.<CartItemResponse>builder()
-            .result(cartService.update(request, identifier))
+            .result(cartService.update(request, cartItemId))
             .build();
     }
 
-    @DeleteMapping({"/items/{identifier}", "/{identifier}"})
-    public ApiResponse<String> remove(@PathVariable Long identifier) {
-        cartService.remove(identifier);
+    @DeleteMapping("/items/{cartItemId}")
+    @PreAuthorize("hasAuthority('CART_REMOVE')")
+    public ApiResponse<String> remove(@PathVariable Long cartItemId) {
+        cartService.remove(cartItemId);
         return ApiResponse.<String>builder()
             .result("Product was deleted successfully from cart")
             .build();
     }
 
     @DeleteMapping
+    @PreAuthorize("hasAuthority('CART_CLEAR')")
     public ApiResponse<String> removeAllProductsFromCart() {
         cartService.removeAllProductsFromCart();
         return ApiResponse.<String>builder()

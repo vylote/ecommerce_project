@@ -2,6 +2,7 @@ package com.vlt.ecommerce.web.rest;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class AddressController {
     AddressService addressService;
     
     @GetMapping
+    @PreAuthorize("hasAuthority('ADDRESS_READ')")
     public ApiResponse<List<AddressResponse>> getMyAddresses() {
         return ApiResponse.<List<AddressResponse>>builder()
             .result(addressService.getMyAddresses())
@@ -36,18 +38,21 @@ public class AddressController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('ADDRESS_CREATE')")
     public ApiResponse<AddressResponse> create(@RequestBody @Valid AddressRequest request) {
         return ApiResponse.<AddressResponse>builder()
             .result(addressService.create(request))
             .build();
     }
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADDRESS_UPDATE') and @addressSecurity.isOwner(#id)")
     public ApiResponse<AddressResponse> update(@RequestBody @Valid AddressRequest request, @PathVariable Long id) {
         return ApiResponse.<AddressResponse>builder()
             .result(addressService.update(request, id))
             .build();
     }
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADDRESS_DELETE') and @addressSecurity.isOwner(#id)")
     public ApiResponse<String> delete(@PathVariable Long id) {
         addressService.delete(id);
         return ApiResponse.<String>builder()

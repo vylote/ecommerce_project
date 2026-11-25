@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +48,6 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('ADMIN')")
     public List<RoleResponse> getAllRoles() {
         return roleRepository.findAll().stream()
                 .map(roleMapper::toAdminRoleResponse)
@@ -58,7 +56,6 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('ADMIN')")
     public RoleResponse getRoleById(Long id) {
         Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
@@ -67,7 +64,6 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public RoleResponse createRole(RoleRequest request) {
         String roleName = request.getName().trim().toUpperCase();
         if (!roleName.startsWith("ROLE_")) {
@@ -94,7 +90,6 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public RoleResponse updateRole(Long id, RoleRequest request) {
         authorizationCache.roleChanged(id);
         Role role = roleRepository.findById(id)
@@ -126,7 +121,6 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public void deleteRole(Long id) {
         authorizationCache.roleChanged(id);
         Role role = roleRepository.findById(id)
@@ -141,7 +135,6 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('ADMIN')")
     public List<PermissionResponse> getAllPermissions() {
         return permissionRepository.findAll().stream()
                 .map(roleMapper::toPermissionResponse)
@@ -150,7 +143,6 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public PermissionResponse createPermission(PermissionRequest request) {
         String permName = request.getName().trim().toUpperCase().replace(" ", "_");
 
@@ -165,7 +157,6 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public PermissionResponse updatePermission(Long id, PermissionRequest request) {
         authorizationCache.permissionChanged(id);
         Permission permission = permissionRepository.findById(id)
@@ -184,7 +175,6 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public void deletePermission(Long id) {
         authorizationCache.permissionChanged(id);
         Permission permission = permissionRepository.findById(id)
@@ -195,7 +185,6 @@ public class RolePermissionServiceImpl implements RolePermissionService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse assignRolesToUser(Long userId, UserRoleAssignRequest request) {
         authorizationCache.userChanged(userId);
         User user = userRepository.findById(userId)

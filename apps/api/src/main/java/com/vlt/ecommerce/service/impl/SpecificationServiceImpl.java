@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,7 +73,6 @@ public class SpecificationServiceImpl implements SpecificationService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
     public SpecificationTypeResponse createSpecificationType(SpecificationTypeRequest request) {
         if (specificationTypeRepository.existsByNameIgnoreCase(request.getName())) {
             throw new AppException(ErrorCode.SPECIFICATION_TYPE_NAME_ALREADY_EXISTS);
@@ -97,7 +95,6 @@ public class SpecificationServiceImpl implements SpecificationService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public SpecificationTypeResponse updateSpecificationType(Long id, SpecificationTypeRequest request) {
         SpecificationType type = specificationTypeRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.SPECIFICATION_TYPE_NOT_FOUND));
@@ -123,7 +120,6 @@ public class SpecificationServiceImpl implements SpecificationService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
     public void deleteSpecificationType(Long id) {
         if (!specificationTypeRepository.existsById(id)) {
             throw new AppException(ErrorCode.SPECIFICATION_TYPE_NOT_FOUND);
@@ -141,7 +137,6 @@ public class SpecificationServiceImpl implements SpecificationService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
     public SpecificationResponse createSpecification(SpecificationRequest request) {
         if (request.getSpecificationTypeId() == null) {
             throw new AppException(ErrorCode.SPECIFICATION_TYPE_REQUIRED);
@@ -165,7 +160,6 @@ public class SpecificationServiceImpl implements SpecificationService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
     public SpecificationResponse updateSpecification(Long id, SpecificationRequest request) {
         Specification spec = specificationRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.SPECIFICATION_NOT_FOUND));
@@ -192,7 +186,6 @@ public class SpecificationServiceImpl implements SpecificationService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasAnyRole('ADMIN', 'SELLER')")
     public void deleteSpecification(Long id) {
         if (!specificationRepository.existsById(id)) {
             throw new AppException(ErrorCode.SPECIFICATION_NOT_FOUND);
@@ -210,7 +203,6 @@ public class SpecificationServiceImpl implements SpecificationService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#productId)")
     public ProductSpecificationResponse addProductSpecification(Long productId, ProductSpecificationRequest request) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -231,7 +223,6 @@ public class SpecificationServiceImpl implements SpecificationService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('SELLER') and @productSecurity.isOwner(#productId)")
     public void removeProductSpecification(Long productId, Long specificationId) {
         productSpecificationRepository.deleteByProductIdAndSpecificationId(productId, specificationId);
     }

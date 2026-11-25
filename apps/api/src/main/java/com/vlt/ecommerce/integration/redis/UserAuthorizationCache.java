@@ -28,11 +28,14 @@ public class UserAuthorizationCache {
     private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
 
+    // decide reading from Redis or MySQL
     public Optional<Set<SimpleGrantedAuthority>> resolveAuthorities(Long userId) {
         try {
+            //read current time before
             String generation = state.stableGeneration();
             if (generation != null) {
                 Optional<Set<SimpleGrantedAuthority>> cached = loadThroughCache(userId, generation);
+                // A write can start and finish during these reads. Compare generations to catch it.
                 if (generation.equals(state.stableGeneration())) {
                     return cached;
                 }
@@ -64,6 +67,7 @@ public class UserAuthorizationCache {
         }
 
         Set<SimpleGrantedAuthority> authorities = new HashSet<>();
+        // Keep permissions shared by role so a grant change only evicts the affected role cache.
         for (Long roleId : user.roleIds()) {
             RolePermissionCache.CachedRole role = roleCache.getRole(roleId, generation);
             if (role.name() != null) {

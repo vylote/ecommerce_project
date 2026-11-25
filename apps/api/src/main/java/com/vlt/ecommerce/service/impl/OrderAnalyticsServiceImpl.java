@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -46,7 +45,6 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
     ShopRepository shopRepository;
 
     @Override
-    @PreAuthorize("hasRole('SELLER')")
     public Map<OrderStatus, Long> getDashboardStats() {
         User seller = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(seller.getId())
@@ -64,7 +62,6 @@ public class OrderAnalyticsServiceImpl implements OrderAnalyticsService {
     }
 
     @Override
-    @PreAuthorize("hasRole('SELLER')")
     public SellerAnalyticsResponse getSellerAnalytics(String periodType, int range) {
         User seller = currentUserProvider.getUser();
         Shop shop = shopRepository.findBySellerId(seller.getId())

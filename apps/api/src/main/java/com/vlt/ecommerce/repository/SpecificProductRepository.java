@@ -21,8 +21,8 @@ public interface SpecificProductRepository extends JpaRepository<SpecificProduct
 
     @Modifying
     @Query("""
-        UPDATE SpecificProduct sp 
-        SET sp.stockQuantity = sp.stockQuantity - :qty 
+        UPDATE SpecificProduct sp
+        SET sp.stockQuantity = sp.stockQuantity - :qty
         WHERE sp.id = :variantId AND sp.stockQuantity >= :qty
         """)
     int decrementStock(@Param("variantId") Long variantId, 
@@ -30,8 +30,8 @@ public interface SpecificProductRepository extends JpaRepository<SpecificProduct
 
     @Modifying
     @Query("""
-        UPDATE SpecificProduct sp 
-        SET sp.stockQuantity = sp.stockQuantity + :qty 
+        UPDATE SpecificProduct sp
+        SET sp.stockQuantity = sp.stockQuantity + :qty
         WHERE sp.id = :variantId
         """)
     void incrementStock(@Param("variantId") Long variantId,

@@ -2,7 +2,6 @@ package com.vlt.ecommerce.service.impl;
 
 import java.util.List;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +39,6 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional(readOnly = true)
-    @PreAuthorize("hasRole('BUYER')")
     public List<CartItemResponse> getCurrentCart() {
         User user = currentUserProvider.getUser();
 
@@ -50,7 +48,6 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('BUYER')")
     public CartItemResponse add(CartItemRequest request) {
         User user = currentUserProvider.getUser();
 
@@ -137,14 +134,8 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('BUYER')")
-    public CartItemResponse update(CartItemRequest request, Long identifier) {
-        User user = currentUserProvider.getUser();
-        // Hỗ trợ cả identifier là cartItemId hoặc productId (tương thích ngược)
-        CartItem cartItem = cartItemRepository.findById(identifier)
-                .filter(c -> c.getBuyer().getId().equals(user.getId()))
-                .orElseGet(() -> cartItemRepository.findByBuyerIdAndProductId(user.getId(), identifier)
-                        .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND)));
+    public CartItemResponse update(CartItemRequest request, Long cartItemId) {
+        CartItem cartItem = getOwnedCartItem(cartItemId);
 
         int availableStock = cartItem.getSpecificProduct() != null
                 ? cartItem.getSpecificProduct().getStockQuantity()
@@ -160,20 +151,19 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('BUYER')")
-    public void remove(Long identifier) {
-        User user = currentUserProvider.getUser();
-        CartItem cartItem = cartItemRepository.findById(identifier)
-                .filter(c -> c.getBuyer().getId().equals(user.getId()))
-                .orElseGet(() -> cartItemRepository.findByBuyerIdAndProductId(user.getId(), identifier)
-                        .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND)));
+    public void remove(Long cartItemId) {
+        CartItem cartItem = getOwnedCartItem(cartItemId);
 
         cartItemRepository.delete(cartItem);
     }
 
+    private CartItem getOwnedCartItem(Long cartItemId) {
+        return cartItemRepository.findByIdAndBuyerId(cartItemId, currentUserProvider.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
+    }
+
     @Override
     @Transactional
-    @PreAuthorize("hasRole('BUYER')")
     public void removeAllProductsFromCart() {
         User user = currentUserProvider.getUser();
         // Gọi 1 lệnh duy nhất. Nếu giỏ hàng đang trống, nó xóa 0 dòng (không báo lỗi).

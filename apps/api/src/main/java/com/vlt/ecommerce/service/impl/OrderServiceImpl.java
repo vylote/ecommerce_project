@@ -19,7 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -83,7 +82,6 @@ public class OrderServiceImpl implements OrderService {
     OrderProperties orderProperties;
 
     @Override
-    @PreAuthorize("hasRole('BUYER')")
     @Transactional
     public List<OrderResponse> create(OrderRequest request) {
         User buyer = currentUserProvider.getUser();
@@ -223,7 +221,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('SELLER')")
     public OrderResponse confirmOrder(Long id) {
         User seller = currentUserProvider.getUser();
 
@@ -252,7 +249,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('SELLER')")
     public OrderResponse shipOrder(Long id) {
         User seller = currentUserProvider.getUser();
 
@@ -279,7 +275,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    @PreAuthorize("hasRole('BUYER')")
     public OrderResponse completeOrder(Long id) {
         User buyer = currentUserProvider.getUser();
 
@@ -301,7 +296,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @PreAuthorize("hasRole('BUYER')")
     public PageResponse<OrderResponse> getOwnHistoryOrder(int page, int size, OrderStatus status) {
         User buyer = currentUserProvider.getUser();
 
@@ -324,19 +318,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('BUYER', 'SELLER', 'ADMIN')")
     public OrderResponse getDetailOrder(Long id) {
-        User user = currentUserProvider.getUser();
+        Long userId = currentUserProvider.getUserId();
 
         Order order = orderRepository.findById(id)
             .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        boolean isBuyer = order.getBuyer() != null && order.getBuyer().getId().equals(user.getId());
+        boolean isBuyer = order.getBuyer() != null && order.getBuyer().getId().equals(userId);
         boolean isSeller = order.getShop() != null && order.getShop().getSeller() != null
-                && order.getShop().getSeller().getId().equals(user.getId());
-        boolean isAdmin = user.getRoles().stream().anyMatch(r -> r.getName().equals(Constants.ROLE_ADMIN));
+                && order.getShop().getSeller().getId().equals(userId);
+        boolean canReadAny = currentUserProvider.hasAuthority(Constants.AUTHORITY_ORDER_READ_ANY);
 
-        if (!isBuyer && !isSeller && !isAdmin) {
+        if (!isBuyer && !isSeller && !canReadAny) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
@@ -346,7 +339,6 @@ public class OrderServiceImpl implements OrderService {
     //huy hang
     @Override
     @Transactional
-    @PreAuthorize("hasRole('BUYER')")
     public OrderResponse cancelOrder(Long id) {
         User buyer = currentUserProvider.getUser();
 
@@ -386,7 +378,6 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @PreAuthorize("hasRole('SELLER')")
     public PageResponse<OrderResponse> getSellerOrders(int page, int size, OrderStatus status) {
         User seller = currentUserProvider.getUser();
 

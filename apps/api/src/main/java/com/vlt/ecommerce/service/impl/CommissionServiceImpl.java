@@ -3,7 +3,6 @@ package com.vlt.ecommerce.service.impl;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.vlt.ecommerce.domain.CommissionConfig;
@@ -34,7 +33,6 @@ public class CommissionServiceImpl implements CommissionService {
     CommissionConfigMapper commissionConfigMapper;
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public CommissionConfigResponse createOrUpdateConfig(CommissionConfigRequest request) {
         User user = currentUserProvider.getUser();
 
@@ -57,7 +55,6 @@ public class CommissionServiceImpl implements CommissionService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public List<CommissionConfigResponse> getConfigs() {
         User user = currentUserProvider.getUser();
 

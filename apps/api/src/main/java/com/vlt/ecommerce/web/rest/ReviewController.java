@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.web.rest;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,7 @@ public class ReviewController {
     ReviewService reviewService;
 
     @PostMapping
+    @PreAuthorize("hasAuthority('REVIEW_CREATE')")
     public ApiResponse<ReviewResponse> createReview(@RequestBody @Valid CreateReviewRequest request) {
         return ApiResponse.<ReviewResponse>builder()
             .result(reviewService.createReview(request))

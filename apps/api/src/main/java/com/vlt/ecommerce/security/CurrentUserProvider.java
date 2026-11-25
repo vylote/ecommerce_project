@@ -34,6 +34,11 @@ public class CurrentUserProvider {
         throw new AppException(ErrorCode.UNAUTHENTICATED);
     }
 
+    public boolean hasAuthority(String authority) {
+        return requireAuthentication().getAuthorities().stream()
+                .anyMatch(granted -> authority.equals(granted.getAuthority()));
+    }
+
     private Authentication requireAuthentication() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()

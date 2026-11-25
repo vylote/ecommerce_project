@@ -2,6 +2,7 @@ package com.vlt.ecommerce.web.rest;
 
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +34,7 @@ public class CommissionController {
     CommissionAnalyticsService commissionAnalyticsService;
 
     @PostMapping("/configs")
+    @PreAuthorize("hasAuthority('COMMISSION_CONFIG_WRITE')")
     public ApiResponse<CommissionConfigResponse> createOrUpdateConfig(@RequestBody @Valid CommissionConfigRequest request) {
         return ApiResponse.<CommissionConfigResponse>builder()
             .result(commissionService.createOrUpdateConfig(request))
@@ -40,6 +42,7 @@ public class CommissionController {
     }
 
     @GetMapping("/configs")
+    @PreAuthorize("hasAuthority('COMMISSION_CONFIG_READ')")
     public ApiResponse<List<CommissionConfigResponse>> getConfigs() {
         return ApiResponse.<List<CommissionConfigResponse>>builder()
             .result(commissionService.getConfigs())
@@ -47,6 +50,7 @@ public class CommissionController {
     }
 
     @GetMapping("/stats/seller")
+    @PreAuthorize("hasAuthority('COMMISSION_OWN_STATS_READ')")
     public ApiResponse<SellerStatsResponse> getSellerStats() {
         return ApiResponse.<SellerStatsResponse>builder()
                 .result(commissionAnalyticsService.getSellerStats())
@@ -54,6 +58,7 @@ public class CommissionController {
     }
 
     @GetMapping("/stats/admin")
+    @PreAuthorize("hasAuthority('COMMISSION_PLATFORM_STATS_READ')")
     public ApiResponse<AdminStatsResponse> getAdminStats() {
         return ApiResponse.<AdminStatsResponse>builder()
                 .result(commissionAnalyticsService.getAdminStats())
@@ -61,6 +66,7 @@ public class CommissionController {
     }
 
     @GetMapping("/stats/admin/analytics")
+    @PreAuthorize("hasAuthority('COMMISSION_PLATFORM_ANALYTICS_READ')")
     public ApiResponse<AdminAnalyticsResponse> getAdminAnalytics(
             @RequestParam(defaultValue = Constants.ANALYTICS_PERIOD_DAY) String period,
             @RequestParam(defaultValue = "7") int range) {

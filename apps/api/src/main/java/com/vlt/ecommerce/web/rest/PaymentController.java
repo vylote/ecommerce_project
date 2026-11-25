@@ -1,5 +1,6 @@
 package com.vlt.ecommerce.web.rest;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,6 +26,7 @@ public class PaymentController {
     PaymentService paymentService;
 
     @PostMapping("/orders/{orderId}")
+    @PreAuthorize("hasAuthority('PAYMENT_CREATE')")
     public ApiResponse<PaymentResponse> create(@PathVariable Long orderId, @RequestBody @Valid PaymentRequest request) {
         return ApiResponse.<PaymentResponse>builder()
             .result(paymentService.create(orderId, request))
@@ -32,6 +34,7 @@ public class PaymentController {
     }
 
     @PostMapping("/{paymentId}/confirm")
+    @PreAuthorize("hasAuthority('PAYMENT_CONFIRM')")
     public ApiResponse<PaymentResponse> confirmMockPayment(@PathVariable Long paymentId) {
         return ApiResponse.<PaymentResponse>builder()
             .result(paymentService.confirmMockPayment(paymentId))
@@ -39,6 +42,7 @@ public class PaymentController {
     }   
 
     @GetMapping("/orders/{orderId}")
+    @PreAuthorize("hasAuthority('PAYMENT_READ')")
     public ApiResponse<PaymentResponse> getPaymentByOrderId(@PathVariable Long orderId) {
         return ApiResponse.<PaymentResponse>builder()
             .result(paymentService.getPaymentByOrderId(orderId))

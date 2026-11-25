@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.vlt.ecommerce.repository.SessionRepository;
+import com.vlt.ecommerce.security.CurrentUserProvider;
 import com.vlt.ecommerce.service.SessionService;
 import com.vlt.ecommerce.service.exception.AppException;
 import com.vlt.ecommerce.service.exception.ErrorCode;
@@ -29,6 +30,7 @@ public class SessionServiceImpl implements SessionService {
     SessionRepository sessionRepository;
     TokenBlacklistService blacklistService;
     JwtService jwtService;
+    CurrentUserProvider currentUserProvider;
 
     @Override
     public TokenResponse createSessionAndGenerateTokens(User user, String userAgent) {
@@ -58,16 +60,32 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     @Transactional
-    public void revokeSession(String ssid) {
-        UserSession session = sessionRepository.findById(ssid)
-                .orElseThrow(() -> new AppException(ErrorCode.SESSION_NOT_FOUND));
+    public void revokeOwnSession(String ssid) {
+        UserSession session = getSession(ssid);
+        if (!session.getUser().getId().equals(currentUserProvider.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        revoke(session);
+    }
 
+    @Override
+    @Transactional
+    public void revokeSession(String ssid) {
+        revoke(getSession(ssid));
+    }
+
+    private UserSession getSession(String ssid) {
+        return sessionRepository.findById(ssid)
+                .orElseThrow(() -> new AppException(ErrorCode.SESSION_NOT_FOUND));
+    }
+
+    private void revoke(UserSession session) {
         Long nowMillis = System.currentTimeMillis();
         Long expireMillis = Timestamp.valueOf(session.getExpires_at()).getTime();
         long remainingTtl = expireMillis - nowMillis;
 
         if (remainingTtl > 0)
-            blacklistService.blacklistSsid(ssid, remainingTtl);
+            blacklistService.blacklistSsid(session.getId(), remainingTtl);
 
         sessionRepository.delete(session);
     }

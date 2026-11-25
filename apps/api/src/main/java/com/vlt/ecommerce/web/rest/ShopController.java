@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +36,7 @@ public class ShopController {
     ShopService shopService;
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('SHOP_CREATE')")
     public ApiResponse<ShopResponse> create(
             @RequestPart(value = "request") @Valid ShopRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file) {
@@ -44,6 +46,7 @@ public class ShopController {
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAuthority('SHOP_UPDATE')")
     public ApiResponse<ShopResponse> update(
             @RequestPart(value = "request") @Valid ShopRequest request,
             @PathVariable Long id,
@@ -61,6 +64,7 @@ public class ShopController {
     }
 
     @GetMapping("/me")
+    @PreAuthorize("hasAuthority('SHOP_READ_OWN')")
     public ApiResponse<ShopResponse> getMyShop() {
         return ApiResponse.<ShopResponse>builder()
                 .result(shopService.getMyShop())
@@ -86,6 +90,7 @@ public class ShopController {
     }
 
     @GetMapping("/admin")
+    @PreAuthorize("hasAuthority('SHOP_ADMIN_LIST')")
     public ApiResponse<PageResponse<ShopResponse>> getShopsForAdmin(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Boolean isActive,
@@ -97,6 +102,7 @@ public class ShopController {
     }
 
     @PatchMapping("/admin/{id}/toggle-status")
+    @PreAuthorize("hasAuthority('SHOP_STATUS_UPDATE')")
     public ApiResponse<ShopResponse> toggleShopStatus(@PathVariable Long id) {
         return ApiResponse.<ShopResponse>builder()
                 .result(shopService.toggleShopStatus(id))
@@ -104,6 +110,7 @@ public class ShopController {
     }
 
     @GetMapping("/admin/stats")
+    @PreAuthorize("hasAuthority('SHOP_ADMIN_STATS_READ')")
     public ApiResponse<Map<String, Long>> getShopStatsForAdmin() {
         return ApiResponse.<Map<String, Long>>builder()
                 .result(shopService.getShopStatsForAdmin())
