@@ -530,22 +530,23 @@ export default function SpecificationManagementPage() {
             </div>
 
             {/* Toggle Phân loại Biến thể vs Thuộc tính tĩnh */}
-            <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <label htmlFor="spec-type-variant" className="flex items-center justify-between cursor-pointer">
-                <span className="block">
-                  <span className="font-semibold text-sm text-gray-800">Dùng làm Phân loại Biến thể bán hàng</span>
-                  <span className="block text-xs text-gray-500 mt-0.5">
-                    Bật nếu là phân loại người mua click chọn khi đặt hàng (Màu sắc, Kích cỡ, Dung lượng...). Tắt nếu là thông số chi tiết (Chất liệu, Xuất xứ, Kiểu dáng...).
-                  </span>
-                </span>
-                <input
-                  id="spec-type-variant"
-                  type="checkbox"
-                  checked={typeForm.isVariant}
-                  onChange={(e) => setTypeForm({ ...typeForm, isVariant: e.target.checked })}
-                  className="toggle toggle-success ml-3 shrink-0"
- />
-              </label>
+            <div className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div>
+                <label htmlFor="spec-type-variant" className="cursor-pointer font-semibold text-sm text-gray-800">
+                  Dùng làm Phân loại Biến thể bán hàng
+                </label>
+                <p id="spec-type-variant-description" className="text-xs text-gray-500 mt-0.5">
+                  Bật nếu là phân loại người mua click chọn khi đặt hàng (Màu sắc, Kích cỡ, Dung lượng...). Tắt nếu là thông số chi tiết (Chất liệu, Xuất xứ, Kiểu dáng...).
+                </p>
+              </div>
+              <input
+                id="spec-type-variant"
+                type="checkbox"
+                aria-describedby="spec-type-variant-description"
+                checked={typeForm.isVariant}
+                onChange={(e) => setTypeForm({ ...typeForm, isVariant: e.target.checked })}
+                className="toggle toggle-success shrink-0"
+              />
             </div>
 
             {/* Chọn danh mục áp dụng */}

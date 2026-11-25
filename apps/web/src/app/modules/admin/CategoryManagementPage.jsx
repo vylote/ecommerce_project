@@ -656,22 +656,23 @@ export default function CategoryManagementPage() {
               </div>
             </div>
 
-            <div className="p-3 bg-gray-50 rounded-xl border border-gray-200">
-              <label htmlFor="category-active" className="flex items-center justify-between cursor-pointer">
-                <span className="block">
-                  <span className="font-semibold text-xs text-gray-800">Trạng thái hoạt động</span>
-                  <span className="block text-[11px] text-gray-500 mt-0.5">
-                    Cho phép người bán chọn và hiển thị sản phẩm thuộc ngành hàng này trên sàn.
-                  </span>
-                </span>
-                <input
-                  id="category-active"
-                  type="checkbox"
-                  checked={categoryForm.isActive}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, isActive: e.target.checked })}
-                  className="toggle toggle-success toggle-sm ml-3 shrink-0"
- />
-              </label>
+            <div className="flex items-center justify-between gap-3 p-3 bg-gray-50 rounded-xl border border-gray-200">
+              <div>
+                <label htmlFor="category-active" className="cursor-pointer font-semibold text-xs text-gray-800">
+                  Trạng thái hoạt động
+                </label>
+                <p id="category-active-description" className="text-[11px] text-gray-500 mt-0.5">
+                  Cho phép người bán chọn và hiển thị sản phẩm thuộc ngành hàng này trên sàn.
+                </p>
+              </div>
+              <input
+                id="category-active"
+                type="checkbox"
+                aria-describedby="category-active-description"
+                checked={categoryForm.isActive}
+                onChange={(e) => setCategoryForm({ ...categoryForm, isActive: e.target.checked })}
+                className="toggle toggle-success toggle-sm shrink-0"
+              />
             </div>
 
             <div className="pt-3 border-t flex justify-end gap-3">

@@ -258,11 +258,7 @@ export default function CheckoutPage() {
           {showAddressPicker && addresses.length > 0 && (
             <div className="mt-4 p-4 border border-gray-200 rounded bg-gray-50 space-y-3">
               {addresses.map((addr) => (
-                <label
-                  htmlFor={`checkout-address-${addr.id}`}
-                  key={addr.id}
-                  className="flex items-start gap-3 cursor-pointer"
-                >
+                <div key={addr.id} className="flex items-start gap-3">
                   <input
                     id={`checkout-address-${addr.id}`}
                     type="radio"
@@ -271,18 +267,19 @@ export default function CheckoutPage() {
                     checked={selectedAddressId === addr.id}
                     onChange={() => setSelectedAddressId(addr.id)}
                   />
-                  <span className="block">
-                    <span className="block font-medium text-gray-800">
-                      {addr.fullName}{" "}
-                      <span className="text-gray-500 font-normal ml-2">
-                        {addr.phone}
-                      </span>
+                  <label
+                    htmlFor={`checkout-address-${addr.id}`}
+                    className="block flex-1 cursor-pointer font-medium text-gray-800"
+                  >
+                    {addr.fullName}{" "}
+                    <span className="text-gray-500 font-normal ml-2">
+                      {addr.phone}
                     </span>
-                    <span className="text-gray-600 text-sm">
+                    <span className="block text-gray-600 text-sm font-normal">
                       {formatAddress(addr)}
                     </span>
-                  </span>
-                </label>
+                  </label>
+                </div>
               ))}
               <div className="pt-3 flex gap-3">
                 <button
