@@ -1,3 +1,4 @@
+import WalletPaymentResultPage from "../modules/checkout/WalletPaymentResultPage";
 import { ROLE_ADMIN, ROLE_SELLER } from "../shared/constants";
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -49,6 +50,7 @@ export const AppRoutes = () => {
       <Route path="/shop/:id" element={<ShopPage />} />
       <Route path="/cart" element={user ? <CartPage /> : <Navigate to="/login" />} />
       <Route path="/checkout" element={user ? <CheckoutPage /> : <Navigate to="/login" />} />
+      <Route path="/payment/result" element={user ? <WalletPaymentResultPage /> : <Navigate to="/login" />} />
       <Route path="/orders" element={user ? <OrdersPage /> : <Navigate to="/login" />} />
       <Route path="/profile" element={user ? <ProfilePage /> : <Navigate to="/login" />} />
       <Route path="/profile/addresses" element={user ? <AddressPage /> : <Navigate to="/login" />} />

@@ -1,3 +1,5 @@
+import openZalopayPayment from "../checkout/openZalopayPayment";
+import FilterTabs from "../../shared/ui/FilterTabs";
 import { NEW_NOTIFICATION_EVENT, ORDER_UPDATED_EVENT } from "../../shared/constants";
 import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import Pagination from "../../shared/components/Pagination";
@@ -122,6 +124,17 @@ export default function OrdersPage() {
     setPage(1);
   };
 
+  const payWithZalopay = async (orderId) => {
+    setProcessingId(orderId);
+    try {
+      await openZalopayPayment(orderId);
+    } catch (error) {
+      toast.error(error.response?.data?.message || t("zalopay.open_error"));
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
   const cancelOrderRequest = async (orderId) => {
     try {
       setProcessingId(orderId);
@@ -183,19 +196,9 @@ export default function OrdersPage() {
 
         <main className="min-w-0 flex-1 space-y-4 [--rounded-btn:0.125rem]">
           <h1 className="text-2xl font-bold tracking-tight">{t("order.purchases")}</h1>
-          <nav aria-label={t("order.status_filter")} className="flex overflow-x-auto rounded-xl border border-base-300 bg-base-100 px-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.value}
-                type="button"
-                aria-pressed={activeTab === tab.value}
-                onClick={() => handleTabChange(tab.value)}
-                className={`flex-1 whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium ${activeTab === tab.value ? "border-primary text-secondary" : "border-transparent text-base-content/70 hover:text-secondary"}`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
+          <div className="overflow-hidden rounded-xl border border-base-300">
+            <FilterTabs label={t("order.status_filter")} options={tabs} value={activeTab} onChange={handleTabChange} />
+          </div>
 
           <form
             role="search"
@@ -248,6 +251,7 @@ export default function OrdersPage() {
                   order={order}
                   statusLabel={getStatusLabel(order.status)}
                   processing={processingId === order.id}
+                  onPay={payWithZalopay}
                   onCancel={handleCancel}
                   onComplete={handleComplete}
                   onReview={setReviewOrder}

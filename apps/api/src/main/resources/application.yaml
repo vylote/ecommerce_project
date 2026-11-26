@@ -66,6 +66,15 @@ notification:
 app:
   order:
     expiration-ttl-ms: 900000
+  payment:
+    zalopay:
+      enabled: false
+      app-id: ${ZALOPAY_APP_ID:0}
+      key1: ${ZALOPAY_KEY1:}
+      key2: ${ZALOPAY_KEY2:}
+      callback-url: ${ZALOPAY_CALLBACK_URL:}
+      redirect-url: ${ZALOPAY_REDIRECT_URL:}
+      timeout: 15s
 logging:
   file:
     name: logs/ecommerce-app.log

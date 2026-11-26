@@ -14,6 +14,8 @@ public interface PaymentMapper {
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "amount", ignore = true)
     @Mapping(target = "transactionRef", ignore = true)
+    @Mapping(target = "gatewayOrderId", ignore = true)
+    @Mapping(target = "gatewayPayUrl", ignore = true)
     @Mapping(target = "paidAt", ignore = true)
     @Mapping(target = "order", ignore = true)
     Payment toPayment(PaymentRequest request);

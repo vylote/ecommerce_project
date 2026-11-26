@@ -15,7 +15,11 @@ const notificationIcons = {
   ORDER_CANCELLED: XCircle,
 };
 
-export default function NotificationDropdown({ user }) {
+export default function NotificationDropdown({
+  user,
+  ordersHref = "/orders",
+  ordersLabelKey = "notif.view_all_orders",
+}) {
   const navigate = useNavigate();
   const { isOpen, setIsOpen, containerRef, triggerRef, panelId } = useDismissiblePopover();
   const { t, lang } = useI18n();
@@ -93,7 +97,7 @@ export default function NotificationDropdown({ user }) {
                     className={`border-l-2 ${notif.isRead ? "border-transparent" : "border-secondary bg-base-200"}`}
                   >
                     <Link
-                      to="/orders"
+                      to={ordersHref}
                       onClick={() => {
                         if (!notif.isRead && notif.id) void markAsRead(notif.id);
                         setIsOpen(false);
@@ -127,11 +131,11 @@ export default function NotificationDropdown({ user }) {
           )}
 
           <Link
-            to="/orders"
+            to={ordersHref}
             onClick={() => setIsOpen(false)}
             className="block border-t border-base-300 px-4 py-2.5 text-center text-xs font-semibold text-secondary hover:bg-base-200"
           >
-            {t("notif.view_all_orders")}
+            {t(ordersLabelKey)}
           </Link>
         </StorefrontPopover>
       )}

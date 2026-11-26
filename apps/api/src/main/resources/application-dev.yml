@@ -1,3 +1,6 @@
 app:
   order:
-    expiration-ttl-ms: 30000
+    expiration-ttl-ms: 900000
+  payment:
+    zalopay:
+      enabled: true

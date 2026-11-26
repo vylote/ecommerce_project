@@ -8,7 +8,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vlt.ecommerce.service.ZalopayPaymentService;
 import com.vlt.ecommerce.service.PaymentService;
+import com.vlt.ecommerce.service.dto.request.ZalopayCallbackRequest;
+import com.vlt.ecommerce.service.dto.response.ZalopayPaymentResponse;
+import com.vlt.ecommerce.service.dto.response.ZalopayCallbackResponse;
 import com.vlt.ecommerce.service.dto.response.ApiResponse;
 import com.vlt.ecommerce.service.dto.request.PaymentRequest;
 import com.vlt.ecommerce.service.dto.response.PaymentResponse;
@@ -24,6 +28,20 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 public class PaymentController {
     PaymentService paymentService;
+    ZalopayPaymentService zalopayPaymentService;
+
+    @PostMapping("/zalopay/orders/{orderId}")
+    @PreAuthorize("hasAuthority('PAYMENT_CREATE')")
+    public ApiResponse<ZalopayPaymentResponse> startZalopayPayment(@PathVariable Long orderId) {
+        return ApiResponse.<ZalopayPaymentResponse>builder().result(zalopayPaymentService.start(orderId)).build();
+    }
+
+    @PostMapping("/zalopay/callback")
+    public ZalopayCallbackResponse receiveZalopayCallback(@RequestBody @Valid ZalopayCallbackRequest request) {
+        return zalopayPaymentService.acceptCallback(request)
+                ? new ZalopayCallbackResponse(1, "Success")
+                : new ZalopayCallbackResponse(2, "Invalid");
+    }
 
     @PostMapping("/orders/{orderId}")
     @PreAuthorize("hasAuthority('PAYMENT_CREATE')")

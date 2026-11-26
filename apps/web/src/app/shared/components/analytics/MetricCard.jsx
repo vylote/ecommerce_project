@@ -1,4 +1,8 @@
 const tones = {
+  primary: {
+    surface: "border-base-300 bg-base-200", compactSurface: "border-base-300 bg-base-200",
+    title: "text-base-content", icon: "bg-primary/10", value: "text-secondary", detail: "text-base-content/75",
+  },
   amber: {
     surface: "border-amber-100 bg-amber-50/60", compactSurface: "border-amber-100 bg-amber-50/50",
     title: "text-amber-800", icon: "bg-amber-100", value: "text-amber-700", detail: "text-amber-600",

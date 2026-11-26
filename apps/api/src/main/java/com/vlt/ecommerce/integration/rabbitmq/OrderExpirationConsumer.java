@@ -1,19 +1,24 @@
 package com.vlt.ecommerce.integration.rabbitmq;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 
 import com.vlt.ecommerce.config.Constants;
 import com.vlt.ecommerce.domain.OrderItem;
+import com.vlt.ecommerce.domain.Payment;
+import com.vlt.ecommerce.domain.Payment.PaymentMethod;
+import com.vlt.ecommerce.domain.Payment.PaymentStatus;
 import com.vlt.ecommerce.domain.enumeration.OrderStatus;
 import com.vlt.ecommerce.domain.event.OrderStatusChangedEvent;
 import com.vlt.ecommerce.config.properties.OrderProperties;
 import com.vlt.ecommerce.repository.OrderRepository;
 import com.vlt.ecommerce.repository.ProductRepository;
 import com.vlt.ecommerce.repository.SpecificProductRepository;
+import com.vlt.ecommerce.service.ZalopayPaymentService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,15 +36,34 @@ public class OrderExpirationConsumer {
     ApplicationEventPublisher eventPublisher;
 
     OrderProperties orderProperties;
+    RabbitTemplate rabbitTemplate;
+    TransactionTemplate transactions;
+    ZalopayPaymentService zalopayPaymentService;
 
-    @Transactional
     @RabbitListener(queues = Constants.ORDER_CANCEL_QUEUE)
     public void handleExpiredOrder(Long orderId) {
         log.info("[RabbitMQ DLX] Nhận tín hiệu kiểm tra hết hạn cho đơn hàng #{}", orderId);
 
+        zalopayPaymentService.reconcilePending(orderId);
+        transactions.executeWithoutResult(transaction -> cancelIfExpired(orderId));
+    }
+
+    private void cancelIfExpired(Long orderId) {
         orderRepository.findByIdForUpdate(orderId).ifPresent(order -> {
             if (order.getStatus() == OrderStatus.PENDING) {
                 int ttlMs = orderProperties.expirationTtlMs();
+                Payment payment = order.getPayment();
+                if (payment != null && payment.getMethod() == PaymentMethod.ZALOPAY) {
+                    if (payment.getStatus() == PaymentStatus.PAID) return;
+                    if (payment.getStatus() == PaymentStatus.PENDING && payment.getGatewayOrderId() != null) {
+                        rabbitTemplate.convertAndSend(Constants.ORDER_DELAY_EXCHANGE, Constants.ORDER_DELAY_ROUTING_KEY,
+                                orderId, message -> {
+                                    message.getMessageProperties().setExpiration(String.valueOf(ttlMs));
+                                    return message;
+                                });
+                        return;
+                    }
+                }
                 String durationStr = (ttlMs < 60000)
                         ? (ttlMs / 1000) + " giây"
                         : (ttlMs < 3600000)

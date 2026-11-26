@@ -1,3 +1,5 @@
+import FilterTabs from "../../shared/ui/FilterTabs";
+import ProductImage from "../../shared/components/ProductImage";
 import { NEW_NOTIFICATION_EVENT, ORDER_UPDATED_EVENT } from "../../shared/constants";
 import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import Pagination from "../../shared/components/Pagination";
@@ -13,13 +15,16 @@ import toast from 'react-hot-toast';
 import api from '../../config/api';
 
 const STATUS_TABS = [
-  { id: 'ALL', label: 'Tất cả' },
-  { id: 'PENDING', label: 'Chờ xác nhận' },
-  { id: 'CONFIRMED', label: 'Chờ lấy hàng' },
-  { id: 'SHIPPING', label: 'Đang giao' },
-  { id: 'COMPLETED', label: 'Thành công' },
-  { id: 'CANCELLED', label: 'Đã hủy' }
+  { value: 'ALL', label: 'Tất cả' },
+  { value: 'PENDING', label: 'Chờ xác nhận' },
+  { value: 'CONFIRMED', label: 'Chờ lấy hàng' },
+  { value: 'SHIPPING', label: 'Đang giao' },
+  { value: 'COMPLETED', label: 'Thành công' },
+  { value: 'CANCELLED', label: 'Đã hủy' }
 ];
+
+const rowActionClass = "inline-flex size-10 shrink-0 items-center justify-center rounded-lg border transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-secondary";
+const primaryRowActionClass = `${rowActionClass} border-transparent bg-primary text-primary-content hover:bg-secondary hover:text-secondary-content`;
 
 export default function SellerOrderPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -102,12 +107,12 @@ export default function SellerOrderPage() {
     if (addr) {
       return (
         <div className="text-sm">
-          <div className="font-semibold text-gray-900 flex items-center gap-1.5">
+          <div className="font-semibold text-base-content flex items-center gap-1.5">
             <span>{addr.receiverName}</span>
           </div>
-          <div className="text-xs text-gray-500 font-mono mt-0.5">{addr.phone}</div>
+          <div className="text-xs text-base-content/70 font-mono mt-0.5">{addr.phone}</div>
           <div
-            className="text-xs text-gray-500 mt-1 line-clamp-2 leading-relaxed"
+            className="text-xs text-base-content/70 mt-1 line-clamp-2 leading-relaxed"
             title={`${addr.street || ''}, ${addr.ward || ''}, ${addr.district || ''}, ${addr.province || ''}`}
           >
             {addr.province ? `${addr.district ? `${addr.district}, ` : ''}${addr.province}` : 'Việt Nam'}
@@ -116,7 +121,7 @@ export default function SellerOrderPage() {
       );
     }
     return (
-      <div className="text-sm font-medium text-gray-800">
+      <div className="text-sm font-medium text-base-content">
         Khách hàng #{order.buyerId || 'N/A'}
       </div>
     );
@@ -144,38 +149,41 @@ export default function SellerOrderPage() {
         );
       case 'COMPLETED':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 text-xs font-semibold rounded-full">
-            <CheckCircle size={12} className="text-green-500" /> Hoàn thành
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-secondary border border-primary/25 text-xs font-semibold rounded-full">
+            <CheckCircle size={12} className="text-secondary" /> Hoàn thành
           </span>
         );
       case 'CANCELLED':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-600 border border-gray-200 text-xs font-semibold rounded-full">
-            <XCircle size={12} className="text-gray-400" /> Đã hủy
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-base-300 text-base-content/80 border border-base-300 text-xs font-semibold rounded-full">
+            <XCircle size={12} className="text-base-content/60" /> Đã hủy
           </span>
         );
       default:
         return (
-          <span className="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded-full">
+          <span className="px-2.5 py-1 bg-base-300 text-base-content/80 text-xs font-semibold rounded-full">
             {status}
           </span>
         );
     }
   };
 
+  const paymentMethodLabels = {
+    ZALOPAY: 'Zalopay (Sandbox)',
+    BANK_TRANSFER: 'Chuyển khoản ngân hàng',
+    MOCK_ONLINE: 'Thanh toán online (demo)',
+  };
+
   const getPaymentLabel = (method, status) => {
-    let name = 'Thanh toán COD';
-    if (method === 'BANK_TRANSFER' || method === 'MOCK_ONLINE') {
-      name = 'Chuyển khoản / VNPAY';
-    }
+    const name = paymentMethodLabels[method] ?? 'Thanh toán COD';
     const isPaid = status === 'PAID';
     return (
       <div className="flex flex-col items-end gap-1">
-        <span className="text-[11px] text-gray-500 font-medium">{name}</span>
+        <span className="text-[11px] text-base-content/70 font-medium">{name}</span>
         <span
           className={`text-[10px] font-semibold px-1.5 py-0.2 rounded ${
             isPaid
-              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+              ? 'bg-primary/10 text-secondary border border-primary/25'
               : 'bg-amber-50 text-amber-700 border border-amber-200'
           }`}
         >
@@ -201,10 +209,10 @@ export default function SellerOrderPage() {
       {/* ================= HEADER PAGE ================= */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-black text-gray-900 tracking-tight flex items-center gap-2">
-            <ShoppingBag className="text-green-600" size={26} /> Quản lý Đơn hàng
+          <h2 className="text-2xl font-black text-base-content tracking-tight flex items-center gap-2">
+            <ShoppingBag className="text-secondary" size={26} /> Quản lý Đơn hàng
           </h2>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-base-content/70 mt-1">
             Theo dõi, xử lý đơn hàng và in hóa đơn giao vận cho khách hàng
           </p>
         </div>
@@ -218,57 +226,46 @@ export default function SellerOrderPage() {
       </div>
 
       {/* ================= CARD BẢNG ĐƠN HÀNG ================= */}
-      <div className="bg-white border border-gray-200/90 rounded-2xl shadow-sm overflow-hidden w-full transition-all">
-        {/* --- TABS TRẠNG THÁI --- */}
-        <div className="flex border-b border-gray-100 overflow-x-auto no-scrollbar bg-gray-50/50 px-2 pt-2 gap-1">
-          {STATUS_TABS.map((tab) => {
-            const isActive = currentStatus === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => updateParams({ status: tab.id, page: 1 })}
-                className={`px-4 py-2.5 text-xs font-semibold rounded-t-lg transition-all relative whitespace-nowrap ${
-                  isActive
-                    ? 'bg-white text-green-700 shadow-xs border-t-2 border-green-600 font-bold'
-                    : 'text-gray-600 hover:text-green-600 hover:bg-gray-100/60'
-                }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+      <div className="bg-base-100 border border-base-300/90 rounded-2xl shadow-sm overflow-hidden w-full transition-all">
+        <div className="border-b border-base-300">
+          <FilterTabs
+            label="Lọc trạng thái đơn hàng"
+            options={STATUS_TABS}
+            value={currentStatus}
+            onChange={(status) => updateParams({ status, page: 1 })}
+          />
         </div>
 
         {/* --- BẢNG ĐƠN HÀNG --- */}
         <div className="overflow-x-auto w-full">
-          <table className="w-full text-left text-sm text-gray-600 border-collapse">
-            <thead className="bg-gray-50/80 text-gray-700 text-xs font-bold uppercase tracking-wider border-b border-gray-200">
+          <table className="w-full text-left text-sm text-base-content/80 border-collapse">
+            <thead className="bg-base-200/80 text-base-content/85 text-xs font-bold uppercase tracking-wider border-b border-base-300">
               <tr>
                 <th className="px-5 py-3.5 w-32">Mã đơn</th>
                 <th className="px-5 py-3.5 w-48">Khách hàng</th>
                 <th className="px-5 py-3.5 min-w-[320px]">Sản phẩm đặt mua</th>
                 <th className="px-5 py-3.5 text-right w-44">Tổng tiền & TT</th>
                 <th className="px-5 py-3.5 text-center w-36">Trạng thái</th>
-                <th className="px-5 py-3.5 text-center w-48">Thao tác</th>
+                <th className="w-28 whitespace-nowrap px-3 py-3.5 text-center">Thao tác</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-base-300">
               {loading ? (
                 <tr>
                   <td colSpan="6" className="text-center py-16">
                     <div className="inline-flex flex-col items-center gap-2">
-                      <span className="loading loading-spinner text-green-600 loading-md"></span>
-                      <span className="text-xs text-gray-400">Đang tải danh sách đơn hàng...</span>
+                      <span className="loading loading-spinner text-secondary loading-md"></span>
+                      <span className="text-xs text-base-content/60">Đang tải danh sách đơn hàng...</span>
                     </div>
                   </td>
                 </tr>
               ) : filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="px-5 py-16 text-center text-gray-400">
+                  <td colSpan="6" className="px-5 py-16 text-center text-base-content/60">
                     <div className="text-5xl mb-3">📦</div>
-                    <p className="text-sm font-medium text-gray-600">Không có đơn hàng nào.</p>
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-sm font-medium text-base-content/80">Không có đơn hàng nào.</p>
+                    <p className="text-xs text-base-content/60 mt-1">
                       {searchInput ? 'Không tìm thấy đơn khớp từ khóa tìm kiếm' : 'Chưa có đơn hàng trong mục này'}
                     </p>
                   </td>
@@ -277,14 +274,14 @@ export default function SellerOrderPage() {
                 filteredOrders.map((order) => (
                   <tr
                     key={order.id}
-                    className="hover:bg-green-50/30 transition-colors group"
+                    className="hover:bg-primary/5 transition-colors group"
                   >
                     {/* CỘT 1: MÃ ĐƠN HÀNG */}
                     <td className="px-5 py-4 align-top">
-                      <div className="font-bold text-gray-900 font-mono text-sm">
+                      <div className="font-bold text-base-content font-mono text-sm">
                         #{order.id}
                       </div>
-                      <div className="text-[11px] text-gray-400 font-normal mt-1 flex items-center gap-1">
+                      <div className="text-[11px] text-base-content/60 font-normal mt-1 flex items-center gap-1">
                         <Calendar size={11} />
                         {order.createdAt ? new Date(order.createdAt).toLocaleDateString('vi-VN') : 'Mới đây'}
                       </div>
@@ -313,11 +310,11 @@ export default function SellerOrderPage() {
                               to={`/product/${item.productId}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="w-12 h-12 rounded-lg border border-gray-200 overflow-hidden shrink-0 bg-gray-50 hover:opacity-90 hover:ring-2 hover:ring-green-500 transition-all block"
+                              className="w-12 h-12 rounded-lg border border-base-300 overflow-hidden shrink-0 bg-base-200 hover:opacity-90 hover:ring-2 hover:ring-accent transition-all block"
                               title="Xem trang sản phẩm"
                             >
-                              <img
-                                src={item.productImageUrl || 'https://via.placeholder.com/48'}
+                              <ProductImage
+                                src={item.productImageUrl}
                                 alt={item.productName}
                                 className="w-full h-full object-cover"
                               />
@@ -329,32 +326,32 @@ export default function SellerOrderPage() {
                                 to={`/product/${item.productId}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-xs font-semibold text-gray-800 hover:text-green-600 line-clamp-2 leading-snug group/item inline-flex items-center gap-1 transition-colors"
+                                className="text-xs font-semibold text-base-content hover:text-secondary line-clamp-2 leading-snug group/item inline-flex items-center gap-1 transition-colors"
                                 title="Mở chi tiết sản phẩm trong tab mới"
                               >
                                 <span>{item.productName}</span>
                                 <ExternalLink
                                   size={11}
-                                  className="text-gray-400 group-hover/item:text-green-600 shrink-0 opacity-0 group-hover/item:opacity-100 transition-opacity"
+                                  className="text-base-content/60 group-hover/item:text-secondary shrink-0 opacity-0 group-hover/item:opacity-100 transition-opacity"
                                 />
                               </Link>
 
                               {/* BIẾN THỂ / PHÂN LOẠI HÀNG */}
                               {item.variantName && (
-                                <div className="text-[11px] text-gray-500 mt-0.5">
-                                  <span className="bg-gray-100 text-gray-600 px-1.5 py-0.2 rounded font-medium">
+                                <div className="text-[11px] text-base-content/70 mt-0.5">
+                                  <span className="bg-base-300 text-base-content/80 px-1.5 py-0.2 rounded font-medium">
                                     {item.variantName}
                                   </span>
                                 </div>
                               )}
 
                               {/* ĐƠN GIÁ VÀ SỐ LƯỢNG */}
-                              <div className="text-xs text-gray-500 mt-1">
-                                <span className="font-semibold text-gray-700">
+                              <div className="text-xs text-base-content/70 mt-1">
+                                <span className="font-semibold text-base-content/85">
                                   ₫{item.productPrice?.toLocaleString('vi-VN')}
                                 </span>{' '}
-                                <span className="text-gray-400">×</span>{' '}
-                                <span className="font-bold text-gray-800">{item.quantity}</span>
+                                <span className="text-base-content/60">×</span>{' '}
+                                <span className="font-bold text-base-content">{item.quantity}</span>
                               </div>
                             </div>
                           </div>
@@ -364,7 +361,7 @@ export default function SellerOrderPage() {
 
                     {/* CỘT 4: TỔNG TIỀN VÀ TRẠNG THÁI THANH TOÁN */}
                     <td className="px-5 py-4 align-top text-right">
-                      <div className="font-bold text-green-600 text-base font-mono">
+                      <div className="font-bold text-secondary text-base font-mono">
                         ₫{order.totalAmount?.toLocaleString('vi-VN')}
                       </div>
                       <div className="mt-1">
@@ -377,35 +374,38 @@ export default function SellerOrderPage() {
                       {getStatusBadge(order.status)}
                     </td>
 
-                    {/* CỘT 6: THAO TÁC RÕ RÀNG, ĐẸP MẮT */}
-                    <td className="px-5 py-4 align-top">
-                      <div className="flex flex-col gap-2">
-                        {/* 1. NÚT CHUYỂN TRẠNG THÁI ĐƠN HÀNG (PRIMARY ACTION) */}
-                        {order.status === 'PENDING' && (
+                    <td className="px-3 py-4 text-center align-top">
+                      <div className="inline-flex items-center gap-2">
+                        {order.status === 'PENDING' && (order.paymentMethod !== 'ZALOPAY' || order.paymentStatus === 'PAID') && (
                           <button
+                            type="button"
+                            aria-label="Chuẩn bị hàng"
+                            title="Chuẩn bị hàng"
                             onClick={() => handleAction(order.id, 'Xác nhận & Chuẩn bị hàng', 'confirm')}
-                            className="w-full px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center justify-center gap-1.5 transition-all hover:shadow"
+                            className={primaryRowActionClass}
                           >
-                            <CheckCircle size={14} /> Chuẩn bị hàng
+                            <CheckCircle size={18} aria-hidden="true" />
                           </button>
                         )}
-
                         {order.status === 'CONFIRMED' && (
                           <button
+                            type="button"
+                            aria-label="Giao cho đơn vị vận chuyển"
+                            title="Giao cho đơn vị vận chuyển"
                             onClick={() => handleAction(order.id, 'Giao cho đơn vị vận chuyển', 'ship')}
-                            className="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs flex items-center justify-center gap-1.5 transition-all hover:shadow"
+                            className={primaryRowActionClass}
                           >
-                            <Truck size={14} /> Giao ĐVVC
+                            <Truck size={18} aria-hidden="true" />
                           </button>
                         )}
-
-                        {/* 2. NÚT XEM CHI TIẾT & HÓA ĐƠN (MỞ MODAL) */}
                         <button
+                          type="button"
+                          aria-label="Chi tiết và hóa đơn"
+                          title="Chi tiết và hóa đơn"
                           onClick={() => setSelectedOrder(order)}
-                          className="w-full px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-700 hover:text-green-700 border border-gray-200 hover:border-green-300 text-xs font-medium rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-xs"
-                          title="Xem chi tiết đơn hàng và in hóa đơn bán hàng"
+                          className={`${rowActionClass} border-base-300 bg-base-100 text-base-content/85 hover:border-primary/35 hover:bg-base-200 hover:text-secondary`}
                         >
-                          <FileText size={13} className="text-gray-500" /> Chi tiết & Hóa đơn
+                          <FileText size={18} aria-hidden="true" />
                         </button>
                       </div>
                     </td>
@@ -422,7 +422,7 @@ export default function SellerOrderPage() {
             currentPage={page}
             totalPages={pageInfo.totalPages}
             onPageChange={(nextPage) => updateParams({ page: nextPage })}
-            className="border-t border-gray-100 !justify-center"
+            className="border-t border-base-300 !justify-center"
           />
         )}
       </div>
@@ -432,11 +432,11 @@ export default function SellerOrderPage() {
       {/* ======================================================= */}
       {selectedOrder && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-gray-200">
+          <div className="bg-base-100 rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-base-300">
             {/* --- HEADER MODAL --- */}
-            <div className="px-6 py-4 bg-gradient-to-r from-green-700 to-green-600 text-white flex items-center justify-between">
+            <div className="px-6 py-4 bg-gradient-to-r from-secondary to-primary text-white flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-white">
+                <div className="w-10 h-10 rounded-xl bg-base-100/15 flex items-center justify-center text-white">
                   <FileText size={22} />
                 </div>
                 <div>
@@ -458,7 +458,7 @@ export default function SellerOrderPage() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => window.print()}
-                  className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                  className="px-3 py-1.5 bg-white/20 hover:bg-base-100/30 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
                   title="In hóa đơn đơn hàng này"
                 >
                   <Printer size={15} /> In hóa đơn
@@ -477,21 +477,21 @@ export default function SellerOrderPage() {
               {/* PHẦN 1: THÔNG TIN GIAO HÀNG & THANH TOÁN */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* KHỐI GIAO HÀNG */}
-                <div className="p-4 rounded-xl border border-gray-200 bg-gray-50/60">
-                  <div className="flex items-center gap-2 font-bold text-gray-900 text-xs uppercase tracking-wider mb-2.5">
-                    <MapPin size={15} className="text-green-600" />
+                <div className="p-4 rounded-xl border border-base-300 bg-base-200/60">
+                  <div className="flex items-center gap-2 font-bold text-base-content text-xs uppercase tracking-wider mb-2.5">
+                    <MapPin size={15} className="text-secondary" />
                     Địa chỉ nhận hàng
                   </div>
                   {(() => {
                     const addr = parseAddress(selectedOrder.addressSnapshot);
                     if (!addr) {
-                      return <p className="text-xs text-gray-500">Khách hàng #{selectedOrder.buyerId}</p>;
+                      return <p className="text-xs text-base-content/70">Khách hàng #{selectedOrder.buyerId}</p>;
                     }
                     return (
-                      <div className="text-xs space-y-1 text-gray-700">
-                        <div className="font-bold text-gray-900 text-sm">{addr.receiverName}</div>
-                        <div className="font-mono text-gray-600">{addr.phone}</div>
-                        <div className="text-gray-600 leading-relaxed pt-1">
+                      <div className="text-xs space-y-1 text-base-content/85">
+                        <div className="font-bold text-base-content text-sm">{addr.receiverName}</div>
+                        <div className="font-mono text-base-content/80">{addr.phone}</div>
+                        <div className="text-base-content/80 leading-relaxed pt-1">
                           {[addr.street, addr.ward, addr.district, addr.province].filter(Boolean).join(', ')}
                         </div>
                       </div>
@@ -500,27 +500,25 @@ export default function SellerOrderPage() {
                 </div>
 
                 {/* KHỐI THANH TOÁN & TRẠNG THÁI */}
-                <div className="p-4 rounded-xl border border-gray-200 bg-gray-50/60 flex flex-col justify-between">
+                <div className="p-4 rounded-xl border border-base-300 bg-base-200/60 flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center gap-2 font-bold text-gray-900 text-xs uppercase tracking-wider mb-2.5">
-                      <CreditCard size={15} className="text-blue-600" />
+                    <div className="flex items-center gap-2 font-bold text-base-content text-xs uppercase tracking-wider mb-2.5">
+                      <CreditCard size={15} className="text-secondary" />
                       Thông tin thanh toán & Vận chuyển
                     </div>
-                    <div className="text-xs space-y-2 text-gray-700">
+                    <div className="text-xs space-y-2 text-base-content/85">
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500">Hình thức thanh toán:</span>
-                        <span className="font-semibold text-gray-900">
-                          {selectedOrder.paymentMethod === 'BANK_TRANSFER' || selectedOrder.paymentMethod === 'MOCK_ONLINE'
-                            ? 'Chuyển khoản / VNPAY'
-                            : 'Thanh toán khi nhận hàng (COD)'}
+                        <span className="text-base-content/70">Hình thức thanh toán:</span>
+                        <span className="font-semibold text-base-content">
+                          {paymentMethodLabels[selectedOrder.paymentMethod] ?? 'Thanh toán khi nhận hàng (COD)'}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500">Trạng thái thanh toán:</span>
+                        <span className="text-base-content/70">Trạng thái thanh toán:</span>
                         <span
                           className={`font-semibold px-2 py-0.5 rounded text-[11px] ${
                             selectedOrder.paymentStatus === 'PAID'
-                              ? 'bg-emerald-100 text-emerald-800'
+                              ? 'bg-primary/15 text-secondary'
                               : 'bg-amber-100 text-amber-800'
                           }`}
                         >
@@ -528,16 +526,16 @@ export default function SellerOrderPage() {
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500">Trạng thái đơn hàng:</span>
+                        <span className="text-base-content/70">Trạng thái đơn hàng:</span>
                         <div>{getStatusBadge(selectedOrder.status)}</div>
                       </div>
                     </div>
                   </div>
 
                   {selectedOrder.note && (
-                    <div className="mt-3 pt-2.5 border-t border-gray-200 text-xs">
-                      <span className="font-semibold text-gray-700">Ghi chú từ khách: </span>
-                      <span className="text-gray-600 italic">"{selectedOrder.note}"</span>
+                    <div className="mt-3 pt-2.5 border-t border-base-300 text-xs">
+                      <span className="font-semibold text-base-content/85">Ghi chú từ khách: </span>
+                      <span className="text-base-content/80 italic">"{selectedOrder.note}"</span>
                     </div>
                   )}
                 </div>
@@ -545,13 +543,13 @@ export default function SellerOrderPage() {
 
               {/* PHẦN 2: BẢNG CHI TIẾT SẢN PHẨM TRONG HÓA ĐƠN */}
               <div>
-                <h4 className="font-bold text-xs uppercase tracking-wider text-gray-700 mb-2.5 flex items-center gap-1.5">
-                  <Package size={15} className="text-green-600" /> Chi tiết các sản phẩm
+                <h4 className="font-bold text-xs uppercase tracking-wider text-base-content/85 mb-2.5 flex items-center gap-1.5">
+                  <Package size={15} className="text-secondary" /> Chi tiết các sản phẩm
                 </h4>
 
-                <div className="border border-gray-200 rounded-xl overflow-hidden shadow-xs">
+                <div className="border border-base-300 rounded-xl overflow-hidden shadow-xs">
                   <table className="w-full text-left text-xs">
-                    <thead className="bg-gray-100 text-gray-700 font-bold uppercase tracking-wider">
+                    <thead className="bg-base-300 text-base-content/85 font-bold uppercase tracking-wider">
                       <tr>
                         <th className="px-4 py-3">STT</th>
                         <th className="px-4 py-3 min-w-[220px]">Sản phẩm</th>
@@ -561,10 +559,10 @@ export default function SellerOrderPage() {
                         <th className="px-4 py-3 text-right">Thành tiền</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 bg-white">
+                    <tbody className="divide-y divide-base-300 bg-base-100">
                       {selectedOrder.items?.map((item, idx) => (
-                        <tr key={idx} className="hover:bg-gray-50/80 transition-colors">
-                          <td className="px-4 py-3 text-gray-400 font-mono text-center w-12">
+                        <tr key={idx} className="hover:bg-base-200/80 transition-colors">
+                          <td className="px-4 py-3 text-base-content/60 font-mono text-center w-12">
                             {idx + 1}
                           </td>
                           <td className="px-4 py-3">
@@ -573,10 +571,10 @@ export default function SellerOrderPage() {
                                 to={`/product/${item.productId}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="w-10 h-10 rounded border border-gray-200 overflow-hidden shrink-0 bg-gray-50"
+                                className="w-10 h-10 rounded border border-base-300 overflow-hidden shrink-0 bg-base-200"
                               >
-                                <img
-                                  src={item.productImageUrl || 'https://via.placeholder.com/40'}
+                                <ProductImage
+                                  src={item.productImageUrl}
                                   alt={item.productName}
                                   className="w-full h-full object-cover"
                                 />
@@ -586,30 +584,30 @@ export default function SellerOrderPage() {
                                   to={`/product/${item.productId}`}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="font-semibold text-gray-900 hover:text-green-600 line-clamp-2 inline-flex items-center gap-1 group/name"
+                                  className="font-semibold text-base-content hover:text-secondary line-clamp-2 inline-flex items-center gap-1 group/name"
                                 >
                                   <span>{item.productName}</span>
-                                  <ExternalLink size={10} className="text-gray-400 group-hover/name:text-green-600" />
+                                  <ExternalLink size={10} className="text-base-content/60 group-hover/name:text-secondary" />
                                 </Link>
                               </div>
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-center text-gray-600">
+                          <td className="px-4 py-3 text-center text-base-content/80">
                             {item.variantName ? (
-                              <span className="bg-gray-100 text-gray-700 px-2 py-0.5 rounded text-[11px] font-medium">
+                              <span className="bg-base-300 text-base-content/85 px-2 py-0.5 rounded text-[11px] font-medium">
                                 {item.variantName}
                               </span>
                             ) : (
-                              <span className="text-gray-400">-</span>
+                              <span className="text-base-content/60">-</span>
                             )}
                           </td>
-                          <td className="px-4 py-3 text-right font-medium text-gray-700">
+                          <td className="px-4 py-3 text-right font-medium text-base-content/85">
                             ₫{item.productPrice?.toLocaleString('vi-VN')}
                           </td>
-                          <td className="px-4 py-3 text-center font-bold text-gray-900">
+                          <td className="px-4 py-3 text-center font-bold text-base-content">
                             {item.quantity}
                           </td>
-                          <td className="px-4 py-3 text-right font-bold text-gray-900 font-mono">
+                          <td className="px-4 py-3 text-right font-bold text-base-content font-mono">
                             ₫{(item.totalPrice || (item.productPrice * item.quantity))?.toLocaleString('vi-VN')}
                           </td>
                         </tr>
@@ -621,20 +619,20 @@ export default function SellerOrderPage() {
 
               {/* PHẦN 3: TỔNG KẾT HÓA ĐƠN */}
               <div className="flex justify-end pt-2">
-                <div className="w-full sm:w-80 space-y-2 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                  <div className="flex justify-between text-xs text-gray-600">
+                <div className="w-full sm:w-80 space-y-2 p-4 bg-base-200 rounded-xl border border-base-300">
+                  <div className="flex justify-between text-xs text-base-content/80">
                     <span>Tiền hàng tạm tính:</span>
-                    <span className="font-semibold text-gray-800">
+                    <span className="font-semibold text-base-content">
                       ₫{selectedOrder.totalAmount?.toLocaleString('vi-VN')}
                     </span>
                   </div>
-                  <div className="flex justify-between text-xs text-gray-600">
+                  <div className="flex justify-between text-xs text-base-content/80">
                     <span>Phí vận chuyển:</span>
-                    <span className="font-semibold text-emerald-600">Miễn phí</span>
+                    <span className="font-semibold text-secondary">Miễn phí</span>
                   </div>
-                  <div className="pt-2 border-t border-gray-200 flex justify-between items-center">
-                    <span className="font-bold text-sm text-gray-900">Tổng thanh toán:</span>
-                    <span className="font-black text-lg text-green-700 font-mono">
+                  <div className="pt-2 border-t border-base-300 flex justify-between items-center">
+                    <span className="font-bold text-sm text-base-content">Tổng thanh toán:</span>
+                    <span className="font-black text-lg text-secondary font-mono">
                       ₫{selectedOrder.totalAmount?.toLocaleString('vi-VN')}
                     </span>
                   </div>
@@ -643,19 +641,19 @@ export default function SellerOrderPage() {
             </div>
 
             {/* --- FOOTER MODAL (CÁC THAO TÁC) --- */}
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex flex-wrap items-center justify-between gap-3">
-              <div className="text-xs text-gray-500 italic">
+            <div className="px-6 py-4 bg-base-200 border-t border-base-300 flex flex-wrap items-center justify-between gap-3">
+              <div className="text-xs text-base-content/70 italic">
                 * Hóa đơn này là căn cứ giao dịch giữa người mua và shop.
               </div>
 
               <div className="flex items-center gap-3">
-                {selectedOrder.status === 'PENDING' && (
+                {selectedOrder.status === 'PENDING' && (selectedOrder.paymentMethod !== 'ZALOPAY' || selectedOrder.paymentStatus === 'PAID') && (
                   <button
                     onClick={() => {
                       void handleAction(selectedOrder.id, 'Xác nhận & Chuẩn bị hàng', 'confirm');
                       setSelectedOrder(null);
                     }}
-                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-colors"
+                    className="px-4 py-2 bg-primary hover:bg-secondary text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-colors"
                   >
                     <CheckCircle size={15} /> Xác nhận & Chuẩn bị hàng
                   </button>
@@ -667,7 +665,7 @@ export default function SellerOrderPage() {
                       void handleAction(selectedOrder.id, 'Giao cho đơn vị vận chuyển', 'ship');
                       setSelectedOrder(null);
                     }}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-colors"
+                    className="px-4 py-2 bg-primary hover:bg-secondary text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-colors"
                   >
                     <Truck size={15} /> Bàn giao vận chuyển
                   </button>
@@ -675,7 +673,7 @@ export default function SellerOrderPage() {
 
                 <button
                   onClick={() => setSelectedOrder(null)}
-                  className="px-4 py-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-300 text-xs font-semibold rounded-lg transition-colors"
+                  className="px-4 py-2 bg-base-100 hover:bg-base-300 text-base-content/85 border border-gray-300 text-xs font-semibold rounded-lg transition-colors"
                 >
                   Đóng
                 </button>

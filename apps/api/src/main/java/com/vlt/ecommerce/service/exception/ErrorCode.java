@@ -91,6 +91,12 @@ public enum ErrorCode {
     PAYMENT_NOT_FOUND(13001, "The payment was not found.", HttpStatus.NOT_FOUND),
     PAYMENT_ALREADY_EXISTS(13002, "A payment already exists for this order.", HttpStatus.CONFLICT),
     PAYMENT_ALREADY_PROCESSED(13003, "This payment has already been processed.", HttpStatus.BAD_REQUEST),
+    PAYMENT_METHOD_MISMATCH(13004, "This operation is unavailable for the selected payment method.", HttpStatus.BAD_REQUEST),
+    WALLET_PAYMENT_IN_PROGRESS(13009, "This order cannot be cancelled while a wallet payment is active or paid.", HttpStatus.CONFLICT),
+    WALLET_PAYMENT_REQUIRED(13010, "The wallet payment must be confirmed before preparing the order.", HttpStatus.CONFLICT),
+    ZALOPAY_NOT_CONFIGURED(13011, "Zalopay Sandbox is currently unavailable.", HttpStatus.SERVICE_UNAVAILABLE),
+    ZALOPAY_GATEWAY_UNAVAILABLE(13012, "Unable to open Zalopay Sandbox checkout.", HttpStatus.BAD_GATEWAY),
+    ZALOPAY_INVALID_AMOUNT(13013, "The Zalopay payment amount is invalid.", HttpStatus.BAD_REQUEST),
 
     // 14000-14999 Commission
     COMMISSION_NOT_CONFIGURED(14001, "The commission rate has not been configured.", HttpStatus.INTERNAL_SERVER_ERROR),

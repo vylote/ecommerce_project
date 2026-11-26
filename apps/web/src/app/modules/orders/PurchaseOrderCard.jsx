@@ -57,7 +57,7 @@ function OrderDetails({ order }) {
   );
 }
 
-export default function PurchaseOrderCard({ order, statusLabel, processing, onCancel, onComplete, onReview }) {
+export default function PurchaseOrderCard({ order, statusLabel, processing, onPay, onCancel, onComplete, onReview }) {
   const { t, lang } = useI18n();
   const date = order.createdAt ? new Date(order.createdAt) : null;
   const placedAt = date && !Number.isNaN(date.getTime())
@@ -117,7 +117,12 @@ export default function PurchaseOrderCard({ order, statusLabel, processing, onCa
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between">
           <OrderDetails order={order} />
           <div className="flex flex-wrap justify-end gap-2">
-            {order.status === "PENDING" && (
+            {order.status === "PENDING" && order.paymentMethod === "ZALOPAY" && order.paymentStatus === "PENDING" && (
+              <button type="button" onClick={() => void onPay(order.id)} disabled={processing} className="btn btn-secondary btn-sm">
+                {t("zalopay.pay")}
+              </button>
+            )}
+            {order.status === "PENDING" && !(order.paymentMethod === "ZALOPAY" && order.paymentStatus === "PAID") && (
               <button type="button" onClick={() => onCancel(order.id)} disabled={processing} className="btn btn-outline btn-sm">
                 {t("order.cancel_order")}
               </button>

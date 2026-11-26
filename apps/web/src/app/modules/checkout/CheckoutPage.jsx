@@ -1,3 +1,4 @@
+import openZalopayPayment from "./openZalopayPayment";
 import { CART_UPDATED_EVENT } from "../../shared/constants";
 import useReloadableRequest from "../../shared/hooks/useReloadableRequest";
 import Dialog, { DialogActions } from "../../shared/ui/Dialog";
@@ -21,7 +22,7 @@ const EMPTY_CART_ITEMS = [];
 const PAYMENT_METHODS = [
   { value: "COD", label: "Thanh toán khi nhận hàng" },
   { value: "BANK_TRANSFER", label: "Chuyển khoản ngân hàng" },
-  { value: "MOCK_ONLINE", label: "Ví ShopeePay (Demo)" },
+  ...(import.meta.env.DEV ? [{ value: "ZALOPAY", label: "Zalopay (Sandbox)" }] : []),
 ];
 
 const formatAddress = (addr) => {
@@ -133,10 +134,11 @@ export default function CheckoutPage() {
     (sum, item) => sum + item.totalPrice,
     0,
   );
-  const shippingFeePerShop = 16500;
+  const isZalopayPayment = paymentMethod === "ZALOPAY";
+  const shippingFeePerShop = isZalopayPayment ? 0 : 16500;
   const totalShippingFee =
     Object.keys(groupedByShop).length * shippingFeePerShop;
-  const coinDiscount = useCoins ? 200 : 0;
+  const coinDiscount = useCoins && !isZalopayPayment ? 200 : 0;
   const grandTotal = totalItemsAmount + totalShippingFee - coinDiscount;
   const selectedAddress = addresses.find((a) => a.id === selectedAddressId);
 
@@ -165,25 +167,27 @@ export default function CheckoutPage() {
         ),
       );
 
-      if (paymentMethod === "MOCK_ONLINE") {
-        const confirmResults = await Promise.allSettled(
-          paymentResults
-            .filter((r) => r.status === "fulfilled")
-            .map((r) => {
-              const paymentId = r.value?.data?.result?.id;
-              if (paymentId) return api.post(`/payments/${paymentId}/confirm`);
-              return Promise.resolve();
-            }),
-        );
-        if (confirmResults.some((r) => r.status === "rejected")) {
-          toast.error(
-            "Một số giao dịch thanh toán online bị lỗi, vui lòng kiểm tra lại đơn hàng.",
-          );
-        }
+      window.dispatchEvent(new Event(CART_UPDATED_EVENT));
+      if (paymentResults.some((result) => result.status === "rejected")) {
+        toast.error("Đã tạo đơn hàng nhưng chưa thiết lập được thanh toán cho tất cả đơn.");
+        navigate("/orders", { replace: true });
+        return;
       }
 
-      window.dispatchEvent(new Event(CART_UPDATED_EVENT));
-      toast.success("Đặt hàng thành công!");
+      if (isZalopayPayment) {
+        if (createdOrders.length === 1) {
+          try {
+            await openZalopayPayment(createdOrders[0].id);
+            return;
+          } catch (error) {
+            toast.error(error.response?.data?.message || "Không thể mở Zalopay Sandbox. Bạn có thể thử lại trong Đơn Mua.");
+          }
+        } else {
+          toast.success("Đã tạo đơn. Vào Đơn Mua để thanh toán Zalopay cho từng shop.");
+        }
+      } else {
+        toast.success("Đặt hàng thành công!");
+      }
       navigate("/orders", { replace: true });
     } catch (error) {
       if (error.response?.status === 409) {
@@ -388,34 +392,35 @@ export default function CheckoutPage() {
           ))}
         </div>
 
-        {/* SECTION 3 & 4: VOUCHER, COIN & THANH TOÁN (Giữ nguyên như của bạn) */}
-        <div className="bg-white rounded-sm shadow-sm space-y-4 py-2">
-          <div className="px-6 py-4 flex items-center justify-between border-b">
-            <div className="flex items-center gap-2 text-lg text-gray-800">
-              <Ticket className="text-[#ee4d2d]" size={22} /> Shopee Voucher
+        {!isZalopayPayment && (
+          <div className="bg-white rounded-sm shadow-sm space-y-4 py-2">
+            <div className="px-6 py-4 flex items-center justify-between border-b">
+              <div className="flex items-center gap-2 text-lg text-gray-800">
+                <Ticket className="text-[#ee4d2d]" size={22} /> Shopee Voucher
+              </div>
+              <button className="text-blue-600 text-sm hover:underline">
+                Chọn Voucher
+              </button>
             </div>
-            <button className="text-blue-600 text-sm hover:underline">
-              Chọn Voucher
-            </button>
+            <div className="px-6 py-4 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-gray-800">
+                <Coins className="text-yellow-500" size={22} /> Shopee Xu
+                <span className="text-gray-500 text-sm ml-2">
+                  Dùng 200 Shopee Xu
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-gray-600 text-sm">-₫200</span>
+                <input
+                  type="checkbox"
+                  className="toggle toggle-warning toggle-sm"
+                  checked={useCoins}
+                  onChange={(e) => setUseCoins(e.target.checked)}
+                />
+              </div>
+            </div>
           </div>
-          <div className="px-6 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-gray-800">
-              <Coins className="text-yellow-500" size={22} /> Shopee Xu
-              <span className="text-gray-500 text-sm ml-2">
-                Dùng 200 Shopee Xu
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-gray-600 text-sm">-₫200</span>
-              <input
-                type="checkbox"
-                className="toggle toggle-warning toggle-sm"
-                checked={useCoins}
-                onChange={(e) => setUseCoins(e.target.checked)}
-              />
-            </div>
-          </div>
-        </div>
+        )}
 
         <div className="bg-white rounded-sm shadow-sm">
           <div className="px-6 py-6 border-b flex items-start gap-8">
@@ -452,7 +457,7 @@ export default function CheckoutPage() {
                 <span>Phí vận chuyển</span>
                 <span>₫{totalShippingFee.toLocaleString("vi-VN")}</span>
               </div>
-              {useCoins && (
+              {coinDiscount > 0 && (
                 <div className="flex justify-between text-gray-500">
                   <span>Shopee Xu</span>
                   <span>-₫200</span>

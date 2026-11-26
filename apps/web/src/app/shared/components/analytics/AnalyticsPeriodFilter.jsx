@@ -7,6 +7,7 @@ const periods = [
 ];
 
 const activeStyles = {
+  primary: "bg-primary text-primary-content shadow-sm",
   blue: "bg-blue-600 text-white shadow-sm",
   emerald: "bg-emerald-600 text-white shadow-sm",
 };

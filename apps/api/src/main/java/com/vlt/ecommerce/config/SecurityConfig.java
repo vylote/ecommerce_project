@@ -44,7 +44,8 @@ public class SecurityConfig {
             "/auth/google",
             "/auth/google/**",
             "/auth/refresh",
-            "/auth/logout"
+            "/auth/logout",
+            "/payments/zalopay/callback"
     };
 
     private String[] PUBLIC_GET_ENDPOINTS = {

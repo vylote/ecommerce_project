@@ -36,6 +36,11 @@ public class Payment {
     private BigDecimal amount;
     @Column(name = "transaction_ref", length = 200)
     private String transactionRef;
+    @Column(name = "gateway_order_id", length = 100, unique = true)
+    private String gatewayOrderId;
+    @Column(name = "gateway_pay_url", length = 2048)
+    @ToString.Exclude
+    private String gatewayPayUrl;
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
@@ -46,7 +51,7 @@ public class Payment {
     private Order order;
 
     public enum PaymentMethod {
-        COD, BANK_TRANSFER, MOCK_ONLINE
+        COD, BANK_TRANSFER, MOCK_ONLINE, ZALOPAY
     }
     public enum PaymentStatus {
         PENDING, PAID, FAILED, REFUNDED

@@ -208,6 +208,12 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
+        Payment payment = order.getPayment();
+        if (expectedStatus == OrderStatus.PENDING && payment != null
+                && payment.getMethod() == PaymentMethod.ZALOPAY && payment.getStatus() != PaymentStatus.PAID) {
+            throw new AppException(ErrorCode.WALLET_PAYMENT_REQUIRED);
+        }
+
         order.setStatus(nextStatus);
         eventPublisher.publishEvent(new OrderStatusChangedEvent(this, order.getId()));
         return orderMapper.toOrderResponse(order);
@@ -291,9 +297,14 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
-        order.setStatus(OrderStatus.CANCELLED);
-
         Payment payment = order.getPayment();
+        if (payment != null && payment.getMethod() == PaymentMethod.ZALOPAY
+                && (payment.getStatus() == PaymentStatus.PAID
+                || (payment.getStatus() == PaymentStatus.PENDING && payment.getGatewayOrderId() != null))) {
+            throw new AppException(ErrorCode.WALLET_PAYMENT_IN_PROGRESS);
+        }
+
+        order.setStatus(OrderStatus.CANCELLED);
         if (payment != null && payment.getStatus() == PaymentStatus.PAID) {
             if (payment.getMethod() == PaymentMethod.MOCK_ONLINE ||
                 payment.getMethod() == PaymentMethod.BANK_TRANSFER) {
